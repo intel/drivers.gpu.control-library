@@ -1,0 +1,255 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API Initialization &mdash; Control Api Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Display API Programming Guide" href="PROG_display.html" />
+    <link rel="prev" title="IGCL API Programming Guide" href="../prog.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Control Api Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="INTRO.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="INTRO.html#fundamentals">Fundamentals</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../prog.html">IGCL API Programming Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../prog.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prog.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prog.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../prog.html#developer-guide">Developer Guide</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">API Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROG_display.html">Display API Programming Guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROG_media.html">Media Programming Guide</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions.html">Versions</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Control Api Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+
+    
+
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-initialization">
+<span id="initialization-programming-guide"></span><h1>API Initialization<a class="headerlink" href="#api-initialization" title="Permalink to this headline">¶</a></h1>
+<p>Applications need to include the “control_api.h” header file in the applications project. All application developers are encouraged to include the “cApiWrapper.cpp” file . The wrapper file abstracts the code for dynamic loading of the library alongwith the function pointer creation.</p>
+<p>Any application which needs to communicate with the Intel Graphics Hardware needs to use the Intel Graphics Control Libray to enumerate the available Intel Graphics Adapters on the system.
+Each of the enumerated adapters will have a unique handle and the applications can use the unique handle to call the api.The adapter handle parameter of the API ensures that the api is targeted to the correct adapter.</p>
+<p>The psuedo code below shows how to initialize the IGCL library and enumerate the adapters:</p>
+<pre class="literal-block">function main( ... )
+ <a class="reference internal" href="api.html#ctl-init-args-t"><span class="std std-ref">ctl_init_args_t</span></a> CtlInitArgs;
+ ctl_api_handle_t hAPIHandle;
+    if (<a class="reference internal" href="api.html#ctlinit"><span class="std std-ref">ctlInit</span></a>(CtlInitArgs, &amp;hAPIHandle) != <a class="reference internal" href="api.html#ctl-result-t"><span class="std std-ref">CTL_RESULT_SUCCESS</span></a>)
+        output(&quot;Can't initialize the API&quot;)
+    else
+        # Enumerate all adapters
+        ctl_device_adapter_handle_t *hDevices = nullptr;
+        uint32_t Adapter_count = 0;
+        <a class="reference internal" href="api.html#ctlenumeratedevices"><span class="std std-ref">ctlEnumerateDevices</span></a>(hAPIHandle,&amp;Adapter_count, hDevices);
+        hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * Adapter_count);
+        <a class="reference internal" href="api.html#ctlenumeratedevices"><span class="std std-ref">ctlEnumerateDevices</span></a>(hAPIHandle,&amp;Adapter_count, hDevices);
+
+        #Use the handle to call the api's
+
+        for(index = 0 .. Adapter_count-1)
+            # Get Adapter Properties
+            <a class="reference internal" href="api.html#ctl-device-adapter-properties-t"><span class="std std-ref">ctl_device_adapter_properties_t</span></a> StDeviceAdapterProperties = { 0 };
+
+            #OS specific initialization.This is an Windows example
+
+            StDeviceAdapterProperties.Size           = sizeof(<a class="reference internal" href="api.html#ctl-device-adapter-properties-t"><span class="std std-ref">ctl_device_adapter_properties_t</span></a>);
+            StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
+            StDeviceAdapterProperties.device_id_size = sizeof(LUID);
+            <a class="reference internal" href="api.html#ctlgetdeviceproperties"><span class="std std-ref">ctlGetDeviceProperties</span></a>(hDevices[Index], &amp;StDeviceAdapterProperties);
+
+
+ free_memory(...)</pre>
+<p>Refer samples for example code snippets of various API’s</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="PROG_display.html" class="btn btn-neutral float-right" title="Display API Programming Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../prog.html" class="btn btn-neutral float-left" title="IGCL API Programming Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Intel
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

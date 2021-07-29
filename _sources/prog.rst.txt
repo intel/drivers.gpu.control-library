@@ -1,0 +1,29 @@
+
+.. _Control-Api-programming-guide:
+
+==================================
+ IGCL API Programming Guide
+==================================
+Introduction
+-------------
+
+Intel Graphics Control Libray ( referred to as IGCL ) is the Intel owned library used to control various aspects of Intel Graphics Hardware.
+
+Overview 
+---------
+
+
+System Requirements 
+-------------------
+IGCL api's are available on all Alderlake-P and higher platforms.
+
+The IGCL library is shipped and installed alongwith the Intel Graphics Driver . Applications should not include the library in the application package. 
+
+Developer Guide
+--------------------
+.. toctree::
+
+   Control/PROG_init.rst
+   Control/PROG_display.rst
+   Control/PROG_media.rst
+   

@@ -1,0 +1,2523 @@
+
+
+==============================
+Control API
+==============================
+Control API Specification - Version 9
+
+ 
+
+Common
+============================================================
+* Functions
+
+
+    * :ref:`ctlInit`
+    * :ref:`ctlClose`
+    * :ref:`ctlWaitForPropertyChange`
+    * :ref:`ctlReservedCall`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-property-value-type-t`
+    * :ref:`ctl-result-t`
+    * :ref:`ctl-supported-functions-flags-t`
+    * :ref:`ctl-device-type-t`
+    * :ref:`ctl-operation-type-t`
+    * :ref:`ctl-property-type-flags-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-base-interface-t`
+    * :ref:`ctl-property-range-info-t`
+    * :ref:`ctl-property-range-info-int-t`
+    * :ref:`ctl-property-range-info-uint-t`
+    * :ref:`ctl-property-info-boolean-t`
+    * :ref:`ctl-property-boolean-t`
+    * :ref:`ctl-property-info-enum-t`
+    * :ref:`ctl-property-enum-t`
+    * :ref:`ctl-property-info-float-t`
+    * :ref:`ctl-property-float-t`
+    * :ref:`ctl-property-info-int-t`
+    * :ref:`ctl-property-int-t`
+    * :ref:`ctl-property-info-uint-t`
+    * :ref:`ctl-property-uint-t`
+    * :ref:`ctl-property-info-t`
+    * :ref:`ctl-property-t`
+    * :ref:`ctl-base-properties-t`
+    * :ref:`ctl-application-id-t`
+    * :ref:`ctl-init-args-t`
+    * :ref:`ctl-reserved-args-t`
+    * :ref:`ctl-firmware-version-t`
+    * :ref:`ctl-device-adapter-properties-t`
+    * :ref:`ctl-generic-void-datatype-t`
+    * :ref:`ctl-revision-datatype-t`
+    * :ref:`ctl-wait-property-change-args-t`
+
+
+Common Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlInit:
+
+ctlInit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlInit
+    :project: ControlApi
+
+
+.. _ctlClose:
+
+ctlClose
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlClose
+    :project: ControlApi
+
+
+.. _ctlWaitForPropertyChange:
+
+ctlWaitForPropertyChange
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlWaitForPropertyChange
+    :project: ControlApi
+
+
+.. _ctlReservedCall:
+
+ctlReservedCall
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlReservedCall
+    :project: ControlApi
+
+
+
+Common Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-property-value-type-t:
+
+ctl_property_value_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_property_value_type_t
+    :project: ControlApi
+
+
+.. _ctl-result-t:
+
+ctl_result_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_result_t
+    :project: ControlApi
+
+
+.. _ctl-supported-functions-flags-t:
+
+ctl_supported_functions_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_supported_functions_flag_t
+    :project: ControlApi
+
+
+.. _ctl-device-type-t:
+
+ctl_device_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_device_type_t
+    :project: ControlApi
+
+
+.. _ctl-operation-type-t:
+
+ctl_operation_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_operation_type_t
+    :project: ControlApi
+
+
+.. _ctl-property-type-flags-t:
+
+ctl_property_type_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_property_type_flag_t
+    :project: ControlApi
+
+ 
+Common Structures
+------------------------------------------------------------------------------
+
+.. _ctl-base-interface-t:
+
+ctl_base_interface_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_base_interface_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-range-info-t:
+
+ctl_property_range_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_range_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-range-info-int-t:
+
+ctl_property_range_info_int_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_range_info_int_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-range-info-uint-t:
+
+ctl_property_range_info_uint_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_range_info_uint_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-info-boolean-t:
+
+ctl_property_info_boolean_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_info_boolean_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-boolean-t:
+
+ctl_property_boolean_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_boolean_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-info-enum-t:
+
+ctl_property_info_enum_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_info_enum_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-enum-t:
+
+ctl_property_enum_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_enum_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-info-float-t:
+
+ctl_property_info_float_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_info_float_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-float-t:
+
+ctl_property_float_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_float_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-info-int-t:
+
+ctl_property_info_int_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_info_int_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-int-t:
+
+ctl_property_int_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_int_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-info-uint-t:
+
+ctl_property_info_uint_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_info_uint_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-uint-t:
+
+ctl_property_uint_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_property_uint_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-property-info-t:
+
+ctl_property_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenunion:: ctl_property_info_t
+    :project: ControlApi
+
+.. _ctl-property-t:
+
+ctl_property_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenunion:: ctl_property_t
+    :project: ControlApi
+
+.. _ctl-base-properties-t:
+
+ctl_base_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_base_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-application-id-t:
+
+ctl_application_id_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_application_id_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-init-args-t:
+
+ctl_init_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_init_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-reserved-args-t:
+
+ctl_reserved_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_reserved_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-firmware-version-t:
+
+ctl_firmware_version_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_firmware_version_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-device-adapter-properties-t:
+
+ctl_device_adapter_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_device_adapter_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-generic-void-datatype-t:
+
+ctl_generic_void_datatype_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_generic_void_datatype_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-revision-datatype-t:
+
+ctl_revision_datatype_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_revision_datatype_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-wait-property-change-args-t:
+
+ctl_wait_property_change_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_wait_property_change_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+3d
+============================================================
+* Functions
+
+
+    * :ref:`ctlGetSupported3DCapabilities`
+    * :ref:`ctlGetSet3DFeature`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-3d-feature-t`
+    * :ref:`ctl-3d-anisotropic-types-t`
+    * :ref:`ctl-3d-texture-filtering-quality-types-t`
+    * :ref:`ctl-3d-frame-pacing-types-t`
+    * :ref:`ctl-3d-cmaa-types-t`
+    * :ref:`ctl-3d-adaptive-tessellation-types-t`
+    * :ref:`ctl-3d-sharpening-filter-types-t`
+    * :ref:`ctl-3d-msaa-types-t`
+    * :ref:`ctl-3d-frame-async-flip-types-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-adaptivesync-caps-t`
+    * :ref:`ctl-adaptivesync-getset-t`
+    * :ref:`ctl-3d-feature-details-t`
+    * :ref:`ctl-3d-feature-caps-t`
+    * :ref:`ctl-3d-feature-getset-t`
+
+
+3d Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlGetSupported3DCapabilities:
+
+ctlGetSupported3DCapabilities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSupported3DCapabilities
+    :project: ControlApi
+
+
+.. _ctlGetSet3DFeature:
+
+ctlGetSet3DFeature
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSet3DFeature
+    :project: ControlApi
+
+
+
+3d Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-3d-feature-t:
+
+ctl_3d_feature_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_feature_t
+    :project: ControlApi
+
+
+.. _ctl-3d-anisotropic-types-t:
+
+ctl_3d_anisotropic_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_anisotropic_types_t
+    :project: ControlApi
+
+
+.. _ctl-3d-texture-filtering-quality-types-t:
+
+ctl_3d_texture_filtering_quality_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_texture_filtering_quality_types_t
+    :project: ControlApi
+
+
+.. _ctl-3d-frame-pacing-types-t:
+
+ctl_3d_frame_pacing_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_frame_pacing_types_t
+    :project: ControlApi
+
+
+.. _ctl-3d-cmaa-types-t:
+
+ctl_3d_cmaa_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_cmaa_types_t
+    :project: ControlApi
+
+
+.. _ctl-3d-adaptive-tessellation-types-t:
+
+ctl_3d_adaptive_tessellation_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_adaptive_tessellation_types_t
+    :project: ControlApi
+
+
+.. _ctl-3d-sharpening-filter-types-t:
+
+ctl_3d_sharpening_filter_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_sharpening_filter_types_t
+    :project: ControlApi
+
+
+.. _ctl-3d-msaa-types-t:
+
+ctl_3d_msaa_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_msaa_types_t
+    :project: ControlApi
+
+
+.. _ctl-3d-frame-async-flip-types-t:
+
+ctl_3d_frame_async_flip_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_frame_async_flip_types_t
+    :project: ControlApi
+
+ 
+3d Structures
+------------------------------------------------------------------------------
+
+.. _ctl-adaptivesync-caps-t:
+
+ctl_adaptivesync_caps_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_adaptivesync_caps_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-adaptivesync-getset-t:
+
+ctl_adaptivesync_getset_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_adaptivesync_getset_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-3d-feature-details-t:
+
+ctl_3d_feature_details_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_3d_feature_details_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-3d-feature-caps-t:
+
+ctl_3d_feature_caps_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_3d_feature_caps_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-3d-feature-getset-t:
+
+ctl_3d_feature_getset_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_3d_feature_getset_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Display
+============================================================
+* Functions
+
+
+    * :ref:`ctlCheckDriverVersion`
+    * :ref:`ctlEnumerateDevices`
+    * :ref:`ctlEnumerateDisplayOutputs`
+    * :ref:`ctlGetDeviceProperties`
+    * :ref:`ctlGetDisplayProperties`
+    * :ref:`ctlGetAdaperDisplayEncoderProperties`
+    * :ref:`ctlGetZeDevice`
+    * :ref:`ctlGetSharpnessCaps`
+    * :ref:`ctlGetCurrentSharpness`
+    * :ref:`ctlSetCurrentSharpness`
+    * :ref:`ctlI2CAccess`
+    * :ref:`ctlAUXAccess`
+    * :ref:`ctlGetPowerOptimizationCaps`
+    * :ref:`ctlGetPowerOptimizationSetting`
+    * :ref:`ctlSetPowerOptimizationSetting`
+    * :ref:`ctlPixelTransformationGetConfig`
+    * :ref:`ctlPixelTransformationSetConfig`
+    * :ref:`ctlPanelDescriptorAccess`
+    * :ref:`ctlGetSupportedRetroScalingCapability`
+    * :ref:`ctlGetSetRetroScaling`
+    * :ref:`ctlGetSupportedScalingCapability`
+    * :ref:`ctlGetCurrentScaling`
+    * :ref:`ctlSetCurrentScaling`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-display-output-types-t`
+    * :ref:`ctl-output-bpc-flags-t`
+    * :ref:`ctl-std-display-feature-flags-t`
+    * :ref:`ctl-intel-display-feature-flags-t`
+    * :ref:`ctl-attached-display-mux-type-t`
+    * :ref:`ctl-signal-standard-type-t`
+    * :ref:`ctl-protocol-converter-location-flags-t`
+    * :ref:`ctl-display-config-flags-t`
+    * :ref:`ctl-encoder-config-flags-t`
+    * :ref:`ctl-sharpness-filter-type-flags-t`
+    * :ref:`ctl-i2c-flags-t`
+    * :ref:`ctl-aux-flags-t`
+    * :ref:`ctl-power-optimization-flags-t`
+    * :ref:`ctl-power-source-t`
+    * :ref:`ctl-power-optimization-plan-t`
+    * :ref:`ctl-power-optimization-lrr-flags-t`
+    * :ref:`ctl-pixtx-pipe-set-config-flags-t`
+    * :ref:`ctl-pixtx-block-type-t`
+    * :ref:`ctl-pixtx-lut-sampling-type-t`
+    * :ref:`ctl-pixtx-config-query-type-t`
+    * :ref:`ctl-pixtx-config-opertaion-type-t`
+    * :ref:`ctl-pixtx-gamma-encoding-type-t`
+    * :ref:`ctl-pixtx-color-space-t`
+    * :ref:`ctl-pixtx-color-model-t`
+    * :ref:`ctl-retro-scaling-type-flags-t`
+    * :ref:`ctl-scaling-type-flags-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-os-display-encoder-identifier-t`
+    * :ref:`ctl-display-timing-t`
+    * :ref:`ctl-display-properties-t`
+    * :ref:`ctl-adapter-display-encoder-properties-t`
+    * :ref:`ctl-sharpness-filter-properties-t`
+    * :ref:`ctl-sharpness-caps-t`
+    * :ref:`ctl-sharpness-settings-t`
+    * :ref:`ctl-i2c-access-args-t`
+    * :ref:`ctl-aux-access-args-t`
+    * :ref:`ctl-power-optimization-caps-t`
+    * :ref:`ctl-power-optimization-lrr-t`
+    * :ref:`ctl-power-optimization-psr-t`
+    * :ref:`ctl-power-optimization-dpst-t`
+    * :ref:`ctl-power-optimization-feature-specific-info-t`
+    * :ref:`ctl-power-optimization-settings-t`
+    * :ref:`ctl-pixtx-color-primaries-t`
+    * :ref:`ctl-pixtx-pixel-format-t`
+    * :ref:`ctl-pixtx-1dlut-config-t`
+    * :ref:`ctl-pixtx-matrix-config-t`
+    * :ref:`ctl-pixtx-3dlut-sample-t`
+    * :ref:`ctl-pixtx-3dlut-config-t`
+    * :ref:`ctl-pixtx-config-t`
+    * :ref:`ctl-pixtx-block-config-t`
+    * :ref:`ctl-pixtx-pipe-get-config-t`
+    * :ref:`ctl-pixtx-pipe-set-config-t`
+    * :ref:`ctl-panel-descriptor-access-args-t`
+    * :ref:`ctl-retro-scaling-settings-t`
+    * :ref:`ctl-retro-scaling-caps-t`
+    * :ref:`ctl-scaling-caps-t`
+    * :ref:`ctl-scaling-settings-t`
+
+
+Display Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlCheckDriverVersion:
+
+ctlCheckDriverVersion
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlCheckDriverVersion
+    :project: ControlApi
+
+
+.. _ctlEnumerateDevices:
+
+ctlEnumerateDevices
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumerateDevices
+    :project: ControlApi
+
+
+.. _ctlEnumerateDisplayOutputs:
+
+ctlEnumerateDisplayOutputs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumerateDisplayOutputs
+    :project: ControlApi
+
+
+.. _ctlGetDeviceProperties:
+
+ctlGetDeviceProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetDeviceProperties
+    :project: ControlApi
+
+
+.. _ctlGetDisplayProperties:
+
+ctlGetDisplayProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetDisplayProperties
+    :project: ControlApi
+
+
+.. _ctlGetAdaperDisplayEncoderProperties:
+
+ctlGetAdaperDisplayEncoderProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetAdaperDisplayEncoderProperties
+    :project: ControlApi
+
+
+.. _ctlGetZeDevice:
+
+ctlGetZeDevice
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetZeDevice
+    :project: ControlApi
+
+
+.. _ctlGetSharpnessCaps:
+
+ctlGetSharpnessCaps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSharpnessCaps
+    :project: ControlApi
+
+
+.. _ctlGetCurrentSharpness:
+
+ctlGetCurrentSharpness
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetCurrentSharpness
+    :project: ControlApi
+
+
+.. _ctlSetCurrentSharpness:
+
+ctlSetCurrentSharpness
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlSetCurrentSharpness
+    :project: ControlApi
+
+
+.. _ctlI2CAccess:
+
+ctlI2CAccess
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlI2CAccess
+    :project: ControlApi
+
+
+.. _ctlAUXAccess:
+
+ctlAUXAccess
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlAUXAccess
+    :project: ControlApi
+
+
+.. _ctlGetPowerOptimizationCaps:
+
+ctlGetPowerOptimizationCaps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetPowerOptimizationCaps
+    :project: ControlApi
+
+
+.. _ctlGetPowerOptimizationSetting:
+
+ctlGetPowerOptimizationSetting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetPowerOptimizationSetting
+    :project: ControlApi
+
+
+.. _ctlSetPowerOptimizationSetting:
+
+ctlSetPowerOptimizationSetting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlSetPowerOptimizationSetting
+    :project: ControlApi
+
+
+.. _ctlPixelTransformationGetConfig:
+
+ctlPixelTransformationGetConfig
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPixelTransformationGetConfig
+    :project: ControlApi
+
+
+.. _ctlPixelTransformationSetConfig:
+
+ctlPixelTransformationSetConfig
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPixelTransformationSetConfig
+    :project: ControlApi
+
+
+.. _ctlPanelDescriptorAccess:
+
+ctlPanelDescriptorAccess
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPanelDescriptorAccess
+    :project: ControlApi
+
+
+.. _ctlGetSupportedRetroScalingCapability:
+
+ctlGetSupportedRetroScalingCapability
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSupportedRetroScalingCapability
+    :project: ControlApi
+
+
+.. _ctlGetSetRetroScaling:
+
+ctlGetSetRetroScaling
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSetRetroScaling
+    :project: ControlApi
+
+
+.. _ctlGetSupportedScalingCapability:
+
+ctlGetSupportedScalingCapability
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSupportedScalingCapability
+    :project: ControlApi
+
+
+.. _ctlGetCurrentScaling:
+
+ctlGetCurrentScaling
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetCurrentScaling
+    :project: ControlApi
+
+
+.. _ctlSetCurrentScaling:
+
+ctlSetCurrentScaling
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlSetCurrentScaling
+    :project: ControlApi
+
+
+
+Display Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-display-output-types-t:
+
+ctl_display_output_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_output_types_t
+    :project: ControlApi
+
+
+.. _ctl-output-bpc-flags-t:
+
+ctl_output_bpc_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_output_bpc_flag_t
+    :project: ControlApi
+
+
+.. _ctl-std-display-feature-flags-t:
+
+ctl_std_display_feature_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_std_display_feature_flag_t
+    :project: ControlApi
+
+
+.. _ctl-intel-display-feature-flags-t:
+
+ctl_intel_display_feature_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_intel_display_feature_flag_t
+    :project: ControlApi
+
+
+.. _ctl-attached-display-mux-type-t:
+
+ctl_attached_display_mux_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_attached_display_mux_type_t
+    :project: ControlApi
+
+
+.. _ctl-signal-standard-type-t:
+
+ctl_signal_standard_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_signal_standard_type_t
+    :project: ControlApi
+
+
+.. _ctl-protocol-converter-location-flags-t:
+
+ctl_protocol_converter_location_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_protocol_converter_location_flag_t
+    :project: ControlApi
+
+
+.. _ctl-display-config-flags-t:
+
+ctl_display_config_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_config_flag_t
+    :project: ControlApi
+
+
+.. _ctl-encoder-config-flags-t:
+
+ctl_encoder_config_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_encoder_config_flag_t
+    :project: ControlApi
+
+
+.. _ctl-sharpness-filter-type-flags-t:
+
+ctl_sharpness_filter_type_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_sharpness_filter_type_flag_t
+    :project: ControlApi
+
+
+.. _ctl-i2c-flags-t:
+
+ctl_i2c_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_i2c_flag_t
+    :project: ControlApi
+
+
+.. _ctl-aux-flags-t:
+
+ctl_aux_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_aux_flag_t
+    :project: ControlApi
+
+
+.. _ctl-power-optimization-flags-t:
+
+ctl_power_optimization_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_power_optimization_flag_t
+    :project: ControlApi
+
+
+.. _ctl-power-source-t:
+
+ctl_power_source_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_power_source_t
+    :project: ControlApi
+
+
+.. _ctl-power-optimization-plan-t:
+
+ctl_power_optimization_plan_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_power_optimization_plan_t
+    :project: ControlApi
+
+
+.. _ctl-power-optimization-lrr-flags-t:
+
+ctl_power_optimization_lrr_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_power_optimization_lrr_flag_t
+    :project: ControlApi
+
+
+.. _ctl-pixtx-pipe-set-config-flags-t:
+
+ctl_pixtx_pipe_set_config_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_pixtx_pipe_set_config_flag_t
+    :project: ControlApi
+
+
+.. _ctl-pixtx-block-type-t:
+
+ctl_pixtx_block_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_pixtx_block_type_t
+    :project: ControlApi
+
+
+.. _ctl-pixtx-lut-sampling-type-t:
+
+ctl_pixtx_lut_sampling_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_pixtx_lut_sampling_type_t
+    :project: ControlApi
+
+
+.. _ctl-pixtx-config-query-type-t:
+
+ctl_pixtx_config_query_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_pixtx_config_query_type_t
+    :project: ControlApi
+
+
+.. _ctl-pixtx-config-opertaion-type-t:
+
+ctl_pixtx_config_opertaion_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_pixtx_config_opertaion_type_t
+    :project: ControlApi
+
+
+.. _ctl-pixtx-gamma-encoding-type-t:
+
+ctl_pixtx_gamma_encoding_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_pixtx_gamma_encoding_type_t
+    :project: ControlApi
+
+
+.. _ctl-pixtx-color-space-t:
+
+ctl_pixtx_color_space_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_pixtx_color_space_t
+    :project: ControlApi
+
+
+.. _ctl-pixtx-color-model-t:
+
+ctl_pixtx_color_model_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_pixtx_color_model_t
+    :project: ControlApi
+
+
+.. _ctl-retro-scaling-type-flags-t:
+
+ctl_retro_scaling_type_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_retro_scaling_type_flag_t
+    :project: ControlApi
+
+
+.. _ctl-scaling-type-flags-t:
+
+ctl_scaling_type_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_scaling_type_flag_t
+    :project: ControlApi
+
+ 
+Display Structures
+------------------------------------------------------------------------------
+
+.. _ctl-os-display-encoder-identifier-t:
+
+ctl_os_display_encoder_identifier_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenunion:: ctl_os_display_encoder_identifier_t
+    :project: ControlApi
+
+.. _ctl-display-timing-t:
+
+ctl_display_timing_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_display_timing_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-display-properties-t:
+
+ctl_display_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_display_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-adapter-display-encoder-properties-t:
+
+ctl_adapter_display_encoder_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_adapter_display_encoder_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-sharpness-filter-properties-t:
+
+ctl_sharpness_filter_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_sharpness_filter_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-sharpness-caps-t:
+
+ctl_sharpness_caps_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_sharpness_caps_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-sharpness-settings-t:
+
+ctl_sharpness_settings_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_sharpness_settings_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-i2c-access-args-t:
+
+ctl_i2c_access_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_i2c_access_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-aux-access-args-t:
+
+ctl_aux_access_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_aux_access_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-optimization-caps-t:
+
+ctl_power_optimization_caps_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_optimization_caps_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-optimization-lrr-t:
+
+ctl_power_optimization_lrr_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_optimization_lrr_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-optimization-psr-t:
+
+ctl_power_optimization_psr_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_optimization_psr_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-optimization-dpst-t:
+
+ctl_power_optimization_dpst_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_optimization_dpst_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-optimization-feature-specific-info-t:
+
+ctl_power_optimization_feature_specific_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenunion:: ctl_power_optimization_feature_specific_info_t
+    :project: ControlApi
+
+.. _ctl-power-optimization-settings-t:
+
+ctl_power_optimization_settings_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_optimization_settings_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pixtx-color-primaries-t:
+
+ctl_pixtx_color_primaries_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pixtx_color_primaries_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pixtx-pixel-format-t:
+
+ctl_pixtx_pixel_format_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pixtx_pixel_format_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pixtx-1dlut-config-t:
+
+ctl_pixtx_1dlut_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pixtx_1dlut_config_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pixtx-matrix-config-t:
+
+ctl_pixtx_matrix_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pixtx_matrix_config_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pixtx-3dlut-sample-t:
+
+ctl_pixtx_3dlut_sample_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pixtx_3dlut_sample_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pixtx-3dlut-config-t:
+
+ctl_pixtx_3dlut_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pixtx_3dlut_config_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pixtx-config-t:
+
+ctl_pixtx_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenunion:: ctl_pixtx_config_t
+    :project: ControlApi
+
+.. _ctl-pixtx-block-config-t:
+
+ctl_pixtx_block_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pixtx_block_config_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pixtx-pipe-get-config-t:
+
+ctl_pixtx_pipe_get_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pixtx_pipe_get_config_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pixtx-pipe-set-config-t:
+
+ctl_pixtx_pipe_set_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pixtx_pipe_set_config_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-panel-descriptor-access-args-t:
+
+ctl_panel_descriptor_access_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_panel_descriptor_access_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-retro-scaling-settings-t:
+
+ctl_retro_scaling_settings_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_retro_scaling_settings_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-retro-scaling-caps-t:
+
+ctl_retro_scaling_caps_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_retro_scaling_caps_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-scaling-caps-t:
+
+ctl_scaling_caps_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_scaling_caps_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-scaling-settings-t:
+
+ctl_scaling_settings_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_scaling_settings_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Engine
+============================================================
+* Functions
+
+
+    * :ref:`ctlEnumEngineGroups`
+    * :ref:`ctlEngineGetProperties`
+    * :ref:`ctlEngineGetActivity`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-engine-group-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-engine-properties-t`
+    * :ref:`ctl-engine-stats-t`
+
+
+Engine Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlEnumEngineGroups:
+
+ctlEnumEngineGroups
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumEngineGroups
+    :project: ControlApi
+
+
+.. _ctlEngineGetProperties:
+
+ctlEngineGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEngineGetProperties
+    :project: ControlApi
+
+
+.. _ctlEngineGetActivity:
+
+ctlEngineGetActivity
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEngineGetActivity
+    :project: ControlApi
+
+
+
+Engine Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-engine-group-t:
+
+ctl_engine_group_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_engine_group_t
+    :project: ControlApi
+
+ 
+Engine Structures
+------------------------------------------------------------------------------
+
+.. _ctl-engine-properties-t:
+
+ctl_engine_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_engine_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-engine-stats-t:
+
+ctl_engine_stats_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_engine_stats_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Fan
+============================================================
+* Functions
+
+
+    * :ref:`ctlEnumFans`
+    * :ref:`ctlFanGetProperties`
+    * :ref:`ctlFanGetConfig`
+    * :ref:`ctlFanSetDefaultMode`
+    * :ref:`ctlFanSetFixedSpeedMode`
+    * :ref:`ctlFanSetSpeedTableMode`
+    * :ref:`ctlFanGetState`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-fan-speed-mode-t`
+    * :ref:`ctl-fan-speed-units-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-fan-speed-t`
+    * :ref:`ctl-fan-temp-speed-t`
+    * :ref:`ctl-fan-speed-table-t`
+    * :ref:`ctl-fan-properties-t`
+    * :ref:`ctl-fan-config-t`
+
+
+Fan Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlEnumFans:
+
+ctlEnumFans
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumFans
+    :project: ControlApi
+
+
+.. _ctlFanGetProperties:
+
+ctlFanGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFanGetProperties
+    :project: ControlApi
+
+
+.. _ctlFanGetConfig:
+
+ctlFanGetConfig
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFanGetConfig
+    :project: ControlApi
+
+
+.. _ctlFanSetDefaultMode:
+
+ctlFanSetDefaultMode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFanSetDefaultMode
+    :project: ControlApi
+
+
+.. _ctlFanSetFixedSpeedMode:
+
+ctlFanSetFixedSpeedMode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFanSetFixedSpeedMode
+    :project: ControlApi
+
+
+.. _ctlFanSetSpeedTableMode:
+
+ctlFanSetSpeedTableMode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFanSetSpeedTableMode
+    :project: ControlApi
+
+
+.. _ctlFanGetState:
+
+ctlFanGetState
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFanGetState
+    :project: ControlApi
+
+
+
+Fan Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-fan-speed-mode-t:
+
+ctl_fan_speed_mode_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_fan_speed_mode_t
+    :project: ControlApi
+
+
+.. _ctl-fan-speed-units-t:
+
+ctl_fan_speed_units_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_fan_speed_units_t
+    :project: ControlApi
+
+ 
+Fan Structures
+------------------------------------------------------------------------------
+
+.. _ctl-fan-speed-t:
+
+ctl_fan_speed_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_fan_speed_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-fan-temp-speed-t:
+
+ctl_fan_temp_speed_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_fan_temp_speed_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-fan-speed-table-t:
+
+ctl_fan_speed_table_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_fan_speed_table_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-fan-properties-t:
+
+ctl_fan_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_fan_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-fan-config-t:
+
+ctl_fan_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_fan_config_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Frequency
+============================================================
+* Functions
+
+
+    * :ref:`ctlEnumFrequencyDomains`
+    * :ref:`ctlFrequencyGetProperties`
+    * :ref:`ctlFrequencyGetAvailableClocks`
+    * :ref:`ctlFrequencyGetRange`
+    * :ref:`ctlFrequencySetRange`
+    * :ref:`ctlFrequencyGetState`
+    * :ref:`ctlFrequencyGetThrottleTime`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-freq-domain-t`
+    * :ref:`ctl-freq-throttle-reason-flags-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-freq-properties-t`
+    * :ref:`ctl-freq-range-t`
+    * :ref:`ctl-freq-state-t`
+    * :ref:`ctl-freq-throttle-time-t`
+
+
+Frequency Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlEnumFrequencyDomains:
+
+ctlEnumFrequencyDomains
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumFrequencyDomains
+    :project: ControlApi
+
+
+.. _ctlFrequencyGetProperties:
+
+ctlFrequencyGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFrequencyGetProperties
+    :project: ControlApi
+
+
+.. _ctlFrequencyGetAvailableClocks:
+
+ctlFrequencyGetAvailableClocks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFrequencyGetAvailableClocks
+    :project: ControlApi
+
+
+.. _ctlFrequencyGetRange:
+
+ctlFrequencyGetRange
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFrequencyGetRange
+    :project: ControlApi
+
+
+.. _ctlFrequencySetRange:
+
+ctlFrequencySetRange
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFrequencySetRange
+    :project: ControlApi
+
+
+.. _ctlFrequencyGetState:
+
+ctlFrequencyGetState
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFrequencyGetState
+    :project: ControlApi
+
+
+.. _ctlFrequencyGetThrottleTime:
+
+ctlFrequencyGetThrottleTime
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlFrequencyGetThrottleTime
+    :project: ControlApi
+
+
+
+Frequency Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-freq-domain-t:
+
+ctl_freq_domain_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_freq_domain_t
+    :project: ControlApi
+
+
+.. _ctl-freq-throttle-reason-flags-t:
+
+ctl_freq_throttle_reason_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_freq_throttle_reason_flag_t
+    :project: ControlApi
+
+ 
+Frequency Structures
+------------------------------------------------------------------------------
+
+.. _ctl-freq-properties-t:
+
+ctl_freq_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_freq_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-freq-range-t:
+
+ctl_freq_range_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_freq_range_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-freq-state-t:
+
+ctl_freq_state_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_freq_state_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-freq-throttle-time-t:
+
+ctl_freq_throttle_time_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_freq_throttle_time_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Media
+============================================================
+* Functions
+
+
+    * :ref:`ctlGetSupportedVideoProcessingCapabilities`
+    * :ref:`ctlGetSetVideoProcessingFeature`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-video-processing-feature-t`
+    * :ref:`ctl-video-processing-super-resolution-flags-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-video-processing-noise-reduction-info-t`
+    * :ref:`ctl-video-processing-noise-reduction-t`
+    * :ref:`ctl-video-processing-adaptive-contrast-enhancement-info-t`
+    * :ref:`ctl-video-processing-adaptive-contrast-enhancement-t`
+    * :ref:`ctl-video-processing-standard-color-correction-info-t`
+    * :ref:`ctl-video-processing-standard-color-correction-t`
+    * :ref:`ctl-video-processing-total-color-correction-info-t`
+    * :ref:`ctl-video-processing-total-color-correction-t`
+    * :ref:`ctl-video-processing-feature-details-t`
+    * :ref:`ctl-video-processing-feature-caps-t`
+    * :ref:`ctl-video-processing-feature-getset-t`
+
+
+Media Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlGetSupportedVideoProcessingCapabilities:
+
+ctlGetSupportedVideoProcessingCapabilities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSupportedVideoProcessingCapabilities
+    :project: ControlApi
+
+
+.. _ctlGetSetVideoProcessingFeature:
+
+ctlGetSetVideoProcessingFeature
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSetVideoProcessingFeature
+    :project: ControlApi
+
+
+
+Media Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-video-processing-feature-t:
+
+ctl_video_processing_feature_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_video_processing_feature_t
+    :project: ControlApi
+
+
+.. _ctl-video-processing-super-resolution-flags-t:
+
+ctl_video_processing_super_resolution_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_video_processing_super_resolution_flag_t
+    :project: ControlApi
+
+ 
+Media Structures
+------------------------------------------------------------------------------
+
+.. _ctl-video-processing-noise-reduction-info-t:
+
+ctl_video_processing_noise_reduction_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_noise_reduction_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-noise-reduction-t:
+
+ctl_video_processing_noise_reduction_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_noise_reduction_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-adaptive-contrast-enhancement-info-t:
+
+ctl_video_processing_adaptive_contrast_enhancement_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_adaptive_contrast_enhancement_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-adaptive-contrast-enhancement-t:
+
+ctl_video_processing_adaptive_contrast_enhancement_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_adaptive_contrast_enhancement_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-standard-color-correction-info-t:
+
+ctl_video_processing_standard_color_correction_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_standard_color_correction_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-standard-color-correction-t:
+
+ctl_video_processing_standard_color_correction_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_standard_color_correction_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-total-color-correction-info-t:
+
+ctl_video_processing_total_color_correction_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_total_color_correction_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-total-color-correction-t:
+
+ctl_video_processing_total_color_correction_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_total_color_correction_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-feature-details-t:
+
+ctl_video_processing_feature_details_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_feature_details_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-feature-caps-t:
+
+ctl_video_processing_feature_caps_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_feature_caps_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-feature-getset-t:
+
+ctl_video_processing_feature_getset_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_feature_getset_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Memory
+============================================================
+* Functions
+
+
+    * :ref:`ctlEnumMemoryModules`
+    * :ref:`ctlMemoryGetProperties`
+    * :ref:`ctlMemoryGetState`
+    * :ref:`ctlMemoryGetBandwidth`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-mem-type-t`
+    * :ref:`ctl-mem-loc-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-mem-properties-t`
+    * :ref:`ctl-mem-state-t`
+    * :ref:`ctl-mem-bandwidth-t`
+
+
+Memory Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlEnumMemoryModules:
+
+ctlEnumMemoryModules
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumMemoryModules
+    :project: ControlApi
+
+
+.. _ctlMemoryGetProperties:
+
+ctlMemoryGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlMemoryGetProperties
+    :project: ControlApi
+
+
+.. _ctlMemoryGetState:
+
+ctlMemoryGetState
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlMemoryGetState
+    :project: ControlApi
+
+
+.. _ctlMemoryGetBandwidth:
+
+ctlMemoryGetBandwidth
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlMemoryGetBandwidth
+    :project: ControlApi
+
+
+
+Memory Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-mem-type-t:
+
+ctl_mem_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_mem_type_t
+    :project: ControlApi
+
+
+.. _ctl-mem-loc-t:
+
+ctl_mem_loc_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_mem_loc_t
+    :project: ControlApi
+
+ 
+Memory Structures
+------------------------------------------------------------------------------
+
+.. _ctl-mem-properties-t:
+
+ctl_mem_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_mem_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-mem-state-t:
+
+ctl_mem_state_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_mem_state_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-mem-bandwidth-t:
+
+ctl_mem_bandwidth_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_mem_bandwidth_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Pci
+============================================================
+* Functions
+
+
+    * :ref:`ctlPciGetProperties`
+    * :ref:`ctlPciGetState`
+
+ 
+
+ 
+* Structures
+
+
+    * :ref:`ctl-pci-address-t`
+    * :ref:`ctl-pci-speed-t`
+    * :ref:`ctl-pci-properties-t`
+    * :ref:`ctl-pci-state-t`
+
+
+Pci Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlPciGetProperties:
+
+ctlPciGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPciGetProperties
+    :project: ControlApi
+
+
+.. _ctlPciGetState:
+
+ctlPciGetState
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPciGetState
+    :project: ControlApi
+
+
+
+ 
+Pci Structures
+------------------------------------------------------------------------------
+
+.. _ctl-pci-address-t:
+
+ctl_pci_address_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pci_address_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pci-speed-t:
+
+ctl_pci_speed_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pci_speed_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pci-properties-t:
+
+ctl_pci_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pci_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-pci-state-t:
+
+ctl_pci_state_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_pci_state_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Power
+============================================================
+* Functions
+
+
+    * :ref:`ctlEnumPowerDomains`
+    * :ref:`ctlPowerGetProperties`
+    * :ref:`ctlPowerGetEnergyCounter`
+    * :ref:`ctlPowerGetLimits`
+    * :ref:`ctlPowerSetLimits`
+
+ 
+
+ 
+* Structures
+
+
+    * :ref:`ctl-power-properties-t`
+    * :ref:`ctl-power-energy-counter-t`
+    * :ref:`ctl-power-sustained-limit-t`
+    * :ref:`ctl-power-burst-limit-t`
+    * :ref:`ctl-power-peak-limit-t`
+    * :ref:`ctl-energy-threshold-t`
+
+
+Power Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlEnumPowerDomains:
+
+ctlEnumPowerDomains
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumPowerDomains
+    :project: ControlApi
+
+
+.. _ctlPowerGetProperties:
+
+ctlPowerGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPowerGetProperties
+    :project: ControlApi
+
+
+.. _ctlPowerGetEnergyCounter:
+
+ctlPowerGetEnergyCounter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPowerGetEnergyCounter
+    :project: ControlApi
+
+
+.. _ctlPowerGetLimits:
+
+ctlPowerGetLimits
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPowerGetLimits
+    :project: ControlApi
+
+
+.. _ctlPowerSetLimits:
+
+ctlPowerSetLimits
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPowerSetLimits
+    :project: ControlApi
+
+
+
+ 
+Power Structures
+------------------------------------------------------------------------------
+
+.. _ctl-power-properties-t:
+
+ctl_power_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-energy-counter-t:
+
+ctl_power_energy_counter_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_energy_counter_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-sustained-limit-t:
+
+ctl_power_sustained_limit_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_sustained_limit_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-burst-limit-t:
+
+ctl_power_burst_limit_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_burst_limit_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-peak-limit-t:
+
+ctl_power_peak_limit_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_peak_limit_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-energy-threshold-t:
+
+ctl_energy_threshold_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_energy_threshold_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Temperature
+============================================================
+* Functions
+
+
+    * :ref:`ctlEnumTemperatureSensors`
+    * :ref:`ctlTemperatureGetProperties`
+    * :ref:`ctlTemperatureGetState`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-temp-sensors-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-temp-properties-t`
+
+
+Temperature Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlEnumTemperatureSensors:
+
+ctlEnumTemperatureSensors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumTemperatureSensors
+    :project: ControlApi
+
+
+.. _ctlTemperatureGetProperties:
+
+ctlTemperatureGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlTemperatureGetProperties
+    :project: ControlApi
+
+
+.. _ctlTemperatureGetState:
+
+ctlTemperatureGetState
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlTemperatureGetState
+    :project: ControlApi
+
+
+
+Temperature Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-temp-sensors-t:
+
+ctl_temp_sensors_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_temp_sensors_t
+    :project: ControlApi
+
+ 
+Temperature Structures
+------------------------------------------------------------------------------
+
+.. _ctl-temp-properties-t:
+
+ctl_temp_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_temp_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+

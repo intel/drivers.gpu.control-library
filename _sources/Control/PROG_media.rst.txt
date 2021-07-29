@@ -1,0 +1,210 @@
+
+
+
+.. _Media-programming-guide:
+
+========================
+ Media Programming Guide
+========================
+
+Introduction
+------------
+
+The media functions exposed by the Control Library provide the ability to query and control media related functionality of the SW driver of the accelerator device.
+
+Currently video post processing feature controls are exposed.
+
+  - Video post processing **color** feature controls, such as color controls and skin tone enhancement.
+  - Video post processing **quality** feature controls, such as noise reduction, sharpness and contrast enhancement.
+
+List of features supported are :ref:`ctl-video-processing-feature-t`\.
+
+Features controls are per adpater (WIP), persistent across reboots and apply to all applications that invoke the appropriate video processing interface the device and operating system supports.  
+
+.. image:: ../images/control_api_video_sw_stack.png
+
+Refer to code samples for example code snippets of various API's.
+
+Check Media Support
+-------------------
+
+The application should initialize the IGCL library using the common initialization functions as described in the previous
+Initialization section.
+
++-----------------------------------+---------------------------------------+
+| Function                          | Description                           |
++===================================+=======================================+
+| :ref:`ctlInit`\()                 | Initialize the control library        |
+|                                   | with app's version                    |
++-----------------------------------+---------------------------------------+
+| :ref:`ctlEnumerateDevices`\()     | Determine device adapters             |
+|                                   | availabe                              |
++-----------------------------------+---------------------------------------+
+| :ref:`ctlGetDeviceProperties`\()  | Get device adapter properties         |
+|                                   | including the subfunctions supported  |
+|                                   | such as media, display etc.           |
++-----------------------------------+---------------------------------------+
+
+The pseudo code below shows how to check to see if a specific device supports media subfunction:
+
+.. parsed-literal::
+
+    :ref:`ctl-device-adapter-properties-t` StDeviceAdapterProperties
+
+    StDeviceAdapterProperties.Size           = sizeof(:ref:`ctl-device-adapter-properties-t`\)
+    StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
+    StDeviceAdapterProperties.device_id_size = sizeof(LUID);
+    :ref:`ctlGetDeviceProperties`\(hDevices[Index], &StDeviceAdapterProperties);
+
+    if (StDeviceAdapterProperties.supported_subfunction_flags & :ref:`CTL_SUPPORTED_FUNCTIONS_FLAG_MEDIA <ctl-supported-functions-flags-t>`\)
+        output("media subfunction supported\n")
+        # Control media features
+               
+    free_memory(...)
+
+
+Query Supported Capabilities 
+----------------------------
+
+The application can then query the video processing capabilities supported.
+
++-------------------------------------------------------+-----------------------------------+
+| Function                                              | Description                       |
++=======================================================+===================================+
+| :ref:`ctlGetSupportedVideoProcessingCapabilities`\()  | Query the supported               |
+|                                                       | video processing capabilities     |
++-------------------------------------------------------+-----------------------------------+
+
+The query to :ref:`ctlGetSupportedVideoProcessingCapabilities`\() with pSupportedFeatures null will return the number of supported 
+features in NumSupportedFeatures.  The query with memory allocated for pFeatureDetails and NumSupportedFeatures indicating 
+the number of elements in the feature array will return the supported features and details such as default value and range information.
+
+Each feature will be described by a :ref:`ctl-property-value-type-t` ValueType.  This will indicate what values will be used to control the feature
+in the :ref:`ctl-property-info-t` Value union.
+
+.. parsed-literal::
+
+    :ref:`ctl-video-processing-feature-caps-t` FeatureCapsVideoProc
+    FeatureCapsVideoProc.Size = sizeof(:ref:`ctl-video-processing-feature-caps-t`\)
+
+    # If FeatureCapsVideoProc.pSupportedFeatures is null pointer, API will return the number of supported features.
+    :ref:`ctlGetSupportedVideoProcessingCapabilities`\(hDAhandle, &FeatureCapsVideoProc)
+
+    # If FeatureCapsVideoProc.pSupportedFeatures is not null pointer, API will return supported features.    
+    FeatureCapsVideoProc.pFeatureDetails = (:ref:`ctl-video-processing-feature-details-t` \*)malloc(sizeof(:ref:`ctl-video-processing-feature-details-t`\) \* FeatureCapsVideoProc.NumSupportedFeatures);
+    :ref:`ctlGetSupportedVideoProcessingCapabilities`\(hDAhandle, &FeatureCapsVideoProc);
+    
+    for (index = 0 .. FeatureCapsVideoProc.NumSupportedFeatures-1)
+        # Get more feature details of the capability such as mode, max/min value
+        :ref:`ctl-video-processing-feature-details-t` \*pFeatureVideoProcDetails = FeatureCapsVideoProc.pFeatureDetails + index;
+
+        if (pFeatureVideoProcDetails->FeatureType == :ref:`CTL_VIDEO_PROCESSING_FEATURE_FILM_MODE_DETECTION <ctl-video-processing-feature-t>`\)
+            # Film Mode Detection Supported, FMD mode is Bool
+            if (pFeatureVideoProcDetails->ValueType == :ref:`CTL_PROPERTY_VALUE_TYPE_BOOL <ctl-property-value-type-t>`\)
+                output(":ref:`CTL_VIDEO_PROCESSING_FEATURE_FILM_MODE_DETECTION <ctl-video-processing-feature-t>` is supported, default value is %d.\n", pFeatureDetails->Value.BoolType.DefaultState);
+                # Control FMD
+
+    free_memory(...)
+
+Get and Set Features
+--------------------
+
+Each video processing feature control parameters can be queried or set using the bSet toggle of :ref:`ctlGetSetVideoProcessingFeature`\().
+
++--------------------------------------------------+-------------------------------------+
+| Function                                         | Description                         |
++==================================================+=====================================+
+| :ref:`ctlGetSetVideoProcessingFeature`\()        | Get or Set Video Processing feature |
+|                                                  | details for a specific feature      |
++--------------------------------------------------+-------------------------------------+
+
+.. parsed-literal::
+    
+    # Set the FMD feature
+    :ref:`ctl-video-processing-feature-getset-t` FeatureSetDetails
+    FeatureSetDetails.FeatureType               = :ref:`CTL_VIDEO_PROCESSING_FEATURE_FILM_MODE_DETECTION <ctl-video-processing-feature-t>`
+    FeatureSetDetails.bSet                      = true
+    FeatureSetDetails.ValueType                 = :ref:`CTL_PROPERTY_VALUE_TYPE_BOOL <ctl-property-value-type-t>`
+    FeatureSetDetails.Value.BoolType.Enable     = true
+    :ref:`ctlGetSetVideoProcessingFeature`\(hDAhandle, &FeatureSetDetails)
+    
+    # Get the currently set FMD feature 
+    :ref:`ctl-video-processing-feature-getset-t` FeatureGetDetails
+    FeatureGetDetails.FeatureType = :ref:`CTL_VIDEO_PROCESSING_FEATURE_FILM_MODE_DETECTION <ctl-video-processing-feature-t>`
+    FeatureGetDetails.bSet        = false
+    FeatureGetDetails.ValueType   = :ref:`CTL_PROPERTY_VALUE_TYPE_BOOL <ctl-property-value-type-t>`
+    :ref:`ctlGetSetVideoProcessingFeature`\(hDAhandle, &FeatureGetDetails)
+   
+Use of Custom Structs
+---------------------
+
+Some features such as :ref:`CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION <ctl-video-processing-feature-t>` use a custom structure for control parameters.  
+This is indicated by the ValueType returned from :ref:`ctlGetSupportedVideoProcessingCapabilities`\() being :ref:`CTL_PROPERTY_VALUE_TYPE_CUSTOM <ctl-property-value-type-t>`\.
+
+Custom Query
+~~~~~~~~~~~~
+
+In this case, the feature will have a custom query structure defined.  For :ref:`CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION <ctl-video-processing-feature-t>` this is
+:ref:`ctl-video-processing-standard-color-correction-info-t` and it will be used to return the feature control parameters.  The application
+must query one more time :ref:`ctlGetSupportedVideoProcessingCapabilities`\() specifying the FeatureType that uses a custom ValueType and allocating 
+enough memory for pCustomValue to hold the custom structure.
+
+.. parsed-literal::
+
+    :ref:`ctl-video-processing-feature-caps-t`    SCCCaps         
+    :ref:`ctl-video-processing-feature-details-t` SCCCapsDetails   
+
+    // Caps query for Standard Color Control
+    SCCCapsDetails.FeatureType      = :ref:`CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION <ctl-video-processing-feature-t>`
+    SCCCapsDetails.pCustomValue     = (void \*)malloc(sizeof(:ref:`ctl-video-processing-standard-color-correction-info-t`\))
+    SCCCapsDetails.CustomValueSize  = sizeof(:ref:`ctl-video-processing-standard-color-correction-info-t`\)
+    SCCCaps.NumSupportedFeatures    = 1;
+    SCCCaps.pFeatureDetails         = &SCCCapsDetails;
+
+    // Query SCC Specific Caps
+    :ref:`ctlGetSupportedVideoProcessingCapabilities`\(hDAhandle, &SCCCaps)
+
+    free_memory(...)
+
+Custom Get and Set
+~~~~~~~~~~~~~~~~~~
+
+There will also be a custom get/set structure defined.  For :ref:`CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION <ctl-video-processing-feature-t>` this is
+:ref:`ctl-video-processing-standard-color-correction-t`\.  The application can then use this custom structure to get/set the
+feature control parameters :ref:`ctlGetSetVideoProcessingFeature`\(), allocating enough memory for pCustomValue to hold the custom structure.
+
+.. parsed-literal::
+
+    # Set the SCC feature
+    :ref:`ctl-video-processing-feature-getset-t` FeatureSetDetails
+    FeatureSetDetails.FeatureType     = :ref:`CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION <ctl-video-processing-feature-t>`
+    FeatureSetDetails.bSet            = true
+    FeatureSetDetails.ValueType       = :ref:`CTL_PROPERTY_VALUE_TYPE_CUSTOM <ctl-property-value-type-t>`
+    FeatureSetDetails.CustomValueSize = sizeof(:ref:`ctl-video-processing-standard-color-correction-t`\)
+    FeatureSetDetails.pCustomValue    = malloc(FeatureSetDetails.CustomValueSize)
+  
+    :ref:`ctl-video-processing-standard-color-correction-t` \*pCustomValueSet = (:ref:`ctl-video-processing-standard-color-correction-t` \*)FeatureSetDetails.pCustomValue
+    :ref:`ctl-video-processing-standard-color-correction-info-t` \*pCaps      = (:ref:`ctl-video-processing-standard-color-correction-info-t` \*)SCCCapsDetails.pCustomValue
+    pCustomValueSet->standard_color_correction_enable                   = true
+
+    # Check if Brightness is in the range of [min, max], then set new value.
+    if (Brightness <= pCaps->brightness.RangeInfo.max_possible_value && Brightness >= pCaps->brightness.RangeInfo.min_possible_value)
+        pCustomValueSet->brightness = Brightness
+    else
+        pCustomValueSet->brightness = pCaps->brightness.RangeInfo.default_value
+        
+    # Similarly check and set Contrast, Hue, Saturation values.
+    
+    # Set SCC Feature
+    :ref:`ctlGetSetVideoProcessingFeature`\(hDAhandle, &FeatureSetDetails);
+    
+    # Get the currently set SCC feature 
+    :ref:`ctl-video-processing-feature-getset-t` FeatureGetDetails
+    FeatureGetDetails.FeatureType     = :ref:`CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION <ctl-video-processing-feature-t>`\;
+    FeatureGetDetails.bSet            = false;
+    FeatureGetDetails.ValueType       = :ref:`CTL_PROPERTY_VALUE_TYPE_CUSTOM <ctl-property-value-type-t>`\;
+    FeatureGetDetails.CustomValueSize = sizeof(:ref:`ctl-video-processing-standard-color-correction-t`\);
+    FeatureGetDetails.pCustomValue    = malloc(FeatureGetDetails.CustomValueSize);
+    :ref:`ctlGetSetVideoProcessingFeature`\(hDAhandle, &FeatureGetDetails);
+    
+    free_memory(...)

@@ -1,0 +1,456 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction &mdash; Control Api Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IGCL API Programming Guide" href="../prog.html" />
+    <link rel="prev" title="Control Api: 0.9" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Control Api Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#objective">Objective</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#display">Display</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#media">Media</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#level0-handling">Level0 Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#fundamentals">Fundamentals</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#naming-convention">Naming Convention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#versioning">Versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multi-threading-and-concurrency">Multi-threading and Concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#application-binary-interface">Application Binary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../prog.html">IGCL API Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions.html">Versions</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Control Api Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+
+    
+
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="objective">
+<h2>Objective<a class="headerlink" href="#objective" title="Permalink to this headline">¶</a></h2>
+<p>The objective of the Intel Graphics Control Library ( IGCL ) Application Programming Interface (API) is to provide a generic way to control various system level SW driver parameters and HW resources.
+Its programming interface can be tailored to any device needs.
+IGCL is meant to be a high level API for all control aspects of hardware, primarily graphics at this point.
+This is a replacement of legacy CUISDK. It will allow global control and tweaking of display, media &amp; 3D capabilities. It know how to talk to UMD, KMD and is expected to be multi-GPU and OS friendly.</p>
+<img alt="../_images/control_api_sw_stack.png" src="../_images/control_api_sw_stack.png" />
+<p>The API is intended for providing explicit controls needed by higher-level runtime APIs and libraries.
+While initially influenced by GPU architecture, the Control APIs are designed to be supportable across different architectures.</p>
+</div>
+<div class="section" id="display">
+<h2>Display<a class="headerlink" href="#display" title="Permalink to this headline">¶</a></h2>
+<p>The display set of API’s help with</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Graphics adapter enumeration &amp; properties</p></li>
+<li><p>Graphics output enumeration &amp; properties</p></li>
+<li><p>Specific functions to control various display pipeline capabilities like color, scaling, unique configurations, sharpness etc.</p></li>
+</ul>
+</div></blockquote>
+<p>See the ref <cite>display-programming-guide</cite> for more details.</p>
+</div>
+<div class="section" id="media">
+<h2>Media<a class="headerlink" href="#media" title="Permalink to this headline">¶</a></h2>
+<p>The media set of API’s help with</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Video post processing color feature control, such as color controls and skin tone enhancement.</p></li>
+<li><p>Video post processing quality feature control, such as noise reduction, sharpness and contrast enhancement.</p></li>
+</ul>
+</div></blockquote>
+<p>See the ref <cite>media-programming-guide</cite> for more details.</p>
+</div>
+<div class="section" id="level0-handling">
+<h2>Level0 Handling<a class="headerlink" href="#level0-handling" title="Permalink to this headline">¶</a></h2>
+<p>Control API has an instance of Level0 driver internally which allows it to talk to Level0 driver as and when required. It will provide an API which allow an application vendor to know of the Level0 device to talk to which corresponds to the control API device handle.</p>
+<p>Note: To test the sample along with level0, please ensure that the level0 binaries (primarily ze_loader.dll &amp; ze_intel_gpu64.dll) are in a path accessible by the sample.</p>
+<p>By default, only administrator users have permissions to perform control operations on resources.
+Most queries are available to any user with the exception of those that could be used for side-channel attacks.
+The systems administrator can tighten/relax the default permissions.</p>
+</div>
+</div>
+<div class="section" id="fundamentals">
+<h1>Fundamentals<a class="headerlink" href="#fundamentals" title="Permalink to this headline">¶</a></h1>
+<p>The following section provides fundamentals of the API design.
+For more detailed information, refer to the programming guides and detailed specification pages.</p>
+<p>Header files can be found at: <a class="reference external" href="https://github.com/intel-innersource/drivers.gpu.control-api">https://github.com/intel-innersource/drivers.gpu.control-api</a></p>
+<div class="section" id="terminology">
+<h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this headline">¶</a></h2>
+<p>This specification uses key words based on <a class="reference external" href="https://www.ietf.org/rfc/rfc2119.txt">RFC2119</a> to indicate requirement level.
+In particular, the following words are used to describe the actions of an implementation of this specification:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>May</strong> - the word <em>may</em>, or the adjective <em>optional</em>, mean that conforming implementations are permitted to, but need not behave as described.</p></li>
+<li><p><strong>Should</strong> - the word <em>should</em>, or the adjective <em>recommended</em>, mean that there could be reasons for an implementations to deviate from the behavior described, but that such deviation should be avoided.</p></li>
+<li><p><strong>Must</strong> - the word <em>must</em>, or the term <em>required</em> or <em>shall</em>, mean that the behavior described is an absolute requirement of the specification.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="naming-convention">
+<h2>Naming Convention<a class="headerlink" href="#naming-convention" title="Permalink to this headline">¶</a></h2>
+<p>The following naming conventions must be followed:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>All functions must be prefixed with <cite>ctl</cite></p></li>
+<li><p>All functions must use camel case <cite>ctlObjectAction</cite> convention</p></li>
+<li><p>All macros must use all caps <cite>CTL_NAME</cite> convention</p></li>
+<li><p>All structures, enumerations and other types must follow <cite>ctl_name_t</cite> snake case convention</p></li>
+<li><p>All structure members and function parameters must use camel case convention</p></li>
+<li><p>All enumerator values must use all caps <cite>CTL_ENUM_ETOR_NAME</cite> convention</p></li>
+<li><p>All handle types must end with <cite>handle_t</cite></p></li>
+<li><p>All descriptor structures must end with <cite>desc_t</cite></p></li>
+<li><p>All property structures must end with <cite>properties_t</cite></p></li>
+<li><p>All flag enumerations must end with <cite>flags_t</cite></p></li>
+</ul>
+</div></blockquote>
+<p>The following coding conventions must be followed:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>All interface structures must be derived from _base_interface_t</p></li>
+<li><p>All function input parameters must precede output parameters</p></li>
+<li><p>All functions must return <a class="reference internal" href="api.html#ctl-result-t"><span class="std std-ref">ctl_result_t</span></a></p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="versioning">
+<h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this headline">¶</a></h2>
+<p>There are multiple versions that should be used by the application to determine compatibility:</p>
+<p><strong>API Version</strong> - this is the version of the API supported by the device.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>This is typically used to determine if the device supports the minimum set of APIs required by the application</p></li>
+<li><p>There is a single 32-bit value that represents an entire collection of APIs</p></li>
+<li><p>The value is encoded with 16-bit Major and 16-bit Minor parts</p></li>
+<li><p>Major version increment consist of modified functionality, including deprecate features, and may break backwards-compatibility</p></li>
+<li><p>Minor version increment consist of additional functionality, including promoted extensions, and must retain backwards-compatibility</p></li>
+<li><p>The value is determined from calling <a class="reference internal" href="api.html#ctlinit"><span class="std std-ref">ctlInit</span></a>()</p></li>
+<li><p>In addition to API version, each call will typically have a version field  in the interface structure.</p></li>
+</ul>
+<p><strong>Nonpointer structs</strong></p>
+<ul class="simple">
+<li><p>A struct passed in as a non-pointer variable should not add new variables which can change the struct size.</p></li>
+<li><p>They can change reserved fields aong with the comment of which structure &amp; API version supports it</p></li>
+<li><p>Implementation code should increment the struct specific max supported version.</p></li>
+<li><p>If new fields are added, struct name should precede with an incrementing number and new function interface should be provided which accepts the new structure.</p></li>
+<li><p>If new fields are added, the new function name should precede with an incrementing number. E.g. SetParameterX2([in] handle, [in] struct ctl_param_x2_t)</p></li>
+<li><p>Caller should always fill the struct size and version fields properly as supported by released API spec</p></li>
+</ul>
+<p><strong>Pointer struct</strong></p>
+<ul class="simple">
+<li><p>A struct passed in as pointer variable can add new variables to it</p></li>
+<li><p>They can change reserved fields but should provide the new struct definition separately.</p></li>
+<li><p>Implementation code should increment the struct specific max supported version.</p></li>
+<li><p>Caller should always fill the struct size and version fields properly as supported by released API spec.</p></li>
+</ul>
+<p><strong>API versioning between multiple driver installations</strong></p>
+<ul class="simple">
+<li><p>Due to various reasons there can be more than one major version of the control API implementation in the system.</p></li>
+<li><p>The default wrapper implementation provided knows how to select the right major version of the implementation (DLL).</p></li>
+<li><p>Caller should always pass in the version they are coding for and the <a class="reference internal" href="api.html#ctlinit"><span class="std std-ref">ctlInit</span></a>() call will return back with the implementation’s APIs.</p></li>
+<li><p>The value returned will be the API version supported by the device and known by the driver.</p></li>
+<li><p>Caller shall never try to call an interface which the implementation doesn’t have. If caller is using the provided wrapper, this will be taken caller
+automatically as wrapper won’t find the new interface and will return failure.</p></li>
+<li><p>Figure below describes a flow where three different implementation get into the system and how the behavior will be</p></li>
+<li><p>Initially 1.1 DLL is there in the system from driver of say GPU2 HW.</p></li>
+<li><p>Later user plugs in GPU1 and installs a driver which provides API DLL’s having version 1.2 and 2.0.</p></li>
+<li><p>Now in the system two DLL’s will be kept each being the latest of their respective major versions, i.e. here 2.0 and 1.2.</p></li>
+<li><p>Various types of applications negotiate the interface as shown in the top part of the figure.</p></li>
+<li><p>In the System32 folder only the latest version of the DLL will reside.Even if user downgrades the graphics driver , the newer version in System32 will not be downgraded.</p></li>
+<li><p>The dll packaged with the graphics driver will be copied in to the respective driver store.But the System32 folder will only have the latest version of the dll.</p></li>
+</ul>
+</div></blockquote>
+<img alt="../_images/control_api_version_management.png" src="../_images/control_api_version_management.png" />
+<p><strong>Driver Version</strong> - this is the version of the driver installed in the system.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>This is typically used to mitigate driver implementation issues for a feature</p></li>
+<li><p>The value encoding is vendor-specific but must be monotonically increasing</p></li>
+<li><p>The value is determined from calling <a class="reference internal" href="api.html#ctlgetdeviceproperties"><span class="std std-ref">ctlGetDeviceProperties</span></a></p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h2>
+<p>The following design philosophies are adopted in order to reduce Host-side overhead:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>By default, the Control API implementation may not perform any form of detailed parameter validation</p>
+<ul>
+<li><p>This should be handled by validation layer(s)</p></li>
+</ul>
+</li>
+<li><p>By default, Control API won’t provide any protection against the following:</p>
+<ul>
+<li><p>Invalid API programming</p></li>
+<li><p>Invalid function arguments</p></li>
+<li><p>Function infinite loops or recursions</p></li>
+<li><p>Synchronization primitive deadlocks</p></li>
+<li><p>Non-visible memory access by the Host or device</p></li>
+<li><p>Non-resident memory access by the device</p></li>
+</ul>
+</li>
+<li><p>The Control API implementation is <strong>not</strong> required to perform API validation of any kind</p>
+<ul>
+<li><p>The driver should ensure well-behaved applications are not burdened with the overhead needed for non-behaving applications</p></li>
+<li><p>Unless otherwise specified, the driver behavior is undefined when APIs are improperly used</p></li>
+<li><p>For debug purposes, API validation can be enabled via the loader’s validation layer(s)</p></li>
+</ul>
+</li>
+<li><p>All API functions return <a class="reference internal" href="api.html#ctl-result-t"><span class="std std-ref">ctl_result_t</span></a></p>
+<ul>
+<li><p>This enumeration contains error codes for the Control APIs</p></li>
+<li><p>This allows for a consistent pattern on the application side for catching errors</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="multi-threading-and-concurrency">
+<h2>Multi-threading and Concurrency<a class="headerlink" href="#multi-threading-and-concurrency" title="Permalink to this headline">¶</a></h2>
+<p>The following design philosophies are adopted in order to maximize Host thread concurrency:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>APIs are free-threaded when the device’s object handle is different.</p>
+<ul>
+<li><p>the Control API should avoid thread-locks for these API calls</p></li>
+</ul>
+</li>
+<li><p>APIs are not thread-safe when the device’s object handle is the same, except when explicitly noted.</p>
+<ul>
+<li><p>the application must ensure multiple threads do not enter an API when the handle is the same</p></li>
+</ul>
+</li>
+<li><p>APIs are not thread-safe with other APIs that use the same driver’s object handle</p>
+<ul>
+<li><p>the application must ensure multiple threads do not enter these APIs when the handle is the same</p></li>
+</ul>
+</li>
+<li><p>APIs do not support reference counting of handles.</p>
+<ul>
+<li><p>the application must track ownership and explicitly free handles and memory</p></li>
+<li><p>the application must ensure that all driver objects and memory are no longer in-use by the device before freeing; otherwise the Host or device may fault</p></li>
+<li><p>no implicit garabage collection is supported by the driver</p></li>
+</ul>
+</li>
+<li><p>APIs can impact system configuration and it’s application job to ensure it listens to system events provided by OS and provide parameters in sync with current system state</p></li>
+</ul>
+</div></blockquote>
+<p>In general, the API is designed to be free-threaded rather than thread-safe.
+This provides multi-threaded applications with complete control over both threading and locks.
+This also eliminates unnecessary implementation overhead for single threaded applications and/or very low latency usages.</p>
+<p>An application is in direct control over all Host thread creation and usage.
+The driver should never implicitly create threads.
+If there is a need for an implementation to use a background thread, then that thread should be created and provided by the application.</p>
+<p>Given the system wide impact of these API’s caller should take care of the possibility of another application changing the state using these or OS API’s.
+Caller shall register with OS events to know of system configuration changes which might impact the API’s they are interested in and update it’s internal state accordingly.</p>
+<p>Each API function must document details on the multi-threading requirements for that call.</p>
+</div>
+<div class="section" id="application-binary-interface">
+<h2>Application Binary Interface<a class="headerlink" href="#application-binary-interface" title="Permalink to this headline">¶</a></h2>
+<p>The Control APIs in C are provided to applications by a shared wrapper helper file cApiWrapper.cpp.
+C/C++ applications must include “control_api.h” and use the wrapper while calling the API’s.
+The wrapper will internally load the required implementation and call respective DLL exported functions.
+With this application is tightly coupled with the DLL though.Wrapper approach helps with better control on control API DLL’s update and version management.</p>
+<p>The implementation of these libraries must use the default Application Binary Interface (ABI) of the standard C compiler for the platform.
+An ABI in this context means the size, alignment, and layout of C data types; the procedure calling convention;
+and the naming convention for shared library symbols corresponding to C functions. The ABI is backward-compatible
+for API minor version increments such as adding new functions, appending new enumerators, and using reserved
+bits in bitfields. ABI is not guaranteed to be backward-compatible for API major version increments such as
+modifying existing function signatures and structures, removing functions and structures, etc.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../prog.html" class="btn btn-neutral float-right" title="IGCL API Programming Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral float-left" title="Control Api: 0.9" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Intel
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+
+
+
+.. _Display-programming-guide:
+
+==================================
+ Display API Programming Guide
+==================================
+
+Display Initialization
+-----------------------
+Applications needs to call the IGCL api to get the list of all the displays enumerated by the driver .The applications need to pass the adapter handle to the api to get the per adapter list.
+
+The psuedo code below shows the display enumeration:
+
+.. parsed-literal::
+
+   function main( ... )
+   # Get the adapter handles in hDevices as shown in the IGCL API programming guide
+   for(index = 0 .. Adapter_count-1)
+        ctl_display_output_handle_t \*hDisplayOutput = nullptr;
+        # Enumerate all displays
+           uint32_t Display_count = 0;
+           :ref:`ctlEnumerateDisplayOutputs`\(hDevices[Index], &Display_count, hDisplayOutput);
+           hDisplayOutput = (ctl_display_output_handle_t \*)malloc(sizeof(ctl_display_output_handle_t) \* Display_count);
+           :ref:`ctlEnumerateDisplayOutputs`\(hDevices[Index], &Display_count, hDisplayOutput);
+           
+           #Use the handle to call the display api's
+           
+           for(display_index = 0 .. Display_count-1)
+               # Get Adapter Properties
+               :ref:`ctl-display-properties-t` stdisplayproperties = {};
+               :ref:`ctlGetDisplayProperties`\(hDisplayOutput[display_index], pStdisplayproperties);
+			   
+              
+    free_memory(...)
+	
+Refer samples for example code snippets of various API's
+
