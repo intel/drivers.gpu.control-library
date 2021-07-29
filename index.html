@@ -1,0 +1,599 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Control Api: 0.9 &mdash; Control Api Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="Control/INTRO.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home" alt="Documentation Home"> Control Api Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="Control/INTRO.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Control/INTRO.html#fundamentals">Fundamentals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prog.html">IGCL API Programming Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="versions.html">Versions</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Control Api Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+
+    
+
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="l0-full-name-l0-spec-version">
+<span id="l0-section"></span><h1>Control Api: 0.9<a class="headerlink" href="#l0-full-name-l0-spec-version" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Control/INTRO.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#objective">Objective</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#display">Display</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#media">Media</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#level0-handling">Level0 Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Control/INTRO.html#fundamentals">Fundamentals</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#naming-convention">Naming Convention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#versioning">Versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#multi-threading-and-concurrency">Multi-threading and Concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Control/INTRO.html#application-binary-interface">Application Binary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prog.html">IGCL API Programming Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prog.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prog.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prog.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prog.html#developer-guide">Developer Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Control/PROG_init.html">API Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Control/PROG_display.html">Display API Programming Guide</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/PROG_display.html#display-initialization">Display Initialization</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/PROG_media.html">Media Programming Guide</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/PROG_media.html#introduction">Introduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/PROG_media.html#check-media-support">Check Media Support</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/PROG_media.html#query-supported-capabilities">Query Supported Capabilities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/PROG_media.html#get-and-set-features">Get and Set Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/PROG_media.html#use-of-custom-structs">Use of Custom Structs</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/PROG_media.html#custom-query">Custom Query</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/PROG_media.html#custom-get-and-set">Custom Get and Set</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Control/api.html">Control API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#common">Common</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#common-functions">Common Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlinit">ctlInit</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlclose">ctlClose</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlwaitforpropertychange">ctlWaitForPropertyChange</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlreservedcall">ctlReservedCall</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#common-enums">Common Enums</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-value-type-t">ctl_property_value_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-result-t">ctl_result_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-supported-functions-flags-t">ctl_supported_functions_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-device-type-t">ctl_device_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-operation-type-t">ctl_operation_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-type-flags-t">ctl_property_type_flags_t</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#common-structures">Common Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-base-interface-t">ctl_base_interface_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-range-info-t">ctl_property_range_info_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-range-info-int-t">ctl_property_range_info_int_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-range-info-uint-t">ctl_property_range_info_uint_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-info-boolean-t">ctl_property_info_boolean_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-boolean-t">ctl_property_boolean_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-info-enum-t">ctl_property_info_enum_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-enum-t">ctl_property_enum_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-info-float-t">ctl_property_info_float_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-float-t">ctl_property_float_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-info-int-t">ctl_property_info_int_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-int-t">ctl_property_int_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-info-uint-t">ctl_property_info_uint_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-uint-t">ctl_property_uint_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-info-t">ctl_property_info_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-t">ctl_property_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-base-properties-t">ctl_base_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-application-id-t">ctl_application_id_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-init-args-t">ctl_init_args_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-reserved-args-t">ctl_reserved_args_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-firmware-version-t">ctl_firmware_version_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-device-adapter-properties-t">ctl_device_adapter_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-generic-void-datatype-t">ctl_generic_void_datatype_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-revision-datatype-t">ctl_revision_datatype_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-wait-property-change-args-t">ctl_wait_property_change_args_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#d">3d</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#d-functions">3d Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsupported3dcapabilities">ctlGetSupported3DCapabilities</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetset3dfeature">ctlGetSet3DFeature</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#d-enums">3d Enums</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-feature-t">ctl_3d_feature_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-anisotropic-types-t">ctl_3d_anisotropic_types_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-texture-filtering-quality-types-t">ctl_3d_texture_filtering_quality_types_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-frame-pacing-types-t">ctl_3d_frame_pacing_types_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-cmaa-types-t">ctl_3d_cmaa_types_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-adaptive-tessellation-types-t">ctl_3d_adaptive_tessellation_types_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-sharpening-filter-types-t">ctl_3d_sharpening_filter_types_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-msaa-types-t">ctl_3d_msaa_types_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-frame-async-flip-types-t">ctl_3d_frame_async_flip_types_t</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#d-structures">3d Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-adaptivesync-caps-t">ctl_adaptivesync_caps_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-adaptivesync-getset-t">ctl_adaptivesync_getset_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-feature-details-t">ctl_3d_feature_details_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-feature-caps-t">ctl_3d_feature_caps_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-feature-getset-t">ctl_3d_feature_getset_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#display">Display</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#display-functions">Display Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlcheckdriverversion">ctlCheckDriverVersion</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenumeratedevices">ctlEnumerateDevices</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenumeratedisplayoutputs">ctlEnumerateDisplayOutputs</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetdeviceproperties">ctlGetDeviceProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetdisplayproperties">ctlGetDisplayProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetadaperdisplayencoderproperties">ctlGetAdaperDisplayEncoderProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetzedevice">ctlGetZeDevice</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsharpnesscaps">ctlGetSharpnessCaps</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetcurrentsharpness">ctlGetCurrentSharpness</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlsetcurrentsharpness">ctlSetCurrentSharpness</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctli2caccess">ctlI2CAccess</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlauxaccess">ctlAUXAccess</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetpoweroptimizationcaps">ctlGetPowerOptimizationCaps</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetpoweroptimizationsetting">ctlGetPowerOptimizationSetting</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlsetpoweroptimizationsetting">ctlSetPowerOptimizationSetting</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlpixeltransformationgetconfig">ctlPixelTransformationGetConfig</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlpixeltransformationsetconfig">ctlPixelTransformationSetConfig</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlpaneldescriptoraccess">ctlPanelDescriptorAccess</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsupportedretroscalingcapability">ctlGetSupportedRetroScalingCapability</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsetretroscaling">ctlGetSetRetroScaling</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsupportedscalingcapability">ctlGetSupportedScalingCapability</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetcurrentscaling">ctlGetCurrentScaling</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlsetcurrentscaling">ctlSetCurrentScaling</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#display-enums">Display Enums</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-display-output-types-t">ctl_display_output_types_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-output-bpc-flags-t">ctl_output_bpc_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-std-display-feature-flags-t">ctl_std_display_feature_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-intel-display-feature-flags-t">ctl_intel_display_feature_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-attached-display-mux-type-t">ctl_attached_display_mux_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-signal-standard-type-t">ctl_signal_standard_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-protocol-converter-location-flags-t">ctl_protocol_converter_location_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-display-config-flags-t">ctl_display_config_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-encoder-config-flags-t">ctl_encoder_config_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-sharpness-filter-type-flags-t">ctl_sharpness_filter_type_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-i2c-flags-t">ctl_i2c_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-aux-flags-t">ctl_aux_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-optimization-flags-t">ctl_power_optimization_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-source-t">ctl_power_source_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-optimization-plan-t">ctl_power_optimization_plan_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-optimization-lrr-flags-t">ctl_power_optimization_lrr_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-pipe-set-config-flags-t">ctl_pixtx_pipe_set_config_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-block-type-t">ctl_pixtx_block_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-lut-sampling-type-t">ctl_pixtx_lut_sampling_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-config-query-type-t">ctl_pixtx_config_query_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-config-opertaion-type-t">ctl_pixtx_config_opertaion_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-gamma-encoding-type-t">ctl_pixtx_gamma_encoding_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-color-space-t">ctl_pixtx_color_space_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-color-model-t">ctl_pixtx_color_model_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-retro-scaling-type-flags-t">ctl_retro_scaling_type_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-scaling-type-flags-t">ctl_scaling_type_flags_t</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#display-structures">Display Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-os-display-encoder-identifier-t">ctl_os_display_encoder_identifier_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-display-timing-t">ctl_display_timing_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-display-properties-t">ctl_display_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-adapter-display-encoder-properties-t">ctl_adapter_display_encoder_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-sharpness-filter-properties-t">ctl_sharpness_filter_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-sharpness-caps-t">ctl_sharpness_caps_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-sharpness-settings-t">ctl_sharpness_settings_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-i2c-access-args-t">ctl_i2c_access_args_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-aux-access-args-t">ctl_aux_access_args_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-optimization-caps-t">ctl_power_optimization_caps_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-optimization-lrr-t">ctl_power_optimization_lrr_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-optimization-psr-t">ctl_power_optimization_psr_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-optimization-dpst-t">ctl_power_optimization_dpst_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-optimization-feature-specific-info-t">ctl_power_optimization_feature_specific_info_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-optimization-settings-t">ctl_power_optimization_settings_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-color-primaries-t">ctl_pixtx_color_primaries_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-pixel-format-t">ctl_pixtx_pixel_format_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-1dlut-config-t">ctl_pixtx_1dlut_config_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-matrix-config-t">ctl_pixtx_matrix_config_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-3dlut-sample-t">ctl_pixtx_3dlut_sample_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-3dlut-config-t">ctl_pixtx_3dlut_config_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-config-t">ctl_pixtx_config_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-block-config-t">ctl_pixtx_block_config_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-pipe-get-config-t">ctl_pixtx_pipe_get_config_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pixtx-pipe-set-config-t">ctl_pixtx_pipe_set_config_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-panel-descriptor-access-args-t">ctl_panel_descriptor_access_args_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-retro-scaling-settings-t">ctl_retro_scaling_settings_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-retro-scaling-caps-t">ctl_retro_scaling_caps_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-scaling-caps-t">ctl_scaling_caps_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-scaling-settings-t">ctl_scaling_settings_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#engine">Engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#engine-functions">Engine Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenumenginegroups">ctlEnumEngineGroups</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenginegetproperties">ctlEngineGetProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenginegetactivity">ctlEngineGetActivity</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#engine-enums">Engine Enums</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-engine-group-t">ctl_engine_group_t</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#engine-structures">Engine Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-engine-properties-t">ctl_engine_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-engine-stats-t">ctl_engine_stats_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#fan">Fan</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#fan-functions">Fan Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenumfans">ctlEnumFans</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfangetproperties">ctlFanGetProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfangetconfig">ctlFanGetConfig</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfansetdefaultmode">ctlFanSetDefaultMode</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfansetfixedspeedmode">ctlFanSetFixedSpeedMode</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfansetspeedtablemode">ctlFanSetSpeedTableMode</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfangetstate">ctlFanGetState</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#fan-enums">Fan Enums</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-fan-speed-mode-t">ctl_fan_speed_mode_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-fan-speed-units-t">ctl_fan_speed_units_t</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#fan-structures">Fan Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-fan-speed-t">ctl_fan_speed_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-fan-temp-speed-t">ctl_fan_temp_speed_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-fan-speed-table-t">ctl_fan_speed_table_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-fan-properties-t">ctl_fan_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-fan-config-t">ctl_fan_config_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#frequency">Frequency</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#frequency-functions">Frequency Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenumfrequencydomains">ctlEnumFrequencyDomains</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfrequencygetproperties">ctlFrequencyGetProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfrequencygetavailableclocks">ctlFrequencyGetAvailableClocks</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfrequencygetrange">ctlFrequencyGetRange</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfrequencysetrange">ctlFrequencySetRange</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfrequencygetstate">ctlFrequencyGetState</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlfrequencygetthrottletime">ctlFrequencyGetThrottleTime</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#frequency-enums">Frequency Enums</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-freq-domain-t">ctl_freq_domain_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-freq-throttle-reason-flags-t">ctl_freq_throttle_reason_flags_t</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#frequency-structures">Frequency Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-freq-properties-t">ctl_freq_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-freq-range-t">ctl_freq_range_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-freq-state-t">ctl_freq_state_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-freq-throttle-time-t">ctl_freq_throttle_time_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#media">Media</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#media-functions">Media Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsupportedvideoprocessingcapabilities">ctlGetSupportedVideoProcessingCapabilities</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsetvideoprocessingfeature">ctlGetSetVideoProcessingFeature</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#media-enums">Media Enums</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-feature-t">ctl_video_processing_feature_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-super-resolution-flags-t">ctl_video_processing_super_resolution_flags_t</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#media-structures">Media Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-noise-reduction-info-t">ctl_video_processing_noise_reduction_info_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-noise-reduction-t">ctl_video_processing_noise_reduction_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-adaptive-contrast-enhancement-info-t">ctl_video_processing_adaptive_contrast_enhancement_info_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-adaptive-contrast-enhancement-t">ctl_video_processing_adaptive_contrast_enhancement_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-standard-color-correction-info-t">ctl_video_processing_standard_color_correction_info_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-standard-color-correction-t">ctl_video_processing_standard_color_correction_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-total-color-correction-info-t">ctl_video_processing_total_color_correction_info_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-total-color-correction-t">ctl_video_processing_total_color_correction_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-feature-details-t">ctl_video_processing_feature_details_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-feature-caps-t">ctl_video_processing_feature_caps_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-video-processing-feature-getset-t">ctl_video_processing_feature_getset_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#memory">Memory</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#memory-functions">Memory Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenummemorymodules">ctlEnumMemoryModules</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlmemorygetproperties">ctlMemoryGetProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlmemorygetstate">ctlMemoryGetState</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlmemorygetbandwidth">ctlMemoryGetBandwidth</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#memory-enums">Memory Enums</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-mem-type-t">ctl_mem_type_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-mem-loc-t">ctl_mem_loc_t</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#memory-structures">Memory Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-mem-properties-t">ctl_mem_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-mem-state-t">ctl_mem_state_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-mem-bandwidth-t">ctl_mem_bandwidth_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#pci">Pci</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#pci-functions">Pci Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlpcigetproperties">ctlPciGetProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlpcigetstate">ctlPciGetState</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#pci-structures">Pci Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pci-address-t">ctl_pci_address_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pci-speed-t">ctl_pci_speed_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pci-properties-t">ctl_pci_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-pci-state-t">ctl_pci_state_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#power">Power</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#power-functions">Power Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenumpowerdomains">ctlEnumPowerDomains</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlpowergetproperties">ctlPowerGetProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlpowergetenergycounter">ctlPowerGetEnergyCounter</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlpowergetlimits">ctlPowerGetLimits</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlpowersetlimits">ctlPowerSetLimits</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#power-structures">Power Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-properties-t">ctl_power_properties_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-energy-counter-t">ctl_power_energy_counter_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-sustained-limit-t">ctl_power_sustained_limit_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-burst-limit-t">ctl_power_burst_limit_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-power-peak-limit-t">ctl_power_peak_limit_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-energy-threshold-t">ctl_energy_threshold_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#temperature">Temperature</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#temperature-functions">Temperature Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlenumtemperaturesensors">ctlEnumTemperatureSensors</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctltemperaturegetproperties">ctlTemperatureGetProperties</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctltemperaturegetstate">ctlTemperatureGetState</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#temperature-enums">Temperature Enums</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-temp-sensors-t">ctl_temp_sensors_t</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#temperature-structures">Temperature Structures</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-temp-properties-t">ctl_temp_properties_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="versions.html">Versions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="versions.html#latest-release">Latest Release</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Control/INTRO.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Intel
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

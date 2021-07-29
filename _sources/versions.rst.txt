@@ -1,0 +1,19 @@
+
+..
+  Copyright 2020 Intel Corporation
+
+.. sphinx-infodev documentation master file, created by
+   sphinx-quickstart on Sun Aug 11 19:58:43 2019.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+=========
+ Versions
+=========
+
+Latest Release
+==============
+
+`Latest Control Api \ Spec <http://capi-docs.intel.com/Control/INTRO.html>`__
+
+

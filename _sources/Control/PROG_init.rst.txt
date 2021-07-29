@@ -1,0 +1,47 @@
+
+
+
+.. _Initialization-programming-guide:
+
+API Initialization
+-------------------
+Applications need to include the "control_api.h" header file in the applications project. All application developers are encouraged to include the "cApiWrapper.cpp" file . The wrapper file abstracts the code for dynamic loading of the library alongwith the function pointer creation.
+
+Any application which needs to communicate with the Intel Graphics Hardware needs to use the Intel Graphics Control Libray to enumerate the available Intel Graphics Adapters on the system.
+Each of the enumerated adapters will have a unique handle and the applications can use the unique handle to call the api.The adapter handle parameter of the API ensures that the api is targeted to the correct adapter.
+
+The psuedo code below shows how to initialize the IGCL library and enumerate the adapters:
+
+.. parsed-literal::
+
+   function main( ... )
+    :ref:`ctl-init-args-t` CtlInitArgs;
+    ctl_api_handle_t hAPIHandle;
+       if (:ref:`ctlInit`\(CtlInitArgs, &hAPIHandle) != :ref:`CTL_RESULT_SUCCESS <ctl-result-t>`\)
+           output("Can't initialize the API")
+       else
+           # Enumerate all adapters
+           ctl_device_adapter_handle_t \*hDevices = nullptr;
+           uint32_t Adapter_count = 0;
+           :ref:`ctlEnumerateDevices`\(hAPIHandle,&Adapter_count, hDevices);
+           hDevices = (ctl_device_adapter_handle_t \*)malloc(sizeof(ctl_device_adapter_handle_t) \* Adapter_count);
+           :ref:`ctlEnumerateDevices`\(hAPIHandle,&Adapter_count, hDevices);
+           
+           #Use the handle to call the api's
+           
+           for(index = 0 .. Adapter_count-1)
+               # Get Adapter Properties
+               :ref:`ctl-device-adapter-properties-t` StDeviceAdapterProperties = { 0 };
+			   
+               #OS specific initialization.This is an Windows example
+			   
+               StDeviceAdapterProperties.Size           = sizeof(:ref:`ctl-device-adapter-properties-t`\);
+               StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
+               StDeviceAdapterProperties.device_id_size = sizeof(LUID);
+               :ref:`ctlGetDeviceProperties`\(hDevices[Index], &StDeviceAdapterProperties);
+			   
+              
+    free_memory(...)
+	
+Refer samples for example code snippets of various API's
+

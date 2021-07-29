@@ -1,0 +1,17 @@
+..
+  Copyright 2020 Intel Corporation
+
+.. Control Api Specification v0.9
+
+.. _l0-section:
+
+===================================
+ |l0_full_name|: |l0_spec_version|
+===================================
+
+.. toctree::
+
+   Control/INTRO.rst
+   prog.rst
+   api.rst
+   versions.rst

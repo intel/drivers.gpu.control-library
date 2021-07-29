@@ -1,0 +1,435 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Media Programming Guide &mdash; Control Api Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Documentation" href="../api.html" />
+    <link rel="prev" title="Display API Programming Guide" href="PROG_display.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Control Api Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="INTRO.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="INTRO.html#fundamentals">Fundamentals</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../prog.html">IGCL API Programming Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../prog.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prog.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prog.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../prog.html#developer-guide">Developer Guide</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="PROG_init.html">API Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PROG_display.html">Display API Programming Guide</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Media Programming Guide</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#check-media-support">Check Media Support</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#query-supported-capabilities">Query Supported Capabilities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#get-and-set-features">Get and Set Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#use-of-custom-structs">Use of Custom Structs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versions.html">Versions</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Control Api Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+
+    
+
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="media-programming-guide">
+<span id="id1"></span><h1>Media Programming Guide<a class="headerlink" href="#media-programming-guide" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The media functions exposed by the Control Library provide the ability to query and control media related functionality of the SW driver of the accelerator device.</p>
+<p>Currently video post processing feature controls are exposed.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Video post processing <strong>color</strong> feature controls, such as color controls and skin tone enhancement.</p></li>
+<li><p>Video post processing <strong>quality</strong> feature controls, such as noise reduction, sharpness and contrast enhancement.</p></li>
+</ul>
+</div></blockquote>
+<p>List of features supported are <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">ctl_video_processing_feature_t</span></a>.</p>
+<p>Features controls are per adpater (WIP), persistent across reboots and apply to all applications that invoke the appropriate video processing interface the device and operating system supports.</p>
+<img alt="../_images/control_api_video_sw_stack.png" src="../_images/control_api_video_sw_stack.png" />
+<p>Refer to code samples for example code snippets of various API’s.</p>
+</div>
+<div class="section" id="check-media-support">
+<h2>Check Media Support<a class="headerlink" href="#check-media-support" title="Permalink to this headline">¶</a></h2>
+<p>The application should initialize the IGCL library using the common initialization functions as described in the previous
+Initialization section.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="api.html#ctlinit"><span class="std std-ref">ctlInit</span></a>()</p></td>
+<td><p>Initialize the control library
+with app’s version</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api.html#ctlenumeratedevices"><span class="std std-ref">ctlEnumerateDevices</span></a>()</p></td>
+<td><p>Determine device adapters
+availabe</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api.html#ctlgetdeviceproperties"><span class="std std-ref">ctlGetDeviceProperties</span></a>()</p></td>
+<td><p>Get device adapter properties
+including the subfunctions supported
+such as media, display etc.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The pseudo code below shows how to check to see if a specific device supports media subfunction:</p>
+<pre class="literal-block"><a class="reference internal" href="api.html#ctl-device-adapter-properties-t"><span class="std std-ref">ctl_device_adapter_properties_t</span></a> StDeviceAdapterProperties
+
+StDeviceAdapterProperties.Size           = sizeof(<a class="reference internal" href="api.html#ctl-device-adapter-properties-t"><span class="std std-ref">ctl_device_adapter_properties_t</span></a>)
+StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
+StDeviceAdapterProperties.device_id_size = sizeof(LUID);
+<a class="reference internal" href="api.html#ctlgetdeviceproperties"><span class="std std-ref">ctlGetDeviceProperties</span></a>(hDevices[Index], &amp;StDeviceAdapterProperties);
+
+if (StDeviceAdapterProperties.supported_subfunction_flags &amp; <a class="reference internal" href="api.html#ctl-supported-functions-flags-t"><span class="std std-ref">CTL_SUPPORTED_FUNCTIONS_FLAG_MEDIA</span></a>)
+    output(&quot;media subfunction supportedn&quot;)
+    # Control media features
+
+free_memory(...)</pre>
+</div>
+<div class="section" id="query-supported-capabilities">
+<h2>Query Supported Capabilities<a class="headerlink" href="#query-supported-capabilities" title="Permalink to this headline">¶</a></h2>
+<p>The application can then query the video processing capabilities supported.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 61%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="api.html#ctlgetsupportedvideoprocessingcapabilities"><span class="std std-ref">ctlGetSupportedVideoProcessingCapabilities</span></a>()</p></td>
+<td><p>Query the supported
+video processing capabilities</p></td>
+</tr>
+</tbody>
+</table>
+<p>The query to <a class="reference internal" href="api.html#ctlgetsupportedvideoprocessingcapabilities"><span class="std std-ref">ctlGetSupportedVideoProcessingCapabilities</span></a>() with pSupportedFeatures null will return the number of supported
+features in NumSupportedFeatures.  The query with memory allocated for pFeatureDetails and NumSupportedFeatures indicating
+the number of elements in the feature array will return the supported features and details such as default value and range information.</p>
+<p>Each feature will be described by a <a class="reference internal" href="api.html#ctl-property-value-type-t"><span class="std std-ref">ctl_property_value_type_t</span></a> ValueType.  This will indicate what values will be used to control the feature
+in the <a class="reference internal" href="api.html#ctl-property-info-t"><span class="std std-ref">ctl_property_info_t</span></a> Value union.</p>
+<pre class="literal-block"><a class="reference internal" href="api.html#ctl-video-processing-feature-caps-t"><span class="std std-ref">ctl_video_processing_feature_caps_t</span></a> FeatureCapsVideoProc
+FeatureCapsVideoProc.Size = sizeof(<a class="reference internal" href="api.html#ctl-video-processing-feature-caps-t"><span class="std std-ref">ctl_video_processing_feature_caps_t</span></a>)
+
+# If FeatureCapsVideoProc.pSupportedFeatures is null pointer, API will return the number of supported features.
+<a class="reference internal" href="api.html#ctlgetsupportedvideoprocessingcapabilities"><span class="std std-ref">ctlGetSupportedVideoProcessingCapabilities</span></a>(hDAhandle, &amp;FeatureCapsVideoProc)
+
+# If FeatureCapsVideoProc.pSupportedFeatures is not null pointer, API will return supported features.
+FeatureCapsVideoProc.pFeatureDetails = (<a class="reference internal" href="api.html#ctl-video-processing-feature-details-t"><span class="std std-ref">ctl_video_processing_feature_details_t</span></a> *)malloc(sizeof(<a class="reference internal" href="api.html#ctl-video-processing-feature-details-t"><span class="std std-ref">ctl_video_processing_feature_details_t</span></a>) * FeatureCapsVideoProc.NumSupportedFeatures);
+<a class="reference internal" href="api.html#ctlgetsupportedvideoprocessingcapabilities"><span class="std std-ref">ctlGetSupportedVideoProcessingCapabilities</span></a>(hDAhandle, &amp;FeatureCapsVideoProc);
+
+for (index = 0 .. FeatureCapsVideoProc.NumSupportedFeatures-1)
+    # Get more feature details of the capability such as mode, max/min value
+    <a class="reference internal" href="api.html#ctl-video-processing-feature-details-t"><span class="std std-ref">ctl_video_processing_feature_details_t</span></a> *pFeatureVideoProcDetails = FeatureCapsVideoProc.pFeatureDetails + index;
+
+    if (pFeatureVideoProcDetails-&gt;FeatureType == <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_FILM_MODE_DETECTION</span></a>)
+        # Film Mode Detection Supported, FMD mode is Bool
+        if (pFeatureVideoProcDetails-&gt;ValueType == <a class="reference internal" href="api.html#ctl-property-value-type-t"><span class="std std-ref">CTL_PROPERTY_VALUE_TYPE_BOOL</span></a>)
+            output(&quot;<a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_FILM_MODE_DETECTION</span></a> is supported, default value is %d.n&quot;, pFeatureDetails-&gt;Value.BoolType.DefaultState);
+            # Control FMD
+
+free_memory(...)</pre>
+</div>
+<div class="section" id="get-and-set-features">
+<h2>Get and Set Features<a class="headerlink" href="#get-and-set-features" title="Permalink to this headline">¶</a></h2>
+<p>Each video processing feature control parameters can be queried or set using the bSet toggle of <a class="reference internal" href="api.html#ctlgetsetvideoprocessingfeature"><span class="std std-ref">ctlGetSetVideoProcessingFeature</span></a>().</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 57%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="api.html#ctlgetsetvideoprocessingfeature"><span class="std std-ref">ctlGetSetVideoProcessingFeature</span></a>()</p></td>
+<td><p>Get or Set Video Processing feature
+details for a specific feature</p></td>
+</tr>
+</tbody>
+</table>
+<pre class="literal-block"># Set the FMD feature
+<a class="reference internal" href="api.html#ctl-video-processing-feature-getset-t"><span class="std std-ref">ctl_video_processing_feature_getset_t</span></a> FeatureSetDetails
+FeatureSetDetails.FeatureType               = <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_FILM_MODE_DETECTION</span></a>
+FeatureSetDetails.bSet                      = true
+FeatureSetDetails.ValueType                 = <a class="reference internal" href="api.html#ctl-property-value-type-t"><span class="std std-ref">CTL_PROPERTY_VALUE_TYPE_BOOL</span></a>
+FeatureSetDetails.Value.BoolType.Enable     = true
+<a class="reference internal" href="api.html#ctlgetsetvideoprocessingfeature"><span class="std std-ref">ctlGetSetVideoProcessingFeature</span></a>(hDAhandle, &amp;FeatureSetDetails)
+
+# Get the currently set FMD feature
+<a class="reference internal" href="api.html#ctl-video-processing-feature-getset-t"><span class="std std-ref">ctl_video_processing_feature_getset_t</span></a> FeatureGetDetails
+FeatureGetDetails.FeatureType = <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_FILM_MODE_DETECTION</span></a>
+FeatureGetDetails.bSet        = false
+FeatureGetDetails.ValueType   = <a class="reference internal" href="api.html#ctl-property-value-type-t"><span class="std std-ref">CTL_PROPERTY_VALUE_TYPE_BOOL</span></a>
+<a class="reference internal" href="api.html#ctlgetsetvideoprocessingfeature"><span class="std std-ref">ctlGetSetVideoProcessingFeature</span></a>(hDAhandle, &amp;FeatureGetDetails)</pre>
+</div>
+<div class="section" id="use-of-custom-structs">
+<h2>Use of Custom Structs<a class="headerlink" href="#use-of-custom-structs" title="Permalink to this headline">¶</a></h2>
+<p>Some features such as <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION</span></a> use a custom structure for control parameters.
+This is indicated by the ValueType returned from <a class="reference internal" href="api.html#ctlgetsupportedvideoprocessingcapabilities"><span class="std std-ref">ctlGetSupportedVideoProcessingCapabilities</span></a>() being <a class="reference internal" href="api.html#ctl-property-value-type-t"><span class="std std-ref">CTL_PROPERTY_VALUE_TYPE_CUSTOM</span></a>.</p>
+<div class="section" id="custom-query">
+<h3>Custom Query<a class="headerlink" href="#custom-query" title="Permalink to this headline">¶</a></h3>
+<p>In this case, the feature will have a custom query structure defined.  For <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION</span></a> this is
+<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-info-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_info_t</span></a> and it will be used to return the feature control parameters.  The application
+must query one more time <a class="reference internal" href="api.html#ctlgetsupportedvideoprocessingcapabilities"><span class="std std-ref">ctlGetSupportedVideoProcessingCapabilities</span></a>() specifying the FeatureType that uses a custom ValueType and allocating
+enough memory for pCustomValue to hold the custom structure.</p>
+<pre class="literal-block"><a class="reference internal" href="api.html#ctl-video-processing-feature-caps-t"><span class="std std-ref">ctl_video_processing_feature_caps_t</span></a>    SCCCaps
+<a class="reference internal" href="api.html#ctl-video-processing-feature-details-t"><span class="std std-ref">ctl_video_processing_feature_details_t</span></a> SCCCapsDetails
+
+// Caps query for Standard Color Control
+SCCCapsDetails.FeatureType      = <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION</span></a>
+SCCCapsDetails.pCustomValue     = (void *)malloc(sizeof(<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-info-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_info_t</span></a>))
+SCCCapsDetails.CustomValueSize  = sizeof(<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-info-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_info_t</span></a>)
+SCCCaps.NumSupportedFeatures    = 1;
+SCCCaps.pFeatureDetails         = &amp;SCCCapsDetails;
+
+// Query SCC Specific Caps
+<a class="reference internal" href="api.html#ctlgetsupportedvideoprocessingcapabilities"><span class="std std-ref">ctlGetSupportedVideoProcessingCapabilities</span></a>(hDAhandle, &amp;SCCCaps)
+
+free_memory(...)</pre>
+</div>
+<div class="section" id="custom-get-and-set">
+<h3>Custom Get and Set<a class="headerlink" href="#custom-get-and-set" title="Permalink to this headline">¶</a></h3>
+<p>There will also be a custom get/set structure defined.  For <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION</span></a> this is
+<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_t</span></a>.  The application can then use this custom structure to get/set the
+feature control parameters <a class="reference internal" href="api.html#ctlgetsetvideoprocessingfeature"><span class="std std-ref">ctlGetSetVideoProcessingFeature</span></a>(), allocating enough memory for pCustomValue to hold the custom structure.</p>
+<pre class="literal-block"># Set the SCC feature
+<a class="reference internal" href="api.html#ctl-video-processing-feature-getset-t"><span class="std std-ref">ctl_video_processing_feature_getset_t</span></a> FeatureSetDetails
+FeatureSetDetails.FeatureType     = <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION</span></a>
+FeatureSetDetails.bSet            = true
+FeatureSetDetails.ValueType       = <a class="reference internal" href="api.html#ctl-property-value-type-t"><span class="std std-ref">CTL_PROPERTY_VALUE_TYPE_CUSTOM</span></a>
+FeatureSetDetails.CustomValueSize = sizeof(<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_t</span></a>)
+FeatureSetDetails.pCustomValue    = malloc(FeatureSetDetails.CustomValueSize)
+
+<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_t</span></a> *pCustomValueSet = (<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_t</span></a> *)FeatureSetDetails.pCustomValue
+<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-info-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_info_t</span></a> *pCaps      = (<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-info-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_info_t</span></a> *)SCCCapsDetails.pCustomValue
+pCustomValueSet-&gt;standard_color_correction_enable                   = true
+
+# Check if Brightness is in the range of [min, max], then set new value.
+if (Brightness &lt;= pCaps-&gt;brightness.RangeInfo.max_possible_value &amp;&amp; Brightness &gt;= pCaps-&gt;brightness.RangeInfo.min_possible_value)
+    pCustomValueSet-&gt;brightness = Brightness
+else
+    pCustomValueSet-&gt;brightness = pCaps-&gt;brightness.RangeInfo.default_value
+
+# Similarly check and set Contrast, Hue, Saturation values.
+
+# Set SCC Feature
+<a class="reference internal" href="api.html#ctlgetsetvideoprocessingfeature"><span class="std std-ref">ctlGetSetVideoProcessingFeature</span></a>(hDAhandle, &amp;FeatureSetDetails);
+
+# Get the currently set SCC feature
+<a class="reference internal" href="api.html#ctl-video-processing-feature-getset-t"><span class="std std-ref">ctl_video_processing_feature_getset_t</span></a> FeatureGetDetails
+FeatureGetDetails.FeatureType     = <a class="reference internal" href="api.html#ctl-video-processing-feature-t"><span class="std std-ref">CTL_VIDEO_PROCESSING_FEATURE_STANDARD_COLOR_CORRECTION</span></a>;
+FeatureGetDetails.bSet            = false;
+FeatureGetDetails.ValueType       = <a class="reference internal" href="api.html#ctl-property-value-type-t"><span class="std std-ref">CTL_PROPERTY_VALUE_TYPE_CUSTOM</span></a>;
+FeatureGetDetails.CustomValueSize = sizeof(<a class="reference internal" href="api.html#ctl-video-processing-standard-color-correction-t"><span class="std std-ref">ctl_video_processing_standard_color_correction_t</span></a>);
+FeatureGetDetails.pCustomValue    = malloc(FeatureGetDetails.CustomValueSize);
+<a class="reference internal" href="api.html#ctlgetsetvideoprocessingfeature"><span class="std std-ref">ctlGetSetVideoProcessingFeature</span></a>(hDAhandle, &amp;FeatureGetDetails);
+
+free_memory(...)</pre>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="PROG_display.html" class="btn btn-neutral float-left" title="Display API Programming Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Intel
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
