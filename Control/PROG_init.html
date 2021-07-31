@@ -96,6 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../prog.html#system-requirements">System Requirements</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../prog.html#developer-guide">Developer Guide</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">API Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-level-zero">Using Level Zero</a></li>
 <li class="toctree-l3"><a class="reference internal" href="PROG_display.html">Display API Programming Guide</a></li>
 <li class="toctree-l3"><a class="reference internal" href="PROG_media.html">Media Programming Guide</a></li>
 </ul>
@@ -161,10 +162,10 @@
             
   <div class="section" id="api-initialization">
 <span id="initialization-programming-guide"></span><h1>API Initialization<a class="headerlink" href="#api-initialization" title="Permalink to this headline">¶</a></h1>
-<p>Applications need to include the “control_api.h” header file in the applications project. All application developers are encouraged to include the “cApiWrapper.cpp” file . The wrapper file abstracts the code for dynamic loading of the library alongwith the function pointer creation.</p>
+<p>Applications need to include the “igcl_api.h” header file in the applications project. All application developers are encouraged to include the “cApiWrapper.cpp” file . The wrapper file abstracts the code for dynamic loading of the library along with the function pointer creation.</p>
 <p>Any application which needs to communicate with the Intel Graphics Hardware needs to use the Intel Graphics Control Libray to enumerate the available Intel Graphics Adapters on the system.
 Each of the enumerated adapters will have a unique handle and the applications can use the unique handle to call the api.The adapter handle parameter of the API ensures that the api is targeted to the correct adapter.</p>
-<p>The psuedo code below shows how to initialize the IGCL library and enumerate the adapters:</p>
+<p>The pseudo code below shows how to initialize the IGCL library and enumerate the adapters:</p>
 <pre class="literal-block">function main( ... )
  <a class="reference internal" href="api.html#ctl-init-args-t"><span class="std std-ref">ctl_init_args_t</span></a> CtlInitArgs;
  ctl_api_handle_t hAPIHandle;
@@ -193,6 +194,62 @@ Each of the enumerated adapters will have a unique handle and the applications c
 
 
  free_memory(...)</pre>
+</div>
+<div class="section" id="using-level-zero">
+<h1>Using Level Zero<a class="headerlink" href="#using-level-zero" title="Permalink to this headline">¶</a></h1>
+<p>IGCL provide an API to retrieve level zero handle for a given device adapter.
+Following C++ code shows how to do the same.</p>
+<pre class="literal-block">#include &quot;ze_ddi.h&quot; // to call Level zero directly
+ctl_result_t Level0HandleTest(ctl_device_adapter_handle_t hDevices)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+    ze_device_handle_t Ze_device;
+    ze_device_module_properties_t ZemoduleProperties;
+    HINSTANCE hLevel0Loader = NULL;
+
+    Result = ctlGetZeDevice(hDevices, &amp;Ze_device, &amp;(void <a href="#id1"><span class="problematic" id="id2">*</span></a>)hLevel0Loader);
+    if (CTL_RESULT_SUCCESS == Result &amp;&amp; Ze_device != NULL)
+    {
+        std::cout &lt;&lt; &quot;Success: ctlDevice = &quot; &lt;&lt; hDevices &lt;&lt; &quot; ze_device = &quot; &lt;&lt; Ze_device &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &quot;Error: Not able to get ze_device!n&quot;;
+        STORE_RESET_ERROR(Result);
+    }
+
+    // Try to get a level0 function using getprocaddress()
+    if (hLevel0Loader)
+    {
+        ze_pfnDeviceGetModuleProperties_t pfnDeviceGetModuleProperties = (ze_pfnDeviceGetModuleProperties_t)GetProcAddress(hLevel0Loader, &quot;zeDeviceGetModuleProperties&quot;);
+        if (pfnDeviceGetModuleProperties)
+        {
+            std::cout &lt;&lt; &quot;Success: Obtained level0 zeDeviceGetModuleProperties &quot;
+                         &quot;functionn&quot;;
+
+            if (Ze_device != NULL)
+            {
+                if (pfnDeviceGetModuleProperties(Ze_device, &amp;ZemoduleProperties) == ZE_RESULT_SUCCESS)
+                {
+                    std::cout &lt;&lt; &quot;zemoduleProperties::spirvVersionSupported = &quot; &lt;&lt; ZemoduleProperties.spirvVersionSupported &lt;&lt; std::endl;
+                }
+                else
+                {
+                    std::cout &lt;&lt; &quot;pfnDeviceGetModuleProperties() returned failuren&quot;;
+                }
+            }
+        }
+        else
+        {
+            std::cout &lt;&lt; &quot;Error: Not able to get level0 loader functionn&quot;;
+        }
+    }
+    else
+    {
+        std::cout &lt;&lt; &quot;Error: Not able to get level0 instancen&quot;;
+    }
+    return Result;
+}</pre>
 <p>Refer samples for example code snippets of various API’s</p>
 </div>
 

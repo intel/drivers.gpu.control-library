@@ -8,17 +8,14 @@
 Objective
 ---------
 
-The objective of the Intel Graphics Control Library ( IGCL ) Application Programming Interface (API) is to provide a generic way to control various system level SW driver parameters and HW resources.
-Its programming interface can be tailored to any device needs.
-IGCL is meant to be a high level API for all control aspects of hardware, primarily graphics at this point.
-This is a replacement of legacy CUISDK. It will allow global control and tweaking of display, media & 3D capabilities. It know how to talk to UMD, KMD and is expected to be multi-GPU and OS friendly.
+IGCL is meant to be a collection of high level APIs for all control aspects of hardware, primarily graphics. This is replacement of legacy Intel CUISDK which used to be released only to OEM's and selected customers. IGCL allows global control and tweaking of display, media & 3D capabilities.
 
 
 
 .. image:: ../images/control_api_sw_stack.png
 
-The API is intended for providing explicit controls needed by higher-level runtime APIs and libraries.
-While initially influenced by GPU architecture, the Control APIs are designed to be supportable across different architectures.
+Intend of providing API headers, helper files and samples is to help develop specialized GPU control applications & services which need something more than the Operating System provided SDK/API's. Examples of this include API's to access DisplayPort AUX bus, using 3DLUT of Intel display pipeline or tweaking media/3D/render performance global feature capabilities.
+Given the low level nature of these API's one should be careful in using these. 
 
 Display
 -------
@@ -29,7 +26,7 @@ The display set of API's help with
   - Graphics output enumeration & properties
   - Specific functions to control various display pipeline capabilities like color, scaling, unique configurations, sharpness etc.
 
-See the ref `display-programming-guide` for more details.
+See :ref:`display-programming-guide` for more details.
 
 Media
 -----
@@ -39,18 +36,28 @@ The media set of API's help with
   - Video post processing color feature control, such as color controls and skin tone enhancement.
   - Video post processing quality feature control, such as noise reduction, sharpness and contrast enhancement.
 
-See the ref `media-programming-guide` for more details.
+See :ref:`media-programming-guide` for more details.
 
-Level0 Handling
----------------
+Gaming
+------
 
-Control API has an instance of Level0 driver internally which allows it to talk to Level0 driver as and when required. It will provide an API which allow an application vendor to know of the Level0 device to talk to which corresponds to the control API device handle. 
+The gaming/3D set of API's help with controlling various features like
 
-Note: To test the sample along with level0, please ensure that the level0 binaries (primarily ze_loader.dll & ze_intel_gpu64.dll) are in a path accessible by the sample.
+  - CMAA, texture quality, anisotropic filtering etc.
+  - Various special flip modes
 
+Performance & Telemetry
+-----------------------
+
+The core performance & telemetry set of API's help with various Intel(R) oneAPI Level Zero provided functionalities.
+IGCL API has an instance of Level Zero driver internally which allows it to talk to Level Zero driver directly as and when required. It will provide an API which allows an application vendor to know of the Level Zero device to talk using an IGCL device adapter handle. 
+
+Notes:
+To test the sample along with Level Zero, please ensure that the Level Zero binaries (primarily ze_loader.dll & ze_intel_gpu64.dll) are in a path accessible by the sample.
 By default, only administrator users have permissions to perform control operations on resources.
 Most queries are available to any user with the exception of those that could be used for side-channel attacks.
-The systems administrator can tighten/relax the default permissions.
+The systems administrator can tighten/relax the default permissions for Level Zero.
+Refer https://spec.oneapi.io/versions/latest/index.html for more details on Level Zero
 
 ============
 Fundamentals
@@ -59,7 +66,7 @@ Fundamentals
 The following section provides fundamentals of the API design.
 For more detailed information, refer to the programming guides and detailed specification pages.
 
-Header files can be found at: https://github.com/intel-innersource/drivers.gpu.control-api
+Header files can be found at: https://github.com/intel/drivers.gpu.control-library
 
 Terminology
 -----------
@@ -74,25 +81,25 @@ In particular, the following words are used to describe the actions of an implem
 Naming Convention
 -----------------
 
-The following naming conventions must be followed:
+The following naming conventions are followed:
 
-  - All functions must be prefixed with `ctl`
-  - All functions must use camel case `ctlObjectAction` convention
-  - All macros must use all caps `CTL_NAME` convention
-  - All structures, enumerations and other types must follow `ctl_name_t` snake case convention
-  - All structure members and function parameters must use camel case convention
-  - All enumerator values must use all caps `CTL_ENUM_ETOR_NAME` convention
-  - All handle types must end with `handle_t`
-  - All descriptor structures must end with `desc_t`
-  - All property structures must end with `properties_t`
-  - All flag enumerations must end with `flags_t`
+  - All functions are prefixed with `ctl`
+  - All functions use camel case `ctlObjectAction` convention
+  - All macros use all caps `CTL_NAME` convention
+  - All structures, enumerations and other types follow `ctl_name_t` snake case convention
+  - All structure members and function parameters use camel case convention
+  - All enumerator values use all caps `CTL_ENUM_ETOR_NAME` convention
+  - All handle types end with `handle_t`
+  - All descriptor structures end with `desc_t`
+  - All property structures end with `properties_t`
+  - All flag enumerations end with `flags_t`
 
 
-The following coding conventions must be followed:
+The following coding conventions are followed:
 
-  - All interface structures must be derived from _base_interface_t
-  - All function input parameters must precede output parameters
-  - All functions must return :ref:`ctl-result-t`
+  - All interface structures are derived from `:ref:`ctl-base-interface-t`\`
+  - All function input parameters precede output parameters
+  - All functions return :ref:`ctl-result-t`
 
 Versioning
 ----------
@@ -128,7 +135,7 @@ There are multiple versions that should be used by the application to determine 
 
   **API versioning between multiple driver installations**
 
-  - Due to various reasons there can be more than one major version of the control API implementation in the system.
+  - Due to various reasons there can be more than one major version of the IGCL API implementation in the system.
   - The default wrapper implementation provided knows how to select the right major version of the implementation (DLL).
   - Caller should always pass in the version they are coding for and the :ref:`ctlInit`\() call will return back with the implementation's APIs.
   - The value returned will be the API version supported by the device and known by the driver.
@@ -157,11 +164,11 @@ Error Handling
 
 The following design philosophies are adopted in order to reduce Host-side overhead:
 
-  - By default, the Control API implementation may not perform any form of detailed parameter validation
+  - By default, the IGCL API implementation may not perform any form of detailed parameter validation
 
     + This should be handled by validation layer(s)
 
-  - By default, Control API won't provide any protection against the following:
+  - By default, IGCL API won't provide any protection against the following:
 
     + Invalid API programming
     + Invalid function arguments
@@ -170,7 +177,7 @@ The following design philosophies are adopted in order to reduce Host-side overh
     + Non-visible memory access by the Host or device
     + Non-resident memory access by the device
 
-  - The Control API implementation is **not** required to perform API validation of any kind
+  - The IGCL API implementation is **not** required to perform API validation of any kind
 
     + The driver should ensure well-behaved applications are not burdened with the overhead needed for non-behaving applications
     + Unless otherwise specified, the driver behavior is undefined when APIs are improperly used
@@ -178,7 +185,7 @@ The following design philosophies are adopted in order to reduce Host-side overh
 
   - All API functions return :ref:`ctl-result-t`
 
-    + This enumeration contains error codes for the Control APIs
+    + This enumeration contains error codes for the IGCL APIs
     + This allows for a consistent pattern on the application side for catching errors
                                                                                     
 Multi-threading and Concurrency
@@ -186,9 +193,9 @@ Multi-threading and Concurrency
 
 The following design philosophies are adopted in order to maximize Host thread concurrency:
 
-  - APIs are free-threaded when the device's object handle is different.
+  - APIs in general are free-threaded when the device's object handle is different.
 
-    + the Control API should avoid thread-locks for these API calls
+    + the IGCL API should avoid thread-locks for these API calls
 
   - APIs are not thread-safe when the device's object handle is the same, except when explicitly noted.
 
@@ -210,25 +217,22 @@ In general, the API is designed to be free-threaded rather than thread-safe.
 This provides multi-threaded applications with complete control over both threading and locks.
 This also eliminates unnecessary implementation overhead for single threaded applications and/or very low latency usages.
 
-An application is in direct control over all Host thread creation and usage.
-The driver should never implicitly create threads.
+An application is in direct control over all Host thread creation and usage. IGCL runtime will never implicitly create threads.
 If there is a need for an implementation to use a background thread, then that thread should be created and provided by the application.
 
 Given the system wide impact of these API's caller should take care of the possibility of another application changing the state using these or OS API's.
 Caller shall register with OS events to know of system configuration changes which might impact the API's they are interested in and update it's internal state accordingly.
 
-Each API function must document details on the multi-threading requirements for that call.
-
     
 Application Binary Interface
 ----------------------------
 
-The Control APIs in C are provided to applications by a shared wrapper helper file cApiWrapper.cpp.
-C/C++ applications must include "control_api.h" and use the wrapper while calling the API's.
+The IGCL APIs in C are provided to applications by a shared wrapper helper file cApiWrapper.cpp.
+C/C++ applications must include "igcl_api.h" and preferably use the wrapper while calling the API's.
 The wrapper will internally load the required implementation and call respective DLL exported functions.
-With this application is tightly coupled with the DLL though.Wrapper approach helps with better control on control API DLL's update and version management.
+Wrapper approach helps with better control on IGCL API DLL's update and version management.
 
-The implementation of these libraries must use the default Application Binary Interface (ABI) of the standard C compiler for the platform.
+IGCL uses the default Application Binary Interface (ABI) of the standard C compiler for the platform.
 An ABI in this context means the size, alignment, and layout of C data types; the procedure calling convention;
 and the naming convention for shared library symbols corresponding to C functions. The ABI is backward-compatible
 for API minor version increments such as adding new functions, appending new enumerators, and using reserved
