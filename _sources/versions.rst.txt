@@ -14,6 +14,6 @@
 Latest Release
 ==============
 
-`Latest Control Api \ Spec <http://capi-docs.intel.com/Control/INTRO.html>`__
+`Latest IGCL \ Spec <https://intel.github.io/drivers.gpu.control-library/Control/INTRO.html>`__
 
 

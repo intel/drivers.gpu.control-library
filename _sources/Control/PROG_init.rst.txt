@@ -44,7 +44,7 @@ The pseudo code below shows how to initialize the IGCL library and enumerate the
     free_memory(...)
 
 Using Level Zero
-----------------
+-----------------
 IGCL provide an API to retrieve level zero handle for a given device adapter.
 Following C++ code shows how to do the same.
 
@@ -58,7 +58,7 @@ Following C++ code shows how to do the same.
         ze_device_module_properties_t ZemoduleProperties;
         HINSTANCE hLevel0Loader = NULL;
 
-        Result = ctlGetZeDevice(hDevices, &Ze_device, &(void *)hLevel0Loader);
+        Result = ctlGetZeDevice(hDevices, &Ze_device, &(void \*)hLevel0Loader);
         if (CTL_RESULT_SUCCESS == Result && Ze_device != NULL)
         {
             std::cout << "Success: ctlDevice = " << hDevices << " ze_device = " << Ze_device << std::endl;
@@ -66,11 +66,10 @@ Following C++ code shows how to do the same.
         else
         {
             std::cout << "Error: Not able to get ze_device!\n";
-            STORE_RESET_ERROR(Result);
         }
 
         // Try to get a level0 function using getprocaddress()
-        if (hLevel0Loader)
+        if (hLevel0Loader && Ze_device)
         {
             ze_pfnDeviceGetModuleProperties_t pfnDeviceGetModuleProperties = (ze_pfnDeviceGetModuleProperties_t)GetProcAddress(hLevel0Loader, "zeDeviceGetModuleProperties");
             if (pfnDeviceGetModuleProperties)
@@ -78,16 +77,13 @@ Following C++ code shows how to do the same.
                 std::cout << "Success: Obtained level0 zeDeviceGetModuleProperties "
                              "function\n";
 
-                if (Ze_device != NULL)
+                if (pfnDeviceGetModuleProperties(Ze_device, &ZemoduleProperties) == ZE_RESULT_SUCCESS)
                 {
-                    if (pfnDeviceGetModuleProperties(Ze_device, &ZemoduleProperties) == ZE_RESULT_SUCCESS)
-                    {
-                        std::cout << "zemoduleProperties::spirvVersionSupported = " << ZemoduleProperties.spirvVersionSupported << std::endl;
-                    }
-                    else
-                    {
-                        std::cout << "pfnDeviceGetModuleProperties() returned failure\n";
-                    }
+                    std::cout << "zemoduleProperties::spirvVersionSupported = " << ZemoduleProperties.spirvVersionSupported << std::endl;
+                }
+                else
+                {
+                    std::cout << "pfnDeviceGetModuleProperties() returned failure\n";
                 }
             }
             else
@@ -99,8 +95,12 @@ Following C++ code shows how to do the same.
         {
             std::cout << "Error: Not able to get level0 instance\n";
         }
+        
+        free_memory(...)
+        
         return Result;
-    }   
+    }                 
+    
 	
 Refer samples for example code snippets of various API's
 
