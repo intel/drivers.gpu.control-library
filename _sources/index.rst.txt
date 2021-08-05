@@ -1,7 +1,7 @@
 ..
   Copyright 2020 Intel Corporation
 
-.. Control Api Specification v0.9
+.. IGCL Specification v0.9
 
 .. _l0-section:
 

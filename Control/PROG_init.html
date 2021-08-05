@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Initialization &mdash; Control Api Specification  documentation</title>
+  <title>API Initialization &mdash; IGCL Specification  documentation</title>
   
 
   
@@ -52,7 +52,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Control Api Specification
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> IGCL Specification
           
 
           
@@ -120,7 +120,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Control Api Specification</a>
+          <a href="../index.html">IGCL Specification</a>
         
       </nav>
 
@@ -207,7 +207,7 @@ ctl_result_t Level0HandleTest(ctl_device_adapter_handle_t hDevices)
     ze_device_module_properties_t ZemoduleProperties;
     HINSTANCE hLevel0Loader = NULL;
 
-    Result = ctlGetZeDevice(hDevices, &amp;Ze_device, &amp;(void <a href="#id1"><span class="problematic" id="id2">*</span></a>)hLevel0Loader);
+    Result = ctlGetZeDevice(hDevices, &amp;Ze_device, &amp;(void *)hLevel0Loader);
     if (CTL_RESULT_SUCCESS == Result &amp;&amp; Ze_device != NULL)
     {
         std::cout &lt;&lt; &quot;Success: ctlDevice = &quot; &lt;&lt; hDevices &lt;&lt; &quot; ze_device = &quot; &lt;&lt; Ze_device &lt;&lt; std::endl;
@@ -215,11 +215,10 @@ ctl_result_t Level0HandleTest(ctl_device_adapter_handle_t hDevices)
     else
     {
         std::cout &lt;&lt; &quot;Error: Not able to get ze_device!n&quot;;
-        STORE_RESET_ERROR(Result);
     }
 
     // Try to get a level0 function using getprocaddress()
-    if (hLevel0Loader)
+    if (hLevel0Loader &amp;&amp; Ze_device)
     {
         ze_pfnDeviceGetModuleProperties_t pfnDeviceGetModuleProperties = (ze_pfnDeviceGetModuleProperties_t)GetProcAddress(hLevel0Loader, &quot;zeDeviceGetModuleProperties&quot;);
         if (pfnDeviceGetModuleProperties)
@@ -227,16 +226,13 @@ ctl_result_t Level0HandleTest(ctl_device_adapter_handle_t hDevices)
             std::cout &lt;&lt; &quot;Success: Obtained level0 zeDeviceGetModuleProperties &quot;
                          &quot;functionn&quot;;
 
-            if (Ze_device != NULL)
+            if (pfnDeviceGetModuleProperties(Ze_device, &amp;ZemoduleProperties) == ZE_RESULT_SUCCESS)
             {
-                if (pfnDeviceGetModuleProperties(Ze_device, &amp;ZemoduleProperties) == ZE_RESULT_SUCCESS)
-                {
-                    std::cout &lt;&lt; &quot;zemoduleProperties::spirvVersionSupported = &quot; &lt;&lt; ZemoduleProperties.spirvVersionSupported &lt;&lt; std::endl;
-                }
-                else
-                {
-                    std::cout &lt;&lt; &quot;pfnDeviceGetModuleProperties() returned failuren&quot;;
-                }
+                std::cout &lt;&lt; &quot;zemoduleProperties::spirvVersionSupported = &quot; &lt;&lt; ZemoduleProperties.spirvVersionSupported &lt;&lt; std::endl;
+            }
+            else
+            {
+                std::cout &lt;&lt; &quot;pfnDeviceGetModuleProperties() returned failuren&quot;;
             }
         }
         else
@@ -248,6 +244,9 @@ ctl_result_t Level0HandleTest(ctl_device_adapter_handle_t hDevices)
     {
         std::cout &lt;&lt; &quot;Error: Not able to get level0 instancen&quot;;
     }
+
+    free_memory(...)
+
     return Result;
 }</pre>
 <p>Refer samples for example code snippets of various API’s</p>
