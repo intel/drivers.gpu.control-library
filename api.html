@@ -165,8 +165,11 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="Control/api.html#common-enums">Common Enums</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-init-flags-t">ctl_init_flags_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-property-value-type-t">ctl_property_value_type_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-result-t">ctl_result_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-units-t">ctl_units_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-data-type-t">ctl_data_type_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-supported-functions-flags-t">ctl_supported_functions_flags_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-device-type-t">ctl_device_type_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-operation-type-t">ctl_operation_type_t</a></li>
@@ -190,10 +193,13 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-property-uint-t">ctl_property_uint_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-property-info-t">ctl_property_info_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-property-t">ctl_property_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-data-value-t">ctl_data_value_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-base-properties-t">ctl_base_properties_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-application-id-t">ctl_application_id_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-init-args-t">ctl_init_args_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-reserved-args-t">ctl_reserved_args_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-reserved-args-base-t">ctl_reserved_args_base_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-unlock-capability-t">ctl_unlock_capability_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-firmware-version-t">ctl_firmware_version_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-device-adapter-properties-t">ctl_device_adapter_properties_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-generic-void-datatype-t">ctl_generic_void_datatype_t</a></li>
@@ -227,6 +233,7 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-feature-details-t">ctl_3d_feature_details_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-feature-caps-t">ctl_3d_feature_caps_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-feature-getset-t">ctl_3d_feature_getset_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-kmd-load-features-t">ctl_kmd_load_features_t</a></li>
 </ul>
 </li>
 </ul>
@@ -272,6 +279,7 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-i2c-flags-t">ctl_i2c_flags_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-aux-flags-t">ctl_aux_flags_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-optimization-flags-t">ctl_power_optimization_flags_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-optimization-dpst-flags-t">ctl_power_optimization_dpst_flags_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-source-t">ctl_power_source_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-optimization-plan-t">ctl_power_optimization_plan_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-optimization-lrr-flags-t">ctl_power_optimization_lrr_flags_t</a></li>
@@ -403,6 +411,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="Control/api.html#media-structures">Media Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-video-processing-super-resolution-info-t">ctl_video_processing_super_resolution_info_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-video-processing-super-resolution-t">ctl_video_processing_super_resolution_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-video-processing-noise-reduction-info-t">ctl_video_processing_noise_reduction_info_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-video-processing-noise-reduction-t">ctl_video_processing_noise_reduction_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-video-processing-adaptive-contrast-enhancement-info-t">ctl_video_processing_adaptive_contrast_enhancement_info_t</a></li>
@@ -439,6 +449,41 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Control/api.html#overclock">Overclock</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#overclock-functions">Overclock Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockgetproperties">ctlOverclockGetProperties</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockwaiverset">ctlOverclockWaiverSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockgpufrequencyoffsetget">ctlOverclockGpuFrequencyOffsetGet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockgpufrequencyoffsetset">ctlOverclockGpuFrequencyOffsetSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockgpuvoltageoffsetget">ctlOverclockGpuVoltageOffsetGet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockgpuvoltageoffsetset">ctlOverclockGpuVoltageOffsetSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockgpulockget">ctlOverclockGpuLockGet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockgpulockset">ctlOverclockGpuLockSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockvramfrequencyoffsetget">ctlOverclockVramFrequencyOffsetGet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockvramfrequencyoffsetset">ctlOverclockVramFrequencyOffsetSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockvramvoltageoffsetget">ctlOverclockVramVoltageOffsetGet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockvramvoltageoffsetset">ctlOverclockVramVoltageOffsetSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockpowerlimitget">ctlOverclockPowerLimitGet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclockpowerlimitset">ctlOverclockPowerLimitSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclocktemperaturelimitget">ctlOverclockTemperatureLimitGet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctloverclocktemperaturelimitset">ctlOverclockTemperatureLimitSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlpowertelemetryget">ctlPowerTelemetryGet</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#overclock-enums">Overclock Enums</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-psu-type-t">ctl_psu_type_t</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Control/api.html#overclock-structures">Overclock Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-oc-telemetry-item-t">ctl_oc_telemetry_item_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-oc-control-info-t">ctl_oc_control_info_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-oc-properties-t">ctl_oc_properties_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-psu-info-t">ctl_psu_info_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-telemetry-t">ctl_power_telemetry_t</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="Control/api.html#pci">Pci</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="Control/api.html#pci-functions">Pci Functions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlpcigetproperties">ctlPciGetProperties</a></li>
@@ -469,6 +514,7 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-sustained-limit-t">ctl_power_sustained_limit_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-burst-limit-t">ctl_power_burst_limit_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-peak-limit-t">ctl_power_peak_limit_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-limits-t">ctl_power_limits_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-energy-threshold-t">ctl_energy_threshold_t</a></li>
 </ul>
 </li>

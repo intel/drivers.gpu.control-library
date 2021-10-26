@@ -21,8 +21,11 @@ Common
 * Enumerations
 
 
+    * :ref:`ctl-init-flags-t`
     * :ref:`ctl-property-value-type-t`
     * :ref:`ctl-result-t`
+    * :ref:`ctl-units-t`
+    * :ref:`ctl-data-type-t`
     * :ref:`ctl-supported-functions-flags-t`
     * :ref:`ctl-device-type-t`
     * :ref:`ctl-operation-type-t`
@@ -48,10 +51,13 @@ Common
     * :ref:`ctl-property-uint-t`
     * :ref:`ctl-property-info-t`
     * :ref:`ctl-property-t`
+    * :ref:`ctl-data-value-t`
     * :ref:`ctl-base-properties-t`
     * :ref:`ctl-application-id-t`
     * :ref:`ctl-init-args-t`
     * :ref:`ctl-reserved-args-t`
+    * :ref:`ctl-reserved-args-base-t`
+    * :ref:`ctl-unlock-capability-t`
     * :ref:`ctl-firmware-version-t`
     * :ref:`ctl-device-adapter-properties-t`
     * :ref:`ctl-generic-void-datatype-t`
@@ -104,6 +110,15 @@ Common Enums
 ------------------------------------------------------------------------------
 
 
+.. _ctl-init-flags-t:
+
+ctl_init_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_init_flag_t
+    :project: ControlApi
+
+
 .. _ctl-property-value-type-t:
 
 ctl_property_value_type_t
@@ -119,6 +134,24 @@ ctl_result_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_result_t
+    :project: ControlApi
+
+
+.. _ctl-units-t:
+
+ctl_units_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_units_t
+    :project: ControlApi
+
+
+.. _ctl-data-type-t:
+
+ctl_data_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_data_type_t
     :project: ControlApi
 
 
@@ -317,6 +350,14 @@ ctl_property_t
 .. doxygenunion:: ctl_property_t
     :project: ControlApi
 
+.. _ctl-data-value-t:
+
+ctl_data_value_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenunion:: ctl_data_value_t
+    :project: ControlApi
+
 .. _ctl-base-properties-t:
 
 ctl_base_properties_t
@@ -353,6 +394,26 @@ ctl_reserved_args_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_reserved_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-reserved-args-base-t:
+
+ctl_reserved_args_base_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_reserved_args_base_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-unlock-capability-t:
+
+ctl_unlock_capability_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_unlock_capability_t
     :project: ControlApi
     :members:
     :undoc-members:
@@ -441,6 +502,7 @@ ctl_wait_property_change_args_t
     * :ref:`ctl-3d-feature-details-t`
     * :ref:`ctl-3d-feature-caps-t`
     * :ref:`ctl-3d-feature-getset-t`
+    * :ref:`ctl-kmd-load-features-t`
 
 
 3d Functions
@@ -604,6 +666,16 @@ ctl_3d_feature_getset_t
     :members:
     :undoc-members:
 
+.. _ctl-kmd-load-features-t:
+
+ctl_kmd_load_features_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_kmd_load_features_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
 
  
 
@@ -653,6 +725,7 @@ Display
     * :ref:`ctl-i2c-flags-t`
     * :ref:`ctl-aux-flags-t`
     * :ref:`ctl-power-optimization-flags-t`
+    * :ref:`ctl-power-optimization-dpst-flags-t`
     * :ref:`ctl-power-source-t`
     * :ref:`ctl-power-optimization-plan-t`
     * :ref:`ctl-power-optimization-lrr-flags-t`
@@ -1033,6 +1106,15 @@ ctl_power_optimization_flags_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_power_optimization_flag_t
+    :project: ControlApi
+
+
+.. _ctl-power-optimization-dpst-flags-t:
+
+ctl_power_optimization_dpst_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_power_optimization_dpst_flag_t
     :project: ControlApi
 
 
@@ -1909,6 +1991,8 @@ Media
 * Structures
 
 
+    * :ref:`ctl-video-processing-super-resolution-info-t`
+    * :ref:`ctl-video-processing-super-resolution-t`
     * :ref:`ctl-video-processing-noise-reduction-info-t`
     * :ref:`ctl-video-processing-noise-reduction-t`
     * :ref:`ctl-video-processing-adaptive-contrast-enhancement-info-t`
@@ -1969,6 +2053,26 @@ ctl_video_processing_super_resolution_flags_t
  
 Media Structures
 ------------------------------------------------------------------------------
+
+.. _ctl-video-processing-super-resolution-info-t:
+
+ctl_video_processing_super_resolution_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_super_resolution_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-video-processing-super-resolution-t:
+
+ctl_video_processing_super_resolution_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_video_processing_super_resolution_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
 
 .. _ctl-video-processing-noise-reduction-info-t:
 
@@ -2208,6 +2312,273 @@ ctl_mem_bandwidth_t
 
  
 
+Overclock
+============================================================
+* Functions
+
+
+    * :ref:`ctlOverclockGetProperties`
+    * :ref:`ctlOverclockWaiverSet`
+    * :ref:`ctlOverclockGpuFrequencyOffsetGet`
+    * :ref:`ctlOverclockGpuFrequencyOffsetSet`
+    * :ref:`ctlOverclockGpuVoltageOffsetGet`
+    * :ref:`ctlOverclockGpuVoltageOffsetSet`
+    * :ref:`ctlOverclockGpuLockGet`
+    * :ref:`ctlOverclockGpuLockSet`
+    * :ref:`ctlOverclockVramFrequencyOffsetGet`
+    * :ref:`ctlOverclockVramFrequencyOffsetSet`
+    * :ref:`ctlOverclockVramVoltageOffsetGet`
+    * :ref:`ctlOverclockVramVoltageOffsetSet`
+    * :ref:`ctlOverclockPowerLimitGet`
+    * :ref:`ctlOverclockPowerLimitSet`
+    * :ref:`ctlOverclockTemperatureLimitGet`
+    * :ref:`ctlOverclockTemperatureLimitSet`
+    * :ref:`ctlPowerTelemetryGet`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-psu-type-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-oc-telemetry-item-t`
+    * :ref:`ctl-oc-control-info-t`
+    * :ref:`ctl-oc-properties-t`
+    * :ref:`ctl-psu-info-t`
+    * :ref:`ctl-power-telemetry-t`
+
+
+Overclock Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlOverclockGetProperties:
+
+ctlOverclockGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGetProperties
+    :project: ControlApi
+
+
+.. _ctlOverclockWaiverSet:
+
+ctlOverclockWaiverSet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockWaiverSet
+    :project: ControlApi
+
+
+.. _ctlOverclockGpuFrequencyOffsetGet:
+
+ctlOverclockGpuFrequencyOffsetGet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuFrequencyOffsetGet
+    :project: ControlApi
+
+
+.. _ctlOverclockGpuFrequencyOffsetSet:
+
+ctlOverclockGpuFrequencyOffsetSet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuFrequencyOffsetSet
+    :project: ControlApi
+
+
+.. _ctlOverclockGpuVoltageOffsetGet:
+
+ctlOverclockGpuVoltageOffsetGet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuVoltageOffsetGet
+    :project: ControlApi
+
+
+.. _ctlOverclockGpuVoltageOffsetSet:
+
+ctlOverclockGpuVoltageOffsetSet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuVoltageOffsetSet
+    :project: ControlApi
+
+
+.. _ctlOverclockGpuLockGet:
+
+ctlOverclockGpuLockGet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuLockGet
+    :project: ControlApi
+
+
+.. _ctlOverclockGpuLockSet:
+
+ctlOverclockGpuLockSet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuLockSet
+    :project: ControlApi
+
+
+.. _ctlOverclockVramFrequencyOffsetGet:
+
+ctlOverclockVramFrequencyOffsetGet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockVramFrequencyOffsetGet
+    :project: ControlApi
+
+
+.. _ctlOverclockVramFrequencyOffsetSet:
+
+ctlOverclockVramFrequencyOffsetSet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockVramFrequencyOffsetSet
+    :project: ControlApi
+
+
+.. _ctlOverclockVramVoltageOffsetGet:
+
+ctlOverclockVramVoltageOffsetGet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockVramVoltageOffsetGet
+    :project: ControlApi
+
+
+.. _ctlOverclockVramVoltageOffsetSet:
+
+ctlOverclockVramVoltageOffsetSet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockVramVoltageOffsetSet
+    :project: ControlApi
+
+
+.. _ctlOverclockPowerLimitGet:
+
+ctlOverclockPowerLimitGet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockPowerLimitGet
+    :project: ControlApi
+
+
+.. _ctlOverclockPowerLimitSet:
+
+ctlOverclockPowerLimitSet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockPowerLimitSet
+    :project: ControlApi
+
+
+.. _ctlOverclockTemperatureLimitGet:
+
+ctlOverclockTemperatureLimitGet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockTemperatureLimitGet
+    :project: ControlApi
+
+
+.. _ctlOverclockTemperatureLimitSet:
+
+ctlOverclockTemperatureLimitSet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockTemperatureLimitSet
+    :project: ControlApi
+
+
+.. _ctlPowerTelemetryGet:
+
+ctlPowerTelemetryGet
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPowerTelemetryGet
+    :project: ControlApi
+
+
+
+Overclock Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-psu-type-t:
+
+ctl_psu_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_psu_type_t
+    :project: ControlApi
+
+ 
+Overclock Structures
+------------------------------------------------------------------------------
+
+.. _ctl-oc-telemetry-item-t:
+
+ctl_oc_telemetry_item_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_oc_telemetry_item_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-oc-control-info-t:
+
+ctl_oc_control_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_oc_control_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-oc-properties-t:
+
+ctl_oc_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_oc_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-psu-info-t:
+
+ctl_psu_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_psu_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-telemetry-t:
+
+ctl_power_telemetry_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_telemetry_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
 Pci
 ============================================================
 * Functions
@@ -2320,6 +2691,7 @@ Power
     * :ref:`ctl-power-sustained-limit-t`
     * :ref:`ctl-power-burst-limit-t`
     * :ref:`ctl-power-peak-limit-t`
+    * :ref:`ctl-power-limits-t`
     * :ref:`ctl-energy-threshold-t`
 
 
@@ -2423,6 +2795,16 @@ ctl_power_peak_limit_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_power_peak_limit_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-limits-t:
+
+ctl_power_limits_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_limits_t
     :project: ControlApi
     :members:
     :undoc-members:
