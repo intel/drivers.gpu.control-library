@@ -1,78 +1,19 @@
 //===========================================================================
-// Control API & Intel Proprietary Patch Software Licenses
-// 4.19.21
-// Control API Software License
-// Use and Redistribution. You may use, modify, and redistribute the software (the
-// "Software"), solely for use on Intel platforms, provided the following conditions are met
-// Redistributions must reproduce the above copyright notice and the following terms
-// of use in the Software and in the documentation and/or other materials provided
-// with the distribution.
-// Neither the name of Intel nor the names of its suppliers may be used to endorse
-// or promote products derived from this Software without specific prior written
-// permission.
-// Limited patent license. Intel grants you a world-wide, royalty-free, non-exclusive license
-// under patents it now or hereafter owns or controls to make, have made, use, import,
-// offer to sell and sell ("Utilize") this Software, but solely to the extent that any such patent
-// is necessary to Utilize the Software alone. The patent license shall not apply to any
-// combinations which include this software. No hardware per se is licensed hereunder.
-//
-// Third party programs. The Software may contain Third Party Programs. "Third Party
-// Programs" are third party software, open source software or other Intel software listed
-// in the "third-party-programs.txt" or other similarly named text file that is included with
-// the Software. Third Party Programs, even if included with the distribution of the Software,
-// may be governed by separate license terms, including without limitation, third party
-// license terms, open source software notices and terms, and/or other Intel software
-// license terms. These separate license terms may govern your use of the Third Party
-// Programs.
-// DISCLAIMER. THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
-// WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT
-// ARE DISCLAIMED. THIS SOFTWARE IS NOT INTENDED FOR USE IN SYSTEMS OR
-// APPLICATIONS WHERE FAILURE OF THE SOFTWARE MAY CAUSE PERSONAL INJURY OR
-// DEATH AND YOU AGREE THAT YOU ARE FULLY RESPONSIBLE FOR ANY CLAIMS, COSTS,
-// DAMAGES, EXPENSES, AND ATTORNEY'S FEES ARISING OUT OF ANY SUCH USE, EVEN
-// IF ANY CLAIM ALLEGES THAT INTEL WAS NEGLIGENT REGARDING THE DESIGN OR
-// MANUFACTURE OF THE MATERIALS.
-//
-// LIMITATION OF LIABILITY. IN NO EVENT WILL INTEL BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-// OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-// DAMAGE. YOU AGREE TO INDEMNIFY AND HOLD INTEL HARMLESS AGAINST ANY
-// CLAIMS AND EXPENSES RESULTING FROM YOUR USE OR UNAUTHORIZED USE OF THE
-// SOFTWARE.
-// No support. Intel may make changes to the Software, at any time without notice, and is
-// not obligated to support, update or provide training for the Software.
-// Termination. Intel may terminate your right to use the Software in the event of your
-// breach of this Agreement and you fail to cure the breach within a reasonable period of
-// time.
-// Feedback. Should you provide Intel with comments, modifications, corrections,
-// enhancements or other input ("Feedback") related to the Software Intel will be free to
-// use, disclose, reproduce, license or otherwise distribute or exploit the Feedback in its sole
-// discretion without any obligations or restrictions of any kind, including without limitation,
-// intellectual property rights or licensing obligations.
-// Compliance with laws. You agree to comply with all relevant laws and regulations
-// governing your use, transfer, import or export (or prohibition thereof) of the Software.
-//
-// Governing law. All disputes will be governed by the laws of the United States of America
-// and the State of Delaware without reference to conflict of law principles and subject to
-// the exclusive jurisdiction of the state or federal courts sitting in the State of Delaware,
-// and each party agrees that it submits to the personal jurisdiction and venue of those
-// courts and waives any objections. The United Nations Convention on Contracts for the
-// International Sale of Goods (1980) is specifically excluded and will not apply to the
-// Software.
-// *Other names and brands may be claimed as the property of others.
+// MIT license
+// Copyright (C) 2021 Intel Corporation
+// SPDX-License-Identifier: MIT
 //--------------------------------------------------------------------------
 
 /**
  *
- * @file ctl_api.cpp
- * @version v0-r7
+ * @file cApiWrapper.cpp
+ * @version v0-r9
  *
  */
+
+// Note: UWP applications should have defined WINDOWS_UWP in their compiler settings
+// Also at this point, it's easier by not enabling pre-compiled option to compile this file
+// Not all functionalities are tested for a UWP application
 
 #include <windows.h>
 #include <strsafe.h>
@@ -102,7 +43,7 @@ ctl_result_t GetControlAPIDLLPath(ctl_init_args_t* pInitArgs, wchar_t* pwcDLLPat
     uint16_t majorVersion = CTL_MAJOR_VERSION(pInitArgs->AppVersion);
 
     // If caller's major version is higher than the DLL's, then simply not support the caller!
-    // This is not supposed to happen as wrapper is part of the app itself which includes control_api.h with right major version
+    // This is not supposed to happen as wrapper is part of the app itself which includes igcl_api.h with right major version
     if (majorVersion > CTL_IMPL_MAJOR_VERSION)
         return CTL_RESULT_ERROR_UNSUPPORTED_VERSION;
 
@@ -138,17 +79,25 @@ ctlInit(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
     // special code - only for ctlInit()
-    if (hinstLib == NULL)
+    if (NULL == hinstLib)
     {
         wchar_t strDLLPath[512];
         result = GetControlAPIDLLPath(pInitDesc, strDLLPath);
         if (result == CTL_RESULT_SUCCESS)
         {
+#ifdef WINDOWS_UWP
+            hinstLib = LoadPackagedLibrary(strDLLPath, 0);
+#else
             hinstLib = LoadLibraryW(strDLLPath);
+#endif
+            if (NULL == hinstLib)
+            {
+                result = CTL_RESULT_ERROR_LOAD;
+            }
         }    
     }
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnInit_t pfnInit = (ctl_pfnInit_t)GetProcAddress(hinstLib, "ctlInit");
         if (pfnInit)
@@ -184,7 +133,7 @@ ctlClose(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnClose_t pfnClose = (ctl_pfnClose_t)GetProcAddress(hinstLib, "ctlClose");
         if (pfnClose)
@@ -194,8 +143,11 @@ ctlClose(
     }
 
     // special code - only for ctlClose()
-    FreeLibrary(hinstLib);
-    hinstLib = NULL;
+    if (NULL != hinstLib)
+    {
+        FreeLibrary(hinstLib);
+        hinstLib = NULL;
+    }
 
     return result;
 }
@@ -226,7 +178,7 @@ ctlWaitForPropertyChange(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnWaitForPropertyChange_t pfnWaitForPropertyChange = (ctl_pfnWaitForPropertyChange_t)GetProcAddress(hinstLib, "ctlWaitForPropertyChange");
         if (pfnWaitForPropertyChange)
@@ -264,7 +216,7 @@ ctlReservedCall(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnReservedCall_t pfnReservedCall = (ctl_pfnReservedCall_t)GetProcAddress(hinstLib, "ctlReservedCall");
         if (pfnReservedCall)
@@ -302,7 +254,7 @@ ctlGetSupported3DCapabilities(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetSupported3DCapabilities_t pfnGetSupported3DCapabilities = (ctl_pfnGetSupported3DCapabilities_t)GetProcAddress(hinstLib, "ctlGetSupported3DCapabilities");
         if (pfnGetSupported3DCapabilities)
@@ -340,7 +292,7 @@ ctlGetSet3DFeature(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetSet3DFeature_t pfnGetSet3DFeature = (ctl_pfnGetSet3DFeature_t)GetProcAddress(hinstLib, "ctlGetSet3DFeature");
         if (pfnGetSet3DFeature)
@@ -376,7 +328,7 @@ ctlCheckDriverVersion(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnCheckDriverVersion_t pfnCheckDriverVersion = (ctl_pfnCheckDriverVersion_t)GetProcAddress(hinstLib, "ctlCheckDriverVersion");
         if (pfnCheckDriverVersion)
@@ -422,7 +374,7 @@ ctlEnumerateDevices(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEnumerateDevices_t pfnEnumerateDevices = (ctl_pfnEnumerateDevices_t)GetProcAddress(hinstLib, "ctlEnumerateDevices");
         if (pfnEnumerateDevices)
@@ -467,7 +419,7 @@ ctlEnumerateDisplayOutputs(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEnumerateDisplayOutputs_t pfnEnumerateDisplayOutputs = (ctl_pfnEnumerateDisplayOutputs_t)GetProcAddress(hinstLib, "ctlEnumerateDisplayOutputs");
         if (pfnEnumerateDisplayOutputs)
@@ -505,7 +457,7 @@ ctlGetDeviceProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetDeviceProperties_t pfnGetDeviceProperties = (ctl_pfnGetDeviceProperties_t)GetProcAddress(hinstLib, "ctlGetDeviceProperties");
         if (pfnGetDeviceProperties)
@@ -543,7 +495,7 @@ ctlGetDisplayProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetDisplayProperties_t pfnGetDisplayProperties = (ctl_pfnGetDisplayProperties_t)GetProcAddress(hinstLib, "ctlGetDisplayProperties");
         if (pfnGetDisplayProperties)
@@ -581,7 +533,7 @@ ctlGetAdaperDisplayEncoderProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetAdaperDisplayEncoderProperties_t pfnGetAdaperDisplayEncoderProperties = (ctl_pfnGetAdaperDisplayEncoderProperties_t)GetProcAddress(hinstLib, "ctlGetAdaperDisplayEncoderProperties");
         if (pfnGetAdaperDisplayEncoderProperties)
@@ -622,7 +574,7 @@ ctlGetZeDevice(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetZeDevice_t pfnGetZeDevice = (ctl_pfnGetZeDevice_t)GetProcAddress(hinstLib, "ctlGetZeDevice");
         if (pfnGetZeDevice)
@@ -660,7 +612,7 @@ ctlGetSharpnessCaps(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetSharpnessCaps_t pfnGetSharpnessCaps = (ctl_pfnGetSharpnessCaps_t)GetProcAddress(hinstLib, "ctlGetSharpnessCaps");
         if (pfnGetSharpnessCaps)
@@ -698,7 +650,7 @@ ctlGetCurrentSharpness(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetCurrentSharpness_t pfnGetCurrentSharpness = (ctl_pfnGetCurrentSharpness_t)GetProcAddress(hinstLib, "ctlGetCurrentSharpness");
         if (pfnGetCurrentSharpness)
@@ -736,7 +688,7 @@ ctlSetCurrentSharpness(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnSetCurrentSharpness_t pfnSetCurrentSharpness = (ctl_pfnSetCurrentSharpness_t)GetProcAddress(hinstLib, "ctlSetCurrentSharpness");
         if (pfnSetCurrentSharpness)
@@ -782,7 +734,7 @@ ctlI2CAccess(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnI2CAccess_t pfnI2CAccess = (ctl_pfnI2CAccess_t)GetProcAddress(hinstLib, "ctlI2CAccess");
         if (pfnI2CAccess)
@@ -829,7 +781,7 @@ ctlAUXAccess(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnAUXAccess_t pfnAUXAccess = (ctl_pfnAUXAccess_t)GetProcAddress(hinstLib, "ctlAUXAccess");
         if (pfnAUXAccess)
@@ -867,7 +819,7 @@ ctlGetPowerOptimizationCaps(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetPowerOptimizationCaps_t pfnGetPowerOptimizationCaps = (ctl_pfnGetPowerOptimizationCaps_t)GetProcAddress(hinstLib, "ctlGetPowerOptimizationCaps");
         if (pfnGetPowerOptimizationCaps)
@@ -907,7 +859,7 @@ ctlGetPowerOptimizationSetting(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetPowerOptimizationSetting_t pfnGetPowerOptimizationSetting = (ctl_pfnGetPowerOptimizationSetting_t)GetProcAddress(hinstLib, "ctlGetPowerOptimizationSetting");
         if (pfnGetPowerOptimizationSetting)
@@ -947,7 +899,7 @@ ctlSetPowerOptimizationSetting(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnSetPowerOptimizationSetting_t pfnSetPowerOptimizationSetting = (ctl_pfnSetPowerOptimizationSetting_t)GetProcAddress(hinstLib, "ctlSetPowerOptimizationSetting");
         if (pfnSetPowerOptimizationSetting)
@@ -984,6 +936,11 @@ ctlSetPowerOptimizationSetting(
 *     - ::CTL_RESULT_ERROR_INVALID_PIXTX_GET_CONFIG_QUERY_TYPE - "Invalid query type"
 *     - ::CTL_RESULT_ERROR_INVALID_PIXTX_BLOCK_ID - "Invalid block id"
 *     - ::CTL_RESULT_ERROR_INSUFFICIENT_PIXTX_BLOCK_CONFIG_MEMORY - "Insufficient memery allocated for BlockConfigs"
+*     - ::CTL_RESULT_ERROR_3DLUT_INVALID_PIPE - "Invalid pipe for 3dlut"
+*     - ::CTL_RESULT_ERROR_3DLUT_INVALID_DATA - "Invalid 3dlut data"
+*     - ::CTL_RESULT_ERROR_3DLUT_NOT_SUPPORTED_IN_HDR - "3dlut not supported in HDR"
+*     - ::CTL_RESULT_ERROR_3DLUT_INVALID_OPERATION - "Invalid 3dlut operation"
+*     - ::CTL_RESULT_ERROR_3DLUT_UNSUCCESSFUL - "3dlut call unsuccessful"
 */
 ctl_result_t CTL_APICALL
 ctlPixelTransformationGetConfig(
@@ -994,7 +951,7 @@ ctlPixelTransformationGetConfig(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnPixelTransformationGetConfig_t pfnPixelTransformationGetConfig = (ctl_pfnPixelTransformationGetConfig_t)GetProcAddress(hinstLib, "ctlPixelTransformationGetConfig");
         if (pfnPixelTransformationGetConfig)
@@ -1032,6 +989,11 @@ ctlPixelTransformationGetConfig(
 *     - ::CTL_RESULT_ERROR_INVALID_SET_CONFIG_NUMBER_OF_SAMPLES - "Invalid number of samples"
 *     - ::CTL_RESULT_ERROR_INVALID_PIXTX_BLOCK_ID - "Invalid block id"
 *     - ::CTL_RESULT_ERROR_PERSISTANCE_NOT_SUPPORTED - "Persistance not supported"
+*     - ::CTL_RESULT_ERROR_3DLUT_INVALID_PIPE - "Invalid pipe for 3dlut"
+*     - ::CTL_RESULT_ERROR_3DLUT_INVALID_DATA - "Invalid 3dlut data"
+*     - ::CTL_RESULT_ERROR_3DLUT_NOT_SUPPORTED_IN_HDR - "3dlut not supported in HDR"
+*     - ::CTL_RESULT_ERROR_3DLUT_INVALID_OPERATION - "Invalid 3dlut operation"
+*     - ::CTL_RESULT_ERROR_3DLUT_UNSUCCESSFUL - "3dlut call unsuccessful"
 */
 ctl_result_t CTL_APICALL
 ctlPixelTransformationSetConfig(
@@ -1042,7 +1004,7 @@ ctlPixelTransformationSetConfig(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnPixelTransformationSetConfig_t pfnPixelTransformationSetConfig = (ctl_pfnPixelTransformationSetConfig_t)GetProcAddress(hinstLib, "ctlPixelTransformationSetConfig");
         if (pfnPixelTransformationSetConfig)
@@ -1087,7 +1049,7 @@ ctlPanelDescriptorAccess(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnPanelDescriptorAccess_t pfnPanelDescriptorAccess = (ctl_pfnPanelDescriptorAccess_t)GetProcAddress(hinstLib, "ctlPanelDescriptorAccess");
         if (pfnPanelDescriptorAccess)
@@ -1125,7 +1087,7 @@ ctlGetSupportedRetroScalingCapability(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetSupportedRetroScalingCapability_t pfnGetSupportedRetroScalingCapability = (ctl_pfnGetSupportedRetroScalingCapability_t)GetProcAddress(hinstLib, "ctlGetSupportedRetroScalingCapability");
         if (pfnGetSupportedRetroScalingCapability)
@@ -1164,7 +1126,7 @@ ctlGetSetRetroScaling(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetSetRetroScaling_t pfnGetSetRetroScaling = (ctl_pfnGetSetRetroScaling_t)GetProcAddress(hinstLib, "ctlGetSetRetroScaling");
         if (pfnGetSetRetroScaling)
@@ -1202,7 +1164,7 @@ ctlGetSupportedScalingCapability(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetSupportedScalingCapability_t pfnGetSupportedScalingCapability = (ctl_pfnGetSupportedScalingCapability_t)GetProcAddress(hinstLib, "ctlGetSupportedScalingCapability");
         if (pfnGetSupportedScalingCapability)
@@ -1240,7 +1202,7 @@ ctlGetCurrentScaling(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetCurrentScaling_t pfnGetCurrentScaling = (ctl_pfnGetCurrentScaling_t)GetProcAddress(hinstLib, "ctlGetCurrentScaling");
         if (pfnGetCurrentScaling)
@@ -1278,7 +1240,7 @@ ctlSetCurrentScaling(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnSetCurrentScaling_t pfnSetCurrentScaling = (ctl_pfnSetCurrentScaling_t)GetProcAddress(hinstLib, "ctlSetCurrentScaling");
         if (pfnSetCurrentScaling)
@@ -1326,7 +1288,7 @@ ctlEnumEngineGroups(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEnumEngineGroups_t pfnEnumEngineGroups = (ctl_pfnEnumEngineGroups_t)GetProcAddress(hinstLib, "ctlEnumEngineGroups");
         if (pfnEnumEngineGroups)
@@ -1364,7 +1326,7 @@ ctlEngineGetProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEngineGetProperties_t pfnEngineGetProperties = (ctl_pfnEngineGetProperties_t)GetProcAddress(hinstLib, "ctlEngineGetProperties");
         if (pfnEngineGetProperties)
@@ -1403,7 +1365,7 @@ ctlEngineGetActivity(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEngineGetActivity_t pfnEngineGetActivity = (ctl_pfnEngineGetActivity_t)GetProcAddress(hinstLib, "ctlEngineGetActivity");
         if (pfnEngineGetActivity)
@@ -1451,7 +1413,7 @@ ctlEnumFans(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEnumFans_t pfnEnumFans = (ctl_pfnEnumFans_t)GetProcAddress(hinstLib, "ctlEnumFans");
         if (pfnEnumFans)
@@ -1489,7 +1451,7 @@ ctlFanGetProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFanGetProperties_t pfnFanGetProperties = (ctl_pfnFanGetProperties_t)GetProcAddress(hinstLib, "ctlFanGetProperties");
         if (pfnFanGetProperties)
@@ -1528,7 +1490,7 @@ ctlFanGetConfig(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFanGetConfig_t pfnFanGetConfig = (ctl_pfnFanGetConfig_t)GetProcAddress(hinstLib, "ctlFanGetConfig");
         if (pfnFanGetConfig)
@@ -1566,7 +1528,7 @@ ctlFanSetDefaultMode(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFanSetDefaultMode_t pfnFanSetDefaultMode = (ctl_pfnFanSetDefaultMode_t)GetProcAddress(hinstLib, "ctlFanSetDefaultMode");
         if (pfnFanSetDefaultMode)
@@ -1609,7 +1571,7 @@ ctlFanSetFixedSpeedMode(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFanSetFixedSpeedMode_t pfnFanSetFixedSpeedMode = (ctl_pfnFanSetFixedSpeedMode_t)GetProcAddress(hinstLib, "ctlFanSetFixedSpeedMode");
         if (pfnFanSetFixedSpeedMode)
@@ -1654,7 +1616,7 @@ ctlFanSetSpeedTableMode(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFanSetSpeedTableMode_t pfnFanSetSpeedTableMode = (ctl_pfnFanSetSpeedTableMode_t)GetProcAddress(hinstLib, "ctlFanSetSpeedTableMode");
         if (pfnFanSetSpeedTableMode)
@@ -1699,7 +1661,7 @@ ctlFanGetState(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFanGetState_t pfnFanGetState = (ctl_pfnFanGetState_t)GetProcAddress(hinstLib, "ctlFanGetState");
         if (pfnFanGetState)
@@ -1747,7 +1709,7 @@ ctlEnumFrequencyDomains(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEnumFrequencyDomains_t pfnEnumFrequencyDomains = (ctl_pfnEnumFrequencyDomains_t)GetProcAddress(hinstLib, "ctlEnumFrequencyDomains");
         if (pfnEnumFrequencyDomains)
@@ -1785,7 +1747,7 @@ ctlFrequencyGetProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFrequencyGetProperties_t pfnFrequencyGetProperties = (ctl_pfnFrequencyGetProperties_t)GetProcAddress(hinstLib, "ctlFrequencyGetProperties");
         if (pfnFrequencyGetProperties)
@@ -1834,7 +1796,7 @@ ctlFrequencyGetAvailableClocks(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFrequencyGetAvailableClocks_t pfnFrequencyGetAvailableClocks = (ctl_pfnFrequencyGetAvailableClocks_t)GetProcAddress(hinstLib, "ctlFrequencyGetAvailableClocks");
         if (pfnFrequencyGetAvailableClocks)
@@ -1873,7 +1835,7 @@ ctlFrequencyGetRange(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFrequencyGetRange_t pfnFrequencyGetRange = (ctl_pfnFrequencyGetRange_t)GetProcAddress(hinstLib, "ctlFrequencyGetRange");
         if (pfnFrequencyGetRange)
@@ -1914,7 +1876,7 @@ ctlFrequencySetRange(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFrequencySetRange_t pfnFrequencySetRange = (ctl_pfnFrequencySetRange_t)GetProcAddress(hinstLib, "ctlFrequencySetRange");
         if (pfnFrequencySetRange)
@@ -1953,7 +1915,7 @@ ctlFrequencyGetState(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFrequencyGetState_t pfnFrequencyGetState = (ctl_pfnFrequencyGetState_t)GetProcAddress(hinstLib, "ctlFrequencyGetState");
         if (pfnFrequencyGetState)
@@ -1992,7 +1954,7 @@ ctlFrequencyGetThrottleTime(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnFrequencyGetThrottleTime_t pfnFrequencyGetThrottleTime = (ctl_pfnFrequencyGetThrottleTime_t)GetProcAddress(hinstLib, "ctlFrequencyGetThrottleTime");
         if (pfnFrequencyGetThrottleTime)
@@ -2030,7 +1992,7 @@ ctlGetSupportedVideoProcessingCapabilities(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetSupportedVideoProcessingCapabilities_t pfnGetSupportedVideoProcessingCapabilities = (ctl_pfnGetSupportedVideoProcessingCapabilities_t)GetProcAddress(hinstLib, "ctlGetSupportedVideoProcessingCapabilities");
         if (pfnGetSupportedVideoProcessingCapabilities)
@@ -2068,7 +2030,7 @@ ctlGetSetVideoProcessingFeature(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnGetSetVideoProcessingFeature_t pfnGetSetVideoProcessingFeature = (ctl_pfnGetSetVideoProcessingFeature_t)GetProcAddress(hinstLib, "ctlGetSetVideoProcessingFeature");
         if (pfnGetSetVideoProcessingFeature)
@@ -2116,7 +2078,7 @@ ctlEnumMemoryModules(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEnumMemoryModules_t pfnEnumMemoryModules = (ctl_pfnEnumMemoryModules_t)GetProcAddress(hinstLib, "ctlEnumMemoryModules");
         if (pfnEnumMemoryModules)
@@ -2154,7 +2116,7 @@ ctlMemoryGetProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnMemoryGetProperties_t pfnMemoryGetProperties = (ctl_pfnMemoryGetProperties_t)GetProcAddress(hinstLib, "ctlMemoryGetProperties");
         if (pfnMemoryGetProperties)
@@ -2192,7 +2154,7 @@ ctlMemoryGetState(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnMemoryGetState_t pfnMemoryGetState = (ctl_pfnMemoryGetState_t)GetProcAddress(hinstLib, "ctlMemoryGetState");
         if (pfnMemoryGetState)
@@ -2233,12 +2195,785 @@ ctlMemoryGetBandwidth(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnMemoryGetBandwidth_t pfnMemoryGetBandwidth = (ctl_pfnMemoryGetBandwidth_t)GetProcAddress(hinstLib, "ctlMemoryGetBandwidth");
         if (pfnMemoryGetBandwidth)
         {
             result = pfnMemoryGetBandwidth(hMemory, pBandwidth);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Get overclock properties - available properties.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pOcProperties`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockGetProperties(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    ctl_oc_properties_t* pOcProperties              ///< [in,out] The overclocking properties for the specified domain.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockGetProperties_t pfnOverclockGetProperties = (ctl_pfnOverclockGetProperties_t)GetProcAddress(hinstLib, "ctlOverclockGetProperties");
+        if (pfnOverclockGetProperties)
+        {
+            result = pfnOverclockGetProperties(hDeviceHandle, pOcProperties);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Overclock Waiver - Warranty Waiver.
+* 
+* @details
+*     - Most of the overclock functions will return an error if the waiver is
+*       not set. This is because most overclock settings will increase the
+*       electric/thermal stress on the part and thus reduce its lifetime.
+*     - By setting the waiver, the user is indicate that they are accepting a
+*       reduction in the lifetime of the part.
+*     - It is the responsibility of overclock applications to notify each user
+*       at least once with a popup of the dangers and requiring acceptance.
+*     - Only once the user has accepted should this function be called by the
+*       application.
+*     - It is acceptable for the application to cache the user choice and call
+*       this function on future executions without issuing the popup.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockWaiverSet(
+    ctl_device_adapter_handle_t hDeviceHandle       ///< [in][release] Handle to display adapter
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockWaiverSet_t pfnOverclockWaiverSet = (ctl_pfnOverclockWaiverSet_t)GetProcAddress(hinstLib, "ctlOverclockWaiverSet");
+        if (pfnOverclockWaiverSet)
+        {
+            result = pfnOverclockWaiverSet(hDeviceHandle);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Get the Overclock Frequency Offset for the GPU in MHz.
+* 
+* @details
+*     - Determine the current frequency offset in effect (refer to
+*       ::ctlOverclockGpuFrequencyOffsetSet() for details).
+*     - The value returned may be different from the value that was previously
+*       set by the application depending on hardware limitations or if the
+*       function ::ctlOverclockGpuFrequencyOffsetSet() has been called or
+*       another application that has changed the value.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pOcFrequencyOffset`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockGpuFrequencyOffsetGet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double* pOcFrequencyOffset                      ///< [in,out] The Turbo Overclocking Frequency Desired in MHz.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockGpuFrequencyOffsetGet_t pfnOverclockGpuFrequencyOffsetGet = (ctl_pfnOverclockGpuFrequencyOffsetGet_t)GetProcAddress(hinstLib, "ctlOverclockGpuFrequencyOffsetGet");
+        if (pfnOverclockGpuFrequencyOffsetGet)
+        {
+            result = pfnOverclockGpuFrequencyOffsetGet(hDeviceHandle, pOcFrequencyOffset);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Set the Overclock Frequency Offset for the GPU in MHZ.
+* 
+* @details
+*     - The purpose of this function is to increase/decrease the frequency at
+*       which typical workloads will run within the same thermal budget.
+*     - The frequency offset is expressed in units of ±1MHz.
+*     - The actual operating frequency for each workload is not guaranteed to
+*       change exactly by the specified offset.
+*     - For positive frequency offsets, the factory maximum frequency may
+*       increase by up to the specified amount.
+*     - For negative frequency offsets, the overclock waiver must have been
+*       set since this can result in running the part at voltages beyond the
+*       part warrantee limits. An error is returned if the waiver has not been
+*       set.
+*     - Specifying large values for the frequency offset can lead to
+*       instability. It is recommended that changes are made in small
+*       increments and stability/performance measured running intense GPU
+*       workloads before increasing further.
+*     - This setting is not persistent through system reboots or driver
+*       resets/hangs. It is up to the overclock application to reapply the
+*       settings in those cases.
+*     - This setting can cause system/device instability. It is up to the
+*       overclock application to detect if the system has rebooted
+*       unexpectedly or the device was restarted. When this occurs, the
+*       application should not reapply the overclock settings automatically
+*       but instead return to previously known good settings or notify the
+*       user that the settings are not being applied.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockGpuFrequencyOffsetSet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double ocFrequencyOffset                        ///< [in] The Turbo Overclocking Frequency Desired in MHz.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockGpuFrequencyOffsetSet_t pfnOverclockGpuFrequencyOffsetSet = (ctl_pfnOverclockGpuFrequencyOffsetSet_t)GetProcAddress(hinstLib, "ctlOverclockGpuFrequencyOffsetSet");
+        if (pfnOverclockGpuFrequencyOffsetSet)
+        {
+            result = pfnOverclockGpuFrequencyOffsetSet(hDeviceHandle, ocFrequencyOffset);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Get the Overclock Gpu Voltage Offset in mV.
+* 
+* @details
+*     - Determine the current voltage offset in effect on the hardware (refer
+*       to ::ctlOverclockGpuVoltageOffsetSet for details).
+*     - The value returned may be different from the value that was previously
+*       set by the application depending on hardware limitations or if the
+*       function ::ctlOverclockGpuVoltageOffsetSet has been called or another
+*       application that has changed the value.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pOcVoltageOffset`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockGpuVoltageOffsetGet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double* pOcVoltageOffset                        ///< [in,out] The Turbo Overclocking Frequency Desired in mV.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockGpuVoltageOffsetGet_t pfnOverclockGpuVoltageOffsetGet = (ctl_pfnOverclockGpuVoltageOffsetGet_t)GetProcAddress(hinstLib, "ctlOverclockGpuVoltageOffsetGet");
+        if (pfnOverclockGpuVoltageOffsetGet)
+        {
+            result = pfnOverclockGpuVoltageOffsetGet(hDeviceHandle, pOcVoltageOffset);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Set the Overclock Gpu Voltage Offset in mV.
+* 
+* @details
+*     - The purpose of this function is to attempt to run the GPU up to higher
+*       voltages beyond the part warrantee limits. This can permit running at
+*       even higher frequencies than can be obtained using the frequency
+*       offset setting, but at the risk of reducing the lifetime of the part.
+*     - The voltage offset is expressed in units of ±Volts with decimal
+*       values permitted down to a resolution of 1 millivolt.
+*     - The overclock waiver must be set before calling this function
+*       otherwise and error will be returned.
+*     - There is no guarantee that a workload can operate at the higher
+*       frequencies permitted by this setting. Significantly more heat will be
+*       generated at these high frequencies/voltages which will necessitate a
+*       good cooling solution.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockGpuVoltageOffsetSet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double ocVoltageOffset                          ///< [in] The Turbo Overclocking Frequency Desired in mV.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockGpuVoltageOffsetSet_t pfnOverclockGpuVoltageOffsetSet = (ctl_pfnOverclockGpuVoltageOffsetSet_t)GetProcAddress(hinstLib, "ctlOverclockGpuVoltageOffsetSet");
+        if (pfnOverclockGpuVoltageOffsetSet)
+        {
+            result = pfnOverclockGpuVoltageOffsetSet(hDeviceHandle, ocVoltageOffset);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Gets the Locked GPU Voltage for Overclocking in mV.
+* 
+* @details
+*     - The purpose of this function is to determine if the current values of
+*       the frequency/voltage lock.
+*     - If the lock is not currently active, will return 0 for frequency and
+*       voltage.
+*     - Note that the operating frequency/voltage may be lower than these
+*       settings if power/thermal limits are exceeded.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pVoltage`
+*         + `nullptr == pFrequency`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockGpuLockGet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double* pVoltage,                               ///< [in,out] The current locked voltage in mV.
+    double* pFrequency                              ///< [in,out] The current fixed frequency MHz.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockGpuLockGet_t pfnOverclockGpuLockGet = (ctl_pfnOverclockGpuLockGet_t)GetProcAddress(hinstLib, "ctlOverclockGpuLockGet");
+        if (pfnOverclockGpuLockGet)
+        {
+            result = pfnOverclockGpuLockGet(hDeviceHandle, pVoltage, pFrequency);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Locks the GPU voltage for Overclocking in mV.
+* 
+* @details
+*     - The purpose of this function is to provide an interface for scanners
+*       to lock the frequency and voltage to fixed values.
+*     - The frequency is expressed in units of MHz with a resolution of 1MHz.
+*     - The voltage is expressed in units of ±Volts with decimal values
+*       permitted down to a resolution of 1 millivolt.
+*     - The overclock waiver must be set since fixing the frequency at a high
+*       value puts unnecessary stress on the part.
+*     - The actual frequency may reduce depending on power/thermal
+*       limitations.
+*     - Requesting a frequency and/or voltage of 0 will return the hardware to
+*       dynamic frequency/voltage management with any previous frequency
+*       offset or voltage offset settings reapplied.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockGpuLockSet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double voltage,                                 ///< [in] The voltage to be locked in mV.
+    double frequency                                ///< [in] The frequency to be fixed in MHz.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockGpuLockSet_t pfnOverclockGpuLockSet = (ctl_pfnOverclockGpuLockSet_t)GetProcAddress(hinstLib, "ctlOverclockGpuLockSet");
+        if (pfnOverclockGpuLockSet)
+        {
+            result = pfnOverclockGpuLockSet(hDeviceHandle, voltage, frequency);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Get the current Vram Frequency Offset in GT/s.
+* 
+* @details
+*     - The purpose of this function is to return the current VRAM frequency
+*       offset in units of GT/s.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pOcFrequencyOffset`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockVramFrequencyOffsetGet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double* pOcFrequencyOffset                      ///< [in,out] The current Memory Frequency in GT/s.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockVramFrequencyOffsetGet_t pfnOverclockVramFrequencyOffsetGet = (ctl_pfnOverclockVramFrequencyOffsetGet_t)GetProcAddress(hinstLib, "ctlOverclockVramFrequencyOffsetGet");
+        if (pfnOverclockVramFrequencyOffsetGet)
+        {
+            result = pfnOverclockVramFrequencyOffsetGet(hDeviceHandle, pOcFrequencyOffset);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Set the desired Vram frquency Offset in GT/s
+* 
+* @details
+*     - The purpose of this function is to increase/decrease the frequency of
+*       VRAM.
+*     - The frequency offset is expressed in units of GT/s with a minimum step
+*       size given by ::ctlOverclockGetProperties.
+*     - The actual operating frequency for each workload is not guaranteed to
+*       change exactly by the specified offset.
+*     - The waiver must be set using clibOverclockWaiverSet() before this
+*       function can be called.
+*     - This setting is not persistent through system reboots or driver
+*       resets/hangs. It is up to the overclock application to reapply the
+*       settings in those cases.
+*     - This setting can cause system/device instability. It is up to the
+*       overclock application to detect if the system has rebooted
+*       unexpectedly or the device was restarted. When this occurs, the
+*       application should not reapply the overclock settings automatically
+*       but instead return to previously known good settings or notify the
+*       user that the settings are not being applied.
+*     - If the memory controller doesn't support changes to frequency on the
+*       fly, one of the following return codes will be given:
+*     - ::CTL_RESULT_ERROR_RESET_DEVICE_REQUIRED: The requested memory
+*       overclock will be applied when the device is reset or the system is
+*       rebooted. In this case, the overclock software should check if the
+*       overclock request was applied after the reset/reboot. If it was and
+*       when the overclock application shuts down gracefully and if the
+*       overclock application wants the setting to be persistent, the
+*       application should request the same overclock settings again so that
+*       they will be applied on the next reset/reboot. If this is not done,
+*       then every time the device is reset and overclock is requested, the
+*       device needs to be reset a second time.
+*     - ::CTL_RESULT_ERROR_FULL_REBOOT_REQUIRED: The requested memory
+*       overclock will be applied when the system is rebooted. In this case,
+*       the overclock software should check if the overclock request was
+*       applied after the reboot. If it was and when the overclock application
+*       shuts down gracefully and if the overclock application wants the
+*       setting to be persistent, the application should request the same
+*       overclock settings again so that they will be applied on the next
+*       reset/reboot. If this is not done and the overclock setting is
+*       requested after the reboot has occurred, a second reboot will be
+*       required.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockVramFrequencyOffsetSet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double ocFrequencyOffset                        ///< [in] The desired Memory Frequency in GT/s.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockVramFrequencyOffsetSet_t pfnOverclockVramFrequencyOffsetSet = (ctl_pfnOverclockVramFrequencyOffsetSet_t)GetProcAddress(hinstLib, "ctlOverclockVramFrequencyOffsetSet");
+        if (pfnOverclockVramFrequencyOffsetSet)
+        {
+            result = pfnOverclockVramFrequencyOffsetSet(hDeviceHandle, ocFrequencyOffset);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Get the Overclock Vram Voltage Offset in mV.
+* 
+* @details
+*     - The purpose of this function is to increase/decrease the voltage of
+*       VRAM.
+*     - The voltage offset is expressed in units of Volts with a minimum step
+*       size given by ::ctlOverclockGetProperties.
+*     - The waiver must be set using ::ctlOverclockWaiverSet before this
+*       function can be called.
+*     - This setting is not persistent through system reboots or driver
+*       resets/hangs. It is up to the overclock application to reapply the
+*       settings in those cases.
+*     - This setting can cause system/device instability. It is up to the
+*       overclock application to detect if the system has rebooted
+*       unexpectedly or the device was restarted. When this occurs, the
+*       application should not reapply the overclock settings automatically
+*       but instead return to previously known good settings or notify the
+*       user that the settings are not being applied.
+*     - If the memory controller doesn't support changes to voltage on the
+*       fly, one of the following return codes will be given:
+*     - ::CTL_RESULT_ERROR_RESET_DEVICE_REQUIRED: The requested memory
+*       overclock will be applied when the device is reset or the system is
+*       rebooted. In this case, the overclock software should check if the
+*       overclock request was applied after the reset/reboot. If it was and
+*       when the overclock application shuts down gracefully and if the
+*       overclock application wants the setting to be persistent, the
+*       application should request the same overclock settings again so that
+*       they will be applied on the next reset/reboot. If this is not done,
+*       then every time the device is reset and overclock is requested, the
+*       device needs to be reset a second time.
+*     - ::CTL_RESULT_ERROR_FULL_REBOOT_REQUIRED: The requested memory
+*       overclock will be applied when the system is rebooted. In this case,
+*       the overclock software should check if the overclock request was
+*       applied after the reboot. If it was and when the overclock application
+*       shuts down gracefully and if the overclock application wants the
+*       setting to be persistent, the application should request the same
+*       overclock settings again so that they will be applied on the next
+*       reset/reboot. If this is not done and the overclock setting is
+*       requested after the reboot has occurred, a second reboot will be
+*       required.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pVoltage`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockVramVoltageOffsetGet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double* pVoltage                                ///< [out] The current locked voltage in mV.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockVramVoltageOffsetGet_t pfnOverclockVramVoltageOffsetGet = (ctl_pfnOverclockVramVoltageOffsetGet_t)GetProcAddress(hinstLib, "ctlOverclockVramVoltageOffsetGet");
+        if (pfnOverclockVramVoltageOffsetGet)
+        {
+            result = pfnOverclockVramVoltageOffsetGet(hDeviceHandle, pVoltage);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Set the Overclock Vram Voltage Offset in mV.
+* 
+* @details
+*     - The purpose of this function is to set the maximum sustained power
+*       limit. If the average GPU power averaged over a few seconds exceeds
+*       this value, the frequency of the GPU will be throttled.
+*     - Set a value of 0 to disable this power limit. In this case, the GPU
+*       frequency will not throttle due to average power but may hit other
+*       limits.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockVramVoltageOffsetSet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double voltage                                  ///< [in] The voltage to be locked in mV.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockVramVoltageOffsetSet_t pfnOverclockVramVoltageOffsetSet = (ctl_pfnOverclockVramVoltageOffsetSet_t)GetProcAddress(hinstLib, "ctlOverclockVramVoltageOffsetSet");
+        if (pfnOverclockVramVoltageOffsetSet)
+        {
+            result = pfnOverclockVramVoltageOffsetSet(hDeviceHandle, voltage);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Get the sustained power limit in mW.
+* 
+* @details
+*     - The purpose of this function is to read the current sustained power
+*       limit.
+*     - A value of 0 means that the limit is disabled - the GPU frequency can
+*       run as high as possible until other limits are hit.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pSustainedPowerLimit`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockPowerLimitGet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double* pSustainedPowerLimit                    ///< [in,out] The current sustained power limit in mW.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockPowerLimitGet_t pfnOverclockPowerLimitGet = (ctl_pfnOverclockPowerLimitGet_t)GetProcAddress(hinstLib, "ctlOverclockPowerLimitGet");
+        if (pfnOverclockPowerLimitGet)
+        {
+            result = pfnOverclockPowerLimitGet(hDeviceHandle, pSustainedPowerLimit);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Set the sustained power limit in mW.
+* 
+* @details
+*     - The purpose of this function is to set the maximum sustained power
+*       limit. If the average GPU power averaged over a few seconds exceeds
+*       this value, the frequency of the GPU will be throttled.
+*     - Set a value of 0 to disable this power limit. In this case, the GPU
+*       frequency will not throttle due to average power but may hit other
+*       limits.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockPowerLimitSet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double sustainedPowerLimit                      ///< [in] The desired sustained power limit in mW.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockPowerLimitSet_t pfnOverclockPowerLimitSet = (ctl_pfnOverclockPowerLimitSet_t)GetProcAddress(hinstLib, "ctlOverclockPowerLimitSet");
+        if (pfnOverclockPowerLimitSet)
+        {
+            result = pfnOverclockPowerLimitSet(hDeviceHandle, sustainedPowerLimit);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Get the current temperature limit in Celsius.
+* 
+* @details
+*     - The purpose of this function is to read the current thermal limit.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pTemperatureLimit`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockTemperatureLimitGet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double* pTemperatureLimit                       ///< [in,out] The current temperature limit in Celsius.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockTemperatureLimitGet_t pfnOverclockTemperatureLimitGet = (ctl_pfnOverclockTemperatureLimitGet_t)GetProcAddress(hinstLib, "ctlOverclockTemperatureLimitGet");
+        if (pfnOverclockTemperatureLimitGet)
+        {
+            result = pfnOverclockTemperatureLimitGet(hDeviceHandle, pTemperatureLimit);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Set the temperature limit in Celsius.
+* 
+* @details
+*     - The purpose of this function is to change the maximum thermal limit.
+*       When the GPU temperature exceeds this value, the GPU frequency will be
+*       throttled.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockTemperatureLimitSet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    double temperatureLimit                         ///< [in] The desired temperature limit in Celsius.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockTemperatureLimitSet_t pfnOverclockTemperatureLimitSet = (ctl_pfnOverclockTemperatureLimitSet_t)GetProcAddress(hinstLib, "ctlOverclockTemperatureLimitSet");
+        if (pfnOverclockTemperatureLimitSet)
+        {
+            result = pfnOverclockTemperatureLimitSet(hDeviceHandle, temperatureLimit);
+        }
+    }
+
+
+    return result;
+}
+
+/**
+* @brief Get Power Telemetry.
+* 
+* @details
+*     - Limited rate of 50 ms, any call under 50 ms will return the same
+*       information.
+* 
+* @returns
+*     - ::CTL_RESULT_SUCCESS
+*     - ::CTL_RESULT_ERROR_UNINITIALIZED
+*     - ::CTL_RESULT_ERROR_DEVICE_LOST
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pTelemetryInfo`
+*/
+ctl_result_t CTL_APICALL
+ctlPowerTelemetryGet(
+    ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
+    ctl_power_telemetry_t* pTelemetryInfo           ///< [out] The overclocking properties for the specified domain.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnPowerTelemetryGet_t pfnPowerTelemetryGet = (ctl_pfnPowerTelemetryGet_t)GetProcAddress(hinstLib, "ctlPowerTelemetryGet");
+        if (pfnPowerTelemetryGet)
+        {
+            result = pfnPowerTelemetryGet(hDeviceHandle, pTelemetryInfo);
         }
     }
 
@@ -2271,7 +3006,7 @@ ctlPciGetProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnPciGetProperties_t pfnPciGetProperties = (ctl_pfnPciGetProperties_t)GetProcAddress(hinstLib, "ctlPciGetProperties");
         if (pfnPciGetProperties)
@@ -2309,7 +3044,7 @@ ctlPciGetState(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnPciGetState_t pfnPciGetState = (ctl_pfnPciGetState_t)GetProcAddress(hinstLib, "ctlPciGetState");
         if (pfnPciGetState)
@@ -2357,7 +3092,7 @@ ctlEnumPowerDomains(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEnumPowerDomains_t pfnEnumPowerDomains = (ctl_pfnEnumPowerDomains_t)GetProcAddress(hinstLib, "ctlEnumPowerDomains");
         if (pfnEnumPowerDomains)
@@ -2395,7 +3130,7 @@ ctlPowerGetProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnPowerGetProperties_t pfnPowerGetProperties = (ctl_pfnPowerGetProperties_t)GetProcAddress(hinstLib, "ctlPowerGetProperties");
         if (pfnPowerGetProperties)
@@ -2434,7 +3169,7 @@ ctlPowerGetEnergyCounter(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnPowerGetEnergyCounter_t pfnPowerGetEnergyCounter = (ctl_pfnPowerGetEnergyCounter_t)GetProcAddress(hinstLib, "ctlPowerGetEnergyCounter");
         if (pfnPowerGetEnergyCounter)
@@ -2464,23 +3199,18 @@ ctlPowerGetEnergyCounter(
 ctl_result_t CTL_APICALL
 ctlPowerGetLimits(
     ctl_pwr_handle_t hPower,                        ///< [in] Handle for the component.
-    ctl_power_sustained_limit_t* pSustained,        ///< [in,out][optional] The sustained power limit. If this is null, the
-                                                    ///< current sustained power limits will not be returned.
-    ctl_power_burst_limit_t* pBurst,                ///< [in,out][optional] The burst power limit. If this is null, the current
-                                                    ///< peak power limits will not be returned.
-    ctl_power_peak_limit_t* pPeak                   ///< [in,out][optional] The peak power limit. If this is null, the peak
-                                                    ///< power limits will not be returned.
+    ctl_power_limits_t* pPowerLimits                ///< [in,out][optional] Structure that will contain the power limits.
     )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnPowerGetLimits_t pfnPowerGetLimits = (ctl_pfnPowerGetLimits_t)GetProcAddress(hinstLib, "ctlPowerGetLimits");
         if (pfnPowerGetLimits)
         {
-            result = pfnPowerGetLimits(hPower, pSustained, pBurst, pPeak);
+            result = pfnPowerGetLimits(hPower, pPowerLimits);
         }
     }
 
@@ -2509,23 +3239,18 @@ ctlPowerGetLimits(
 ctl_result_t CTL_APICALL
 ctlPowerSetLimits(
     ctl_pwr_handle_t hPower,                        ///< [in] Handle for the component.
-    const ctl_power_sustained_limit_t* pSustained,  ///< [in][optional] The sustained power limit. If this is null, no changes
-                                                    ///< will be made to the sustained power limits.
-    const ctl_power_burst_limit_t* pBurst,          ///< [in][optional] The burst power limit. If this is null, no changes will
-                                                    ///< be made to the burst power limits.
-    const ctl_power_peak_limit_t* pPeak             ///< [in][optional] The peak power limit. If this is null, no changes will
-                                                    ///< be made to the peak power limits.
+    const ctl_power_limits_t* pPowerLimits          ///< [in][optional] Structure that will contain the power limits.
     )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnPowerSetLimits_t pfnPowerSetLimits = (ctl_pfnPowerSetLimits_t)GetProcAddress(hinstLib, "ctlPowerSetLimits");
         if (pfnPowerSetLimits)
         {
-            result = pfnPowerSetLimits(hPower, pSustained, pBurst, pPeak);
+            result = pfnPowerSetLimits(hPower, pPowerLimits);
         }
     }
 
@@ -2568,7 +3293,7 @@ ctlEnumTemperatureSensors(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnEnumTemperatureSensors_t pfnEnumTemperatureSensors = (ctl_pfnEnumTemperatureSensors_t)GetProcAddress(hinstLib, "ctlEnumTemperatureSensors");
         if (pfnEnumTemperatureSensors)
@@ -2606,7 +3331,7 @@ ctlTemperatureGetProperties(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnTemperatureGetProperties_t pfnTemperatureGetProperties = (ctl_pfnTemperatureGetProperties_t)GetProcAddress(hinstLib, "ctlTemperatureGetProperties");
         if (pfnTemperatureGetProperties)
@@ -2645,7 +3370,7 @@ ctlTemperatureGetState(
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
     
 
-    if (hinstLib != NULL)
+    if (NULL != hinstLib)
     {
         ctl_pfnTemperatureGetState_t pfnTemperatureGetState = (ctl_pfnTemperatureGetState_t)GetProcAddress(hinstLib, "ctlTemperatureGetState");
         if (pfnTemperatureGetState)
