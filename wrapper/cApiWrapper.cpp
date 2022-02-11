@@ -88,7 +88,7 @@ ctlInit(
 #ifdef WINDOWS_UWP
             hinstLib = LoadPackagedLibrary(strDLLPath, 0);
 #else
-            hinstLib = LoadLibraryW(strDLLPath);
+            hinstLib = LoadLibraryExW(strDLLPath, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
 #endif
             if (NULL == hinstLib)
             {
