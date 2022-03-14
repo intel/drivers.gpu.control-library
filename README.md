@@ -1,6 +1,5 @@
 # Intel Graphics Control Library (IGCL)
-Draft Header, wrapper library and samples of IGCL
-Version 0.9
+Header, wrapper library and samples of IGCL version 0.95
  
 
 # Introduction
@@ -10,3 +9,4 @@ IGCL is meant to be a collection of high level APIs for all control aspects of h
 * IGCL binaries are distributed as part of Intel Graphics driver package.
 * Header & library wrapper code are provided here to help developers with their application development.
 * For API/spec questions or issues, for now, use the "Issues" tab under Github. For issues related to an already shipped binary of this spec, contact standard Intel customer support for Graphics.
+* In sync with IGCL build version 67

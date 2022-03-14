@@ -333,14 +333,18 @@ typedef union _ctl_property_t
 } ctl_property_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Defines Return/Error codes. Bit30 indicates error.
-///        All generic error codes are between 0x40000000-0x4000FFFF.
-///        All 3D specific ones are between 0x60000000-0x6000FFFF.
-///        All media specific ones are between 0x50000000-0x5000FFFF.
-///        All display specific ones are between 0x48000000-0x4800FFFF
+/// @brief Defines Return/Error codes.
+///        All generic error (bit30) codes are between 0x40000000-0x4000FFFF.
+///        All 3D (bit 29) specific error codes are between 0x60000000-0x6000FFFF.
+///        All media (bit 28) specific error codes are between 0x50000000-0x5000FFFF.
+///        All display (bit 27) specific error codes are between 0x48000000-0x4800FFFF
+///        All core (bit 26) specific error codes are between 0x44000000-0x4400FFFF
+///        Success result code with additional info are between 0x00000001-0x0000FFFF.
 typedef enum _ctl_result_t
 {
-    CTL_RESULT_SUCCESS = 0,                         ///< "success
+    CTL_RESULT_SUCCESS = 0x00000000,                ///< success
+    CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER = 0x00000001,   ///< success but still open by another caller
+    CTL_RESULT_ERROR_SUCCESS_END = 0x0000FFFF,      ///< "Success group error code end value, not to be used
                                                     ///< "
     CTL_RESULT_ERROR_GENERIC_START = 0x40000000,    ///< Generic error code starting value, not to be used
     CTL_RESULT_ERROR_NOT_INITIALIZED = 0x40000001,  ///< Result not initialized
@@ -382,7 +386,20 @@ typedef enum _ctl_result_t
     CTL_RESULT_ERROR_FULL_REBOOT_REQUIRED = 0x40000025, ///< The device requires a full reboot.
     CTL_RESULT_ERROR_LOAD = 0x40000026,             ///< Library load failure
     CTL_RESULT_ERROR_UNKNOWN = 0x4000FFFF,          ///< Unknown or internal error
+    CTL_RESULT_ERROR_RETRY_OPERATION = 0x40010000,  ///< Operation failed, retry previous operation again
     CTL_RESULT_ERROR_GENERIC_END = 0x4000FFFF,      ///< "Generic error code end value, not to be used
+                                                    ///< "
+    CTL_RESULT_ERROR_CORE_START = 0x44000000,       ///< Core error code starting value, not to be used
+    CTL_RESULT_ERROR_CORE_OVERCLOCK_NOT_SUPPORTED = 0x44000001, ///< The Overclock is not supported.
+    CTL_RESULT_ERROR_CORE_OVERCLOCK_VOLTAGE_OUTSIDE_RANGE = 0x44000002, ///< The Voltage exceeds the acceptable min/max.
+    CTL_RESULT_ERROR_CORE_OVERCLOCK_FREQUENCY_OUTSIDE_RANGE = 0x44000003,   ///< The Frequency exceeds the acceptable min/max.
+    CTL_RESULT_ERROR_CORE_OVERCLOCK_POWER_OUTSIDE_RANGE = 0x44000004,   ///< The Power exceeds the acceptable min/max.
+    CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE = 0x44000005, ///< The Power exceeds the acceptable min/max.
+    CTL_RESULT_ERROR_CORE_OVERCLOCK_IN_VOLTAGE_LOCKED_MODE = 0x44000006,///< The Overclock is in voltage locked mode.
+    CTL_RESULT_ERROR_CORE_OVERCLOCK_RESET_REQUIRED = 0x44000007,///< It indicates that the requested change will not be applied until the
+                                                    ///< device is reset.
+    CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SET = 0x44000008,///< The $OverclockWaiverSet function has not been called.
+    CTL_RESULT_ERROR_CORE_END = 0x0440FFFF,         ///< "Core error code end value, not to be used
                                                     ///< "
     CTL_RESULT_ERROR_3D_START = 0x60000000,         ///< 3D error code starting value, not to be used
     CTL_RESULT_ERROR_3D_END = 0x6000FFFF,           ///< "3D error code end value, not to be used
@@ -412,6 +429,8 @@ typedef enum _ctl_result_t
     CTL_RESULT_ERROR_AUX_INCOMPLETE_WRITE = 0x48000013, ///< AUX incomplete write failure
     CTL_RESULT_ERROR_I2C_AUX_STATUS_UNKNOWN = 0x48000014,   ///< I2C/AUX unkonown failure
     CTL_RESULT_ERROR_I2C_AUX_UNSUCCESSFUL = 0x48000015, ///< I2C/AUX unsuccessful
+    CTL_RESULT_ERROR_LACE_INVALID_DATA_ARGUMENT_PASSED = 0x48000016,///< Lace Incorrrect AggressivePercent data or LuxVsAggressive Map data
+                                                    ///< passed by user
     CTL_RESULT_ERROR_DISPLAY_END = 0x4800FFFF,      ///< "Display error code end value, not to be used
                                                     ///< "
     CTL_RESULT_MAX
@@ -436,13 +455,14 @@ typedef enum _ctl_units_t
 {
     CTL_UNITS_FREQUENCY_MHZ = 0,                    ///< Type is Frequency with units in MHz.
     CTL_UNITS_OPERATIONS_GTS = 1,                   ///< Type is Frequency with units in GT/s (gigatransfers per second).
-    CTL_UNITS_VOLTAGE_VOLTS = 2,                    ///< Type is Voltage with units in Volts.
-    CTL_UNITS_POWER_WATTS = 3,                      ///< Type is Power with units in Watts.
-    CTL_UNITS_TEMPERATURE_CELSIUS = 4,              ///< Type is Temperature with units in Celsius.
-    CTL_UNITS_ENERGY_CELSIUS = 5,                   ///< Type is Energy with units in Joules.
-    CTL_UNITS_TIME_SECONDS = 6,                     ///< Type is Time with units in Seconds.
-    CTL_UNITS_MEMORY_BYTES = 7,                     ///< Type is Memory with units in Bytes.
-    CTL_UNITS_ANGULAR_SPEED_RPM = 8,                ///< Type is Angular Speed with units in Revolutions per Minute.
+    CTL_UNITS_OPERATIONS_MTS = 2,                   ///< Type is Frequency with units in MT/s (megatransfers per second).
+    CTL_UNITS_VOLTAGE_VOLTS = 3,                    ///< Type is Voltage with units in Volts.
+    CTL_UNITS_POWER_WATTS = 4,                      ///< Type is Power with units in Watts.
+    CTL_UNITS_TEMPERATURE_CELSIUS = 5,              ///< Type is Temperature with units in Celsius.
+    CTL_UNITS_ENERGY_JOULES = 6,                    ///< Type is Energy with units in Joules.
+    CTL_UNITS_TIME_SECONDS = 7,                     ///< Type is Time with units in Seconds.
+    CTL_UNITS_MEMORY_BYTES = 8,                     ///< Type is Memory with units in Bytes.
+    CTL_UNITS_ANGULAR_SPEED_RPM = 9,                ///< Type is Angular Speed with units in Revolutions per Minute.
     CTL_UNITS_UNKNOWN = 0x4800FFFF,                 ///< Type of units unknown.
     CTL_UNITS_MAX
 
@@ -554,16 +574,30 @@ typedef struct _ctl_unlock_capability_t
 } ctl_unlock_capability_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Used by loader like modules to specify runtime implementation details
+typedef struct _ctl_runtime_path_args_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    ctl_application_id_t UnlockID;                  ///< [in] Unique ID for reserved/special function
+    wchar_t* pRuntimePath;                          ///< [in] Path to runtime DLL
+    uint16_t DeviceID;                              ///< [in] Device ID of interest to caller. pRuntimePath should not be NULL.
+    uint8_t RevID;                                  ///< [in] Revision ID of interest to caller. pRuntimePath should not be
+                                                    ///< NULL.
+
+} ctl_runtime_path_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Control Api Init
 /// 
 /// @details
 ///     - Control Api Init
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pInitDesc`
 ///         + `nullptr == phAPIHandle`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
@@ -580,16 +614,38 @@ ctlInit(
 ///     - Control Api Close
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hAPIHandle`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlClose(
     ctl_api_handle_t hAPIHandle                     ///< [in][release] Control API implementation handle obtained during init
                                                     ///< call
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Runtime path
+/// 
+/// @details
+///     - Control Api set runtime path. Optional call from a loader which allows
+///       the loaded runtime to enumerate only the adapters which the specified
+///       runtime is responsible for. This is done usually by a loader or by
+///       callers who know how to get the specific runtime of interest. This
+///       call right now is reserved for use by Intel components.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pArgs`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlSetRuntimePath(
+    ctl_runtime_path_args_t* pArgs                  ///< [in] Runtime path
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -711,12 +767,12 @@ typedef struct _ctl_wait_property_change_args_t
 ///     - Wait for a property change in display, 3d, media etc.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceAdapter`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pArgs`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -733,12 +789,12 @@ ctlWaitForPropertyChange(
 ///     - Reserved function
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceAdapter`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pArgs`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -828,6 +884,10 @@ typedef struct _ctl_reserved_args_base_t ctl_reserved_args_base_t;
 typedef struct _ctl_unlock_capability_t ctl_unlock_capability_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_runtime_path_args_t
+typedef struct _ctl_runtime_path_args_t ctl_runtime_path_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_firmware_version_t
 typedef struct _ctl_firmware_version_t ctl_firmware_version_t;
 
@@ -846,6 +906,14 @@ typedef struct _ctl_revision_datatype_t ctl_revision_datatype_t;
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_wait_property_change_args_t
 typedef struct _ctl_wait_property_change_args_t ctl_wait_property_change_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_endurance_gaming_caps_t
+typedef struct _ctl_endurance_gaming_caps_t ctl_endurance_gaming_caps_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_endurance_gaming_t
+typedef struct _ctl_endurance_gaming_t ctl_endurance_gaming_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_adaptivesync_caps_t
@@ -980,6 +1048,34 @@ typedef struct _ctl_scaling_caps_t ctl_scaling_caps_t;
 typedef struct _ctl_scaling_settings_t ctl_scaling_settings_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_lace_lux_aggr_map_entry_t
+typedef struct _ctl_lace_lux_aggr_map_entry_t ctl_lace_lux_aggr_map_entry_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_lace_lux_aggr_map_t
+typedef struct _ctl_lace_lux_aggr_map_t ctl_lace_lux_aggr_map_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_lace_config_t
+typedef struct _ctl_lace_config_t ctl_lace_config_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_sw_psr_settings_t
+typedef struct _ctl_sw_psr_settings_t ctl_sw_psr_settings_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_intel_arc_sync_monitor_params_t
+typedef struct _ctl_intel_arc_sync_monitor_params_t ctl_intel_arc_sync_monitor_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_mux_properties_t
+typedef struct _ctl_mux_properties_t ctl_mux_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_intel_arc_sync_profile_params_t
+typedef struct _ctl_intel_arc_sync_profile_params_t ctl_intel_arc_sync_profile_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_engine_properties_t
 typedef struct _ctl_engine_properties_t ctl_engine_properties_t;
 
@@ -1100,6 +1196,10 @@ typedef struct _ctl_oc_control_info_t ctl_oc_control_info_t;
 typedef struct _ctl_oc_properties_t ctl_oc_properties_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_oc_vf_pair_t
+typedef struct _ctl_oc_vf_pair_t ctl_oc_vf_pair_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_psu_info_t
 typedef struct _ctl_psu_info_t ctl_psu_info_t;
 
@@ -1181,7 +1281,7 @@ typedef enum _ctl_3d_feature_t
     CTL_3D_FEATURE_ADAPTIVE_TESSELLATION = 6,       ///< Adaptive tessellation quality. Contains generic integer type fields
     CTL_3D_FEATURE_SHARPENING_FILTER = 7,           ///< Sharpening Filter. Contains generic integer type fields
     CTL_3D_FEATURE_MSAA = 8,                        ///< Msaa. Contains generic enum type fields
-    CTL_3D_FEATURE_ASYNC_FLIP_MODES = 9,            ///< Various async flips modes like speed frame, smooth sync & force aync
+    CTL_3D_FEATURE_GAMING_FLIP_MODES = 9,           ///< Various Gaming flip modes like speed frame, smooth sync & force async
                                                     ///< flip. Contains generic enum type fields
     CTL_3D_FEATURE_ADAPTIVE_SYNC_PLUS = 10,         ///< Adaptive sync plus. Refer custom field ::ctl_adaptivesync_caps_t &
                                                     ///< ::ctl_adaptivesync_getset_t
@@ -1224,6 +1324,28 @@ typedef enum _ctl_3d_frame_pacing_types_t
     CTL_3D_FRAME_PACING_TYPES_MAX
 
 } ctl_3d_frame_pacing_types_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Endurance Gaming control possible
+typedef enum _ctl_3d_endurance_gaming_control_t
+{
+    CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_OFF = 0,   ///< Endurance Gaming disable
+    CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_ON = 1,    ///< Endurance Gaming enable
+    CTL_3D_ENDURANCE_GAMING_CONTROL_AUTO = 2,       ///< Endurance Gaming auto
+    CTL_3D_ENDURANCE_GAMING_CONTROL_MAX
+
+} ctl_3d_endurance_gaming_control_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Endurance Gaming modes possible
+typedef enum _ctl_3d_endurance_gaming_mode_t
+{
+    CTL_3D_ENDURANCE_GAMING_MODE_BETTER_PERFORMANCE = 0,///< Endurance Gaming better performance mode
+    CTL_3D_ENDURANCE_GAMING_MODE_BALANCED = 1,      ///< Endurance Gaming balanced mode
+    CTL_3D_ENDURANCE_GAMING_MODE_MAXIMUM_BATTERY = 2,   ///< Endurance Gaming maximum battery mode
+    CTL_3D_ENDURANCE_GAMING_MODE_MAX
+
+} ctl_3d_endurance_gaming_mode_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Cmaa values possible
@@ -1271,16 +1393,38 @@ typedef enum _ctl_3d_msaa_types_t
 } ctl_3d_msaa_types_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Async flip modes
-typedef enum _ctl_3d_frame_async_flip_types_t
+/// @brief Gaming flip modes
+typedef uint32_t ctl_gaming_flip_mode_flags_t;
+typedef enum _ctl_gaming_flip_mode_flag_t
 {
-    CTL_3D_FRAME_ASYNC_FLIP_TYPES_APP_CHOICE = 0,   ///< Application choice
-    CTL_3D_FRAME_ASYNC_FLIP_TYPES_ENABLE_FORCE_SYNC = 1,///< Force async to sync flip conversion
-    CTL_3D_FRAME_ASYNC_FLIP_TYPES_ENABLE_SPEED_FRAME = 2,   ///< Enable Intel speed frame technology
-    CTL_3D_FRAME_ASYNC_FLIP_TYPES_ENABLE_SMOOTH_SYNC = 3,   ///< Enable Intel smooth sync technology
-    CTL_3D_FRAME_ASYNC_FLIP_TYPES_MAX
+    CTL_GAMING_FLIP_MODE_FLAG_APPLICATION_DEFAULT = CTL_BIT(0), ///< Application Default
+    CTL_GAMING_FLIP_MODE_FLAG_VSYNC_OFF = CTL_BIT(1),   ///< Convert all sync flips to async on the next possible scanline.
+    CTL_GAMING_FLIP_MODE_FLAG_VSYNC_ON = CTL_BIT(2),///< Convert all async flips to sync flips.
+    CTL_GAMING_FLIP_MODE_FLAG_SMOOTH_SYNC = CTL_BIT(3), ///< Reduce tearing effect with async flips
+    CTL_GAMING_FLIP_MODE_FLAG_SPEED_FRAME = CTL_BIT(4), ///< Application unaware triple buffering
+    CTL_GAMING_FLIP_MODE_FLAG_CAPPED_FPS = CTL_BIT(5),  ///< Limit the game FPS to panel RR
+    CTL_GAMING_FLIP_MODE_FLAG_MAX = 0x80000000
 
-} ctl_3d_frame_async_flip_types_t;
+} ctl_gaming_flip_mode_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Endurance Gaming caps
+typedef struct _ctl_endurance_gaming_caps_t
+{
+    ctl_property_info_enum_t EGControlCaps;         ///< [out] Endurance Gaming control capability
+    ctl_property_info_enum_t EGModeCaps;            ///< [out] Endurance Gaming mode capability
+
+} ctl_endurance_gaming_caps_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Endurance Gaming Get/Set
+typedef struct _ctl_endurance_gaming_t
+{
+    ctl_3d_endurance_gaming_control_t EGControl;    ///< [in,out] Endurance Gaming control - Off/On/Auto
+    ctl_3d_endurance_gaming_mode_t EGMode;          ///< [in,out] Endurance Gaming mode - Better Performance/Balanced/Maximum
+                                                    ///< Battery
+
+} ctl_endurance_gaming_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Adaptive sync plus caps
@@ -1391,12 +1535,12 @@ typedef struct _ctl_kmd_load_features_t
 ///     - The application gets 3D properties
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pFeatureCaps`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1412,12 +1556,12 @@ ctlGetSupported3DCapabilities(
 ///     - 3D feature details
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pFeature`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1445,10 +1589,10 @@ typedef struct _ctl_display_output_handle_t *ctl_display_output_handle_t;
 ///     - The application checks driver version
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceAdapter`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1461,15 +1605,15 @@ ctlCheckDriverVersion(
 /// @brief Enumerate devices
 /// 
 /// @details
-///     - The application checks driver version
+///     - The application enumerates all device adapters in the system
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hAPIHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pCount`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1493,12 +1637,12 @@ ctlEnumerateDevices(
 ///     - Enumerates display output capabilities
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceAdapter`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pCount`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1764,12 +1908,12 @@ typedef struct _ctl_adapter_display_encoder_properties_t
 ///     - The application gets device properties
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1785,12 +1929,12 @@ ctlGetDeviceProperties(
 ///     - The application gets display  properties
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1806,12 +1950,12 @@ ctlGetDisplayProperties(
 ///     - The application gets the graphic adapters display encoder properties
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1827,12 +1971,12 @@ ctlGetAdaperDisplayEncoderProperties(
 ///     - The application gets OneAPI Level0 Device handles
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pZeDevice`
 ///         + `nullptr == hInstance`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
@@ -1899,12 +2043,12 @@ typedef struct _ctl_sharpness_settings_t
 ///     - Returns sharpness capability
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pSharpnessCaps`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1920,12 +2064,12 @@ ctlGetSharpnessCaps(
 ///     - Returns current sharpness settings
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pSharpnessSettings`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1941,12 +2085,12 @@ ctlGetCurrentSharpness(
 ///     - Set current sharpness settings
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pSharpnessSettings`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -1996,12 +2140,12 @@ typedef struct _ctl_i2c_access_args_t
 ///     - The application does I2C aceess
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pI2cAccessArgs`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 ///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
@@ -2058,15 +2202,16 @@ typedef struct _ctl_aux_access_args_t
 /// @brief Aux Access
 /// 
 /// @details
-///     - The application does Aux aceess
+///     - The application does Aux aceess, PSR needs to be disabled for AUX
+///       call.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pAuxAccessArgs`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 ///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
@@ -2093,7 +2238,8 @@ typedef enum _ctl_power_optimization_flag_t
     CTL_POWER_OPTIMIZATION_FLAG_FBC = CTL_BIT(0),   ///< Frame buffer compression
     CTL_POWER_OPTIMIZATION_FLAG_PSR = CTL_BIT(1),   ///< Panel self refresh
     CTL_POWER_OPTIMIZATION_FLAG_DPST = CTL_BIT(2),  ///< Display power saving technology (Panel technology dependent)
-    CTL_POWER_OPTIMIZATION_FLAG_LRR = CTL_BIT(3),   ///< Low refresh rate (LRR/ALRR/UBRR)
+    CTL_POWER_OPTIMIZATION_FLAG_LRR = CTL_BIT(3),   ///< Low refresh rate (LRR/ALRR/UBRR), UBRR is supported only for IGCC and
+                                                    ///< NDA clients
     CTL_POWER_OPTIMIZATION_FLAG_MAX = 0x80000000
 
 } ctl_power_optimization_flag_t;
@@ -2166,12 +2312,12 @@ typedef struct _ctl_power_optimization_caps_t
 ///     - Returns power optimization capabilities
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pPowerOptimizationCaps`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -2254,12 +2400,12 @@ typedef struct _ctl_power_optimization_settings_t
 ///     - Returns power optimization setting for a specific feature
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pPowerOptimizationSettings`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 ///     - ::CTL_RESULT_ERROR_INVALID_POWERFEATURE_OPTIMIZATION_FLAG - "Unsupported PowerOptimizationFeature"
@@ -2277,12 +2423,12 @@ ctlGetPowerOptimizationSetting(
 ///     - Set power optimization setting for a specific feature
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pPowerOptimizationSettings`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 ///     - ::CTL_RESULT_ERROR_INVALID_POWERFEATURE_OPTIMIZATION_FLAG - "Unsupported PowerOptimizationFeature"
@@ -2545,12 +2691,12 @@ typedef struct _ctl_pixtx_pipe_set_config_t
 ///     - The application does pixel transformation get pipe configuration
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pPixTxGetConfigArgs`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 ///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
@@ -2580,12 +2726,12 @@ ctlPixelTransformationGetConfig(
 ///     - The application does pixel transformation set pipe configuration
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pPixTxSetConfigArgs`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 ///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
@@ -2615,8 +2761,8 @@ typedef struct _ctl_panel_descriptor_access_args_t
 {
     uint32_t Size;                                  ///< [in] size of this structure
     uint8_t Version;                                ///< [in] version of this structure
-    ctl_operation_type_t OpType;                    ///< [in] Operation type, 1 for Read, 2 for Write, for Write operation, App
-                                                    ///< needs to run with admin privileges, Currently only Read operation is
+    ctl_operation_type_t OpType;                    ///< [in] Operation type, 1 for Read, 2 for Write. App needs to run with
+                                                    ///< admin privileges for Write operation, Currently only Read operation is
                                                     ///< supported
     uint32_t BlockNumber;                           ///< [in] Block number, Need to provide only if acccessing EDID
     uint32_t DescriptorDataSize;                    ///< [in] Descriptor data size, Should be 0 for querying the size and
@@ -2632,12 +2778,12 @@ typedef struct _ctl_panel_descriptor_access_args_t
 ///     - The application does EDID or Display ID access
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pPanelDescriptorAccessArgs`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 ///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
@@ -2695,12 +2841,12 @@ typedef struct _ctl_retro_scaling_caps_t
 ///     - Returns supported retro scaling capabilities
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pRetroScalingCaps`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -2717,12 +2863,12 @@ ctlGetSupportedRetroScalingCapability(
 ///       modeset resulting in flash on the screen
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pGetSetRetroScalingType`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -2781,12 +2927,12 @@ typedef struct _ctl_scaling_settings_t
 ///     - Returns supported scaling capabilities
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pScalingCaps`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -2802,12 +2948,12 @@ ctlGetSupportedScalingCapability(
 ///     - Returns current active scaling
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pGetCurrentScalingType`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -2823,18 +2969,399 @@ ctlGetCurrentScaling(
 ///     - Returns current active scaling
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDisplayOutput`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pSetScalingType`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlSetCurrentScaling(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_scaling_settings_t* pSetScalingType         ///< [in,out][release] Set scaling types
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Ambient light based enhancement table entry
+typedef struct _ctl_lace_lux_aggr_map_entry_t
+{
+    uint32_t Lux;                                   ///< [in,out] Ambient lux
+    uint8_t AggressivenessPercent;                  ///< [in,out] Pixel boost agressiveness
+
+} ctl_lace_lux_aggr_map_entry_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Ambient light based enhancement table
+typedef struct _ctl_lace_lux_aggr_map_t
+{
+    uint32_t MaxNumEntries;                         ///< [out] Max Number of entries in mapping table supported
+    uint32_t NumEntries;                            ///< [in,out] Number of entries in the given mapping table
+    ctl_lace_lux_aggr_map_entry_t* pLuxToAggrMappingTable;  ///< [in] Max number of Entries which can be passed in
+                                                    ///< LuxToAggrMappingTable
+
+} ctl_lace_lux_aggr_map_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Data specific to the mode caller is interested in
+typedef union _ctl_lace_aggr_config_t
+{
+    uint8_t FixedAggressivenessLevelPercent;        ///< [in,out] Fixed aggressiveness level, applicable for
+                                                    ///< CTL_LACE_MODE_FIXED_AGGR_LEVEL
+    ctl_lace_lux_aggr_map_t AggrLevelMap;           ///< [in,out] Lux to enhancement mapping table, applicable for
+                                                    ///< CTL_LACE_MODE_AMBIENT_ADAPTIVE
+
+} ctl_lace_aggr_config_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Operations used for additional settings
+typedef uint32_t ctl_get_operation_flags_t;
+typedef enum _ctl_get_operation_flag_t
+{
+    CTL_GET_OPERATION_FLAG_CURRENT = CTL_BIT(0),    ///< Get the details set through last set call
+    CTL_GET_OPERATION_FLAG_DEFAULT = CTL_BIT(1),    ///< Get the driver default values
+    CTL_GET_OPERATION_FLAG_CAPABILITY = CTL_BIT(2), ///< Get capability
+    CTL_GET_OPERATION_FLAG_MAX = 0x80000000
+
+} ctl_get_operation_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set Operations used for additional settings
+typedef enum _ctl_set_operation_t
+{
+    CTL_SET_OPERATION_RESTORE_DEFAULT = 0,          ///< Restore default values
+    CTL_SET_OPERATION_CUSTOM = 1,                   ///< Set custom values
+    CTL_SET_OPERATION_MAX
+
+} ctl_set_operation_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief  Lace Trigger Modes
+typedef uint32_t ctl_lace_trigger_flags_t;
+typedef enum _ctl_lace_trigger_flag_t
+{
+    CTL_LACE_TRIGGER_FLAG_AMBIENT_LIGHT = CTL_BIT(0),   ///< LACE enhancement depends on Ambient light
+    CTL_LACE_TRIGGER_FLAG_FIXED_AGGRESSIVENESS = CTL_BIT(1),///< LACE enhancement is as per given fixed aggressiveness level
+    CTL_LACE_TRIGGER_FLAG_MAX = 0x80000000
+
+} ctl_lace_trigger_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set/Get LACE Config
+typedef struct _ctl_lace_config_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    bool Enabled;                                   ///< [in,out] Enable or disable LACE feature
+    ctl_get_operation_flags_t OpTypeGet;            ///< [in] Get Operations used for additional settings
+    ctl_set_operation_t OpTypeSet;                  ///< [in] Set Operations used for additional settings
+    ctl_lace_trigger_flags_t Trigger;               ///< [in,out] LACE operating mode to be Triggerd
+    ctl_lace_aggr_config_t LaceConfig;              ///< [in,out] Data specific to the mode, caller is interested in
+
+} ctl_lace_config_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get LACE Config
+/// 
+/// @details
+///     - Returns current LACE Config
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pLaceConfig`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_LACE_INVALID_DATA_ARGUMENT_PASSED - "Lace Incorrrect AggressivePercent data or LuxVsAggressive Map data passed by user"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetLACEConfig(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
+    ctl_lace_config_t* pLaceConfig                  ///< [out]Lace configuration
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Sets LACE Config
+/// 
+/// @details
+///     - Sets LACE Config
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pLaceConfig`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_LACE_INVALID_DATA_ARGUMENT_PASSED - "Lace Incorrrect AggressivePercent data or LuxVsAggressive Map data passed by user"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlSetLACEConfig(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in]Handle to display output
+    ctl_lace_config_t* pLaceConfig                  ///< [in]Lace configuration
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Software PSR status/Set Software PSR settings
+typedef struct _ctl_sw_psr_settings_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    bool Set;                                       ///< [in][release] Set to False to Get Software PSR status. Set to True to
+                                                    ///< Enable/Disable Software PSR
+    bool Supported;                                 ///< [out] When Get is True, returns if SW PSR is supported
+    bool Enable;                                    ///< [in,out] When Get is True, returns current state of  Software PSR.
+                                                    ///< When Get is False, Enables/Diasbles Software PSR
+
+} ctl_sw_psr_settings_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Software PSR caps/Set software PSR State
+/// 
+/// @details
+///     - Returns Software PSR status or Sets Software PSR capabilities. This is
+///       a reserved capability. By default, software PSR is not supported/will
+///       not be enabled, need application to activate it, please contact Intel
+///       for activation.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pSoftwarePsrSetting`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlSoftwarePSR(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_sw_psr_settings_t* pSoftwarePsrSetting      ///< [in,out][release] Get Software PSR caps/state or Set Software PSR
+                                                    ///< state
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intel Arc Sync Monitor Params
+typedef struct _ctl_intel_arc_sync_monitor_params_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    bool IsIntelArcSyncSupported;                   ///< [out] Intel Arc Sync support for the monitor
+    float MinimumRefreshRateInHz;                   ///< [out] Minimum Intel Arc Sync refresh rate supported by the monitor
+    float MaximumRefreshRateInHz;                   ///< [out] Maximum Intel Arc Sync refresh rate supported by the monitor
+    uint32_t MaxFrameTimeIncreaseInUs;              ///< [out] Max frame time increase in micro seconds from DID2.1 Adaptive
+                                                    ///< Sync block
+    uint32_t MaxFrameTimeDecreaseInUs;              ///< [out] Max frame time decrease in micro seconds from DID2.1 Adaptive
+                                                    ///< Sync block
+
+} ctl_intel_arc_sync_monitor_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Intel Arc Sync information for monitor
+/// 
+/// @details
+///     - Returns Intel Arc Sync information for selected monitor
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pIntelArcSyncMonitorParams`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetIntelArcSyncInfoForMonitor(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_intel_arc_sync_monitor_params_t* pIntelArcSyncMonitorParams ///< [in,out][release] Intel Arc Sync params for monitor
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Handle of a MUX output instance
+typedef struct _ctl_mux_output_handle_t *ctl_mux_output_handle_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enumerate Display MUX Devices on this system across adapters
+/// 
+/// @details
+///     - The application enumerates all MUX devices in the system
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hAPIHandle`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pCount`
+///         + `nullptr == phMuxDevices`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlEnumerateMuxDevices(
+    ctl_api_handle_t hAPIHandle,                    ///< [in][release] Applications should pass the Control API handle returned
+                                                    ///< by the CtlInit function 
+    uint32_t* pCount,                               ///< [in,out][release] pointer to the number of MUX device instances. If
+                                                    ///< input count is zero, then the api will update the value with the total
+                                                    ///< number of MUX devices available and return the Count value. If input
+                                                    ///< count is non-zero, then the api will only retrieve the number of MUX Devices.
+                                                    ///< If count is larger than the number of MUX devices available, then the
+                                                    ///< api will update the value with the correct number of MUX devices available.
+    ctl_mux_output_handle_t* phMuxDevices           ///< [out][range(0, *pCount)] array of MUX device instance handles
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Display MUX device properties
+typedef struct _ctl_mux_properties_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    uint8_t MuxId;                                  ///< [out] MUX ID of this MUX device enumerated
+    uint32_t Count;                                 ///< [in,out] Pointer to the number of display output instances this MUX
+                                                    ///< object can drive. If count is zero, then the api will update the value
+                                                    ///< with the total
+                                                    ///< number of outputs available. If count is non-zero, then the api will
+                                                    ///< only retrieve the number of outputs.
+                                                    ///< If count is larger than the number of display outputs MUX can drive,
+                                                    ///< then the api will update the value with the correct number of display
+                                                    ///< outputs MUX can driver.
+    ctl_display_output_handle_t* phDisplayOutputs;  ///< [in,out][range(0, *pCount)] Array of display output instance handles
+                                                    ///< this MUX device can drive
+    uint8_t IndexOfDisplayOutputOwningMux;          ///< [out] [range(0, (Count-1))] This is the index into the
+                                                    ///< phDisplayOutputs list to the display output which currently owns the
+                                                    ///< MUX output. This doesn't mean display is active
+
+} ctl_mux_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Display Mux properties
+/// 
+/// @details
+///     - Get the propeties of the Mux device
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hMuxDevice`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pMuxProperties`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetMuxProperties(
+    ctl_mux_output_handle_t hMuxDevice,             ///< [in] MUX device instance handle
+    ctl_mux_properties_t* pMuxProperties            ///< [in,out] MUX device properties
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Switch Mux output
+/// 
+/// @details
+///     - Switches the MUX output
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hMuxDevice`
+///         + `nullptr == hInactiveDisplayOutput`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlSwitchMux(
+    ctl_mux_output_handle_t hMuxDevice,             ///< [in] MUX device instance handle
+    ctl_display_output_handle_t hInactiveDisplayOutput  ///< [out] Input selection for this MUX, which if active will drive the
+                                                    ///< output of this MUX device. This should be one of the display output
+                                                    ///< handles reported under this MUX device's properties.
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intel Arc Sync profile
+typedef enum _ctl_intel_arc_sync_profile_t
+{
+    CTL_INTEL_ARC_SYNC_PROFILE_INVALID = 0,         ///< Invalid profile
+    CTL_INTEL_ARC_SYNC_PROFILE_RECOMMENDED = 1,     ///< Default. Selects appropriate profile based on the monitor. COMPATIBLE
+                                                    ///< profile is applied if profile is not available for the monitor
+    CTL_INTEL_ARC_SYNC_PROFILE_EXCELLENT = 2,       ///< Unconstrained. Full VRR range of the monitor can be used
+    CTL_INTEL_ARC_SYNC_PROFILE_GOOD = 3,            ///< Some minor range constraints, unlikely to effect user experience but
+                                                    ///< can reduce flicker on some monitors
+    CTL_INTEL_ARC_SYNC_PROFILE_COMPATIBLE = 4,      ///< Significant constraints that will reduce flicker considerably but are
+                                                    ///< likely to cause some level of judder onscreen especially when refresh
+                                                    ///< rates are changing rapidly
+    CTL_INTEL_ARC_SYNC_PROFILE_OFF = 5,             ///< Disable Intel Arc Sync on this monitor. This disables variable rate
+                                                    ///< flips on this monitor. All sync flips will occur at the OS requested
+                                                    ///< refresh rate
+    CTL_INTEL_ARC_SYNC_PROFILE_VESA = 6,            ///< Applies vesa specified constraints if the monitor has provided them,
+                                                    ///< COMPATIBLE profile if not
+    CTL_INTEL_ARC_SYNC_PROFILE_CUSTOM = 7,          ///< Unlocks controls to set a custom Intel Arc Sync profile
+    CTL_INTEL_ARC_SYNC_PROFILE_MAX
+
+} ctl_intel_arc_sync_profile_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Intel Arc Sync Profile Params
+typedef struct _ctl_intel_arc_sync_profile_params_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    ctl_intel_arc_sync_profile_t IntelArcSyncProfile;   ///< [in,out] Intel Arc Sync profile used by driver. Refer
+                                                    ///< ::ctl_intel_arc_sync_profile_t
+    float MaxRefreshRateInHz;                       ///< [in,out] Maximum refresh rate utilized by the driver
+    float MinRefreshRateInHz;                       ///< [in,out] Minimum refresh rate utilized by the driver
+    uint32_t MaxFrameTimeIncreaseInUs;              ///< [in,out] Maximum frame time increase (in micro seconds) imposed by the
+                                                    ///< driver
+    uint32_t MaxFrameTimeDecreaseInUs;              ///< [in,out] Maximum frame time decrease (in micro seconds) imposed by the
+                                                    ///< driver
+
+} ctl_intel_arc_sync_profile_params_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Intel Arc Sync profile
+/// 
+/// @details
+///     - Returns Intel Arc Sync profile for selected monitor
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pIntelArcSyncProfileParams`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetIntelArcSyncProfile(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_intel_arc_sync_profile_params_t* pIntelArcSyncProfileParams ///< [in,out][release] Intel Arc Sync params for monitor
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set Intel Arc Sync profile
+/// 
+/// @details
+///     - Sets Intel Arc Sync profile for selected monitor. In a mux situation,
+///       this API should be called for all display IDs associated with a
+///       physical display.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pIntelArcSyncProfileParams`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlSetIntelArcSyncProfile(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_intel_arc_sync_profile_params_t* pIntelArcSyncProfileParams ///< [in][release] Intel Arc Sync params for monitor
     );
 
 
@@ -2898,12 +3425,12 @@ typedef struct _ctl_engine_stats_t
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pCount`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlEnumEngineGroups(
@@ -2929,12 +3456,12 @@ ctlEnumEngineGroups(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hEngine`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlEngineGetProperties(
@@ -2950,12 +3477,12 @@ ctlEngineGetProperties(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hEngine`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pStats`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlEngineGetActivity(
@@ -3078,12 +3605,12 @@ typedef struct _ctl_fan_config_t
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pCount`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlEnumFans(
@@ -3109,12 +3636,12 @@ ctlEnumFans(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFan`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlFanGetProperties(
@@ -3131,12 +3658,12 @@ ctlFanGetProperties(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFan`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pConfig`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlFanGetConfig(
@@ -3153,10 +3680,10 @@ ctlFanGetConfig(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFan`
 ///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 ///         + User does not have permissions to make these modifications.
@@ -3174,12 +3701,12 @@ ctlFanSetDefaultMode(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFan`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == speed`
 ///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 ///         + User does not have permissions to make these modifications.
@@ -3200,12 +3727,12 @@ ctlFanSetFixedSpeedMode(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFan`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == speedTable`
 ///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 ///         + User does not have permissions to make these modifications.
@@ -3227,14 +3754,14 @@ ctlFanSetSpeedTableMode(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFan`
-///     - ::CTL_RESULT_ERROR_INVALID_ENUMERATION
+///     - CTL_RESULT_ERROR_INVALID_ENUMERATION
 ///         + `::CTL_FAN_SPEED_UNITS_PERCENT < units`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pSpeed`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_FEATURE
 ///         + The requested fan speed units are not supported. See ::ctl_fan_properties_t.supportedUnits.
@@ -3373,12 +3900,12 @@ typedef struct _ctl_freq_throttle_time_t
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pCount`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlEnumFrequencyDomains(
@@ -3404,12 +3931,12 @@ ctlEnumFrequencyDomains(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFrequency`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlFrequencyGetProperties(
@@ -3428,12 +3955,12 @@ ctlFrequencyGetProperties(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFrequency`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pCount`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlFrequencyGetAvailableClocks(
@@ -3457,12 +3984,12 @@ ctlFrequencyGetAvailableClocks(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFrequency`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pLimits`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlFrequencyGetRange(
@@ -3479,12 +4006,12 @@ ctlFrequencyGetRange(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFrequency`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pLimits`
 ///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 ///         + User does not have permissions to make these modifications.
@@ -3504,12 +4031,12 @@ ctlFrequencySetRange(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFrequency`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pState`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlFrequencyGetState(
@@ -3525,12 +4052,12 @@ ctlFrequencyGetState(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hFrequency`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pThrottleTime`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlFrequencyGetThrottleTime(
@@ -3620,7 +4147,9 @@ typedef struct _ctl_video_processing_super_resolution_t
                                                     ///< resolution will be allowed to enabled.
     uint32_t super_resolution_max_in_height;        ///< [in,out] The maximum input height limiation value setting which super
                                                     ///< resolution will be allowed to enabled.
-    uint32_t ReservedFields[16];                    ///< [out] Reserved field of 64 bytes
+    bool super_resolution_reboot_reset;             ///< [in,out] Resetting of super resolution after rebooting.
+    uint32_t ReservedFields[15];                    ///< [out] Reserved field of 60 bytes
+    char ReservedBytes[3];                          ///< [out] Reserved field of 3 bytes
 
 } ctl_video_processing_super_resolution_t;
 
@@ -3830,12 +4359,12 @@ typedef struct _ctl_video_processing_feature_getset_t
 ///     - The application gets Video Processing properties
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pFeatureCaps`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -3851,12 +4380,12 @@ ctlGetSupportedVideoProcessingCapabilities(
 ///     - Video Processing feature details
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pFeature`
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
@@ -3971,12 +4500,12 @@ typedef struct _ctl_mem_bandwidth_t
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pCount`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlEnumMemoryModules(
@@ -4002,12 +4531,12 @@ ctlEnumMemoryModules(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hMemory`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlMemoryGetProperties(
@@ -4023,12 +4552,12 @@ ctlMemoryGetProperties(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hMemory`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pState`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlMemoryGetState(
@@ -4044,12 +4573,12 @@ ctlMemoryGetState(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hMemory`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pBandwidth`
 ///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 ///         + User does not have permissions to query this telemetry.
@@ -4141,6 +4670,17 @@ typedef struct _ctl_oc_properties_t
     ctl_oc_control_info_t temperatureLimit;         ///< [out] related to function ::ctlOverclockTemperatureLimitSet
 
 } ctl_oc_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Overclock Voltage Frequency Pair
+typedef struct _ctl_oc_vf_pair_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    double Voltage;                                 ///< [in,out] Voltage component of the pair in Volts.
+    double Frequency;                               ///< [in,out] Frequency component of the pair in Frequency.
+
+} ctl_oc_vf_pair_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef CTL_PSU_COUNT
@@ -4275,12 +4815,12 @@ typedef struct _ctl_power_telemetry_t
 /// @brief Get overclock properties - available properties.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pOcProperties`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockGetProperties(
@@ -4305,10 +4845,10 @@ ctlOverclockGetProperties(
 ///       this function on future executions without issuing the popup.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockWaiverSet(
@@ -4327,12 +4867,12 @@ ctlOverclockWaiverSet(
 ///       another application that has changed the value.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pOcFrequencyOffset`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockGpuFrequencyOffsetGet(
@@ -4370,10 +4910,10 @@ ctlOverclockGpuFrequencyOffsetGet(
 ///       user that the settings are not being applied.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockGpuFrequencyOffsetSet(
@@ -4393,12 +4933,12 @@ ctlOverclockGpuFrequencyOffsetSet(
 ///       application that has changed the value.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pOcVoltageOffset`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockGpuVoltageOffsetGet(
@@ -4424,10 +4964,10 @@ ctlOverclockGpuVoltageOffsetGet(
 ///       good cooling solution.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockGpuVoltageOffsetSet(
@@ -4447,19 +4987,17 @@ ctlOverclockGpuVoltageOffsetSet(
 ///       settings if power/thermal limits are exceeded.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
-///         + `nullptr == pVoltage`
-///         + `nullptr == pFrequency`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pVfPair`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockGpuLockGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
-    double* pVoltage,                               ///< [in,out] The current locked voltage in mV.
-    double* pFrequency                              ///< [in,out] The current fixed frequency MHz.
+    ctl_oc_vf_pair_t* pVfPair                       ///< [out] The current locked voltage and frequency.
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4480,16 +5018,15 @@ ctlOverclockGpuLockGet(
 ///       offset or voltage offset settings reapplied.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockGpuLockSet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
-    double voltage,                                 ///< [in] The voltage to be locked in mV.
-    double frequency                                ///< [in] The frequency to be fixed in MHz.
+    ctl_oc_vf_pair_t vFPair                         ///< [in] The current locked voltage and frequency.
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4500,12 +5037,12 @@ ctlOverclockGpuLockSet(
 ///       offset in units of GT/s.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pOcFrequencyOffset`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockVramFrequencyOffsetGet(
@@ -4558,10 +5095,10 @@ ctlOverclockVramFrequencyOffsetGet(
 ///       required.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockVramFrequencyOffsetSet(
@@ -4612,12 +5149,12 @@ ctlOverclockVramFrequencyOffsetSet(
 ///       required.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pVoltage`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockVramVoltageOffsetGet(
@@ -4637,10 +5174,10 @@ ctlOverclockVramVoltageOffsetGet(
 ///       limits.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockVramVoltageOffsetSet(
@@ -4658,12 +5195,12 @@ ctlOverclockVramVoltageOffsetSet(
 ///       run as high as possible until other limits are hit.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pSustainedPowerLimit`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockPowerLimitGet(
@@ -4683,10 +5220,10 @@ ctlOverclockPowerLimitGet(
 ///       limits.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockPowerLimitSet(
@@ -4701,12 +5238,12 @@ ctlOverclockPowerLimitSet(
 ///     - The purpose of this function is to read the current thermal limit.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pTemperatureLimit`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockTemperatureLimitGet(
@@ -4723,10 +5260,10 @@ ctlOverclockTemperatureLimitGet(
 ///       throttled.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlOverclockTemperatureLimitSet(
@@ -4742,12 +5279,12 @@ ctlOverclockTemperatureLimitSet(
 ///       information.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDeviceHandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pTelemetryInfo`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlPowerTelemetryGet(
@@ -4823,12 +5360,12 @@ typedef struct _ctl_pci_state_t
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlPciGetProperties(
@@ -4844,12 +5381,12 @@ ctlPciGetProperties(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pState`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlPciGetState(
@@ -4992,12 +5529,12 @@ typedef struct _ctl_energy_threshold_t
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pCount`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlEnumPowerDomains(
@@ -5023,12 +5560,12 @@ ctlEnumPowerDomains(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hPower`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlPowerGetProperties(
@@ -5044,12 +5581,12 @@ ctlPowerGetProperties(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hPower`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pEnergy`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlPowerGetEnergyCounter(
@@ -5066,10 +5603,10 @@ ctlPowerGetEnergyCounter(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hPower`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlPowerGetLimits(
@@ -5085,10 +5622,10 @@ ctlPowerGetLimits(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hPower`
 ///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 ///         + User does not have permissions to make these modifications.
@@ -5142,12 +5679,12 @@ typedef struct _ctl_temp_properties_t
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hDAhandle`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pCount`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlEnumTemperatureSensors(
@@ -5173,12 +5710,12 @@ ctlEnumTemperatureSensors(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hTemperature`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pProperties`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlTemperatureGetProperties(
@@ -5194,12 +5731,12 @@ ctlTemperatureGetProperties(
 ///     - The implementation of this function should be lock-free.
 /// 
 /// @returns
-///     - ::CTL_RESULT_SUCCESS
-///     - ::CTL_RESULT_ERROR_UNINITIALIZED
-///     - ::CTL_RESULT_ERROR_DEVICE_LOST
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `nullptr == hTemperature`
-///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 ///         + `nullptr == pTemperature`
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlTemperatureGetState(
@@ -5226,6 +5763,13 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnInit_t)(
 /// @brief Function-pointer for ctlClose 
 typedef ctl_result_t (CTL_APICALL *ctl_pfnClose_t)(
     ctl_api_handle_t
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlSetRuntimePath 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnSetRuntimePath_t)(
+    ctl_runtime_path_args_t*
     );
 
 
@@ -5445,6 +5989,79 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnGetCurrentScaling_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnSetCurrentScaling_t)(
     ctl_display_output_handle_t,
     ctl_scaling_settings_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetLACEConfig 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetLACEConfig_t)(
+    ctl_display_output_handle_t,
+    ctl_lace_config_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlSetLACEConfig 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnSetLACEConfig_t)(
+    ctl_display_output_handle_t,
+    ctl_lace_config_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlSoftwarePSR 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnSoftwarePSR_t)(
+    ctl_display_output_handle_t,
+    ctl_sw_psr_settings_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetIntelArcSyncInfoForMonitor 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetIntelArcSyncInfoForMonitor_t)(
+    ctl_display_output_handle_t,
+    ctl_intel_arc_sync_monitor_params_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlEnumerateMuxDevices 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnEnumerateMuxDevices_t)(
+    ctl_api_handle_t,
+    uint32_t*,
+    ctl_mux_output_handle_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetMuxProperties 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetMuxProperties_t)(
+    ctl_mux_output_handle_t,
+    ctl_mux_properties_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlSwitchMux 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnSwitchMux_t)(
+    ctl_mux_output_handle_t,
+    ctl_display_output_handle_t
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetIntelArcSyncProfile 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetIntelArcSyncProfile_t)(
+    ctl_display_output_handle_t,
+    ctl_intel_arc_sync_profile_params_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlSetIntelArcSyncProfile 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnSetIntelArcSyncProfile_t)(
+    ctl_display_output_handle_t,
+    ctl_intel_arc_sync_profile_params_t*
     );
 
 
@@ -5688,8 +6305,7 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnOverclockGpuVoltageOffsetSet_t)(
 /// @brief Function-pointer for ctlOverclockGpuLockGet 
 typedef ctl_result_t (CTL_APICALL *ctl_pfnOverclockGpuLockGet_t)(
     ctl_device_adapter_handle_t,
-    double*,
-    double*
+    ctl_oc_vf_pair_t*
     );
 
 
@@ -5697,8 +6313,7 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnOverclockGpuLockGet_t)(
 /// @brief Function-pointer for ctlOverclockGpuLockSet 
 typedef ctl_result_t (CTL_APICALL *ctl_pfnOverclockGpuLockSet_t)(
     ctl_device_adapter_handle_t,
-    double,
-    double
+    ctl_oc_vf_pair_t
     );
 
 

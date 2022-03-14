@@ -1,12 +1,14 @@
 //===========================================================================
-// MIT license
-// Copyright (C) 2021 Intel Corporation
-// SPDX-License-Identifier: MIT
+//Copyright (C) 2021 Intel Corporation
+//
+// 
+//
+//SPDX-License-Identifier: MIT
 //--------------------------------------------------------------------------
 
 /**
  *
- * @file cApiWrapper.cpp
+ * @file ctl_api.cpp
  * @version v0-r9
  *
  */
@@ -18,7 +20,7 @@
 #include <windows.h>
 #include <strsafe.h>
 
-#define CTL_APIEXPORT
+//#define CTL_APIEXPORT
 
 #include "igcl_api.h"
 
@@ -27,6 +29,7 @@
 // Implementation of wrapper functions
 //
 static HINSTANCE hinstLib = NULL;
+static ctl_runtime_path_args_t* pRuntimeArgs = NULL;
 
 /**
  * @brief Function to get DLL name based on app version
@@ -37,23 +40,33 @@ static HINSTANCE hinstLib = NULL;
 #else
     #define CTL_DLL_NAME L"ControlLib32"
 #endif
+#define CTL_DLL_PATH_LEN 512
+
 ctl_result_t GetControlAPIDLLPath(ctl_init_args_t* pInitArgs, wchar_t* pwcDLLPath)
 {
-    // Load the requested DLL based on major version in init args
-    uint16_t majorVersion = CTL_MAJOR_VERSION(pInitArgs->AppVersion);
+    if ((NULL == pRuntimeArgs) || (NULL == pRuntimeArgs->pRuntimePath))
+    {
+        // Load the requested DLL based on major version in init args
+        uint16_t majorVersion = CTL_MAJOR_VERSION(pInitArgs->AppVersion);
 
-    // If caller's major version is higher than the DLL's, then simply not support the caller!
-    // This is not supposed to happen as wrapper is part of the app itself which includes igcl_api.h with right major version
-    if (majorVersion > CTL_IMPL_MAJOR_VERSION)
-        return CTL_RESULT_ERROR_UNSUPPORTED_VERSION;
+        // If caller's major version is higher than the DLL's, then simply not support the caller!
+        // This is not supposed to happen as wrapper is part of the app itself which includes igcl_api.h with right major version
+        if (majorVersion > CTL_IMPL_MAJOR_VERSION)
+            return CTL_RESULT_ERROR_UNSUPPORTED_VERSION;
 
-    if (majorVersion > 1)
-        StringCbPrintfW(pwcDLLPath,512,L"%s%d.dll", CTL_DLL_NAME, majorVersion);
-    else // just control_api.dll
-        StringCbPrintfW(pwcDLLPath,512,L"%s.dll", CTL_DLL_NAME);
-
+        if (majorVersion > 1)
+            StringCbPrintfW(pwcDLLPath,CTL_DLL_PATH_LEN,L"%s%d.dll", CTL_DLL_NAME, majorVersion);
+        else // just control_api.dll
+            StringCbPrintfW(pwcDLLPath,CTL_DLL_PATH_LEN,L"%s.dll", CTL_DLL_NAME);
+    }
+    else if (pRuntimeArgs->pRuntimePath)
+    {
+        // caller specified a specific RT, use it instead
+        wcsncpy_s(pwcDLLPath, CTL_DLL_PATH_LEN, pRuntimeArgs->pRuntimePath, CTL_DLL_PATH_LEN - 1);
+    }
     return CTL_RESULT_SUCCESS;
 }
+
 
 /**
 * @brief Control Api Init
@@ -62,10 +75,10 @@ ctl_result_t GetControlAPIDLLPath(ctl_init_args_t* pInitArgs, wchar_t* pwcDLLPat
 *     - Control Api Init
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pInitDesc`
 *         + `nullptr == phAPIHandle`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
@@ -81,7 +94,7 @@ ctlInit(
     // special code - only for ctlInit()
     if (NULL == hinstLib)
     {
-        wchar_t strDLLPath[512];
+        wchar_t strDLLPath[CTL_DLL_PATH_LEN];
         result = GetControlAPIDLLPath(pInitDesc, strDLLPath);
         if (result == CTL_RESULT_SUCCESS)
         {
@@ -94,6 +107,10 @@ ctlInit(
             {
                 result = CTL_RESULT_ERROR_LOAD;
             }
+            else if (pRuntimeArgs)
+            {
+                ctlSetRuntimePath(pRuntimeArgs);
+            }            
         }    
     }
 
@@ -106,9 +123,9 @@ ctlInit(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Control Api Destroy
@@ -117,10 +134,10 @@ ctlInit(
 *     - Control Api Close
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hAPIHandle`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -143,14 +160,70 @@ ctlClose(
     }
 
     // special code - only for ctlClose()
-    if (NULL != hinstLib)
+	// might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
+	// if its open by another caller do not free the instance handle 
+    if( result == CTL_RESULT_SUCCESS)
     {
-        FreeLibrary(hinstLib);
-        hinstLib = NULL;
+        if (NULL != hinstLib)
+        {
+            FreeLibrary(hinstLib);
+            hinstLib = NULL;            
+        }        
     }
-
+    // set runtime args back to NULL
+    // no need to free this as it's allocated by caller   
+    pRuntimeArgs = NULL;
     return result;
 }
+
+
+/**
+* @brief Runtime path
+* 
+* @details
+*     - Control Api set runtime path. Optional call from a loader which allows
+*       the loaded runtime to enumerate only the adapters which the specified
+*       runtime is responsible for. This is done usually by a loader or by
+*       callers who know how to get the specific runtime of interest. This
+*       call right now is reserved for use by Intel components.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pArgs`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*/
+ctl_result_t CTL_APICALL
+ctlSetRuntimePath(
+    ctl_runtime_path_args_t* pArgs                  ///< [in] Runtime path
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnSetRuntimePath_t pfnSetRuntimePath = (ctl_pfnSetRuntimePath_t)GetProcAddress(hinstLib, "ctlSetRuntimePath");
+        if (pfnSetRuntimePath)
+        {
+            result = pfnSetRuntimePath(pArgs);
+        }
+    }
+
+    // special code - only for ctlSetRuntimePath()
+	// might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
+	// if its open by another caller do not free the instance handle 
+    else if (pArgs->pRuntimePath)
+    {
+        // this is a case where the caller app is interested in loading a RT directly
+        pRuntimeArgs = pArgs;
+        result = CTL_RESULT_SUCCESS;
+    }
+    return result;
+}
+
 
 /**
 * @brief Wait for a property change. Note that this is a blocking call
@@ -159,12 +232,12 @@ ctlClose(
 *     - Wait for a property change in display, 3d, media etc.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceAdapter`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pArgs`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -187,9 +260,9 @@ ctlWaitForPropertyChange(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Reserved function
@@ -198,12 +271,12 @@ ctlWaitForPropertyChange(
 *     - Reserved function
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceAdapter`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pArgs`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -225,9 +298,9 @@ ctlReservedCall(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get 3D capabilities
@@ -236,12 +309,12 @@ ctlReservedCall(
 *     - The application gets 3D properties
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pFeatureCaps`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -263,9 +336,9 @@ ctlGetSupported3DCapabilities(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get/Set 3D feature
@@ -274,12 +347,12 @@ ctlGetSupported3DCapabilities(
 *     - 3D feature details
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pFeature`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -301,9 +374,9 @@ ctlGetSet3DFeature(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Check Driver version
@@ -312,10 +385,10 @@ ctlGetSet3DFeature(
 *     - The application checks driver version
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceAdapter`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -337,23 +410,23 @@ ctlCheckDriverVersion(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Enumerate devices
 * 
 * @details
-*     - The application checks driver version
+*     - The application enumerates all device adapters in the system
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hAPIHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pCount`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -383,9 +456,9 @@ ctlEnumerateDevices(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Enumerate display outputs
@@ -394,12 +467,12 @@ ctlEnumerateDevices(
 *     - Enumerates display output capabilities
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceAdapter`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pCount`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -428,9 +501,9 @@ ctlEnumerateDisplayOutputs(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Device Properties
@@ -439,12 +512,12 @@ ctlEnumerateDisplayOutputs(
 *     - The application gets device properties
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -466,9 +539,9 @@ ctlGetDeviceProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Display  Properties
@@ -477,12 +550,12 @@ ctlGetDeviceProperties(
 *     - The application gets display  properties
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -504,9 +577,9 @@ ctlGetDisplayProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Adapter Display encoder  Properties
@@ -515,12 +588,12 @@ ctlGetDisplayProperties(
 *     - The application gets the graphic adapters display encoder properties
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -542,9 +615,9 @@ ctlGetAdaperDisplayEncoderProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Level0 Device handle
@@ -553,12 +626,12 @@ ctlGetAdaperDisplayEncoderProperties(
 *     - The application gets OneAPI Level0 Device handles
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pZeDevice`
 *         + `nullptr == hInstance`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
@@ -583,9 +656,9 @@ ctlGetZeDevice(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Sharpness capability
@@ -594,12 +667,12 @@ ctlGetZeDevice(
 *     - Returns sharpness capability
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pSharpnessCaps`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -621,9 +694,9 @@ ctlGetSharpnessCaps(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Sharpness setting
@@ -632,12 +705,12 @@ ctlGetSharpnessCaps(
 *     - Returns current sharpness settings
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pSharpnessSettings`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -659,9 +732,9 @@ ctlGetCurrentSharpness(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set Sharpness setting
@@ -670,12 +743,12 @@ ctlGetCurrentSharpness(
 *     - Set current sharpness settings
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pSharpnessSettings`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -697,9 +770,9 @@ ctlSetCurrentSharpness(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief I2C Access
@@ -708,12 +781,12 @@ ctlSetCurrentSharpness(
 *     - The application does I2C aceess
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pI2cAccessArgs`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 *     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
@@ -743,23 +816,24 @@ ctlI2CAccess(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Aux Access
 * 
 * @details
-*     - The application does Aux aceess
+*     - The application does Aux aceess, PSR needs to be disabled for AUX
+*       call.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pAuxAccessArgs`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 *     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
@@ -790,9 +864,9 @@ ctlAUXAccess(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Power optimization features
@@ -801,12 +875,12 @@ ctlAUXAccess(
 *     - Returns power optimization capabilities
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pPowerOptimizationCaps`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -828,9 +902,9 @@ ctlGetPowerOptimizationCaps(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Power optimization setting
@@ -839,12 +913,12 @@ ctlGetPowerOptimizationCaps(
 *     - Returns power optimization setting for a specific feature
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pPowerOptimizationSettings`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 *     - ::CTL_RESULT_ERROR_INVALID_POWERFEATURE_OPTIMIZATION_FLAG - "Unsupported PowerOptimizationFeature"
@@ -868,9 +942,9 @@ ctlGetPowerOptimizationSetting(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set Power optimization setting
@@ -879,12 +953,12 @@ ctlGetPowerOptimizationSetting(
 *     - Set power optimization setting for a specific feature
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pPowerOptimizationSettings`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 *     - ::CTL_RESULT_ERROR_INVALID_POWERFEATURE_OPTIMIZATION_FLAG - "Unsupported PowerOptimizationFeature"
@@ -908,9 +982,9 @@ ctlSetPowerOptimizationSetting(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Pixel transformation get pipe configuration
@@ -919,12 +993,12 @@ ctlSetPowerOptimizationSetting(
 *     - The application does pixel transformation get pipe configuration
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pPixTxGetConfigArgs`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 *     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
@@ -960,9 +1034,9 @@ ctlPixelTransformationGetConfig(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Pixel transformation set pipe configuration
@@ -971,12 +1045,12 @@ ctlPixelTransformationGetConfig(
 *     - The application does pixel transformation set pipe configuration
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pPixTxSetConfigArgs`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 *     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
@@ -1013,9 +1087,9 @@ ctlPixelTransformationSetConfig(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Panel Descriptor Access
@@ -1024,12 +1098,12 @@ ctlPixelTransformationSetConfig(
 *     - The application does EDID or Display ID access
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pPanelDescriptorAccessArgs`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 *     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
@@ -1058,9 +1132,9 @@ ctlPanelDescriptorAccess(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Supported Retro Scaling Types
@@ -1069,12 +1143,12 @@ ctlPanelDescriptorAccess(
 *     - Returns supported retro scaling capabilities
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pRetroScalingCaps`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -1096,9 +1170,9 @@ ctlGetSupportedRetroScalingCapability(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get/Set Retro Scaling
@@ -1108,12 +1182,12 @@ ctlGetSupportedRetroScalingCapability(
 *       modeset resulting in flash on the screen
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pGetSetRetroScalingType`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -1135,9 +1209,9 @@ ctlGetSetRetroScaling(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Supported Scaling Types
@@ -1146,12 +1220,12 @@ ctlGetSetRetroScaling(
 *     - Returns supported scaling capabilities
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pScalingCaps`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -1173,9 +1247,9 @@ ctlGetSupportedScalingCapability(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Current Scaling
@@ -1184,12 +1258,12 @@ ctlGetSupportedScalingCapability(
 *     - Returns current active scaling
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pGetCurrentScalingType`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -1211,9 +1285,9 @@ ctlGetCurrentScaling(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set Scaling Type
@@ -1222,12 +1296,12 @@ ctlGetCurrentScaling(
 *     - Returns current active scaling
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDisplayOutput`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pSetScalingType`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -1249,9 +1323,368 @@ ctlSetCurrentScaling(
         }
     }
 
+    return result;
+}
+
+
+/**
+* @brief Get LACE Config
+* 
+* @details
+*     - Returns current LACE Config
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pLaceConfig`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_LACE_INVALID_DATA_ARGUMENT_PASSED - "Lace Incorrrect AggressivePercent data or LuxVsAggressive Map data passed by user"
+*/
+ctl_result_t CTL_APICALL
+ctlGetLACEConfig(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
+    ctl_lace_config_t* pLaceConfig                  ///< [out]Lace configuration
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetLACEConfig_t pfnGetLACEConfig = (ctl_pfnGetLACEConfig_t)GetProcAddress(hinstLib, "ctlGetLACEConfig");
+        if (pfnGetLACEConfig)
+        {
+            result = pfnGetLACEConfig(hDisplayOutput, pLaceConfig);
+        }
+    }
 
     return result;
 }
+
+
+/**
+* @brief Sets LACE Config
+* 
+* @details
+*     - Sets LACE Config
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pLaceConfig`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_LACE_INVALID_DATA_ARGUMENT_PASSED - "Lace Incorrrect AggressivePercent data or LuxVsAggressive Map data passed by user"
+*/
+ctl_result_t CTL_APICALL
+ctlSetLACEConfig(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in]Handle to display output
+    ctl_lace_config_t* pLaceConfig                  ///< [in]Lace configuration
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnSetLACEConfig_t pfnSetLACEConfig = (ctl_pfnSetLACEConfig_t)GetProcAddress(hinstLib, "ctlSetLACEConfig");
+        if (pfnSetLACEConfig)
+        {
+            result = pfnSetLACEConfig(hDisplayOutput, pLaceConfig);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get Software PSR caps/Set software PSR State
+* 
+* @details
+*     - Returns Software PSR status or Sets Software PSR capabilities. This is
+*       a reserved capability. By default, software PSR is not supported/will
+*       not be enabled, need application to activate it, please contact Intel
+*       for activation.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pSoftwarePsrSetting`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*/
+ctl_result_t CTL_APICALL
+ctlSoftwarePSR(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_sw_psr_settings_t* pSoftwarePsrSetting      ///< [in,out][release] Get Software PSR caps/state or Set Software PSR
+                                                    ///< state
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnSoftwarePSR_t pfnSoftwarePSR = (ctl_pfnSoftwarePSR_t)GetProcAddress(hinstLib, "ctlSoftwarePSR");
+        if (pfnSoftwarePSR)
+        {
+            result = pfnSoftwarePSR(hDisplayOutput, pSoftwarePsrSetting);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get Intel Arc Sync information for monitor
+* 
+* @details
+*     - Returns Intel Arc Sync information for selected monitor
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pIntelArcSyncMonitorParams`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*/
+ctl_result_t CTL_APICALL
+ctlGetIntelArcSyncInfoForMonitor(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_intel_arc_sync_monitor_params_t* pIntelArcSyncMonitorParams ///< [in,out][release] Intel Arc Sync params for monitor
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetIntelArcSyncInfoForMonitor_t pfnGetIntelArcSyncInfoForMonitor = (ctl_pfnGetIntelArcSyncInfoForMonitor_t)GetProcAddress(hinstLib, "ctlGetIntelArcSyncInfoForMonitor");
+        if (pfnGetIntelArcSyncInfoForMonitor)
+        {
+            result = pfnGetIntelArcSyncInfoForMonitor(hDisplayOutput, pIntelArcSyncMonitorParams);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Enumerate Display MUX Devices on this system across adapters
+* 
+* @details
+*     - The application enumerates all MUX devices in the system
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hAPIHandle`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pCount`
+*         + `nullptr == phMuxDevices`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*/
+ctl_result_t CTL_APICALL
+ctlEnumerateMuxDevices(
+    ctl_api_handle_t hAPIHandle,                    ///< [in][release] Applications should pass the Control API handle returned
+                                                    ///< by the CtlInit function 
+    uint32_t* pCount,                               ///< [in,out][release] pointer to the number of MUX device instances. If
+                                                    ///< input count is zero, then the api will update the value with the total
+                                                    ///< number of MUX devices available and return the Count value. If input
+                                                    ///< count is non-zero, then the api will only retrieve the number of MUX Devices.
+                                                    ///< If count is larger than the number of MUX devices available, then the
+                                                    ///< api will update the value with the correct number of MUX devices available.
+    ctl_mux_output_handle_t* phMuxDevices           ///< [out][range(0, *pCount)] array of MUX device instance handles
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnEnumerateMuxDevices_t pfnEnumerateMuxDevices = (ctl_pfnEnumerateMuxDevices_t)GetProcAddress(hinstLib, "ctlEnumerateMuxDevices");
+        if (pfnEnumerateMuxDevices)
+        {
+            result = pfnEnumerateMuxDevices(hAPIHandle, pCount, phMuxDevices);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get Display Mux properties
+* 
+* @details
+*     - Get the propeties of the Mux device
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hMuxDevice`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pMuxProperties`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*/
+ctl_result_t CTL_APICALL
+ctlGetMuxProperties(
+    ctl_mux_output_handle_t hMuxDevice,             ///< [in] MUX device instance handle
+    ctl_mux_properties_t* pMuxProperties            ///< [in,out] MUX device properties
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetMuxProperties_t pfnGetMuxProperties = (ctl_pfnGetMuxProperties_t)GetProcAddress(hinstLib, "ctlGetMuxProperties");
+        if (pfnGetMuxProperties)
+        {
+            result = pfnGetMuxProperties(hMuxDevice, pMuxProperties);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Switch Mux output
+* 
+* @details
+*     - Switches the MUX output
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hMuxDevice`
+*         + `nullptr == hInactiveDisplayOutput`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*/
+ctl_result_t CTL_APICALL
+ctlSwitchMux(
+    ctl_mux_output_handle_t hMuxDevice,             ///< [in] MUX device instance handle
+    ctl_display_output_handle_t hInactiveDisplayOutput  ///< [out] Input selection for this MUX, which if active will drive the
+                                                    ///< output of this MUX device. This should be one of the display output
+                                                    ///< handles reported under this MUX device's properties.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnSwitchMux_t pfnSwitchMux = (ctl_pfnSwitchMux_t)GetProcAddress(hinstLib, "ctlSwitchMux");
+        if (pfnSwitchMux)
+        {
+            result = pfnSwitchMux(hMuxDevice, hInactiveDisplayOutput);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get Intel Arc Sync profile
+* 
+* @details
+*     - Returns Intel Arc Sync profile for selected monitor
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pIntelArcSyncProfileParams`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*/
+ctl_result_t CTL_APICALL
+ctlGetIntelArcSyncProfile(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_intel_arc_sync_profile_params_t* pIntelArcSyncProfileParams ///< [in,out][release] Intel Arc Sync params for monitor
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetIntelArcSyncProfile_t pfnGetIntelArcSyncProfile = (ctl_pfnGetIntelArcSyncProfile_t)GetProcAddress(hinstLib, "ctlGetIntelArcSyncProfile");
+        if (pfnGetIntelArcSyncProfile)
+        {
+            result = pfnGetIntelArcSyncProfile(hDisplayOutput, pIntelArcSyncProfileParams);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Set Intel Arc Sync profile
+* 
+* @details
+*     - Sets Intel Arc Sync profile for selected monitor. In a mux situation,
+*       this API should be called for all display IDs associated with a
+*       physical display.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pIntelArcSyncProfileParams`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*/
+ctl_result_t CTL_APICALL
+ctlSetIntelArcSyncProfile(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_intel_arc_sync_profile_params_t* pIntelArcSyncProfileParams ///< [in][release] Intel Arc Sync params for monitor
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnSetIntelArcSyncProfile_t pfnSetIntelArcSyncProfile = (ctl_pfnSetIntelArcSyncProfile_t)GetProcAddress(hinstLib, "ctlSetIntelArcSyncProfile");
+        if (pfnSetIntelArcSyncProfile)
+        {
+            result = pfnSetIntelArcSyncProfile(hDisplayOutput, pIntelArcSyncProfileParams);
+        }
+    }
+
+    return result;
+}
+
 
 /**
 * @brief Get handle of engine groups
@@ -1261,12 +1694,12 @@ ctlSetCurrentScaling(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pCount`
 */
 ctl_result_t CTL_APICALL
@@ -1297,9 +1730,9 @@ ctlEnumEngineGroups(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get engine group properties
@@ -1309,12 +1742,12 @@ ctlEnumEngineGroups(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hEngine`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 */
 ctl_result_t CTL_APICALL
@@ -1335,9 +1768,9 @@ ctlEngineGetProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get the activity stats for an engine group
@@ -1347,12 +1780,12 @@ ctlEngineGetProperties(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hEngine`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pStats`
 */
 ctl_result_t CTL_APICALL
@@ -1374,9 +1807,9 @@ ctlEngineGetActivity(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get handle of fans
@@ -1386,12 +1819,12 @@ ctlEngineGetActivity(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pCount`
 */
 ctl_result_t CTL_APICALL
@@ -1422,9 +1855,9 @@ ctlEnumFans(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get fan properties
@@ -1434,12 +1867,12 @@ ctlEnumFans(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFan`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 */
 ctl_result_t CTL_APICALL
@@ -1460,9 +1893,9 @@ ctlFanGetProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get fan configurations and the current fan speed mode (default, fixed,
@@ -1473,12 +1906,12 @@ ctlFanGetProperties(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFan`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pConfig`
 */
 ctl_result_t CTL_APICALL
@@ -1499,9 +1932,9 @@ ctlFanGetConfig(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Configure the fan to run with hardware factory settings (set mode to
@@ -1512,10 +1945,10 @@ ctlFanGetConfig(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFan`
 *     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 *         + User does not have permissions to make these modifications.
@@ -1537,9 +1970,9 @@ ctlFanSetDefaultMode(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Configure the fan to rotate at a fixed speed (set mode to
@@ -1550,12 +1983,12 @@ ctlFanSetDefaultMode(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFan`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == speed`
 *     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 *         + User does not have permissions to make these modifications.
@@ -1580,9 +2013,9 @@ ctlFanSetFixedSpeedMode(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Configure the fan to adjust speed based on a temperature/speed table
@@ -1593,12 +2026,12 @@ ctlFanSetFixedSpeedMode(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFan`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == speedTable`
 *     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 *         + User does not have permissions to make these modifications.
@@ -1625,9 +2058,9 @@ ctlFanSetSpeedTableMode(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get current state of a fan - current mode and speed
@@ -1637,14 +2070,14 @@ ctlFanSetSpeedTableMode(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFan`
-*     - ::CTL_RESULT_ERROR_INVALID_ENUMERATION
+*     - CTL_RESULT_ERROR_INVALID_ENUMERATION
 *         + `::CTL_FAN_SPEED_UNITS_PERCENT < units`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pSpeed`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_FEATURE
 *         + The requested fan speed units are not supported. See ::ctl_fan_properties_t.supportedUnits.
@@ -1670,9 +2103,9 @@ ctlFanGetState(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get handle of frequency domains
@@ -1682,12 +2115,12 @@ ctlFanGetState(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pCount`
 */
 ctl_result_t CTL_APICALL
@@ -1718,9 +2151,9 @@ ctlEnumFrequencyDomains(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get frequency properties - available frequencies
@@ -1730,12 +2163,12 @@ ctlEnumFrequencyDomains(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFrequency`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 */
 ctl_result_t CTL_APICALL
@@ -1756,9 +2189,9 @@ ctlFrequencyGetProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get available non-overclocked hardware clock frequencies for the
@@ -1771,12 +2204,12 @@ ctlFrequencyGetProperties(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFrequency`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pCount`
 */
 ctl_result_t CTL_APICALL
@@ -1805,9 +2238,9 @@ ctlFrequencyGetAvailableClocks(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get current frequency limits
@@ -1817,12 +2250,12 @@ ctlFrequencyGetAvailableClocks(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFrequency`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pLimits`
 */
 ctl_result_t CTL_APICALL
@@ -1844,9 +2277,9 @@ ctlFrequencyGetRange(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set frequency range between which the hardware can operate.
@@ -1856,12 +2289,12 @@ ctlFrequencyGetRange(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFrequency`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pLimits`
 *     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 *         + User does not have permissions to make these modifications.
@@ -1885,9 +2318,9 @@ ctlFrequencySetRange(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get current frequency state - frequency request, actual frequency, TDP
@@ -1898,12 +2331,12 @@ ctlFrequencySetRange(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFrequency`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pState`
 */
 ctl_result_t CTL_APICALL
@@ -1924,9 +2357,9 @@ ctlFrequencyGetState(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get frequency throttle time
@@ -1936,12 +2369,12 @@ ctlFrequencyGetState(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hFrequency`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pThrottleTime`
 */
 ctl_result_t CTL_APICALL
@@ -1963,9 +2396,9 @@ ctlFrequencyGetThrottleTime(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Video Processing capabilities
@@ -1974,12 +2407,12 @@ ctlFrequencyGetThrottleTime(
 *     - The application gets Video Processing properties
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pFeatureCaps`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -2001,9 +2434,9 @@ ctlGetSupportedVideoProcessingCapabilities(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get/Set Video Processing feature details
@@ -2012,12 +2445,12 @@ ctlGetSupportedVideoProcessingCapabilities(
 *     - Video Processing feature details
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pFeature`
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 */
@@ -2039,9 +2472,9 @@ ctlGetSetVideoProcessingFeature(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get handle of memory modules
@@ -2051,12 +2484,12 @@ ctlGetSetVideoProcessingFeature(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pCount`
 */
 ctl_result_t CTL_APICALL
@@ -2087,9 +2520,9 @@ ctlEnumMemoryModules(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get memory properties
@@ -2099,12 +2532,12 @@ ctlEnumMemoryModules(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hMemory`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 */
 ctl_result_t CTL_APICALL
@@ -2125,9 +2558,9 @@ ctlMemoryGetProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get memory state - health, allocated
@@ -2137,12 +2570,12 @@ ctlMemoryGetProperties(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hMemory`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pState`
 */
 ctl_result_t CTL_APICALL
@@ -2163,9 +2596,9 @@ ctlMemoryGetState(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get memory bandwidth
@@ -2175,12 +2608,12 @@ ctlMemoryGetState(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hMemory`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pBandwidth`
 *     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 *         + User does not have permissions to query this telemetry.
@@ -2204,20 +2637,20 @@ ctlMemoryGetBandwidth(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get overclock properties - available properties.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pOcProperties`
 */
 ctl_result_t CTL_APICALL
@@ -2238,9 +2671,9 @@ ctlOverclockGetProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Overclock Waiver - Warranty Waiver.
@@ -2259,10 +2692,10 @@ ctlOverclockGetProperties(
 *       this function on future executions without issuing the popup.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
 */
 ctl_result_t CTL_APICALL
@@ -2282,9 +2715,9 @@ ctlOverclockWaiverSet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get the Overclock Frequency Offset for the GPU in MHz.
@@ -2298,12 +2731,12 @@ ctlOverclockWaiverSet(
 *       another application that has changed the value.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pOcFrequencyOffset`
 */
 ctl_result_t CTL_APICALL
@@ -2324,9 +2757,9 @@ ctlOverclockGpuFrequencyOffsetGet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set the Overclock Frequency Offset for the GPU in MHZ.
@@ -2358,10 +2791,10 @@ ctlOverclockGpuFrequencyOffsetGet(
 *       user that the settings are not being applied.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
 */
 ctl_result_t CTL_APICALL
@@ -2382,9 +2815,9 @@ ctlOverclockGpuFrequencyOffsetSet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get the Overclock Gpu Voltage Offset in mV.
@@ -2398,12 +2831,12 @@ ctlOverclockGpuFrequencyOffsetSet(
 *       application that has changed the value.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pOcVoltageOffset`
 */
 ctl_result_t CTL_APICALL
@@ -2424,9 +2857,9 @@ ctlOverclockGpuVoltageOffsetGet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set the Overclock Gpu Voltage Offset in mV.
@@ -2446,10 +2879,10 @@ ctlOverclockGpuVoltageOffsetGet(
 *       good cooling solution.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
 */
 ctl_result_t CTL_APICALL
@@ -2470,9 +2903,9 @@ ctlOverclockGpuVoltageOffsetSet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Gets the Locked GPU Voltage for Overclocking in mV.
@@ -2486,20 +2919,18 @@ ctlOverclockGpuVoltageOffsetSet(
 *       settings if power/thermal limits are exceeded.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
-*         + `nullptr == pVoltage`
-*         + `nullptr == pFrequency`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pVfPair`
 */
 ctl_result_t CTL_APICALL
 ctlOverclockGpuLockGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
-    double* pVoltage,                               ///< [in,out] The current locked voltage in mV.
-    double* pFrequency                              ///< [in,out] The current fixed frequency MHz.
+    ctl_oc_vf_pair_t* pVfPair                       ///< [out] The current locked voltage and frequency.
     )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
@@ -2510,13 +2941,13 @@ ctlOverclockGpuLockGet(
         ctl_pfnOverclockGpuLockGet_t pfnOverclockGpuLockGet = (ctl_pfnOverclockGpuLockGet_t)GetProcAddress(hinstLib, "ctlOverclockGpuLockGet");
         if (pfnOverclockGpuLockGet)
         {
-            result = pfnOverclockGpuLockGet(hDeviceHandle, pVoltage, pFrequency);
+            result = pfnOverclockGpuLockGet(hDeviceHandle, pVfPair);
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Locks the GPU voltage for Overclocking in mV.
@@ -2536,17 +2967,16 @@ ctlOverclockGpuLockGet(
 *       offset or voltage offset settings reapplied.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
 */
 ctl_result_t CTL_APICALL
 ctlOverclockGpuLockSet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
-    double voltage,                                 ///< [in] The voltage to be locked in mV.
-    double frequency                                ///< [in] The frequency to be fixed in MHz.
+    ctl_oc_vf_pair_t vFPair                         ///< [in] The current locked voltage and frequency.
     )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
@@ -2557,13 +2987,13 @@ ctlOverclockGpuLockSet(
         ctl_pfnOverclockGpuLockSet_t pfnOverclockGpuLockSet = (ctl_pfnOverclockGpuLockSet_t)GetProcAddress(hinstLib, "ctlOverclockGpuLockSet");
         if (pfnOverclockGpuLockSet)
         {
-            result = pfnOverclockGpuLockSet(hDeviceHandle, voltage, frequency);
+            result = pfnOverclockGpuLockSet(hDeviceHandle, vFPair);
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get the current Vram Frequency Offset in GT/s.
@@ -2573,12 +3003,12 @@ ctlOverclockGpuLockSet(
 *       offset in units of GT/s.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pOcFrequencyOffset`
 */
 ctl_result_t CTL_APICALL
@@ -2599,9 +3029,9 @@ ctlOverclockVramFrequencyOffsetGet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set the desired Vram frquency Offset in GT/s
@@ -2648,10 +3078,10 @@ ctlOverclockVramFrequencyOffsetGet(
 *       required.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
 */
 ctl_result_t CTL_APICALL
@@ -2672,9 +3102,9 @@ ctlOverclockVramFrequencyOffsetSet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get the Overclock Vram Voltage Offset in mV.
@@ -2719,12 +3149,12 @@ ctlOverclockVramFrequencyOffsetSet(
 *       required.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pVoltage`
 */
 ctl_result_t CTL_APICALL
@@ -2745,9 +3175,9 @@ ctlOverclockVramVoltageOffsetGet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set the Overclock Vram Voltage Offset in mV.
@@ -2761,10 +3191,10 @@ ctlOverclockVramVoltageOffsetGet(
 *       limits.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
 */
 ctl_result_t CTL_APICALL
@@ -2785,9 +3215,9 @@ ctlOverclockVramVoltageOffsetSet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get the sustained power limit in mW.
@@ -2799,12 +3229,12 @@ ctlOverclockVramVoltageOffsetSet(
 *       run as high as possible until other limits are hit.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pSustainedPowerLimit`
 */
 ctl_result_t CTL_APICALL
@@ -2825,9 +3255,9 @@ ctlOverclockPowerLimitGet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set the sustained power limit in mW.
@@ -2841,10 +3271,10 @@ ctlOverclockPowerLimitGet(
 *       limits.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
 */
 ctl_result_t CTL_APICALL
@@ -2865,9 +3295,9 @@ ctlOverclockPowerLimitSet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get the current temperature limit in Celsius.
@@ -2876,12 +3306,12 @@ ctlOverclockPowerLimitSet(
 *     - The purpose of this function is to read the current thermal limit.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pTemperatureLimit`
 */
 ctl_result_t CTL_APICALL
@@ -2902,9 +3332,9 @@ ctlOverclockTemperatureLimitGet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set the temperature limit in Celsius.
@@ -2915,10 +3345,10 @@ ctlOverclockTemperatureLimitGet(
 *       throttled.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
 */
 ctl_result_t CTL_APICALL
@@ -2939,9 +3369,9 @@ ctlOverclockTemperatureLimitSet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get Power Telemetry.
@@ -2951,12 +3381,12 @@ ctlOverclockTemperatureLimitSet(
 *       information.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDeviceHandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pTelemetryInfo`
 */
 ctl_result_t CTL_APICALL
@@ -2977,9 +3407,9 @@ ctlPowerTelemetryGet(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get PCI properties - address, max speed
@@ -2989,12 +3419,12 @@ ctlPowerTelemetryGet(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 */
 ctl_result_t CTL_APICALL
@@ -3015,9 +3445,9 @@ ctlPciGetProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get current PCI state - current speed
@@ -3027,12 +3457,12 @@ ctlPciGetProperties(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pState`
 */
 ctl_result_t CTL_APICALL
@@ -3053,9 +3483,9 @@ ctlPciGetState(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get handle of power domains
@@ -3065,12 +3495,12 @@ ctlPciGetState(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pCount`
 */
 ctl_result_t CTL_APICALL
@@ -3101,9 +3531,9 @@ ctlEnumPowerDomains(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get properties related to a power domain
@@ -3113,12 +3543,12 @@ ctlEnumPowerDomains(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hPower`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 */
 ctl_result_t CTL_APICALL
@@ -3139,9 +3569,9 @@ ctlPowerGetProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get energy counter
@@ -3151,12 +3581,12 @@ ctlPowerGetProperties(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hPower`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pEnergy`
 */
 ctl_result_t CTL_APICALL
@@ -3178,9 +3608,9 @@ ctlPowerGetEnergyCounter(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get power limits
@@ -3190,10 +3620,10 @@ ctlPowerGetEnergyCounter(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hPower`
 */
 ctl_result_t CTL_APICALL
@@ -3214,9 +3644,9 @@ ctlPowerGetLimits(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Set power limits
@@ -3226,10 +3656,10 @@ ctlPowerGetLimits(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hPower`
 *     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS
 *         + User does not have permissions to make these modifications.
@@ -3254,9 +3684,9 @@ ctlPowerSetLimits(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get handle of temperature sensors
@@ -3266,12 +3696,12 @@ ctlPowerSetLimits(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hDAhandle`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pCount`
 */
 ctl_result_t CTL_APICALL
@@ -3302,9 +3732,9 @@ ctlEnumTemperatureSensors(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get temperature sensor properties
@@ -3314,12 +3744,12 @@ ctlEnumTemperatureSensors(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hTemperature`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pProperties`
 */
 ctl_result_t CTL_APICALL
@@ -3340,9 +3770,9 @@ ctlTemperatureGetProperties(
         }
     }
 
-
     return result;
 }
+
 
 /**
 * @brief Get the temperature from a specified sensor
@@ -3352,12 +3782,12 @@ ctlTemperatureGetProperties(
 *     - The implementation of this function should be lock-free.
 * 
 * @returns
-*     - ::CTL_RESULT_SUCCESS
-*     - ::CTL_RESULT_ERROR_UNINITIALIZED
-*     - ::CTL_RESULT_ERROR_DEVICE_LOST
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
 *         + `nullptr == hTemperature`
-*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
 *         + `nullptr == pTemperature`
 */
 ctl_result_t CTL_APICALL
@@ -3378,7 +3808,6 @@ ctlTemperatureGetState(
             result = pfnTemperatureGetState(hTemperature, pTemperature);
         }
     }
-
 
     return result;
 }
