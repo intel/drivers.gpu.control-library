@@ -160,6 +160,7 @@
 <li class="toctree-l3"><a class="reference internal" href="Control/api.html#common-functions">Common Functions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlinit">ctlInit</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlclose">ctlClose</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlsetruntimepath">ctlSetRuntimePath</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlwaitforpropertychange">ctlWaitForPropertyChange</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlreservedcall">ctlReservedCall</a></li>
 </ul>
@@ -200,6 +201,7 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-reserved-args-t">ctl_reserved_args_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-reserved-args-base-t">ctl_reserved_args_base_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-unlock-capability-t">ctl_unlock_capability_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-runtime-path-args-t">ctl_runtime_path_args_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-firmware-version-t">ctl_firmware_version_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-device-adapter-properties-t">ctl_device_adapter_properties_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-generic-void-datatype-t">ctl_generic_void_datatype_t</a></li>
@@ -220,14 +222,18 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-anisotropic-types-t">ctl_3d_anisotropic_types_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-texture-filtering-quality-types-t">ctl_3d_texture_filtering_quality_types_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-frame-pacing-types-t">ctl_3d_frame_pacing_types_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-endurance-gaming-control-t">ctl_3d_endurance_gaming_control_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-endurance-gaming-mode-t">ctl_3d_endurance_gaming_mode_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-cmaa-types-t">ctl_3d_cmaa_types_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-adaptive-tessellation-types-t">ctl_3d_adaptive_tessellation_types_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-sharpening-filter-types-t">ctl_3d_sharpening_filter_types_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-msaa-types-t">ctl_3d_msaa_types_t</a></li>
-<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-frame-async-flip-types-t">ctl_3d_frame_async_flip_types_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-gaming-flip-mode-flags-t">ctl_gaming_flip_mode_flags_t</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="Control/api.html#d-structures">3d Structures</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-endurance-gaming-caps-t">ctl_endurance_gaming_caps_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-endurance-gaming-t">ctl_endurance_gaming_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-adaptivesync-caps-t">ctl_adaptivesync_caps_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-adaptivesync-getset-t">ctl_adaptivesync_getset_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-3d-feature-details-t">ctl_3d_feature_details_t</a></li>
@@ -263,6 +269,15 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlgetsupportedscalingcapability">ctlGetSupportedScalingCapability</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlgetcurrentscaling">ctlGetCurrentScaling</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlsetcurrentscaling">ctlSetCurrentScaling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlgetlaceconfig">ctlGetLACEConfig</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlsetlaceconfig">ctlSetLACEConfig</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlsoftwarepsr">ctlSoftwarePSR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlgetintelarcsyncinfoformonitor">ctlGetIntelArcSyncInfoForMonitor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlenumeratemuxdevices">ctlEnumerateMuxDevices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlgetmuxproperties">ctlGetMuxProperties</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlswitchmux">ctlSwitchMux</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlgetintelarcsyncprofile">ctlGetIntelArcSyncProfile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctlsetintelarcsyncprofile">ctlSetIntelArcSyncProfile</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="Control/api.html#display-enums">Display Enums</a><ul>
@@ -293,6 +308,10 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-pixtx-color-model-t">ctl_pixtx_color_model_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-retro-scaling-type-flags-t">ctl_retro_scaling_type_flags_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-scaling-type-flags-t">ctl_scaling_type_flags_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-get-operation-flags-t">ctl_get_operation_flags_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-set-operation-t">ctl_set_operation_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-lace-trigger-flags-t">ctl_lace_trigger_flags_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-intel-arc-sync-profile-t">ctl_intel_arc_sync_profile_t</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="Control/api.html#display-structures">Display Structures</a><ul>
@@ -326,6 +345,14 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-retro-scaling-caps-t">ctl_retro_scaling_caps_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-scaling-caps-t">ctl_scaling_caps_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-scaling-settings-t">ctl_scaling_settings_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-lace-lux-aggr-map-entry-t">ctl_lace_lux_aggr_map_entry_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-lace-lux-aggr-map-t">ctl_lace_lux_aggr_map_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-lace-aggr-config-t">ctl_lace_aggr_config_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-lace-config-t">ctl_lace_config_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-sw-psr-settings-t">ctl_sw_psr_settings_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-intel-arc-sync-monitor-params-t">ctl_intel_arc_sync_monitor_params_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-mux-properties-t">ctl_mux_properties_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-intel-arc-sync-profile-params-t">ctl_intel_arc_sync_profile_params_t</a></li>
 </ul>
 </li>
 </ul>
@@ -478,6 +505,7 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-oc-telemetry-item-t">ctl_oc_telemetry_item_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-oc-control-info-t">ctl_oc_control_info_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-oc-properties-t">ctl_oc_properties_t</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-oc-vf-pair-t">ctl_oc_vf_pair_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-psu-info-t">ctl_psu_info_t</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#ctl-power-telemetry-t">ctl_power_telemetry_t</a></li>
 </ul>

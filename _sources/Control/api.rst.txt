@@ -14,6 +14,7 @@ Common
 
     * :ref:`ctlInit`
     * :ref:`ctlClose`
+    * :ref:`ctlSetRuntimePath`
     * :ref:`ctlWaitForPropertyChange`
     * :ref:`ctlReservedCall`
 
@@ -58,6 +59,7 @@ Common
     * :ref:`ctl-reserved-args-t`
     * :ref:`ctl-reserved-args-base-t`
     * :ref:`ctl-unlock-capability-t`
+    * :ref:`ctl-runtime-path-args-t`
     * :ref:`ctl-firmware-version-t`
     * :ref:`ctl-device-adapter-properties-t`
     * :ref:`ctl-generic-void-datatype-t`
@@ -84,6 +86,15 @@ ctlClose
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenfunction:: ctlClose
+    :project: ControlApi
+
+
+.. _ctlSetRuntimePath:
+
+ctlSetRuntimePath
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlSetRuntimePath
     :project: ControlApi
 
 
@@ -418,6 +429,16 @@ ctl_unlock_capability_t
     :members:
     :undoc-members:
 
+.. _ctl-runtime-path-args-t:
+
+ctl_runtime_path_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_runtime_path_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
 .. _ctl-firmware-version-t:
 
 ctl_firmware_version_t
@@ -487,16 +508,20 @@ ctl_wait_property_change_args_t
     * :ref:`ctl-3d-anisotropic-types-t`
     * :ref:`ctl-3d-texture-filtering-quality-types-t`
     * :ref:`ctl-3d-frame-pacing-types-t`
+    * :ref:`ctl-3d-endurance-gaming-control-t`
+    * :ref:`ctl-3d-endurance-gaming-mode-t`
     * :ref:`ctl-3d-cmaa-types-t`
     * :ref:`ctl-3d-adaptive-tessellation-types-t`
     * :ref:`ctl-3d-sharpening-filter-types-t`
     * :ref:`ctl-3d-msaa-types-t`
-    * :ref:`ctl-3d-frame-async-flip-types-t`
+    * :ref:`ctl-gaming-flip-mode-flags-t`
 
  
 * Structures
 
 
+    * :ref:`ctl-endurance-gaming-caps-t`
+    * :ref:`ctl-endurance-gaming-t`
     * :ref:`ctl-adaptivesync-caps-t`
     * :ref:`ctl-adaptivesync-getset-t`
     * :ref:`ctl-3d-feature-details-t`
@@ -568,6 +593,24 @@ ctl_3d_frame_pacing_types_t
     :project: ControlApi
 
 
+.. _ctl-3d-endurance-gaming-control-t:
+
+ctl_3d_endurance_gaming_control_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_endurance_gaming_control_t
+    :project: ControlApi
+
+
+.. _ctl-3d-endurance-gaming-mode-t:
+
+ctl_3d_endurance_gaming_mode_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_endurance_gaming_mode_t
+    :project: ControlApi
+
+
 .. _ctl-3d-cmaa-types-t:
 
 ctl_3d_cmaa_types_t
@@ -604,17 +647,37 @@ ctl_3d_msaa_types_t
     :project: ControlApi
 
 
-.. _ctl-3d-frame-async-flip-types-t:
+.. _ctl-gaming-flip-mode-flags-t:
 
-ctl_3d_frame_async_flip_types_t
+ctl_gaming_flip_mode_flags_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. doxygenenum:: ctl_3d_frame_async_flip_types_t
+.. doxygenenum:: ctl_gaming_flip_mode_flag_t
     :project: ControlApi
 
  
 3d Structures
 ------------------------------------------------------------------------------
+
+.. _ctl-endurance-gaming-caps-t:
+
+ctl_endurance_gaming_caps_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_endurance_gaming_caps_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-endurance-gaming-t:
+
+ctl_endurance_gaming_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_endurance_gaming_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
 
 .. _ctl-adaptivesync-caps-t:
 
@@ -707,6 +770,15 @@ Display
     * :ref:`ctlGetSupportedScalingCapability`
     * :ref:`ctlGetCurrentScaling`
     * :ref:`ctlSetCurrentScaling`
+    * :ref:`ctlGetLACEConfig`
+    * :ref:`ctlSetLACEConfig`
+    * :ref:`ctlSoftwarePSR`
+    * :ref:`ctlGetIntelArcSyncInfoForMonitor`
+    * :ref:`ctlEnumerateMuxDevices`
+    * :ref:`ctlGetMuxProperties`
+    * :ref:`ctlSwitchMux`
+    * :ref:`ctlGetIntelArcSyncProfile`
+    * :ref:`ctlSetIntelArcSyncProfile`
 
  
 * Enumerations
@@ -739,6 +811,10 @@ Display
     * :ref:`ctl-pixtx-color-model-t`
     * :ref:`ctl-retro-scaling-type-flags-t`
     * :ref:`ctl-scaling-type-flags-t`
+    * :ref:`ctl-get-operation-flags-t`
+    * :ref:`ctl-set-operation-t`
+    * :ref:`ctl-lace-trigger-flags-t`
+    * :ref:`ctl-intel-arc-sync-profile-t`
 
  
 * Structures
@@ -774,6 +850,14 @@ Display
     * :ref:`ctl-retro-scaling-caps-t`
     * :ref:`ctl-scaling-caps-t`
     * :ref:`ctl-scaling-settings-t`
+    * :ref:`ctl-lace-lux-aggr-map-entry-t`
+    * :ref:`ctl-lace-lux-aggr-map-t`
+    * :ref:`ctl-lace-aggr-config-t`
+    * :ref:`ctl-lace-config-t`
+    * :ref:`ctl-sw-psr-settings-t`
+    * :ref:`ctl-intel-arc-sync-monitor-params-t`
+    * :ref:`ctl-mux-properties-t`
+    * :ref:`ctl-intel-arc-sync-profile-params-t`
 
 
 Display Functions
@@ -984,6 +1068,87 @@ ctlSetCurrentScaling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenfunction:: ctlSetCurrentScaling
+    :project: ControlApi
+
+
+.. _ctlGetLACEConfig:
+
+ctlGetLACEConfig
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetLACEConfig
+    :project: ControlApi
+
+
+.. _ctlSetLACEConfig:
+
+ctlSetLACEConfig
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlSetLACEConfig
+    :project: ControlApi
+
+
+.. _ctlSoftwarePSR:
+
+ctlSoftwarePSR
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlSoftwarePSR
+    :project: ControlApi
+
+
+.. _ctlGetIntelArcSyncInfoForMonitor:
+
+ctlGetIntelArcSyncInfoForMonitor
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetIntelArcSyncInfoForMonitor
+    :project: ControlApi
+
+
+.. _ctlEnumerateMuxDevices:
+
+ctlEnumerateMuxDevices
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumerateMuxDevices
+    :project: ControlApi
+
+
+.. _ctlGetMuxProperties:
+
+ctlGetMuxProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetMuxProperties
+    :project: ControlApi
+
+
+.. _ctlSwitchMux:
+
+ctlSwitchMux
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlSwitchMux
+    :project: ControlApi
+
+
+.. _ctlGetIntelArcSyncProfile:
+
+ctlGetIntelArcSyncProfile
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetIntelArcSyncProfile
+    :project: ControlApi
+
+
+.. _ctlSetIntelArcSyncProfile:
+
+ctlSetIntelArcSyncProfile
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlSetIntelArcSyncProfile
     :project: ControlApi
 
 
@@ -1232,6 +1397,42 @@ ctl_scaling_type_flags_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_scaling_type_flag_t
+    :project: ControlApi
+
+
+.. _ctl-get-operation-flags-t:
+
+ctl_get_operation_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_get_operation_flag_t
+    :project: ControlApi
+
+
+.. _ctl-set-operation-t:
+
+ctl_set_operation_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_set_operation_t
+    :project: ControlApi
+
+
+.. _ctl-lace-trigger-flags-t:
+
+ctl_lace_trigger_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_lace_trigger_flag_t
+    :project: ControlApi
+
+
+.. _ctl-intel-arc-sync-profile-t:
+
+ctl_intel_arc_sync_profile_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_intel_arc_sync_profile_t
     :project: ControlApi
 
  
@@ -1528,6 +1729,84 @@ ctl_scaling_settings_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_scaling_settings_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-lace-lux-aggr-map-entry-t:
+
+ctl_lace_lux_aggr_map_entry_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_lace_lux_aggr_map_entry_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-lace-lux-aggr-map-t:
+
+ctl_lace_lux_aggr_map_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_lace_lux_aggr_map_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-lace-aggr-config-t:
+
+ctl_lace_aggr_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenunion:: ctl_lace_aggr_config_t
+    :project: ControlApi
+
+.. _ctl-lace-config-t:
+
+ctl_lace_config_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_lace_config_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-sw-psr-settings-t:
+
+ctl_sw_psr_settings_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_sw_psr_settings_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-intel-arc-sync-monitor-params-t:
+
+ctl_intel_arc_sync_monitor_params_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_intel_arc_sync_monitor_params_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-mux-properties-t:
+
+ctl_mux_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_mux_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-intel-arc-sync-profile-params-t:
+
+ctl_intel_arc_sync_profile_params_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_intel_arc_sync_profile_params_t
     :project: ControlApi
     :members:
     :undoc-members:
@@ -2348,6 +2627,7 @@ Overclock
     * :ref:`ctl-oc-telemetry-item-t`
     * :ref:`ctl-oc-control-info-t`
     * :ref:`ctl-oc-properties-t`
+    * :ref:`ctl-oc-vf-pair-t`
     * :ref:`ctl-psu-info-t`
     * :ref:`ctl-power-telemetry-t`
 
@@ -2552,6 +2832,16 @@ ctl_oc_properties_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_oc_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-oc-vf-pair-t:
+
+ctl_oc_vf_pair_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_oc_vf_pair_t
     :project: ControlApi
     :members:
     :undoc-members:
