@@ -3,7 +3,7 @@
 ==============================
 Control API
 ==============================
-Control API Specification - Version 0.9
+Control API Specification - Version 1.0
 
  
 
