@@ -1,5 +1,5 @@
 //===========================================================================
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2022 Intel Corporation
 // This software and the related documents are Intel copyrighted materials, and
 // your use of them is governed by the express license under which they were
 // provided to you ("License"). Unless the License provides otherwise, you may
@@ -12,7 +12,7 @@
 /** 
  *
  * @file igcl_api.h
- * @version v0-r9
+ * @version v1-r0
  *
  */
 #ifndef _CTL_API_H
