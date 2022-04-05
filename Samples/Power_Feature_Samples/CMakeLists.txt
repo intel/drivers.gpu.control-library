@@ -18,6 +18,6 @@ if(MSVC)
     ADD_DEFINITIONS(-D_UNICODE)
 endif()
 
-    include_directories(${ROOT_DIR}/includes)
-	include_directories(${ROOT_DIR}/Samples/Initialization)
+include_directories(${ROOT_DIR}/includes)
+include_directories(${ROOT_DIR}/Samples/inc)
   

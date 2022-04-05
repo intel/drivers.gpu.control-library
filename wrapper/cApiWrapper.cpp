@@ -13,9 +13,9 @@
  *
  */
 
-// Note: UWP applications should have defined WINDOWS_UWP in their compiler settings
-// Also at this point, it's easier by not enabling pre-compiled option to compile this file
-// Not all functionalities are tested for a UWP application
+ // Note: UWP applications should have defined WINDOWS_UWP in their compiler settings
+ // Also at this point, it's easier by not enabling pre-compiled option to compile this file
+ // Not all functionalities are tested for a UWP application
 
 #include <windows.h>
 #include <strsafe.h>
@@ -36,9 +36,9 @@ static ctl_runtime_path_args_t* pRuntimeArgs = NULL;
  *
  */
 #if defined(_WIN64)
-    #define CTL_DLL_NAME L"ControlLib"
+#define CTL_DLL_NAME L"ControlLib"
 #else
-    #define CTL_DLL_NAME L"ControlLib32"
+#define CTL_DLL_NAME L"ControlLib32"
 #endif
 #define CTL_DLL_PATH_LEN 512
 
@@ -55,9 +55,9 @@ ctl_result_t GetControlAPIDLLPath(ctl_init_args_t* pInitArgs, wchar_t* pwcDLLPat
             return CTL_RESULT_ERROR_UNSUPPORTED_VERSION;
 
         if (majorVersion > 1)
-            StringCbPrintfW(pwcDLLPath,CTL_DLL_PATH_LEN,L"%s%d.dll", CTL_DLL_NAME, majorVersion);
+            StringCbPrintfW(pwcDLLPath, CTL_DLL_PATH_LEN, L"%s%d.dll", CTL_DLL_NAME, majorVersion);
         else // just control_api.dll
-            StringCbPrintfW(pwcDLLPath,CTL_DLL_PATH_LEN,L"%s.dll", CTL_DLL_NAME);
+            StringCbPrintfW(pwcDLLPath, CTL_DLL_PATH_LEN, L"%s.dll", CTL_DLL_NAME);
     }
     else if (pRuntimeArgs->pRuntimePath)
     {
@@ -70,10 +70,10 @@ ctl_result_t GetControlAPIDLLPath(ctl_init_args_t* pInitArgs, wchar_t* pwcDLLPat
 
 /**
 * @brief Control Api Init
-* 
+*
 * @details
 *     - Control Api Init
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -87,10 +87,10 @@ ctl_result_t CTL_APICALL
 ctlInit(
     ctl_init_args_t* pInitDesc,                     ///< [in][out] App's control API version
     ctl_api_handle_t* phAPIHandle                   ///< [in][out][release] Control API handle
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
     // special code - only for ctlInit()
     if (NULL == hinstLib)
     {
@@ -110,8 +110,8 @@ ctlInit(
             else if (pRuntimeArgs)
             {
                 ctlSetRuntimePath(pRuntimeArgs);
-            }            
-        }    
+            }
+        }
     }
 
     if (NULL != hinstLib)
@@ -129,10 +129,10 @@ ctlInit(
 
 /**
 * @brief Control Api Destroy
-* 
+*
 * @details
 *     - Control Api Close
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -145,10 +145,10 @@ ctl_result_t CTL_APICALL
 ctlClose(
     ctl_api_handle_t hAPIHandle                     ///< [in][release] Control API implementation handle obtained during init
                                                     ///< call
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -160,15 +160,15 @@ ctlClose(
     }
 
     // special code - only for ctlClose()
-	// might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
-	// if its open by another caller do not free the instance handle 
-    if( result == CTL_RESULT_SUCCESS)
+    // might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
+    // if its open by another caller do not free the instance handle 
+    if (result == CTL_RESULT_SUCCESS)
     {
         if (NULL != hinstLib)
         {
             FreeLibrary(hinstLib);
-            hinstLib = NULL;            
-        }        
+            hinstLib = NULL;
+        }
     }
     // set runtime args back to NULL
     // no need to free this as it's allocated by caller   
@@ -179,14 +179,14 @@ ctlClose(
 
 /**
 * @brief Runtime path
-* 
+*
 * @details
 *     - Control Api set runtime path. Optional call from a loader which allows
 *       the loaded runtime to enumerate only the adapters which the specified
 *       runtime is responsible for. This is done usually by a loader or by
 *       callers who know how to get the specific runtime of interest. This
 *       call right now is reserved for use by Intel components.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -198,10 +198,10 @@ ctlClose(
 ctl_result_t CTL_APICALL
 ctlSetRuntimePath(
     ctl_runtime_path_args_t* pArgs                  ///< [in] Runtime path
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -213,8 +213,8 @@ ctlSetRuntimePath(
     }
 
     // special code - only for ctlSetRuntimePath()
-	// might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
-	// if its open by another caller do not free the instance handle 
+    // might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
+    // if its open by another caller do not free the instance handle 
     else if (pArgs->pRuntimePath)
     {
         // this is a case where the caller app is interested in loading a RT directly
@@ -227,10 +227,10 @@ ctlSetRuntimePath(
 
 /**
 * @brief Wait for a property change. Note that this is a blocking call
-* 
+*
 * @details
 *     - Wait for a property change in display, 3d, media etc.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -246,10 +246,10 @@ ctlWaitForPropertyChange(
     ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to control device adapter
     ctl_wait_property_change_args_t* pArgs          ///< [in] Argument containing information about which property changes to
                                                     ///< listen for
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -266,10 +266,10 @@ ctlWaitForPropertyChange(
 
 /**
 * @brief Reserved function
-* 
+*
 * @details
 *     - Reserved function
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -284,10 +284,10 @@ ctl_result_t CTL_APICALL
 ctlReservedCall(
     ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to control device adapter
     ctl_reserved_args_t* pArgs                      ///< [in] Argument containing information
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -304,10 +304,10 @@ ctlReservedCall(
 
 /**
 * @brief Get 3D capabilities
-* 
+*
 * @details
 *     - The application gets 3D properties
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -322,10 +322,10 @@ ctl_result_t CTL_APICALL
 ctlGetSupported3DCapabilities(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
     ctl_3d_feature_caps_t* pFeatureCaps             ///< [in,out][release] 3D properties
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -342,10 +342,10 @@ ctlGetSupported3DCapabilities(
 
 /**
 * @brief Get/Set 3D feature
-* 
+*
 * @details
 *     - 3D feature details
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -360,10 +360,10 @@ ctl_result_t CTL_APICALL
 ctlGetSet3DFeature(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
     ctl_3d_feature_getset_t* pFeature               ///< [in][release] 3D feature get/set parameter
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -380,10 +380,10 @@ ctlGetSet3DFeature(
 
 /**
 * @brief Check Driver version
-* 
+*
 * @details
 *     - The application checks driver version
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -396,10 +396,10 @@ ctl_result_t CTL_APICALL
 ctlCheckDriverVersion(
     ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to control device adapter
     ctl_version_info_t version_info                 ///< [in][release] Driver version info
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -416,10 +416,10 @@ ctlCheckDriverVersion(
 
 /**
 * @brief Enumerate devices
-* 
+*
 * @details
 *     - The application enumerates all device adapters in the system
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -442,10 +442,10 @@ ctlEnumerateDevices(
                                                     ///< will update the value with the correct number of drivers available.
     ctl_device_adapter_handle_t* phDevices          ///< [in,out][optional][release][range(0, *pCount)] array of driver
                                                     ///< instance handles
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -462,10 +462,10 @@ ctlEnumerateDevices(
 
 /**
 * @brief Enumerate display outputs
-* 
+*
 * @details
 *     - Enumerates display output capabilities
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -487,10 +487,10 @@ ctlEnumerateDisplayOutputs(
                                                     ///< will update the value with the correct number of drivers available.
     ctl_display_output_handle_t* phDisplayOutputs   ///< [in,out][optional][release][range(0, *pCount)] array of display output
                                                     ///< instance handles
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -507,10 +507,10 @@ ctlEnumerateDisplayOutputs(
 
 /**
 * @brief Get Device Properties
-* 
+*
 * @details
 *     - The application gets device properties
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -525,10 +525,10 @@ ctl_result_t CTL_APICALL
 ctlGetDeviceProperties(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to control device adapter
     ctl_device_adapter_properties_t* pProperties    ///< [in,out][release] Query result for device properties
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -545,10 +545,10 @@ ctlGetDeviceProperties(
 
 /**
 * @brief Get Display  Properties
-* 
+*
 * @details
 *     - The application gets display  properties
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -563,10 +563,10 @@ ctl_result_t CTL_APICALL
 ctlGetDisplayProperties(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_display_properties_t* pProperties           ///< [in,out][release] Query result for display  properties
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -583,10 +583,10 @@ ctlGetDisplayProperties(
 
 /**
 * @brief Get Adapter Display encoder  Properties
-* 
+*
 * @details
 *     - The application gets the graphic adapters display encoder properties
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -601,10 +601,10 @@ ctl_result_t CTL_APICALL
 ctlGetAdaperDisplayEncoderProperties(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_adapter_display_encoder_properties_t* pProperties   ///< [in,out][release] Query result for adapter display encoder properties
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -621,10 +621,10 @@ ctlGetAdaperDisplayEncoderProperties(
 
 /**
 * @brief Get Level0 Device handle
-* 
+*
 * @details
 *     - The application gets OneAPI Level0 Device handles
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -642,10 +642,10 @@ ctlGetZeDevice(
     void* pZeDevice,                                ///< [out][release] ze_device handle
     void** hInstance                                ///< [out][release] Module instance which caller can use to get export
                                                     ///< functions directly
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -662,10 +662,10 @@ ctlGetZeDevice(
 
 /**
 * @brief Get Sharpness capability
-* 
+*
 * @details
 *     - Returns sharpness capability
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -680,10 +680,10 @@ ctl_result_t CTL_APICALL
 ctlGetSharpnessCaps(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_sharpness_caps_t* pSharpnessCaps            ///< [in,out][release] Query result for sharpness capability
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -700,10 +700,10 @@ ctlGetSharpnessCaps(
 
 /**
 * @brief Get Sharpness setting
-* 
+*
 * @details
 *     - Returns current sharpness settings
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -718,10 +718,10 @@ ctl_result_t CTL_APICALL
 ctlGetCurrentSharpness(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_sharpness_settings_t* pSharpnessSettings    ///< [in,out][release] Query result for sharpness current settings
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -738,10 +738,10 @@ ctlGetCurrentSharpness(
 
 /**
 * @brief Set Sharpness setting
-* 
+*
 * @details
 *     - Set current sharpness settings
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -756,10 +756,10 @@ ctl_result_t CTL_APICALL
 ctlSetCurrentSharpness(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_sharpness_settings_t* pSharpnessSettings    ///< [in][release] Set sharpness current settings
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -776,10 +776,10 @@ ctlSetCurrentSharpness(
 
 /**
 * @brief I2C Access
-* 
+*
 * @details
 *     - The application does I2C aceess
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -802,10 +802,10 @@ ctl_result_t CTL_APICALL
 ctlI2CAccess(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_i2c_access_args_t* pI2cAccessArgs           ///< [in,out] I2c access arguments
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -822,11 +822,11 @@ ctlI2CAccess(
 
 /**
 * @brief Aux Access
-* 
+*
 * @details
 *     - The application does Aux aceess, PSR needs to be disabled for AUX
 *       call.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -850,10 +850,10 @@ ctl_result_t CTL_APICALL
 ctlAUXAccess(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_aux_access_args_t* pAuxAccessArgs           ///< [in,out] Aux access arguments
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -870,10 +870,10 @@ ctlAUXAccess(
 
 /**
 * @brief Get Power optimization features
-* 
+*
 * @details
 *     - Returns power optimization capabilities
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -888,10 +888,10 @@ ctl_result_t CTL_APICALL
 ctlGetPowerOptimizationCaps(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_power_optimization_caps_t* pPowerOptimizationCaps   ///< [in,out][release] Query result for power optimization features
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -908,10 +908,10 @@ ctlGetPowerOptimizationCaps(
 
 /**
 * @brief Get Power optimization setting
-* 
+*
 * @details
 *     - Returns power optimization setting for a specific feature
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -928,10 +928,10 @@ ctl_result_t CTL_APICALL
 ctlGetPowerOptimizationSetting(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in,out][release] Power optimization data to be fetched
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -948,10 +948,10 @@ ctlGetPowerOptimizationSetting(
 
 /**
 * @brief Set Power optimization setting
-* 
+*
 * @details
 *     - Set power optimization setting for a specific feature
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -968,10 +968,10 @@ ctl_result_t CTL_APICALL
 ctlSetPowerOptimizationSetting(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in][release] Power optimization data to be applied
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -988,10 +988,10 @@ ctlSetPowerOptimizationSetting(
 
 /**
 * @brief Pixel transformation get pipe configuration
-* 
+*
 * @details
 *     - The application does pixel transformation get pipe configuration
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1020,10 +1020,10 @@ ctl_result_t CTL_APICALL
 ctlPixelTransformationGetConfig(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_pixtx_pipe_get_config_t* pPixTxGetConfigArgs///< [in,out] Pixel transformation get pipe configiguration arguments
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1040,10 +1040,10 @@ ctlPixelTransformationGetConfig(
 
 /**
 * @brief Pixel transformation set pipe configuration
-* 
+*
 * @details
 *     - The application does pixel transformation set pipe configuration
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1073,10 +1073,10 @@ ctl_result_t CTL_APICALL
 ctlPixelTransformationSetConfig(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_pixtx_pipe_set_config_t* pPixTxSetConfigArgs///< [in,out] Pixel transformation set pipe configiguration arguments
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1093,10 +1093,10 @@ ctlPixelTransformationSetConfig(
 
 /**
 * @brief Panel Descriptor Access
-* 
+*
 * @details
 *     - The application does EDID or Display ID access
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1118,10 +1118,10 @@ ctl_result_t CTL_APICALL
 ctlPanelDescriptorAccess(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_panel_descriptor_access_args_t* pPanelDescriptorAccessArgs  ///< [in,out] Panel descriptor access arguments
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1138,10 +1138,10 @@ ctlPanelDescriptorAccess(
 
 /**
 * @brief Get Supported Retro Scaling Types
-* 
+*
 * @details
 *     - Returns supported retro scaling capabilities
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1156,10 +1156,10 @@ ctl_result_t CTL_APICALL
 ctlGetSupportedRetroScalingCapability(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to adapter
     ctl_retro_scaling_caps_t* pRetroScalingCaps     ///< [in,out][release] Query result for supported retro scaling types
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1176,11 +1176,11 @@ ctlGetSupportedRetroScalingCapability(
 
 /**
 * @brief Get/Set Retro Scaling
-* 
+*
 * @details
 *     - Get or Set the status of retro scaling.This Api will do a physical
 *       modeset resulting in flash on the screen
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1195,10 +1195,10 @@ ctl_result_t CTL_APICALL
 ctlGetSetRetroScaling(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to adapter
     ctl_retro_scaling_settings_t* pGetSetRetroScalingType   ///< [in,out][release] Get or Set the retro scaling type
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1215,10 +1215,10 @@ ctlGetSetRetroScaling(
 
 /**
 * @brief Get Supported Scaling Types
-* 
+*
 * @details
 *     - Returns supported scaling capabilities
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1233,10 +1233,10 @@ ctl_result_t CTL_APICALL
 ctlGetSupportedScalingCapability(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_scaling_caps_t* pScalingCaps                ///< [in,out][release] Query result for supported scaling types
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1253,10 +1253,10 @@ ctlGetSupportedScalingCapability(
 
 /**
 * @brief Get Current Scaling
-* 
+*
 * @details
 *     - Returns current active scaling
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1271,10 +1271,10 @@ ctl_result_t CTL_APICALL
 ctlGetCurrentScaling(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_scaling_settings_t* pGetCurrentScalingType  ///< [in,out][release] Query result for active scaling types
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1291,10 +1291,10 @@ ctlGetCurrentScaling(
 
 /**
 * @brief Set Scaling Type
-* 
+*
 * @details
 *     - Returns current active scaling
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1309,10 +1309,10 @@ ctl_result_t CTL_APICALL
 ctlSetCurrentScaling(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_scaling_settings_t* pSetScalingType         ///< [in,out][release] Set scaling types
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1329,10 +1329,10 @@ ctlSetCurrentScaling(
 
 /**
 * @brief Get LACE Config
-* 
+*
 * @details
 *     - Returns current LACE Config
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1348,10 +1348,10 @@ ctl_result_t CTL_APICALL
 ctlGetLACEConfig(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_lace_config_t* pLaceConfig                  ///< [out]Lace configuration
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1368,10 +1368,10 @@ ctlGetLACEConfig(
 
 /**
 * @brief Sets LACE Config
-* 
+*
 * @details
 *     - Sets LACE Config
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1387,10 +1387,10 @@ ctl_result_t CTL_APICALL
 ctlSetLACEConfig(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in]Handle to display output
     ctl_lace_config_t* pLaceConfig                  ///< [in]Lace configuration
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1407,13 +1407,13 @@ ctlSetLACEConfig(
 
 /**
 * @brief Get Software PSR caps/Set software PSR State
-* 
+*
 * @details
 *     - Returns Software PSR status or Sets Software PSR capabilities. This is
 *       a reserved capability. By default, software PSR is not supported/will
 *       not be enabled, need application to activate it, please contact Intel
 *       for activation.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1429,10 +1429,10 @@ ctlSoftwarePSR(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_sw_psr_settings_t* pSoftwarePsrSetting      ///< [in,out][release] Get Software PSR caps/state or Set Software PSR
                                                     ///< state
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1449,10 +1449,10 @@ ctlSoftwarePSR(
 
 /**
 * @brief Get Intel Arc Sync information for monitor
-* 
+*
 * @details
 *     - Returns Intel Arc Sync information for selected monitor
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1467,10 +1467,10 @@ ctl_result_t CTL_APICALL
 ctlGetIntelArcSyncInfoForMonitor(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_intel_arc_sync_monitor_params_t* pIntelArcSyncMonitorParams ///< [in,out][release] Intel Arc Sync params for monitor
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1487,10 +1487,10 @@ ctlGetIntelArcSyncInfoForMonitor(
 
 /**
 * @brief Enumerate Display MUX Devices on this system across adapters
-* 
+*
 * @details
 *     - The application enumerates all MUX devices in the system
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1513,10 +1513,10 @@ ctlEnumerateMuxDevices(
                                                     ///< If count is larger than the number of MUX devices available, then the
                                                     ///< api will update the value with the correct number of MUX devices available.
     ctl_mux_output_handle_t* phMuxDevices           ///< [out][range(0, *pCount)] array of MUX device instance handles
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1533,10 +1533,10 @@ ctlEnumerateMuxDevices(
 
 /**
 * @brief Get Display Mux properties
-* 
+*
 * @details
 *     - Get the propeties of the Mux device
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1551,10 +1551,10 @@ ctl_result_t CTL_APICALL
 ctlGetMuxProperties(
     ctl_mux_output_handle_t hMuxDevice,             ///< [in] MUX device instance handle
     ctl_mux_properties_t* pMuxProperties            ///< [in,out] MUX device properties
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1571,10 +1571,10 @@ ctlGetMuxProperties(
 
 /**
 * @brief Switch Mux output
-* 
+*
 * @details
 *     - Switches the MUX output
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1590,10 +1590,10 @@ ctlSwitchMux(
     ctl_display_output_handle_t hInactiveDisplayOutput  ///< [out] Input selection for this MUX, which if active will drive the
                                                     ///< output of this MUX device. This should be one of the display output
                                                     ///< handles reported under this MUX device's properties.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1610,10 +1610,10 @@ ctlSwitchMux(
 
 /**
 * @brief Get Intel Arc Sync profile
-* 
+*
 * @details
 *     - Returns Intel Arc Sync profile for selected monitor
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1628,10 +1628,10 @@ ctl_result_t CTL_APICALL
 ctlGetIntelArcSyncProfile(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_intel_arc_sync_profile_params_t* pIntelArcSyncProfileParams ///< [in,out][release] Intel Arc Sync params for monitor
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1648,12 +1648,12 @@ ctlGetIntelArcSyncProfile(
 
 /**
 * @brief Set Intel Arc Sync profile
-* 
+*
 * @details
 *     - Sets Intel Arc Sync profile for selected monitor. In a mux situation,
 *       this API should be called for all display IDs associated with a
 *       physical display.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1668,10 +1668,10 @@ ctl_result_t CTL_APICALL
 ctlSetIntelArcSyncProfile(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
     ctl_intel_arc_sync_profile_params_t* pIntelArcSyncProfileParams ///< [in][release] Intel Arc Sync params for monitor
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1688,11 +1688,11 @@ ctlSetIntelArcSyncProfile(
 
 /**
 * @brief Get handle of engine groups
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1716,10 +1716,10 @@ ctlEnumEngineGroups(
                                                     ///< if count is less than the number of components of this type that are
                                                     ///< available, then the driver shall only retrieve that number of
                                                     ///< component handles.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1736,11 +1736,11 @@ ctlEnumEngineGroups(
 
 /**
 * @brief Get engine group properties
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1754,10 +1754,10 @@ ctl_result_t CTL_APICALL
 ctlEngineGetProperties(
     ctl_engine_handle_t hEngine,                    ///< [in] Handle for the component.
     ctl_engine_properties_t* pProperties            ///< [in,out] The properties for the specified engine group.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1774,11 +1774,11 @@ ctlEngineGetProperties(
 
 /**
 * @brief Get the activity stats for an engine group
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1793,10 +1793,10 @@ ctlEngineGetActivity(
     ctl_engine_handle_t hEngine,                    ///< [in] Handle for the component.
     ctl_engine_stats_t* pStats                      ///< [in,out] Will contain a snapshot of the engine group activity
                                                     ///< counters.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1813,11 +1813,11 @@ ctlEngineGetActivity(
 
 /**
 * @brief Get handle of fans
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1841,10 +1841,10 @@ ctlEnumFans(
                                                     ///< if count is less than the number of components of this type that are
                                                     ///< available, then the driver shall only retrieve that number of
                                                     ///< component handles.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1861,11 +1861,11 @@ ctlEnumFans(
 
 /**
 * @brief Get fan properties
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1879,10 +1879,10 @@ ctl_result_t CTL_APICALL
 ctlFanGetProperties(
     ctl_fan_handle_t hFan,                          ///< [in] Handle for the component.
     ctl_fan_properties_t* pProperties               ///< [in,out] Will contain the properties of the fan.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1900,11 +1900,11 @@ ctlFanGetProperties(
 /**
 * @brief Get fan configurations and the current fan speed mode (default, fixed,
 *        temp-speed table)
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1918,10 +1918,10 @@ ctl_result_t CTL_APICALL
 ctlFanGetConfig(
     ctl_fan_handle_t hFan,                          ///< [in] Handle for the component.
     ctl_fan_config_t* pConfig                       ///< [in,out] Will contain the current configuration of the fan.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1939,11 +1939,11 @@ ctlFanGetConfig(
 /**
 * @brief Configure the fan to run with hardware factory settings (set mode to
 *        ::CTL_FAN_SPEED_MODE_DEFAULT)
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1956,10 +1956,10 @@ ctlFanGetConfig(
 ctl_result_t CTL_APICALL
 ctlFanSetDefaultMode(
     ctl_fan_handle_t hFan                           ///< [in] Handle for the component.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -1977,11 +1977,11 @@ ctlFanSetDefaultMode(
 /**
 * @brief Configure the fan to rotate at a fixed speed (set mode to
 *        ::CTL_FAN_SPEED_MODE_FIXED)
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -1999,10 +1999,10 @@ ctl_result_t CTL_APICALL
 ctlFanSetFixedSpeedMode(
     ctl_fan_handle_t hFan,                          ///< [in] Handle for the component.
     const ctl_fan_speed_t* speed                    ///< [in] The fixed fan speed setting
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2020,11 +2020,11 @@ ctlFanSetFixedSpeedMode(
 /**
 * @brief Configure the fan to adjust speed based on a temperature/speed table
 *        (set mode to ::CTL_FAN_SPEED_MODE_TABLE)
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2044,10 +2044,10 @@ ctl_result_t CTL_APICALL
 ctlFanSetSpeedTableMode(
     ctl_fan_handle_t hFan,                          ///< [in] Handle for the component.
     const ctl_fan_speed_table_t* speedTable         ///< [in] A table containing temperature/speed pairs.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2064,11 +2064,11 @@ ctlFanSetSpeedTableMode(
 
 /**
 * @brief Get current state of a fan - current mode and speed
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2089,10 +2089,10 @@ ctlFanGetState(
     int32_t* pSpeed                                 ///< [in,out] Will contain the current speed of the fan in the units
                                                     ///< requested. A value of -1 indicates that the fan speed cannot be
                                                     ///< measured.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2109,11 +2109,11 @@ ctlFanGetState(
 
 /**
 * @brief Get handle of frequency domains
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2137,10 +2137,10 @@ ctlEnumFrequencyDomains(
                                                     ///< if count is less than the number of components of this type that are
                                                     ///< available, then the driver shall only retrieve that number of
                                                     ///< component handles.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2157,11 +2157,11 @@ ctlEnumFrequencyDomains(
 
 /**
 * @brief Get frequency properties - available frequencies
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2175,10 +2175,10 @@ ctl_result_t CTL_APICALL
 ctlFrequencyGetProperties(
     ctl_freq_handle_t hFrequency,                   ///< [in] Handle for the component.
     ctl_freq_properties_t* pProperties              ///< [in,out] The frequency properties for the specified domain.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2196,13 +2196,13 @@ ctlFrequencyGetProperties(
 /**
 * @brief Get available non-overclocked hardware clock frequencies for the
 *        frequency domain
-* 
+*
 * @details
 *     - The list of available frequencies is returned in order of slowest to
 *       fastest.
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2224,10 +2224,10 @@ ctlFrequencyGetAvailableClocks(
                                                     ///< MHz and sorted from slowest to fastest.
                                                     ///< if count is less than the number of frequencies that are available,
                                                     ///< then the driver shall only retrieve that number of frequencies.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2244,11 +2244,11 @@ ctlFrequencyGetAvailableClocks(
 
 /**
 * @brief Get current frequency limits
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2263,10 +2263,10 @@ ctlFrequencyGetRange(
     ctl_freq_handle_t hFrequency,                   ///< [in] Handle for the component.
     ctl_freq_range_t* pLimits                       ///< [in,out] The range between which the hardware can operate for the
                                                     ///< specified domain.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2283,11 +2283,11 @@ ctlFrequencyGetRange(
 
 /**
 * @brief Set frequency range between which the hardware can operate.
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2304,10 +2304,10 @@ ctlFrequencySetRange(
     ctl_freq_handle_t hFrequency,                   ///< [in] Handle for the component.
     const ctl_freq_range_t* pLimits                 ///< [in] The limits between which the hardware can operate for the
                                                     ///< specified domain.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2325,11 +2325,11 @@ ctlFrequencySetRange(
 /**
 * @brief Get current frequency state - frequency request, actual frequency, TDP
 *        limits
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2343,10 +2343,10 @@ ctl_result_t CTL_APICALL
 ctlFrequencyGetState(
     ctl_freq_handle_t hFrequency,                   ///< [in] Handle for the component.
     ctl_freq_state_t* pState                        ///< [in,out] Frequency state for the specified domain.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2363,11 +2363,11 @@ ctlFrequencyGetState(
 
 /**
 * @brief Get frequency throttle time
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2382,10 +2382,10 @@ ctlFrequencyGetThrottleTime(
     ctl_freq_handle_t hFrequency,                   ///< [in] Handle for the component.
     ctl_freq_throttle_time_t* pThrottleTime         ///< [in,out] Will contain a snapshot of the throttle time counters for the
                                                     ///< specified domain.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2402,10 +2402,10 @@ ctlFrequencyGetThrottleTime(
 
 /**
 * @brief Get Video Processing capabilities
-* 
+*
 * @details
 *     - The application gets Video Processing properties
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2420,10 +2420,10 @@ ctl_result_t CTL_APICALL
 ctlGetSupportedVideoProcessingCapabilities(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
     ctl_video_processing_feature_caps_t* pFeatureCaps   ///< [in,out][release] Video Processing properties
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2440,10 +2440,10 @@ ctlGetSupportedVideoProcessingCapabilities(
 
 /**
 * @brief Get/Set Video Processing feature details
-* 
+*
 * @details
 *     - Video Processing feature details
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2458,10 +2458,10 @@ ctl_result_t CTL_APICALL
 ctlGetSetVideoProcessingFeature(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
     ctl_video_processing_feature_getset_t* pFeature ///< [in][release] Video Processing feature get/set parameter
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2478,11 +2478,11 @@ ctlGetSetVideoProcessingFeature(
 
 /**
 * @brief Get handle of memory modules
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2506,10 +2506,10 @@ ctlEnumMemoryModules(
                                                     ///< if count is less than the number of components of this type that are
                                                     ///< available, then the driver shall only retrieve that number of
                                                     ///< component handles.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2526,11 +2526,11 @@ ctlEnumMemoryModules(
 
 /**
 * @brief Get memory properties
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2544,10 +2544,10 @@ ctl_result_t CTL_APICALL
 ctlMemoryGetProperties(
     ctl_mem_handle_t hMemory,                       ///< [in] Handle for the component.
     ctl_mem_properties_t* pProperties               ///< [in,out] Will contain memory properties.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2564,11 +2564,11 @@ ctlMemoryGetProperties(
 
 /**
 * @brief Get memory state - health, allocated
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2582,10 +2582,10 @@ ctl_result_t CTL_APICALL
 ctlMemoryGetState(
     ctl_mem_handle_t hMemory,                       ///< [in] Handle for the component.
     ctl_mem_state_t* pState                         ///< [in,out] Will contain the current health and allocated memory.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2602,11 +2602,11 @@ ctlMemoryGetState(
 
 /**
 * @brief Get memory bandwidth
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2623,10 +2623,10 @@ ctlMemoryGetBandwidth(
     ctl_mem_handle_t hMemory,                       ///< [in] Handle for the component.
     ctl_mem_bandwidth_t* pBandwidth                 ///< [in,out] Will contain the current health, free memory, total memory
                                                     ///< size.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2643,7 +2643,7 @@ ctlMemoryGetBandwidth(
 
 /**
 * @brief Get overclock properties - available properties.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2657,10 +2657,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockGetProperties(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     ctl_oc_properties_t* pOcProperties              ///< [in,out] The overclocking properties for the specified domain.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2677,7 +2677,7 @@ ctlOverclockGetProperties(
 
 /**
 * @brief Overclock Waiver - Warranty Waiver.
-* 
+*
 * @details
 *     - Most of the overclock functions will return an error if the waiver is
 *       not set. This is because most overclock settings will increase the
@@ -2690,7 +2690,7 @@ ctlOverclockGetProperties(
 *       application.
 *     - It is acceptable for the application to cache the user choice and call
 *       this function on future executions without issuing the popup.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2701,10 +2701,10 @@ ctlOverclockGetProperties(
 ctl_result_t CTL_APICALL
 ctlOverclockWaiverSet(
     ctl_device_adapter_handle_t hDeviceHandle       ///< [in][release] Handle to display adapter
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2721,7 +2721,7 @@ ctlOverclockWaiverSet(
 
 /**
 * @brief Get the Overclock Frequency Offset for the GPU in MHz.
-* 
+*
 * @details
 *     - Determine the current frequency offset in effect (refer to
 *       ::ctlOverclockGpuFrequencyOffsetSet() for details).
@@ -2729,7 +2729,7 @@ ctlOverclockWaiverSet(
 *       set by the application depending on hardware limitations or if the
 *       function ::ctlOverclockGpuFrequencyOffsetSet() has been called or
 *       another application that has changed the value.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2743,10 +2743,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockGpuFrequencyOffsetGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double* pOcFrequencyOffset                      ///< [in,out] The Turbo Overclocking Frequency Desired in MHz.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2763,7 +2763,7 @@ ctlOverclockGpuFrequencyOffsetGet(
 
 /**
 * @brief Set the Overclock Frequency Offset for the GPU in MHZ.
-* 
+*
 * @details
 *     - The purpose of this function is to increase/decrease the frequency at
 *       which typical workloads will run within the same thermal budget.
@@ -2789,7 +2789,7 @@ ctlOverclockGpuFrequencyOffsetGet(
 *       application should not reapply the overclock settings automatically
 *       but instead return to previously known good settings or notify the
 *       user that the settings are not being applied.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2801,10 +2801,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockGpuFrequencyOffsetSet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double ocFrequencyOffset                        ///< [in] The Turbo Overclocking Frequency Desired in MHz.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2821,7 +2821,7 @@ ctlOverclockGpuFrequencyOffsetSet(
 
 /**
 * @brief Get the Overclock Gpu Voltage Offset in mV.
-* 
+*
 * @details
 *     - Determine the current voltage offset in effect on the hardware (refer
 *       to ::ctlOverclockGpuVoltageOffsetSet for details).
@@ -2829,7 +2829,7 @@ ctlOverclockGpuFrequencyOffsetSet(
 *       set by the application depending on hardware limitations or if the
 *       function ::ctlOverclockGpuVoltageOffsetSet has been called or another
 *       application that has changed the value.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2843,10 +2843,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockGpuVoltageOffsetGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double* pOcVoltageOffset                        ///< [in,out] The Turbo Overclocking Frequency Desired in mV.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2863,7 +2863,7 @@ ctlOverclockGpuVoltageOffsetGet(
 
 /**
 * @brief Set the Overclock Gpu Voltage Offset in mV.
-* 
+*
 * @details
 *     - The purpose of this function is to attempt to run the GPU up to higher
 *       voltages beyond the part warrantee limits. This can permit running at
@@ -2877,7 +2877,7 @@ ctlOverclockGpuVoltageOffsetGet(
 *       frequencies permitted by this setting. Significantly more heat will be
 *       generated at these high frequencies/voltages which will necessitate a
 *       good cooling solution.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2889,10 +2889,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockGpuVoltageOffsetSet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double ocVoltageOffset                          ///< [in] The Turbo Overclocking Frequency Desired in mV.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2909,7 +2909,7 @@ ctlOverclockGpuVoltageOffsetSet(
 
 /**
 * @brief Gets the Locked GPU Voltage for Overclocking in mV.
-* 
+*
 * @details
 *     - The purpose of this function is to determine if the current values of
 *       the frequency/voltage lock.
@@ -2917,7 +2917,7 @@ ctlOverclockGpuVoltageOffsetSet(
 *       voltage.
 *     - Note that the operating frequency/voltage may be lower than these
 *       settings if power/thermal limits are exceeded.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2931,10 +2931,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockGpuLockGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     ctl_oc_vf_pair_t* pVfPair                       ///< [out] The current locked voltage and frequency.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2951,7 +2951,7 @@ ctlOverclockGpuLockGet(
 
 /**
 * @brief Locks the GPU voltage for Overclocking in mV.
-* 
+*
 * @details
 *     - The purpose of this function is to provide an interface for scanners
 *       to lock the frequency and voltage to fixed values.
@@ -2965,7 +2965,7 @@ ctlOverclockGpuLockGet(
 *     - Requesting a frequency and/or voltage of 0 will return the hardware to
 *       dynamic frequency/voltage management with any previous frequency
 *       offset or voltage offset settings reapplied.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -2977,10 +2977,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockGpuLockSet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     ctl_oc_vf_pair_t vFPair                         ///< [in] The current locked voltage and frequency.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -2997,11 +2997,11 @@ ctlOverclockGpuLockSet(
 
 /**
 * @brief Get the current Vram Frequency Offset in GT/s.
-* 
+*
 * @details
 *     - The purpose of this function is to return the current VRAM frequency
 *       offset in units of GT/s.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3015,10 +3015,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockVramFrequencyOffsetGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double* pOcFrequencyOffset                      ///< [in,out] The current Memory Frequency in GT/s.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3035,7 +3035,7 @@ ctlOverclockVramFrequencyOffsetGet(
 
 /**
 * @brief Set the desired Vram frquency Offset in GT/s
-* 
+*
 * @details
 *     - The purpose of this function is to increase/decrease the frequency of
 *       VRAM.
@@ -3076,7 +3076,7 @@ ctlOverclockVramFrequencyOffsetGet(
 *       reset/reboot. If this is not done and the overclock setting is
 *       requested after the reboot has occurred, a second reboot will be
 *       required.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3088,10 +3088,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockVramFrequencyOffsetSet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double ocFrequencyOffset                        ///< [in] The desired Memory Frequency in GT/s.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3108,7 +3108,7 @@ ctlOverclockVramFrequencyOffsetSet(
 
 /**
 * @brief Get the Overclock Vram Voltage Offset in mV.
-* 
+*
 * @details
 *     - The purpose of this function is to increase/decrease the voltage of
 *       VRAM.
@@ -3147,7 +3147,7 @@ ctlOverclockVramFrequencyOffsetSet(
 *       reset/reboot. If this is not done and the overclock setting is
 *       requested after the reboot has occurred, a second reboot will be
 *       required.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3161,10 +3161,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockVramVoltageOffsetGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double* pVoltage                                ///< [out] The current locked voltage in mV.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3181,7 +3181,7 @@ ctlOverclockVramVoltageOffsetGet(
 
 /**
 * @brief Set the Overclock Vram Voltage Offset in mV.
-* 
+*
 * @details
 *     - The purpose of this function is to set the maximum sustained power
 *       limit. If the average GPU power averaged over a few seconds exceeds
@@ -3189,7 +3189,7 @@ ctlOverclockVramVoltageOffsetGet(
 *     - Set a value of 0 to disable this power limit. In this case, the GPU
 *       frequency will not throttle due to average power but may hit other
 *       limits.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3201,10 +3201,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockVramVoltageOffsetSet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double voltage                                  ///< [in] The voltage to be locked in mV.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3221,13 +3221,13 @@ ctlOverclockVramVoltageOffsetSet(
 
 /**
 * @brief Get the sustained power limit in mW.
-* 
+*
 * @details
 *     - The purpose of this function is to read the current sustained power
 *       limit.
 *     - A value of 0 means that the limit is disabled - the GPU frequency can
 *       run as high as possible until other limits are hit.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3241,10 +3241,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockPowerLimitGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double* pSustainedPowerLimit                    ///< [in,out] The current sustained power limit in mW.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3261,7 +3261,7 @@ ctlOverclockPowerLimitGet(
 
 /**
 * @brief Set the sustained power limit in mW.
-* 
+*
 * @details
 *     - The purpose of this function is to set the maximum sustained power
 *       limit. If the average GPU power averaged over a few seconds exceeds
@@ -3269,7 +3269,7 @@ ctlOverclockPowerLimitGet(
 *     - Set a value of 0 to disable this power limit. In this case, the GPU
 *       frequency will not throttle due to average power but may hit other
 *       limits.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3281,10 +3281,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockPowerLimitSet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double sustainedPowerLimit                      ///< [in] The desired sustained power limit in mW.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3301,10 +3301,10 @@ ctlOverclockPowerLimitSet(
 
 /**
 * @brief Get the current temperature limit in Celsius.
-* 
+*
 * @details
 *     - The purpose of this function is to read the current thermal limit.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3318,10 +3318,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockTemperatureLimitGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double* pTemperatureLimit                       ///< [in,out] The current temperature limit in Celsius.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3338,12 +3338,12 @@ ctlOverclockTemperatureLimitGet(
 
 /**
 * @brief Set the temperature limit in Celsius.
-* 
+*
 * @details
 *     - The purpose of this function is to change the maximum thermal limit.
 *       When the GPU temperature exceeds this value, the GPU frequency will be
 *       throttled.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3355,10 +3355,10 @@ ctl_result_t CTL_APICALL
 ctlOverclockTemperatureLimitSet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     double temperatureLimit                         ///< [in] The desired temperature limit in Celsius.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3375,11 +3375,11 @@ ctlOverclockTemperatureLimitSet(
 
 /**
 * @brief Get Power Telemetry.
-* 
+*
 * @details
 *     - Limited rate of 50 ms, any call under 50 ms will return the same
 *       information.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3393,10 +3393,10 @@ ctl_result_t CTL_APICALL
 ctlPowerTelemetryGet(
     ctl_device_adapter_handle_t hDeviceHandle,      ///< [in][release] Handle to display adapter
     ctl_power_telemetry_t* pTelemetryInfo           ///< [out] The overclocking properties for the specified domain.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3413,11 +3413,11 @@ ctlPowerTelemetryGet(
 
 /**
 * @brief Get PCI properties - address, max speed
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3431,10 +3431,10 @@ ctl_result_t CTL_APICALL
 ctlPciGetProperties(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
     ctl_pci_properties_t* pProperties               ///< [in,out] Will contain the PCI properties.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3451,11 +3451,11 @@ ctlPciGetProperties(
 
 /**
 * @brief Get current PCI state - current speed
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3469,10 +3469,10 @@ ctl_result_t CTL_APICALL
 ctlPciGetState(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
     ctl_pci_state_t* pState                         ///< [in,out] Will contain the PCI properties.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3489,11 +3489,11 @@ ctlPciGetState(
 
 /**
 * @brief Get handle of power domains
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3517,10 +3517,10 @@ ctlEnumPowerDomains(
                                                     ///< if count is less than the number of components of this type that are
                                                     ///< available, then the driver shall only retrieve that number of
                                                     ///< component handles.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3537,11 +3537,11 @@ ctlEnumPowerDomains(
 
 /**
 * @brief Get properties related to a power domain
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3555,10 +3555,10 @@ ctl_result_t CTL_APICALL
 ctlPowerGetProperties(
     ctl_pwr_handle_t hPower,                        ///< [in] Handle for the component.
     ctl_power_properties_t* pProperties             ///< [in,out] Structure that will contain property data.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3575,11 +3575,11 @@ ctlPowerGetProperties(
 
 /**
 * @brief Get energy counter
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3594,10 +3594,10 @@ ctlPowerGetEnergyCounter(
     ctl_pwr_handle_t hPower,                        ///< [in] Handle for the component.
     ctl_power_energy_counter_t* pEnergy             ///< [in,out] Will contain the latest snapshot of the energy counter and
                                                     ///< timestamp when the last counter value was measured.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3614,11 +3614,11 @@ ctlPowerGetEnergyCounter(
 
 /**
 * @brief Get power limits
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3630,10 +3630,10 @@ ctl_result_t CTL_APICALL
 ctlPowerGetLimits(
     ctl_pwr_handle_t hPower,                        ///< [in] Handle for the component.
     ctl_power_limits_t* pPowerLimits                ///< [in,out][optional] Structure that will contain the power limits.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3650,11 +3650,11 @@ ctlPowerGetLimits(
 
 /**
 * @brief Set power limits
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3670,10 +3670,10 @@ ctl_result_t CTL_APICALL
 ctlPowerSetLimits(
     ctl_pwr_handle_t hPower,                        ///< [in] Handle for the component.
     const ctl_power_limits_t* pPowerLimits          ///< [in][optional] Structure that will contain the power limits.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3690,11 +3690,11 @@ ctlPowerSetLimits(
 
 /**
 * @brief Get handle of temperature sensors
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3718,10 +3718,10 @@ ctlEnumTemperatureSensors(
                                                     ///< if count is less than the number of components of this type that are
                                                     ///< available, then the driver shall only retrieve that number of
                                                     ///< component handles.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3738,11 +3738,11 @@ ctlEnumTemperatureSensors(
 
 /**
 * @brief Get temperature sensor properties
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3756,10 +3756,10 @@ ctl_result_t CTL_APICALL
 ctlTemperatureGetProperties(
     ctl_temp_handle_t hTemperature,                 ///< [in] Handle for the component.
     ctl_temp_properties_t* pProperties              ///< [in,out] Will contain the temperature sensor properties.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
@@ -3776,11 +3776,11 @@ ctlTemperatureGetProperties(
 
 /**
 * @brief Get the temperature from a specified sensor
-* 
+*
 * @details
 *     - The application may call this function from simultaneous threads.
 *     - The implementation of this function should be lock-free.
-* 
+*
 * @returns
 *     - CTL_RESULT_SUCCESS
 *     - CTL_RESULT_ERROR_UNINITIALIZED
@@ -3795,10 +3795,10 @@ ctlTemperatureGetState(
     ctl_temp_handle_t hTemperature,                 ///< [in] Handle for the component.
     double* pTemperature                            ///< [in,out] Will contain the temperature read from the specified sensor
                                                     ///< in degrees Celsius.
-    )
+)
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-    
+
 
     if (NULL != hinstLib)
     {
