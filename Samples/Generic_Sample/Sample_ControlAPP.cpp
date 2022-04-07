@@ -1,5 +1,5 @@
 //===========================================================================
-// Copyright (C) 2022 Intel Corporation
+// Copyright (C) 2021 Intel Corporation
 //
 //
 //
@@ -469,7 +469,7 @@ ctl_result_t CtlTestEvents(ctl_device_adapter_handle_t hAdapter)
     HANDLE ThreadHandle = NULL;
 
     printf("Do you want to listen for events (L), listen via a thread (T), quit (Q) or do series of set calls (any other key)? ");
-    int Key = getch();
+    int Key = _getch();
     printf("\n");
     if ((Key == 'L') || (Key == 'l'))
     {
@@ -547,7 +547,7 @@ ctl_result_t CtlTestEvents(ctl_device_adapter_handle_t hAdapter)
         if (SpawnThread)
         {
             printf("Press any key to signal thread to exit...");
-            int Key = getch();
+            int Key = _getch();
             printf("\n");
             QuiteEventThread = true;
             break; // exit from loop
@@ -555,7 +555,7 @@ ctl_result_t CtlTestEvents(ctl_device_adapter_handle_t hAdapter)
         else
         {
             printf("Quit(q) or continue (any other key)? ");
-            int Key = getch();
+            int Key = _getch();
             printf("\n");
             if ((Key == 'Q') || (Key == 'q'))
             {
