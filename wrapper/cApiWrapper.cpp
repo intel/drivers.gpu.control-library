@@ -87,10 +87,10 @@ ctl_result_t CTL_APICALL
 ctlInit(
     ctl_init_args_t* pInitDesc,                     ///< [in][out] App's control API version
     ctl_api_handle_t* phAPIHandle                   ///< [in][out][release] Control API handle
-)
+    )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-
+    
     // special code - only for ctlInit()
     if (NULL == hinstLib)
     {
@@ -101,7 +101,11 @@ ctlInit(
 #ifdef WINDOWS_UWP
             hinstLib = LoadPackagedLibrary(strDLLPath, 0);
 #else
-            hinstLib = LoadLibraryW(strDLLPath);
+            DWORD dwFlags = LOAD_LIBRARY_SEARCH_SYSTEM32;
+#ifdef _DEBUG
+            dwFlags = dwFlags | LOAD_LIBRARY_SEARCH_APPLICATION_DIR;
+#endif
+            hinstLib = LoadLibraryExW(strDLLPath, NULL, dwFlags);            
 #endif
             if (NULL == hinstLib)
             {
@@ -110,8 +114,8 @@ ctlInit(
             else if (pRuntimeArgs)
             {
                 ctlSetRuntimePath(pRuntimeArgs);
-            }
-        }
+            }            
+        }    
     }
 
     if (NULL != hinstLib)
@@ -125,7 +129,6 @@ ctlInit(
 
     return result;
 }
-
 
 /**
 * @brief Control Api Destroy
