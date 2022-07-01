@@ -10,4 +10,6 @@ IGCL is meant to be a collection of high level APIs for all control aspects of h
 * Header & library wrapper code are provided here to help developers with their application development.
 * For API/spec questions or issues, for now, use the "Issues" tab under Github. For issues related to an already shipped binary of this spec, contact standard Intel customer support for Graphics.
 * Performance & Telemetry API's, i.e., Engine/Fan/Telemetry/Frequency/Memory/Overclock/PCI/Power/Temperature are limited to 64-bit applications as of now. This is a Level0 limitation.
-* In sync with IGCL build version 73 (Graphics driver build: 30.0.101.1660+)
+
+# Usage 
+cmake.exe -B <output_folder> -S <cmake_source_folder> -G "Visual Studio 17 2022" -A x64

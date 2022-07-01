@@ -96,9 +96,51 @@ inline char *Get3DFeatureName(ctl_3d_feature_t FeatureType)
             return "Gaming flip modes";
         case CTL_3D_FEATURE_ADAPTIVE_SYNC_PLUS:
             return "Adaptive sync plus";
+        case CTL_3D_FEATURE_APP_PROFILES:
+            return "Application profile";
+        case CTL_3D_FEATURE_APP_PROFILE_DETAILS:
+            return "Application profile custom details";
         default:
             return "No Name";
     }
+}
+
+/***************************************************************
+ * @brief
+ * Helper function/macros
+ * @param
+ * @return char*
+ ***************************************************************/
+inline char *GetProfileTypeName(ctl_3d_tier_type_flags_t Flag)
+{
+    if ((CTL_3D_TIER_TYPE_FLAG_COMPATIBILITY & Flag) && (CTL_3D_TIER_TYPE_FLAG_PERFORMANCE & Flag))
+        return "Compatibility and Performance";
+    else if (CTL_3D_TIER_TYPE_FLAG_COMPATIBILITY & Flag)
+        return "Compatibility";
+    else if (CTL_3D_TIER_TYPE_FLAG_PERFORMANCE & Flag)
+        return "Performance";
+
+    return "Unknown tier type";
+}
+
+/***************************************************************
+ * @brief
+ * Helper function/macros
+ * @param
+ * @return char*
+ ***************************************************************/
+inline char *GetProfileTierName(ctl_3d_tier_profile_flags_t Flags)
+{
+    if ((Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_1) && (Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_2))
+        return "Tier 1 & 2";
+    else if (Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_1)
+        return "Tier 1";
+    else if (Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_2)
+        return "Tier 2";
+    else if (0 == Flags)
+        return "None";
+
+    return "Unknown tier";
 }
 
 /***************************************************************
@@ -213,7 +255,7 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
             {
                 if (pFeatureDetails->pCustomValue == NULL)
                 {
-                    printf("  Requery caps for this feature to get the custom capability structure\n");
+                    printf("  Empty custom data\n");
                     break;
                 }
 
@@ -238,6 +280,14 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
                         printf("  pEGCaps->EGModeCaps.DefaultType = %d\n", pEGCaps->EGModeCaps.DefaultType);
                     }
                     break;
+
+                    case CTL_3D_FEATURE_APP_PROFILES:
+                    {
+                        ctl_3d_app_profiles_caps_t *pCaps = (ctl_3d_app_profiles_caps_t *)pFeatureDetails->pCustomValue;
+                        printf("  pCaps->SupportedTierTypes = %s\n", GetProfileTypeName(pCaps->SupportedTierTypes));
+                    }
+                    break;
+
                     default:
                     {
                         printf("  Unknown feature type with custom capabilities! ERROR!!\n");

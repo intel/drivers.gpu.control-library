@@ -1,5 +1,5 @@
 //===========================================================================
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2022 Intel Corporation
 //
 //
 //
@@ -245,6 +245,10 @@ inline bool Get3DCustomStruct(ctl_3d_feature_getset_t *p3DGetSetArgs)
     {
         p3DGetSetArgs->CustomValueSize = sizeof(ctl_adaptivesync_getset_t);
     }
+    else if (CTL_3D_FEATURE_APP_PROFILES == p3DGetSetArgs->FeatureType)
+    {
+        p3DGetSetArgs->CustomValueSize = sizeof(ctl_3d_app_profiles_t);
+    }
     else
     {
         // TODO: A new custom property got added, which is not known to this driver
@@ -258,7 +262,18 @@ inline bool Get3DCustomStruct(ctl_3d_feature_getset_t *p3DGetSetArgs)
         p3DGetSetArgs->pCustomValue = malloc(p3DGetSetArgs->CustomValueSize);
 
     if (p3DGetSetArgs->pCustomValue)
+    {
+        // clear the custom struct
+        memset(p3DGetSetArgs->pCustomValue, 0, p3DGetSetArgs->CustomValueSize);
+
+        // if any in parameters are required, set it up with some default ones - just to generalize code
+        if (CTL_3D_FEATURE_APP_PROFILES == p3DGetSetArgs->FeatureType)
+        {
+            ctl_3d_app_profiles_t *pAppProfile = (ctl_3d_app_profiles_t *)p3DGetSetArgs->pCustomValue;
+            pAppProfile->TierType              = CTL_3D_TIER_TYPE_FLAG_COMPATIBILITY;
+        }
         return true;
+    }
 
     return false;
 }

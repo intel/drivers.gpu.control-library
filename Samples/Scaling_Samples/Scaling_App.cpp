@@ -42,6 +42,7 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices)
     ctl_retro_scaling_settings_t RetroScalingSettings = { 0 };
     ctl_scaling_caps_t ScalingCaps                    = { 0 };
     ctl_scaling_settings_t ScalingSetting             = { 0 };
+    bool ModeSet;
 
     // Test Retro scaling
     // Retro scaling is adapter capability
@@ -121,18 +122,23 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices)
                 STORE_AND_RESET_ERROR(Result);
                 continue;
             }
-
             printf("ctlGetCurrentScaling returned Enable: 0x%X type:0x%x\n", ScalingSetting.Enable, ScalingSetting.ScalingType);
         }
 
-        ScalingSetting                 = { 0 };
-        ScalingSetting.Enable          = true;
-        ScalingSetting.ScalingType     = CTL_SCALING_TYPE_FLAG_CUSTOM;
-        ScalingSetting.Size            = sizeof(ctl_scaling_settings_t);
-        ScalingSetting.CustomScalingX  = 1000; // For demonstration purpose
-        ScalingSetting.CustomScalingY  = 1000; // For demonstration purpose
-        ScalingSetting.HardwareModeSet = false;
-
+        // fill custom scaling details only if it is supported
+        if (0x1F == ScalingCaps.SupportedScaling)
+        {
+            // check if hardware modeset required to apply custom scaling
+            ModeSet = ((TRUE == ScalingSetting.Enable) && (CTL_SCALING_TYPE_FLAG_CUSTOM == ScalingSetting.ScalingType)) ? FALSE : TRUE;
+            // filling custom scaling details
+            ScalingSetting                 = { 0 };
+            ScalingSetting.Enable          = true;
+            ScalingSetting.ScalingType     = CTL_SCALING_TYPE_FLAG_CUSTOM;
+            ScalingSetting.Size            = sizeof(ctl_scaling_settings_t);
+            ScalingSetting.HardwareModeSet = (TRUE == ModeSet) ? TRUE : FALSE;
+            ScalingSetting.CustomScalingX  = 1000;
+            ScalingSetting.CustomScalingY  = 1000;
+        }
         Result = ctlSetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
 
         if (CTL_RESULT_SUCCESS != Result)
@@ -141,20 +147,16 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices)
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
-
-        // Check if the applied scaling was successful
+        // check if the applied scaling was successful
         ScalingSetting      = { 0 };
         ScalingSetting.Size = sizeof(ctl_scaling_settings_t);
-
-        Result = ctlGetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
-
+        Result              = ctlGetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
         if (CTL_RESULT_SUCCESS != Result)
         {
             printf("ctlGetCurrentScaling returned failure code: 0x%X\n", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
-
         printf("ctlGetCurrentScaling returned Enable: 0x%X type:0x%x\n", ScalingSetting.Enable, ScalingSetting.ScalingType);
     }
 

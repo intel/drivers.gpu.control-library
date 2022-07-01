@@ -288,6 +288,32 @@ double GetSRGBDecodingValue(double Input)
 
 /***************************************************************
  * @brief
+ * GetSRGBEncodingValue
+ * @param Input
+ * @return double
+ ***************************************************************/
+double GetSRGBEncodingValue(double Input)
+{
+    /*
+    https://en.wikipedia.org/wiki/SRGB#The_forward_transformation_.28CIE_xyY_or_CIE_XYZ_to_sRGB.29
+    */
+
+    double Output;
+
+    if (Input <= 0.0031308)
+    {
+        Output = Input * 12.92;
+    }
+    else
+    {
+        Output = (1.055 * pow(Input, 1.0 / 2.4)) - 0.055;
+    }
+
+    return Output;
+}
+
+/***************************************************************
+ * @brief
  * CIELabTxFn
  * @param Input
  * @return double
@@ -693,6 +719,7 @@ ctl_result_t GetPixTxCapability(ctl_display_output_handle_t hDisplayOutput, ctl_
         ctl_pixtx_1dlut_config_t *pOneDLutConfig = &pPixTxCaps->pBlockConfigs[i].Config.OneDLutConfig;
 
         // Block specific information
+        printf("pPixTxCaps->pBlockConfigs[%d].BlockId = %d\n", i, pPixTxCaps->pBlockConfigs[i].BlockId);
         if (CTL_PIXTX_BLOCK_TYPE_1D_LUT == pPixTxCaps->pBlockConfigs[i].BlockType)
         {
             printf("Block type is CTL_PIXTX_BLOCK_TYPE_1D_LUT\n");
@@ -709,9 +736,260 @@ ctl_result_t GetPixTxCapability(ctl_display_output_handle_t hDisplayOutput, ctl_
             printf("Block type is CTL_PIXTX_BLOCK_TYPE_3D_LUT\n");
             printf("pPixTxCaps->pBlockConfigs[%d].Config.ThreeDLutConfig.NumSamplesPerChannel = %d\n", i, pPixTxCaps->pBlockConfigs[i].Config.ThreeDLutConfig.NumSamplesPerChannel);
         }
+        else if (CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX_AND_OFFSETS == pPixTxCaps->pBlockConfigs[i].BlockType)
+        {
+            printf("Block type is CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX_AND_OFFSETS\n");
+        }
     }
 
 Exit:
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * ApplyLinearCSC DGLUT->CSC->GLUT
+ * @param hDisplayOutput
+ * @param pPixTxCaps
+ * @return
+ ***************************************************************/
+ctl_result_t ApplyLinearCSC(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_config_t *pPixTxCaps)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    if (nullptr == hDisplayOutput)
+    {
+        return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (nullptr == pPixTxCaps)
+    {
+        return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    // One approach could be check for CSC with offsets block, the block right before CSC with offset block is DGLUT and the Block Right after CSC with Offsets block is GLUT.
+
+    // In HDR mode only one 1DLUT block will be reported and that is of GLUT. So, need to take last occurrence of 1DLUT block in consideration.
+
+    int32_t DGLUTIndex, CscIndex, GLUTIndex;
+    DGLUTIndex = CscIndex = GLUTIndex = -1;
+    uint32_t OneDLutOccurances        = 0;
+
+    for (uint32_t i = 0; i < pPixTxCaps->NumBlocks; i++)
+    {
+        if (CTL_PIXTX_BLOCK_TYPE_1D_LUT == pPixTxCaps->pBlockConfigs[i].BlockType)
+        {
+            if ((CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX_AND_OFFSETS == pPixTxCaps->pBlockConfigs[i + 1].BlockType) && (CTL_PIXTX_BLOCK_TYPE_1D_LUT == pPixTxCaps->pBlockConfigs[i + 2].BlockType))
+            {
+                DGLUTIndex = i;
+                CscIndex   = i + 1;
+                GLUTIndex  = i + 2;
+            }
+            break;
+        }
+    }
+
+    if (DGLUTIndex < 0 || CscIndex < 0 || GLUTIndex < 0)
+    {
+        printf("Invalid Index for DGLUT/CSC/GLUT\n");
+        return CTL_RESULT_ERROR_INVALID_ARGUMENT;
+    }
+
+    ctl_pixtx_block_config_t DGLUTConfig = pPixTxCaps->pBlockConfigs[DGLUTIndex];
+    ctl_pixtx_block_config_t CSCConfig   = pPixTxCaps->pBlockConfigs[CscIndex];
+    ctl_pixtx_block_config_t GLUTConfig  = pPixTxCaps->pBlockConfigs[GLUTIndex];
+
+    ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
+    SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
+    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.NumBlocks                   = 3; // We are trying to set only one block
+    SetPixTxArgs.pBlockConfigs               = (ctl_pixtx_block_config_t *)malloc(SetPixTxArgs.NumBlocks * sizeof(ctl_pixtx_block_config_t));
+    EXIT_ON_MEM_ALLOC_FAILURE(SetPixTxArgs.pBlockConfigs, " SetPixTxArgs.pBlockConfigs");
+
+    memset(SetPixTxArgs.pBlockConfigs, 0, SetPixTxArgs.NumBlocks * sizeof(ctl_pixtx_block_config_t));
+
+    // DGLUT values
+    const uint32_t DGLutSize                                                = DGLUTConfig.Config.OneDLutConfig.NumSamplesPerChannel * DGLUTConfig.Config.OneDLutConfig.NumChannels;
+    SetPixTxArgs.pBlockConfigs[0].BlockId                                   = DGLUTConfig.BlockId;
+    SetPixTxArgs.pBlockConfigs[0].BlockType                                 = DGLUTConfig.BlockType;
+    SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.NumChannels          = DGLUTConfig.Config.OneDLutConfig.NumChannels;
+    SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.NumSamplesPerChannel = DGLUTConfig.Config.OneDLutConfig.NumSamplesPerChannel;
+    SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.SamplingType         = DGLUTConfig.Config.OneDLutConfig.SamplingType;
+    SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues        = (double *)malloc(DGLutSize * sizeof(double));
+
+    EXIT_ON_MEM_ALLOC_FAILURE(SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues, " SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues");
+
+    memset(SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues, 0, DGLutSize * sizeof(double));
+
+    for (uint32_t i = 0; i < (DGLutSize / DGLUTConfig.Config.OneDLutConfig.NumChannels); i++)
+    {
+        double Input                                                        = (double)i / (double)(DGLutSize - 1);
+        SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues[i] = GetSRGBDecodingValue(Input);
+    }
+
+    // CSC Values
+    double PostOffsets[3] = { 0, 0, 0 };
+    double PreOffsets[3]  = { 0, 0, 0 };
+    double Matrix[3][3]   = { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } }; // Identity Matrix
+    // double Matrix[3][3]                     = { { 0, 0, 1 }, { 0, 1, 0 }, { 1, 0, 0 } }; // Red Blue swap Matrix
+    SetPixTxArgs.pBlockConfigs[1].BlockId   = CSCConfig.BlockId;
+    SetPixTxArgs.pBlockConfigs[1].BlockType = CSCConfig.BlockType;
+
+    // Create a valid CSC Matrix.
+    for (uint32_t i = 0; i < 3; i++)
+    {
+        CSCConfig.Config.MatrixConfig.PreOffsets[i] = PreOffsets[i];
+    }
+    for (uint32_t i = 0; i < 3; i++)
+    {
+        CSCConfig.Config.MatrixConfig.PostOffsets[i] = PostOffsets[i];
+    }
+
+    memcpy_s(SetPixTxArgs.pBlockConfigs[1].Config.MatrixConfig.Matrix, sizeof(SetPixTxArgs.pBlockConfigs[1].Config.MatrixConfig.Matrix), Matrix, sizeof(Matrix));
+
+    // GLUT Values
+    // Create a valid 1D LUT.
+    const uint32_t GLutSize                                                 = GLUTConfig.Config.OneDLutConfig.NumSamplesPerChannel * GLUTConfig.Config.OneDLutConfig.NumChannels;
+    SetPixTxArgs.pBlockConfigs[2].BlockId                                   = GLUTConfig.BlockId;
+    SetPixTxArgs.pBlockConfigs[2].BlockType                                 = GLUTConfig.BlockType;
+    SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumChannels          = GLUTConfig.Config.OneDLutConfig.NumChannels;
+    SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumSamplesPerChannel = GLUTConfig.Config.OneDLutConfig.NumSamplesPerChannel;
+    SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.SamplingType         = GLUTConfig.Config.OneDLutConfig.SamplingType;
+    SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues        = (double *)malloc(GLutSize * sizeof(double));
+
+    EXIT_ON_MEM_ALLOC_FAILURE(SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues, " SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues");
+
+    memset(SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues, 0, GLutSize * sizeof(double));
+
+    double *pRedLut   = SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues;
+    double *pGreenLut = pRedLut + SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumSamplesPerChannel;
+    double *pBlueLut  = pGreenLut + SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumSamplesPerChannel;
+
+    for (uint32_t i = 0; i < (GLutSize / SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumChannels); i++)
+    {
+        double Input = (double)i / (double)((GLutSize / SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumChannels) - 1);
+        pRedLut[i] = pGreenLut[i] = pBlueLut[i] = GetSRGBEncodingValue(Input);
+    }
+
+    Result = ctlPixelTransformationSetConfig(hDisplayOutput, &SetPixTxArgs);
+    LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ctlPixelTransformationSetConfig");
+
+Exit:
+    CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues);
+    CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues);
+    CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs);
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Set DeGamma Lut
+ * @param hDisplayOutput
+ * @param *pPixTxCaps
+ * @param DGLUTIndex
+ * @return
+ ***************************************************************/
+ctl_result_t SetDeGammaLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_config_t *pPixTxCaps, int32_t DGLUTIndex)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    if (nullptr == hDisplayOutput)
+    {
+        return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (nullptr == pPixTxCaps)
+    {
+        return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    ctl_pixtx_pipe_set_config_t SetPixTxArgs        = { 0 };
+    ctl_pixtx_block_config_t LutConfig              = pPixTxCaps->pBlockConfigs[DGLUTIndex];
+    LutConfig.Size                                  = sizeof(ctl_pixtx_block_config_t);
+    LutConfig.Config.OneDLutConfig.pSamplePositions = NULL;
+    double *pLut;
+
+    // Create a valid 1D LUT.
+    const uint32_t LutSize                       = LutConfig.Config.OneDLutConfig.NumSamplesPerChannel * LutConfig.Config.OneDLutConfig.NumChannels;
+    LutConfig.Config.OneDLutConfig.pSampleValues = (double *)malloc(LutSize * sizeof(double));
+
+    EXIT_ON_MEM_ALLOC_FAILURE(LutConfig.Config.OneDLutConfig.pSampleValues, " LutConfig.Config.OneDLutConfig.pSampleValues");
+
+    memset(LutConfig.Config.OneDLutConfig.pSampleValues, 0, LutSize * sizeof(double));
+
+    SetPixTxArgs.Size          = sizeof(ctl_pixtx_pipe_set_config_t);
+    SetPixTxArgs.OpertaionType = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.NumBlocks     = 1;          // We are enabling only one block
+    SetPixTxArgs.pBlockConfigs = &LutConfig; // for 1DLUT block
+
+    pLut = LutConfig.Config.OneDLutConfig.pSampleValues;
+
+    for (uint32_t i = 0; i < (LutSize / LutConfig.Config.OneDLutConfig.NumChannels); i++)
+    {
+        double Input = (double)i / (double)(LutSize - 1);
+        pLut[i]      = GetSRGBDecodingValue(Input);
+        // pLut[i] = Input; // unity
+    }
+
+    Result = ctlPixelTransformationSetConfig(hDisplayOutput, &SetPixTxArgs);
+
+    LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ctlPixelTransformationSetConfig");
+
+Exit:
+    CTL_FREE_MEM(LutConfig.Config.OneDLutConfig.pSampleValues);
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Get DeGamma
+ * @param ctl_display_output_handle_t ,ctl_pixtx_pipe_get_config_t, int32_t
+ * @return
+ ***************************************************************/
+ctl_result_t GetDeGammaLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_config_t *pPixTxCaps, int32_t DGLUTIndex)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    if (nullptr == hDisplayOutput)
+    {
+        return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (nullptr == pPixTxCaps)
+    {
+        return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    ctl_pixtx_pipe_get_config_t GetPixTxCurrentArgs = { 0 };
+    GetPixTxCurrentArgs.Size                        = sizeof(ctl_pixtx_pipe_get_config_t);
+    ctl_pixtx_block_config_t LutConfig              = pPixTxCaps->pBlockConfigs[DGLUTIndex];
+
+    GetPixTxCurrentArgs.QueryType                = CTL_PIXTX_CONFIG_QUERY_TYPE_CURRENT;
+    GetPixTxCurrentArgs.NumBlocks                = 1;          // We are trying to query only one block
+    GetPixTxCurrentArgs.pBlockConfigs            = &LutConfig; // Providing Lut config
+    LutConfig.Config.OneDLutConfig.pSampleValues = (double *)malloc(LutConfig.Config.OneDLutConfig.NumSamplesPerChannel * LutConfig.Config.OneDLutConfig.NumChannels * sizeof(double));
+
+    EXIT_ON_MEM_ALLOC_FAILURE(LutConfig.Config.OneDLutConfig.pSampleValues, "LutConfig.Config.OneDLutConfig.pSampleValues");
+
+    memset(LutConfig.Config.OneDLutConfig.pSampleValues, 0, LutConfig.Config.OneDLutConfig.NumSamplesPerChannel * LutConfig.Config.OneDLutConfig.NumChannels * sizeof(double));
+
+    Result = ctlPixelTransformationGetConfig(hDisplayOutput, &GetPixTxCurrentArgs);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlPixelTransformationGetConfig");
+
+    printf("DEGamma values : LutConfig.Config.OneDLutConfig.pSampleValues\n");
+
+    uint32_t LutDataSize = LutConfig.Config.OneDLutConfig.NumSamplesPerChannel * LutConfig.Config.OneDLutConfig.NumChannels;
+    printf("LutDataSize = %d\n ", LutDataSize);
+
+    printf("DeGamma values : LutConfig.Config.OneDLutConfig.pSampleValues\n");
+
+    for (uint32_t i = 0; i < LutDataSize; i++)
+    {
+        printf("[%d] = %f\n", i, LutConfig.Config.OneDLutConfig.pSampleValues[i]);
+    }
+
+Exit:
+    CTL_FREE_MEM(LutConfig.Config.OneDLutConfig.pSampleValues);
     return Result;
 }
 
@@ -751,9 +1029,8 @@ ctl_result_t SetGammaLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_p
 
     for (uint32_t i = 0; i < (LutSize / LutConfig.Config.OneDLutConfig.NumChannels); i++)
     {
-        double Input  = (double)i / (double)(LutSize - 1);
-        double Output = min(1.2 * Input, 1.0); // Enhancing the contrast by 20%
-        pRedLut[i] = pGreenLut[i] = pBlueLut[i] = Output;
+        double Input = (double)i / (double)(LutSize / LutConfig.Config.OneDLutConfig.NumChannels - 1);
+        pRedLut[i] = pGreenLut[i] = pBlueLut[i] = GetSRGBEncodingValue(Input);
     }
 
     Result = ctlPixelTransformationSetConfig(hDisplayOutput, &SetPixTxArgs);
@@ -1011,23 +1288,77 @@ Exit:
 
 /***************************************************************
  * @brief
+ * Get Set DeGamma
+ * Iterate through blocks PixTxCaps and find the LUT.
+ * @param ctl_display_output_handle_t ,ctl_pixtx_pipe_get_config_t
+ * @return
+ ***************************************************************/
+void GetSetDeGamma(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_config_t *pPixTxCaps)
+{
+    // One approach could be check for CSC with offsets block, the block right before CSC with offset block is DGLUT.
+
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+    int32_t DGLUTIndex  = -1;
+
+    for (uint32_t i = 0; i < pPixTxCaps->NumBlocks; i++)
+    {
+        if ((CTL_PIXTX_BLOCK_TYPE_1D_LUT == pPixTxCaps->pBlockConfigs[i].BlockType) && (CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX_AND_OFFSETS == pPixTxCaps->pBlockConfigs[i + 1].BlockType))
+        {
+            DGLUTIndex = i;
+            break;
+        }
+    }
+
+    if (DGLUTIndex < 0)
+    {
+        printf("Invalid OneDLut Index\n");
+        goto Exit;
+    }
+
+    // Set DeGamma
+    Result = SetDeGammaLut(hDisplayOutput, pPixTxCaps, DGLUTIndex);
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        printf("SetDeGammaLut call failed\n");
+        STORE_AND_RESET_ERROR(Result);
+    }
+    else
+    {
+        // Get DeGamma
+        Result = GetDeGammaLut(hDisplayOutput, pPixTxCaps, DGLUTIndex);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("GetDeGamma call failed\n");
+            LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "GetDeGammaLut");
+        }
+    }
+
+Exit:
+    return;
+}
+
+/***************************************************************
+ * @brief
  * Get Set Gamma
  * Iterate through blocks PixTxCaps and find the LUT.
- * currently only single 1DLUT block is enabled hence consider 1st 1DLUT index, If there are multiple 1DLUTs enabled then consider index based on the sequence of block
  * @param ctl_display_output_handle_t ,ctl_pixtx_pipe_get_config_t
  * @return
  ***************************************************************/
 void GetSetGamma(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_config_t *pPixTxCaps)
 {
-    ctl_result_t Result  = CTL_RESULT_SUCCESS;
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    // One approach could be check for CSC with offsets block, the block right after CSC with offset block is GLUT.
+    // In HDR mode only one 1DLUT block will be reported and that is of GLUT. So, need to take last occurrence of 1DLUT block in consideration.
+
     int32_t OneDLUTIndex = -1;
 
     for (uint8_t i = 0; i < pPixTxCaps->NumBlocks; i++)
     {
+        // Need to consider the last 1DLUT block for Gamma
         if (CTL_PIXTX_BLOCK_TYPE_1D_LUT == pPixTxCaps->pBlockConfigs[i].BlockType)
         {
             OneDLUTIndex = i;
-            break;
         }
     }
 
@@ -1118,10 +1449,10 @@ ctl_result_t TestBrightnessContrastGamma(ctl_display_output_handle_t hDisplayOut
 
     for (uint8_t i = 0; i < pPixTxCaps->NumBlocks; i++)
     {
+        // Need to consider the last 1DLUT block for Gamma
         if (CTL_PIXTX_BLOCK_TYPE_1D_LUT == pPixTxCaps->pBlockConfigs[i].BlockType)
         {
             DesktopGammaBlockIndex = i;
-            break;
         }
     }
 
@@ -1240,6 +1571,13 @@ ctl_result_t TestPixTxGetSetConfig(ctl_display_output_handle_t hDisplayOutput)
 
     // Query capability of each block, number of blocks etc
     Result = GetPixTxCapability(hDisplayOutput, &PixTxCaps);
+
+    // Apply multiple blocks together, for Ex : LinearCSC Degamma->CSC->Gamma
+    Result = ApplyLinearCSC(hDisplayOutput, &PixTxCaps);
+    LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ApplyLinearCSC");
+
+    // Set DeGamma & Get DeGamma
+    GetSetDeGamma(hDisplayOutput, &PixTxCaps);
 
     // Set Gamma & Get Gamma
     GetSetGamma(hDisplayOutput, &PixTxCaps);

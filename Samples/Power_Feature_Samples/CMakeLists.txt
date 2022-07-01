@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
-set(TARGET_NAME PowerFeature_Sample_App)
+set(TARGET_NAME Power_Feature_Samples)
 get_filename_component(ROOT_DIR ../../ ABSOLUTE)
-project(PowerFeature_Sample_App VERSION 1.0)
+project(Power_Feature_Samples VERSION 1.0)
 add_executable(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/PowerFeature_Sample_App.cpp
     ${ROOT_DIR}/wrapper/cApiWrapper.cpp
@@ -20,4 +20,3 @@ endif()
 
 include_directories(${ROOT_DIR}/includes)
 include_directories(${ROOT_DIR}/Samples/inc)
-  

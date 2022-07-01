@@ -26,6 +26,9 @@
 #include "igcl_api.h"
 #include "GenericIGCLApp.h"
 
+#define TARGET_BRIGHTNESS_VALUE 50000;  // 50000 in milli percentage so effectively 50%
+#define SMOOTH_TRANSITION_TIME_VALUE 0; // if its 0 then immediate change. Maximum value supported is 1000ms.
+
 ctl_result_t GResult = CTL_RESULT_SUCCESS;
 
 /***************************************************************
@@ -108,11 +111,17 @@ ctl_result_t TestDPSTPowerFeature(ctl_display_output_handle_t hDisplayOutput)
         goto Exit;
     }
 
-    printf("DPST is supported\n");
-
     Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (DPST)");
 
+    if (CTL_POWER_OPTIMIZATION_DPST_FLAG_BKLT != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_BKLT))
+    {
+        printf("BKLT is not supported\n");
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
+
+    printf("DPST is supported\n");
     printf("DPST Enable = %d\n", AppliedPowerSettings.Enable);
     printf("DPST MinLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
     printf("DPST MaxLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
@@ -126,7 +135,7 @@ ctl_result_t TestDPSTPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     NewPowerSettings.Size                                         = sizeof(ctl_power_optimization_settings_t);
     NewPowerSettings.PowerOptimizationFeature                     = CTL_POWER_OPTIMIZATION_FLAG_DPST;
     NewPowerSettings.Enable                                       = TRUE;
-    NewPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_EPSM;
+    NewPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_EPSM | CTL_POWER_OPTIMIZATION_DPST_FLAG_BKLT; // BKLT bit should be set to enable Intel DPST
     NewPowerSettings.PowerSource                                  = CTL_POWER_SOURCE_DC;
     NewPowerSettings.PowerOptimizationPlan                        = CTL_POWER_OPTIMIZATION_PLAN_BALANCED;
 
@@ -174,6 +183,9 @@ ctl_result_t TestOPSTPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     Result = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerCaps);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (OPST)");
 
+    Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (OPST)");
+
     if ((CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST)) ||
         (CTL_POWER_OPTIMIZATION_DPST_FLAG_OPST != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_OPST)))
     {
@@ -183,10 +195,6 @@ ctl_result_t TestOPSTPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     }
 
     printf("OPST is supported\n");
-
-    Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (OPST)");
-
     printf("GetPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_OPST\n");
     printf("OPST MinLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
     printf("OPST MaxLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
@@ -244,6 +252,9 @@ ctl_result_t TestELPPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     Result = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerCaps);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (ELP)");
 
+    Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (ELP)");
+
     if ((CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST)) ||
         (CTL_POWER_OPTIMIZATION_DPST_FLAG_ELP != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_ELP)))
     {
@@ -251,9 +262,6 @@ ctl_result_t TestELPPowerFeature(ctl_display_output_handle_t hDisplayOutput)
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
-
-    Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (ELP)");
 
     printf("GetPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_ELP\n");
     printf("ELP MinLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
@@ -282,6 +290,74 @@ ctl_result_t TestELPPowerFeature(ctl_display_output_handle_t hDisplayOutput)
         {
             printf("Current and Applied levels mismatched: %d, %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
         }
+    }
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Brightness control Test
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestBrightnessControl(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                                                 = CTL_RESULT_SUCCESS;
+    ctl_set_brightness_t NewBrightnessSettings                          = { 0 };
+    ctl_get_brightness_t AppliedBrightnessSettings                      = { 0 };
+    bool IsDisplayActive                                                = false;
+    bool IsCompanionDisplay                                             = false;
+    AppliedBrightnessSettings.Size                                      = sizeof(ctl_get_brightness_t);
+    ctl_adapter_display_encoder_properties_t StDisplayEncoderProperties = { 0 }; // display encoder properties
+    StDisplayEncoderProperties.Size                                     = sizeof(ctl_adapter_display_encoder_properties_t);
+    ctl_display_properties_t DisplayProperties                          = { 0 }; // display properties
+    DisplayProperties.Size                                              = sizeof(ctl_display_properties_t);
+
+    // check if the display is active.
+    Result = ctlGetDisplayProperties(hDisplayOutput, &DisplayProperties);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetDisplayProperties (Brightness)");
+
+    if (0 == (DisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ACTIVE))
+    {
+        Result = CTL_RESULT_ERROR_DISPLAY_NOT_ACTIVE;
+        goto Exit;
+    }
+
+    // check for companion display , SET/GET call should be called for only companion display.
+    Result = ctlGetAdaperDisplayEncoderProperties(hDisplayOutput, &StDisplayEncoderProperties);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetAdaperDisplayEncoderProperties (Brightness)");
+
+    IsCompanionDisplay = StDisplayEncoderProperties.EncoderConfigFlags & CTL_ENCODER_CONFIG_FLAG_COMPANION_DISPLAY;
+    IsDisplayActive    = DisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ACTIVE;
+
+    if (IsDisplayActive && IsCompanionDisplay)
+    {
+        NewBrightnessSettings.Size = sizeof(ctl_set_brightness_t);
+
+        // Target Brightness value is in Milli percentage, range (0,100000).
+        NewBrightnessSettings.TargetBrightness         = TARGET_BRIGHTNESS_VALUE;      // 50000 in milli percentage so effectively 50%
+        NewBrightnessSettings.SmoothTransitionTimeInMs = SMOOTH_TRANSITION_TIME_VALUE; // if its 0 then immediate change. Maximum value supported is 1000ms.
+
+        Result = ctlSetBrightnessSetting(hDisplayOutput, &NewBrightnessSettings);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlSetBrightnessSetting (Brightness)");
+
+        // Get PowerFeature brightness
+        Result = ctlGetBrightnessSetting(hDisplayOutput, &AppliedBrightnessSettings);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetBrightnessSetting (Brightness)");
+
+        if (AppliedBrightnessSettings.TargetBrightness != NewBrightnessSettings.TargetBrightness)
+        {
+            printf("Current and Applied TargetBrightness mismatched: %d, %d\n", AppliedBrightnessSettings.TargetBrightness, NewBrightnessSettings.TargetBrightness);
+        }
+
+        printf("Current brightness = %d\n", AppliedBrightnessSettings.CurrentBrightness);
+        printf("Target brightness = %d\n", AppliedBrightnessSettings.TargetBrightness);
+    }
+    else
+    {
+        return CTL_RESULT_ERROR_INVALID_OPERATION_TYPE;
     }
 
 Exit:
@@ -336,6 +412,10 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
         STORE_AND_RESET_ERROR(Result);
 
         Result = TestELPPowerFeature(hDisplayOutput[DisplayIndex]);
+
+        STORE_AND_RESET_ERROR(Result);
+
+        Result = TestBrightnessControl(hDisplayOutput[DisplayIndex]);
 
         STORE_AND_RESET_ERROR(Result);
     }
