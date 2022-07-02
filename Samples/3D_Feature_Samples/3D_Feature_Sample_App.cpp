@@ -491,6 +491,140 @@ ctl_result_t CtlTestEvents(ctl_device_adapter_handle_t hAdapter)
     return Result;
 }
 
+/***************************************************************
+ * @brief
+ * Generic method to get & print app profile
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlGetGamingAppProfile(ctl_device_adapter_handle_t hDevices, ctl_3d_app_profiles_t &AppProfileGet, char *ApplicationName = NULL)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    // Get App Profile
+    ctl_3d_feature_getset_t Get3DProperty = { 0 };
+    Get3DProperty.Size                    = sizeof(Get3DProperty);
+    Get3DProperty.FeatureType             = CTL_3D_FEATURE_APP_PROFILES;
+    Get3DProperty.bSet                    = FALSE;
+    Get3DProperty.CustomValueSize         = sizeof(ctl_3d_app_profiles_t);
+    Get3DProperty.pCustomValue            = &AppProfileGet;
+    Get3DProperty.ValueType               = CTL_PROPERTY_VALUE_TYPE_CUSTOM;
+    Get3DProperty.Version                 = 0;
+    Get3DProperty.ApplicationName         = ApplicationName;
+    Get3DProperty.ApplicationNameLength   = (ApplicationName != NULL) ? (int8_t)strlen(ApplicationName) : 0;
+
+    if (NULL != hDevices)
+    {
+        printf("\nDoing a GetAILProfile(%s, %s)\n", ApplicationName ? ApplicationName : "Global", AppProfileGet.TierType == CTL_3D_TIER_TYPE_FLAG_COMPATIBILITY ? "Compatibility" : "Performance");
+
+        Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature(Get AppProfile) returned failure code: 0x%X\n", Result);
+            if (Result == CTL_RESULT_ERROR_DATA_NOT_FOUND)
+            {
+                printf(" Reason: Value not found\n");
+                printf(" Use DefaultEnabledTierProfiles (=%s) for UI default selection if required\n", GetProfileTierName(AppProfileGet.DefaultEnabledTierProfiles));
+            }
+        }
+        else if (Get3DProperty.CustomValueSize > 0)
+        {
+            printf("ctlGetSet3DFeature returned success(Get AppProfile)\n");
+            printf(" App name = %s\n", ApplicationName == NULL ? "Global" : ApplicationName);
+            printf(" AppProfileGet.TierType = %s\n", GetProfileTypeName(AppProfileGet.TierType));
+            printf(" AppProfileGet.EnabledTierProfiles = %s\n", GetProfileTierName(AppProfileGet.EnabledTierProfiles));
+            printf(" AppProfileGet.DefaultEnabledTierProfiles = %s\n", GetProfileTierName(AppProfileGet.DefaultEnabledTierProfiles));
+            printf(" AppProfileGet.CustomizationSupportedTierProfiles = %s\n", GetProfileTierName(AppProfileGet.CustomizationSupportedTierProfiles));
+            printf(" AppProfileGet.CustomizationEnabledTierProfiles = %s\n", GetProfileTierName(AppProfileGet.CustomizationEnabledTierProfiles));
+        }
+    }
+
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Generic method to set & print app profile
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlSetGamingAppProfile(ctl_device_adapter_handle_t hDevices, ctl_3d_app_profiles_t &AppProfileSet, char *ApplicationName = NULL)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    // Get App Profile
+    ctl_3d_feature_getset_t Set3DProperty = { 0 };
+    Set3DProperty.Size                    = sizeof(Set3DProperty);
+    Set3DProperty.FeatureType             = CTL_3D_FEATURE_APP_PROFILES;
+    Set3DProperty.bSet                    = TRUE;
+    Set3DProperty.CustomValueSize         = sizeof(ctl_3d_app_profiles_t);
+    Set3DProperty.pCustomValue            = &AppProfileSet;
+    Set3DProperty.ValueType               = CTL_PROPERTY_VALUE_TYPE_CUSTOM;
+    Set3DProperty.Version                 = 0;
+    Set3DProperty.ApplicationName         = ApplicationName;
+    Set3DProperty.ApplicationNameLength   = (ApplicationName != NULL) ? (int8_t)strlen(ApplicationName) : 0;
+
+    if (NULL != hDevices)
+    {
+        printf("\nDoing a SetAILProfile(%s, %s)\n", ApplicationName ? ApplicationName : "Global", AppProfileSet.TierType == CTL_3D_TIER_TYPE_FLAG_COMPATIBILITY ? "Compatibility" : "Performance");
+
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature(Set AppProfile) returned failure code: 0x%X\n", Result);
+            if (CTL_RESULT_ERROR_DATA_NOT_FOUND == Result)
+                printf("Reason: Value not found\n");
+            return Result;
+        }
+        else if (Set3DProperty.CustomValueSize > 0)
+        {
+            printf("ctlGetSet3DFeature returned success(Set AppProfile)\n");
+            printf(" App name = %s\n", ApplicationName == NULL ? "Global" : ApplicationName);
+            printf(" AppProfileSet.TierType = %s\n", GetProfileTypeName(AppProfileSet.TierType));
+            printf(" AppProfileSet.EnabledTierProfiles = %s\n", GetProfileTierName(AppProfileSet.EnabledTierProfiles));
+            printf(" AppProfileSet.CustomizationSupportedTierProfiles = %s\n", GetProfileTierName(AppProfileSet.CustomizationSupportedTierProfiles));
+        }
+    }
+
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Method to test Endurance Gaming
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlGamingAppProfile(ctl_device_adapter_handle_t hDevices)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    printf("======================Gaming App Profile test======================\n");
+
+    ctl_3d_app_profiles_t AppProfile = { 0 };
+
+    // get profile for some xyz.exe
+    AppProfile.TierType = CTL_3D_TIER_TYPE_FLAG_COMPATIBILITY;
+    CtlGetGamingAppProfile(hDevices, AppProfile, "xyz.exe");
+
+    // Set global app profile - might fail if app doesn't have the required privilages
+    AppProfile.TierType            = CTL_3D_TIER_TYPE_FLAG_COMPATIBILITY;
+    AppProfile.EnabledTierProfiles = CTL_3D_TIER_PROFILE_FLAG_TIER_1;
+    CtlSetGamingAppProfile(hDevices, AppProfile);
+
+    // Get global App Profile
+    AppProfile.TierType = CTL_3D_TIER_TYPE_FLAG_COMPATIBILITY;
+    CtlGetGamingAppProfile(hDevices, AppProfile);
+
+    // Get global App Profile
+    AppProfile.TierType = CTL_3D_TIER_TYPE_FLAG_PERFORMANCE;
+    CtlGetGamingAppProfile(hDevices, AppProfile);
+
+    return Result;
+}
+
 int main()
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
@@ -559,6 +693,13 @@ int main()
                 if (CTL_RESULT_SUCCESS != Result)
                 {
                     printf("CtlGamingFlipTest failure code: 0x%X\n", Result);
+                }
+                STORE_RESET_ERROR(Result);
+
+                CtlGamingAppProfile(hDevices[Index]);
+                if (CTL_RESULT_SUCCESS != Result)
+                {
+                    printf("CtlGamingAppProfile failure code: 0x%X\n", Result);
                 }
                 STORE_RESET_ERROR(Result);
 

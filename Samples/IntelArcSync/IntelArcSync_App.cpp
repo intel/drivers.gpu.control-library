@@ -54,8 +54,8 @@ bool IsIntelArcSyncSupportedOnMonitor(ctl_display_output_handle_t hDisplayOutput
 
     if (true == PrintCaps)
     {
-        printf("\n\tMaxRrInHz=%d", static_cast<int>(StIntelArcSyncMonitorParams.MaximumRefreshRateInHz));
-        printf("\n\tMinRrInHz=%d", static_cast<int>(StIntelArcSyncMonitorParams.MinimumRefreshRateInHz));
+        printf("\n\tMaxRrInHz=%.4f", StIntelArcSyncMonitorParams.MaximumRefreshRateInHz);
+        printf("\n\tMinRrInHz=%.4f", StIntelArcSyncMonitorParams.MinimumRefreshRateInHz);
         printf("\n\tMaxFrameTimeDecreaseInUs=%d", StIntelArcSyncMonitorParams.MaxFrameTimeDecreaseInUs);
         printf("\n\tMaxFrameTimeIncreaseInUs=%d", StIntelArcSyncMonitorParams.MaxFrameTimeIncreaseInUs);
     }
@@ -108,15 +108,12 @@ void PrintCurrentIntelArcSyncProfileConfig(ctl_display_output_handle_t hDisplayO
         case CTL_INTEL_ARC_SYNC_PROFILE_CUSTOM:
             printf("\n\tProfileName= CUSTOM");
             break;
-        case CTL_INTEL_ARC_SYNC_PROFILE_MAX:
-            printf("\n\tProfileName= MAX");
-            break;
         default:
             break;
     }
 
-    printf("\n\tMaxRrInHz=%d", static_cast<int>(StIntelArcSyncProfileParams.MaxRefreshRateInHz));
-    printf("\n\tMinRrInHz=%d", static_cast<int>(StIntelArcSyncProfileParams.MinRefreshRateInHz));
+    printf("\n\tMaxRrInHz=%.4f", StIntelArcSyncProfileParams.MaxRefreshRateInHz);
+    printf("\n\tMinRrInHz=%.4f", StIntelArcSyncProfileParams.MinRefreshRateInHz);
     printf("\n\tMaxFrameTimeDecreaseInUs=%d", StIntelArcSyncProfileParams.MaxFrameTimeDecreaseInUs);
     printf("\n\tMaxFrameTimeIncreaseInUs=%d", StIntelArcSyncProfileParams.MaxFrameTimeIncreaseInUs);
 }
@@ -148,7 +145,7 @@ void ChangeIntelArcSyncProfile(ctl_display_output_handle_t hDisplayOutput, ctl_i
  * @brief
  * Apply a custom Intel Arc Sync profile for selected monitor
  ***************************************************************/
-ctl_result_t ApplyCustomIntelArcSyncProfile(ctl_display_output_handle_t hDisplayOutput, uint32_t MinRr, uint32_t MaxRr, uint32_t SfditValue, uint32_t SfddtValue)
+ctl_result_t ApplyCustomIntelArcSyncProfile(ctl_display_output_handle_t hDisplayOutput, float MinRr, float MaxRr, uint32_t SfditValue, uint32_t SfddtValue)
 {
     ctl_intel_arc_sync_profile_params_t StIntelArcSyncProfileParams = { 0 };
     ctl_result_t Result;
@@ -158,8 +155,8 @@ ctl_result_t ApplyCustomIntelArcSyncProfile(ctl_display_output_handle_t hDisplay
     StIntelArcSyncProfileParams.IntelArcSyncProfile = CTL_INTEL_ARC_SYNC_PROFILE_CUSTOM;
 
     // Min/Max RR must be in panel supported range
-    StIntelArcSyncProfileParams.MinRefreshRateInHz = static_cast<float>(MinRr);
-    StIntelArcSyncProfileParams.MaxRefreshRateInHz = static_cast<float>(MaxRr);
+    StIntelArcSyncProfileParams.MinRefreshRateInHz = MinRr;
+    StIntelArcSyncProfileParams.MaxRefreshRateInHz = MaxRr;
 
     StIntelArcSyncProfileParams.MaxFrameTimeIncreaseInUs = SfditValue;
     StIntelArcSyncProfileParams.MaxFrameTimeDecreaseInUs = SfddtValue;
@@ -423,7 +420,7 @@ void GetIntelArcSyncProfileNames()
     printf("\nGOOD");
     printf("\nCOMPATIBLE");
     printf("\nOFF");
-    printf("\nVES");
+    printf("\nVESA");
     printf("\nCUSTOM");
 }
 
@@ -431,7 +428,7 @@ void GetIntelArcSyncProfileNames()
  * @brief
  * SetIntelArcSyncProfile.
  ***************************************************************/
-void SetIntelArcSyncProfile(char *pProfileName, uint32_t MinRr, uint32_t MaxRr, uint32_t SfditValue, uint32_t SfddtValue)
+void SetIntelArcSyncProfile(char *pProfileName, float MinRr, float MaxRr, uint32_t SfditValue, uint32_t SfddtValue)
 {
     ctl_intel_arc_sync_profile_t Profile;
     ctl_api_handle_t hAPIHandle;
@@ -633,9 +630,10 @@ int main(int argc, char *pArgv[])
                     PrintUsage();
                     return -1;
                 }
-                uint32_t MinRr, MaxRr, SfditValue, SfddtValue;
-                sscanf_s(pArgv[4], "%d", &MinRr);
-                sscanf_s(pArgv[5], "%d", &MaxRr);
+                float MinRr, MaxRr;
+                uint32_t SfditValue, SfddtValue;
+                sscanf_s(pArgv[4], "%f", &MinRr);
+                sscanf_s(pArgv[5], "%f", &MaxRr);
                 sscanf_s(pArgv[6], "%d", &SfditValue);
                 sscanf_s(pArgv[7], "%d", &SfddtValue);
                 SetIntelArcSyncProfile(pArgv[3], MinRr, MaxRr, SfditValue, SfddtValue);

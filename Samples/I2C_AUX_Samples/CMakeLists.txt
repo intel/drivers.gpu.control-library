@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
-set(TARGET_NAME I2C_AUX_Sample_app)
+set(TARGET_NAME I2C_AUX_Samples)
 get_filename_component(ROOT_DIR ../../ ABSOLUTE)
-project(I2C_AUX_Sample_app VERSION 1.0)
+project(I2C_AUX_Samples VERSION 1.0)
 add_executable(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/I2C_AUX_Sample_App.cpp
     ${ROOT_DIR}/wrapper/cApiWrapper.cpp
 )
-    
+
 if(MSVC)
     set_target_properties(${TARGET_NAME}
         PROPERTIES
@@ -20,4 +20,3 @@ endif()
 
 include_directories(${ROOT_DIR}/includes)
 include_directories(${ROOT_DIR}/Samples/inc)
-    
