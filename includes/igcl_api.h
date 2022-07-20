@@ -433,6 +433,10 @@ typedef enum _ctl_result_t
     CTL_RESULT_ERROR_I2C_AUX_UNSUCCESSFUL = 0x48000017, ///< I2C/AUX unsuccessful
     CTL_RESULT_ERROR_LACE_INVALID_DATA_ARGUMENT_PASSED = 0x48000018,///< Lace Incorrrect AggressivePercent data or LuxVsAggressive Map data
                                                     ///< passed by user
+    CTL_RESULT_ERROR_EXTERNAL_DISPLAY_ATTACHED = 0x48000019,///< External Display is Attached hence fail the Display Switch
+    CTL_RESULT_ERROR_CUSTOM_MODE_STANDARD_CUSTOM_MODE_EXISTS = 0x4800001a,  ///< Standard custom mode exists
+    CTL_RESULT_ERROR_CUSTOM_MODE_NON_CUSTOM_MATCHING_MODE_EXISTS = 0x4800001b,  ///< Non custom matching mode exists
+    CTL_RESULT_ERROR_CUSTOM_MODE_INSUFFICIENT_MEMORY = 0x4800001c,  ///< Custom mode insufficent memory
     CTL_RESULT_ERROR_DISPLAY_END = 0x4800FFFF,      ///< "Display error code end value, not to be used
                                                     ///< "
     CTL_RESULT_MAX
@@ -448,7 +452,7 @@ typedef enum _ctl_result_t
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef CTL_MAX_RESERVED_SIZE
 /// @brief Maximum reserved size for future members.
-#define CTL_MAX_RESERVED_SIZE  124
+#define CTL_MAX_RESERVED_SIZE  120
 #endif // CTL_MAX_RESERVED_SIZE
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -712,6 +716,7 @@ typedef struct _ctl_device_adapter_properties_t
     uint32_t num_slices;                            ///< [out] Number of slices
     char name[CTL_MAX_DEVICE_NAME_LEN];             ///< [out] Device name
     ctl_adapter_properties_flags_t graphics_adapter_properties; ///< [out] Graphics Adapter Properties
+    uint32_t Frequency;                             ///< [out] Clock frequency for this device. Supported only for Version > 0
     char reserved[CTL_MAX_RESERVED_SIZE];           ///< [out] Reserved
 
 } ctl_device_adapter_properties_t;
@@ -1111,6 +1116,14 @@ typedef struct _ctl_intel_arc_sync_profile_params_t ctl_intel_arc_sync_profile_p
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_edid_management_args_t
 typedef struct _ctl_edid_management_args_t ctl_edid_management_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_get_set_custom_mode_args_t
+typedef struct _ctl_get_set_custom_mode_args_t ctl_get_set_custom_mode_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_custom_src_mode_t
+typedef struct _ctl_custom_src_mode_t ctl_custom_src_mode_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_engine_properties_t
@@ -3665,6 +3678,75 @@ CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlEdidManagement(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_edid_management_args_t* pEdidManagementArgs ///< [in,out] EDID management arguments
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Custom mode operation types
+typedef enum _ctl_custom_mode_operation_types_t
+{
+    CTL_CUSTOM_MODE_OPERATION_TYPES_GET_CUSTOM_SOURCE_MODES = 0,///< Get details of all previous applied custom modes if any.
+    CTL_CUSTOM_MODE_OPERATION_TYPES_ADD_CUSTOM_SOURCE_MODE = 1, ///< Add a new mode. Allows only single mode adition at a time.
+    CTL_CUSTOM_MODE_OPERATION_TYPES_REMOVE_CUSTOM_SOURCE_MODES = 2, ///< Remove previously added custom mode. Allows single or multiple mode
+                                                    ///< removal at a time.
+    CTL_CUSTOM_MODE_OPERATION_TYPES_MAX
+
+} ctl_custom_mode_operation_types_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Custom Mode
+typedef struct _ctl_get_set_custom_mode_args_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    ctl_custom_mode_operation_types_t CustomModeOpType; ///< [in] Custom mode operation type
+    uint32_t NumOfModes;                            ///< [in,out] Number of Custom Src Modes to be added/removed/Read.
+    ctl_custom_src_mode_t* pCustomSrcModeList;      ///< [in,out] Custom mode source list which holds source modes to be
+                                                    ///< added/removed/Read.
+
+} ctl_get_set_custom_mode_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Custom Mode
+typedef struct _ctl_custom_src_mode_t
+{
+    uint32_t SourceX;                               ///< [in,out] CustomMode Source X Size
+    uint32_t SourceY;                               ///< [in,out] CustomMode Source Y Size 
+
+} ctl_custom_src_mode_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Custom mode.
+/// 
+/// @details
+///     - To get or set custom mode.
+///     - Add custom source mode operation supports only single mode additon at
+///       a time.
+///     - Remove custom source mode operation supports single or multiple mode
+///       removal at a time.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pCustomModeArgs`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+///     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernal mode driver call failure"
+///     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid combination of parameters"
+///     - ::CTL_RESULT_ERROR_CUSTOM_MODE_STANDARD_CUSTOM_MODE_EXISTS - "Standard custom mode exists"
+///     - ::CTL_RESULT_ERROR_CUSTOM_MODE_NON_CUSTOM_MATCHING_MODE_EXISTS - "Non custom matching mode exists"
+///     - ::CTL_RESULT_ERROR_CUSTOM_MODE_INSUFFICIENT_MEMORY - "Custom mode insufficent memory"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetSetCustomMode(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
+    ctl_get_set_custom_mode_args_t* pCustomModeArgs ///< [in,out] Custom mode arguments
     );
 
 
@@ -6390,6 +6472,14 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnSetIntelArcSyncProfile_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnEdidManagement_t)(
     ctl_display_output_handle_t,
     ctl_edid_management_args_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetSetCustomMode 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetCustomMode_t)(
+    ctl_display_output_handle_t,
+    ctl_get_set_custom_mode_args_t*
     );
 
 

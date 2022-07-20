@@ -478,6 +478,7 @@ DWORD WINAPI CtlEventThread(LPVOID ThreadParameterPtr)
 ctl_result_t CtlTestEvents(ctl_device_adapter_handle_t hAdapter)
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
+#ifdef TEST_ENABLE_SETCALLS
     bool Listener       = false;
     bool SpawnThread    = false;
     DWORD ThreadID      = 0;
@@ -587,6 +588,8 @@ ctl_result_t CtlTestEvents(ctl_device_adapter_handle_t hAdapter)
     }
 
     free(ThreadHandle);
+#endif
+
     return Result;
 }
 
@@ -596,13 +599,23 @@ ctl_result_t CtlTestEvents(ctl_device_adapter_handle_t hAdapter)
  * @param
  * @return
  ***************************************************************/
-void PrintDriverVersion(ctl_device_adapter_properties_t StDeviceAdapterProperties)
+void PrintAdapterProperties(ctl_device_adapter_properties_t StDeviceAdapterProperties)
 {
     char DriverVersion[25] = "";
     LARGE_INTEGER LIDriverVersion;
     LIDriverVersion.QuadPart = StDeviceAdapterProperties.driver_version;
     sprintf(DriverVersion, "%d.%d.%d.%d", HIWORD(LIDriverVersion.HighPart), LOWORD(LIDriverVersion.HighPart), HIWORD(LIDriverVersion.LowPart), LOWORD(LIDriverVersion.LowPart));
-    std::cout << "Intel Graphics Driver Version : " << DriverVersion << "\n";
+
+    printf("Intel Graphics Driver Version : %s\n", DriverVersion);
+    printf("Intel Adapter Name: %s\n", StDeviceAdapterProperties.name);
+    printf("Vendor ID: 0x%X\n", StDeviceAdapterProperties.pci_vendor_id);
+    printf("Device ID: 0x%X\n", StDeviceAdapterProperties.pci_device_id);
+    printf("Rev ID: 0x%X\n", StDeviceAdapterProperties.rev_id);
+    printf("Graphics Frequency: %dMHz\n", StDeviceAdapterProperties.Frequency);
+    printf("num_eus_per_sub_slice: %d\n", StDeviceAdapterProperties.num_eus_per_sub_slice);
+    printf("num_slices: %d\n", StDeviceAdapterProperties.num_slices);
+    printf("num_sub_slices_per_slice: %d\n", StDeviceAdapterProperties.num_sub_slices_per_slice);
+    printf("Graphics HW type: %s\n", StDeviceAdapterProperties.graphics_adapter_properties & CTL_ADAPTER_PROPERTIES_FLAG_INTEGRATED ? "Integrated" : "External GFX");
 }
 
 /***************************************************************
@@ -668,6 +681,36 @@ ctl_result_t CtlTestAdditionalCaller(void)
     return Result;
 }
 
+void PrintDetailsFromSysman(ctl_device_adapter_handle_t hDevice)
+{
+    uint32_t FrequencyHandlerCount = 0;
+    ctl_result_t res               = ctlEnumFrequencyDomains(hDevice, &FrequencyHandlerCount, nullptr);
+    if ((res == CTL_RESULT_SUCCESS) && FrequencyHandlerCount > 0)
+    {
+        ctl_freq_handle_t *pFrequencyHandle = new ctl_freq_handle_t[FrequencyHandlerCount];
+        res                                 = ctlEnumFrequencyDomains(hDevice, &FrequencyHandlerCount, pFrequencyHandle);
+
+        for (uint32_t i = 0; i < FrequencyHandlerCount; i++)
+        {
+            ctl_freq_properties_t freqProperties = { 0 };
+            freqProperties.Size                  = sizeof(ctl_freq_properties_t);
+            res                                  = ctlFrequencyGetProperties(pFrequencyHandle[i], &freqProperties);
+
+            if ((CTL_RESULT_SUCCESS == res) && (CTL_FREQ_DOMAIN_GPU == freqProperties.type))
+            {
+                printf("Max freq from L0 (ctl_freq_properties_t::max) = %f\n", freqProperties.max);
+            }
+        }
+
+        delete[] pFrequencyHandle;
+        pFrequencyHandle = nullptr;
+    }
+    if (res != CTL_RESULT_SUCCESS || 0 == FrequencyHandlerCount)
+        printf("Couldn't get P0 from L0. Freq domains = %d, Error = 0x%X\n", FrequencyHandlerCount, res);
+
+    return;
+}
+
 /***************************************************************
  * @brief Main Function
  *
@@ -692,7 +735,7 @@ int main()
     ctl_init_args_t CtlInitArgs;
     ctl_api_handle_t hAPIHandle;
     CtlInitArgs.AppVersion = CTL_MAKE_VERSION(CTL_IMPL_MAJOR_VERSION, CTL_IMPL_MINOR_VERSION);
-    CtlInitArgs.flags      = 0;
+    CtlInitArgs.flags      = CTL_INIT_FLAG_USE_LEVEL_ZERO;
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
     // Init App UID appropriately
@@ -727,6 +770,7 @@ int main()
         StDeviceAdapterProperties.Size           = sizeof(ctl_device_adapter_properties_t);
         StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
         StDeviceAdapterProperties.device_id_size = sizeof(LUID);
+        StDeviceAdapterProperties.Version        = 1;
 
         if (NULL == StDeviceAdapterProperties.pDeviceID)
         {
@@ -744,10 +788,17 @@ int main()
 
                 Result = ctlGetDeviceProperties(hDevices[Index], &StDeviceAdapterProperties);
 
+                if (CTL_RESULT_ERROR_UNSUPPORTED_VERSION == Result) // reduce version if required & recheck
+                {
+                    printf("ctlGetDeviceProperties() version mismatch - Reducing version to 0 and retrying\n");
+                    StDeviceAdapterProperties.Version = 0;
+                    Result                            = ctlGetDeviceProperties(hDevices[Index], &StDeviceAdapterProperties);
+                }
+
                 if (Result != CTL_RESULT_SUCCESS)
                 {
                     printf("ctlGetDeviceProperties returned failure code: 0x%X\n", Result);
-                    break;
+                    continue;
                 }
 
                 if (CTL_DEVICE_TYPE_GRAPHICS != StDeviceAdapterProperties.device_type)
@@ -762,35 +813,31 @@ int main()
                     std::cout << "Adapter ID " << AdapterID.LowPart << "\n";
                 }
 
-                if (0x8086 == StDeviceAdapterProperties.pci_vendor_id)
-                {
-                    PrintDriverVersion(StDeviceAdapterProperties);
-                    printf("Intel Adapter Name: %s\n", StDeviceAdapterProperties.name);
-                    printf("Vendor ID: 0x%X\n", StDeviceAdapterProperties.pci_vendor_id);
-                    printf("Device ID: 0x%X\n", StDeviceAdapterProperties.pci_device_id);
-                    printf("Rev ID: 0x%X\n", StDeviceAdapterProperties.rev_id);
-                }
+                if (0x8086 != StDeviceAdapterProperties.pci_vendor_id)
+                    continue;
+
+                PrintAdapterProperties(StDeviceAdapterProperties);
+
+                // get max/P0 from L0 & print the same here
+                PrintDetailsFromSysman(hDevices[Index]);
 
                 // enumerate all the possible target display's for the adapters
-                if (CTL_RESULT_SUCCESS == Result)
+                // first step is to get the count
+                Display_count = 0;
+                Result        = ctlEnumerateDisplayOutputs(hDevices[Index], &Display_count, hDisplayOutput);
+
+                printf("ctlEnumerateDisplayOutputs returned %d encoders\n", Display_count);
+
+                if (CTL_RESULT_SUCCESS == Result && (Display_count > 0))
                 {
-                    // first step is to get the count
-                    Display_count = 0;
-                    Result        = ctlEnumerateDisplayOutputs(hDevices[Index], &Display_count, hDisplayOutput);
+                    hDisplayOutput = (ctl_display_output_handle_t *)malloc(sizeof(ctl_display_output_handle_t) * Display_count);
+                    Result         = ctlEnumerateDisplayOutputs(hDevices[Index], &Display_count, hDisplayOutput);
+                }
 
-                    printf("ctlEnumerateDisplayOutputs returned %d encoders\n", Display_count);
-
-                    if (CTL_RESULT_SUCCESS == Result && (Display_count > 0))
-                    {
-                        hDisplayOutput = (ctl_display_output_handle_t *)malloc(sizeof(ctl_display_output_handle_t) * Display_count);
-                        Result         = ctlEnumerateDisplayOutputs(hDevices[Index], &Display_count, hDisplayOutput);
-                    }
-
-                    if (Result != CTL_RESULT_SUCCESS)
-                    {
-                        printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
-                        STORE_RESET_ERROR(Result);
-                    }
+                if (Result != CTL_RESULT_SUCCESS)
+                {
+                    printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+                    STORE_RESET_ERROR(Result);
                 }
 
                 // get display encoder properties
@@ -821,6 +868,7 @@ int main()
                     }
                 }
 
+#ifdef TEST_ENABLE_SETCALLS
                 // Sharpness Test
                 if (CTL_RESULT_SUCCESS == Result)
                 {
@@ -833,6 +881,7 @@ int main()
                         STORE_RESET_ERROR(Result);
                     }
                 }
+#endif
 
                 // get 3D global properties
                 if (CTL_RESULT_SUCCESS == Result)

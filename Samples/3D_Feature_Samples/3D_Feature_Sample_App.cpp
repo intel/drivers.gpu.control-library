@@ -625,6 +625,108 @@ ctl_result_t CtlGamingAppProfile(ctl_device_adapter_handle_t hDevices)
     return Result;
 }
 
+/***************************************************************
+ * @brief
+ * Method to test Endurance Gaming
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlCMAAGamingFeatureTest(ctl_device_adapter_handle_t hDevices)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    if (NULL == hDevices)
+        return CTL_RESULT_ERROR_INVALID_NULL_HANDLE;
+
+    printf("======================CtlCMAAGamingFeatureTest======================\n");
+
+    ctl_3d_feature_getset_t Get3DProperty = { 0 };
+    ctl_3d_feature_getset_t Set3DProperty = { 0 };
+    uint32_t InitialValue                 = 0;
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    // Get feature - global
+    Get3DProperty.FeatureType = CTL_3D_FEATURE_CMAA;
+    Get3DProperty.bSet        = FALSE;
+    Get3DProperty.ValueType   = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.Version     = 0;
+    Result                    = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+    printf(" Get3DProperty.Value.EnumType.EnableType = %d\n", Get3DProperty.Value.EnumType.EnableType);
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        printf("Returned failure code: 0x%X\n", Result);
+        if (CTL_RESULT_ERROR_DATA_NOT_FOUND != Result) // if value not present, it's expected, so continue with set/get verification
+            return Result;
+    }
+    else
+    {
+        printf("ctlGetSet3DFeature returned success\n");
+        InitialValue = Get3DProperty.Value.EnumType.EnableType;
+    }
+
+    // Set feature - global
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_CMAA;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Version                   = 0;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_CMAA_TYPES_OVERRIDE_MSAA;
+    Result                                  = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    printf(" Set3DProperty.Value.EnumType.EnableType = CTL_3D_CMAA_TYPES_OVERRIDE_MSAA\n");
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        printf("Returned failure code: 0x%X\n", Result);
+        return Result;
+    }
+    else
+    {
+        printf("ctlGetSet3DFeature returned success\n");
+    }
+
+    // Get feature back & check - global
+    Get3DProperty.FeatureType = CTL_3D_FEATURE_CMAA;
+    Get3DProperty.bSet        = FALSE;
+    Get3DProperty.ValueType   = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.Version     = 0;
+    Result                    = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+    printf(" Get3DProperty.Value.EnumType.EnableType = %d\n", Get3DProperty.Value.EnumType.EnableType);
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        printf("Returned failure code: 0x%X\n", Result);
+        return Result;
+    }
+    else
+    {
+        printf("ctlGetSet3DFeature returned success\n");
+        if (Get3DProperty.Value.EnumType.EnableType != Set3DProperty.Value.EnumType.EnableType)
+        {
+            printf("ERROR: Value didn't get set!\n");
+            return CTL_RESULT_ERROR_UNKNOWN;
+        }
+    }
+
+    // set the initial value back
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_CMAA;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Version                   = 0;
+    Set3DProperty.Value.EnumType.EnableType = InitialValue;
+    Result                                  = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    printf(" Set3DProperty.Value.EnumType.EnableType = %d\n", Set3DProperty.Value.EnumType.EnableType);
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        printf("Returned failure code: 0x%X\n", Result);
+        return Result;
+    }
+    else
+    {
+        printf("ctlGetSet3DFeature returned success\n");
+    }
+
+    return Result;
+}
+
 int main()
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
@@ -700,6 +802,13 @@ int main()
                 if (CTL_RESULT_SUCCESS != Result)
                 {
                     printf("CtlGamingAppProfile failure code: 0x%X\n", Result);
+                }
+                STORE_RESET_ERROR(Result);
+
+                CtlCMAAGamingFeatureTest(hDevices[Index]);
+                if (CTL_RESULT_SUCCESS != Result)
+                {
+                    printf("CtlCMAAGamingFeatureTest failure code: 0x%X\n", Result);
                 }
                 STORE_RESET_ERROR(Result);
 
