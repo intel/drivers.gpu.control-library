@@ -3,7 +3,7 @@
 ==============================
 Control API
 ==============================
-Control API Specification - Version 1.0
+Control API Specification - Version 0
 
  
 
@@ -855,6 +855,7 @@ Display
     * :ref:`ctlGetIntelArcSyncProfile`
     * :ref:`ctlSetIntelArcSyncProfile`
     * :ref:`ctlEdidManagement`
+    * :ref:`ctlGetSetCustomMode`
 
  
 * Enumerations
@@ -894,6 +895,7 @@ Display
     * :ref:`ctl-edid-management-optype-t`
     * :ref:`ctl-edid-type-t`
     * :ref:`ctl-edid-management-out-flags-t`
+    * :ref:`ctl-custom-mode-operation-types-t`
 
  
 * Structures
@@ -940,6 +942,8 @@ Display
     * :ref:`ctl-mux-properties-t`
     * :ref:`ctl-intel-arc-sync-profile-params-t`
     * :ref:`ctl-edid-management-args-t`
+    * :ref:`ctl-get-set-custom-mode-args-t`
+    * :ref:`ctl-custom-src-mode-t`
 
 
 Display Functions
@@ -1261,6 +1265,15 @@ ctlEdidManagement
     :project: ControlApi
 
 
+.. _ctlGetSetCustomMode:
+
+ctlGetSetCustomMode
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSetCustomMode
+    :project: ControlApi
+
+
 
 Display Enums
 ------------------------------------------------------------------------------
@@ -1569,6 +1582,15 @@ ctl_edid_management_out_flags_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_edid_management_out_flag_t
+    :project: ControlApi
+
+
+.. _ctl-custom-mode-operation-types-t:
+
+ctl_custom_mode_operation_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_custom_mode_operation_types_t
     :project: ControlApi
 
  
@@ -1973,6 +1995,26 @@ ctl_edid_management_args_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_edid_management_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-get-set-custom-mode-args-t:
+
+ctl_get_set_custom_mode_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_get_set_custom_mode_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-custom-src-mode-t:
+
+ctl_custom_src_mode_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_custom_src_mode_t
     :project: ControlApi
     :members:
     :undoc-members:
