@@ -11,9 +11,11 @@
  Versions
 =========
 
+Version 1.0: <https://github.com/intel/drivers.gpu.control-library/tree/DocV1>`__
+
 Latest Release
 ==============
 
-`Latest IGCL \ Spec <https://intel.github.io/drivers.gpu.control-library/Control/INTRO.html>`__
+`Latest IGCL \ Spec 1.1 Draft <https://intel.github.io/drivers.gpu.control-library/Control/INTRO.html>`__
 
 
