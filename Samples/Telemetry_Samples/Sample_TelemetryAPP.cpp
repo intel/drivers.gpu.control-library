@@ -29,6 +29,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include "igcl_api.h"
+#include "GenericIGCLApp.h"
 
 std::string DecodeRetCode(ctl_result_t Res);
 void CtlTemperatureTest(ctl_device_adapter_handle_t hDAhandle);
@@ -187,18 +188,18 @@ const char *printUnits(ctl_units_t Units)
  ***************************************************************/
 void CtlTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Temperature Properties::::::::::::::\n" << std::endl;
+    PRINT_LOGS("\n::::::::::::::Print Temperature Properties::::::::::::::\n");
 
     uint32_t TemperatureHandlerCount = 0;
     ctl_result_t res                 = ctlEnumTemperatureSensors(hDAhandle, &TemperatureHandlerCount, nullptr);
     if ((res != CTL_RESULT_SUCCESS) || TemperatureHandlerCount == 0)
     {
-        std::cout << "Temperature component not supported. Error: " << DecodeRetCode(res) << std::endl;
+        PRINT_LOGS("\nTemperature component not supported. Error: %s", DecodeRetCode(res).c_str());
         return;
     }
     else
     {
-        std::cout << "Number of Temperature Handles [" << TemperatureHandlerCount << "]" << std::endl;
+        PRINT_LOGS("\nNumber of Temperature Handles [%d]", TemperatureHandlerCount);
     }
 
     ctl_temp_handle_t *pTtemperatureHandle = new ctl_temp_handle_t[TemperatureHandlerCount];
@@ -207,15 +208,15 @@ void CtlTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
 
     if (res != CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error: " << DecodeRetCode(res) << " for Temperature handle." << std::endl;
+        PRINT_LOGS("\nError: %s for Temperature handle.", DecodeRetCode(res).c_str());
         goto cleanUp;
     }
 
     for (uint32_t i = 0; i < TemperatureHandlerCount; i++)
     {
-        std::cout << "\nFor Temperature Handle [" << i << "]" << std::endl;
+        PRINT_LOGS("\n\nFor Temperature Handle [%d]", i);
 
-        std::cout << "[Temperature] Get Temperature properties:" << std::endl;
+        PRINT_LOGS("\n[Temperature] Get Temperature properties:");
 
         ctl_temp_properties_t temperatureProperties = { 0 };
         temperatureProperties.Size                  = sizeof(ctl_temp_properties_t);
@@ -223,35 +224,31 @@ void CtlTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << "Error: " << DecodeRetCode(res) << " from Temperature get properties." << std::endl;
+            PRINT_LOGS("\nError: %s from Temperature get properties.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Temperature] Max temp [" << (uint32_t)temperatureProperties.maxTemperature << "]" << std::endl
-                      << "[Temperature] Sensor type ["
-                      << ((temperatureProperties.type == CTL_TEMP_SENSORS_GLOBAL) ? "Global" :
-                          (temperatureProperties.type == CTL_TEMP_SENSORS_GPU)    ? "Gpu" :
-                          (temperatureProperties.type == CTL_TEMP_SENSORS_MEMORY) ? "Memory" :
-                                                                                    "Unknown")
-                      << "]" << std::endl;
+            PRINT_LOGS("\n[Temperature] Max temp [%d]", (uint32_t)temperatureProperties.maxTemperature);
+            PRINT_LOGS("\n[Temperature] Sensor type [%s]", ((temperatureProperties.type == CTL_TEMP_SENSORS_GLOBAL) ? "Global" :
+                                                            (temperatureProperties.type == CTL_TEMP_SENSORS_GPU)    ? "Gpu" :
+                                                            (temperatureProperties.type == CTL_TEMP_SENSORS_MEMORY) ? "Memory" :
+                                                                                                                      "Unknown"));
         }
 
-        std::cout << "[Temperature] Get Temperature state:" << std::endl;
+        PRINT_LOGS("\n[Temperature] Get Temperature state:");
 
         double temperature = 0;
         res                = ctlTemperatureGetState(pTtemperatureHandle[i], &temperature);
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << "Error: " << DecodeRetCode(res) << " from Temperature get state." << std::endl;
+            PRINT_LOGS("\nError: %s  from Temperature get state.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Temperature] Current Temperature [" << temperature << "] C degrees" << std::endl;
+            PRINT_LOGS("\n[Temperature] Current Temperature [%f] C degrees \n \n", temperature);
         }
     }
-
-    std::cout << std::endl << std::endl;
 
 cleanUp:
     delete[] pTtemperatureHandle;
@@ -266,18 +263,17 @@ cleanUp:
  ***************************************************************/
 void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Frequency Properties::::::::::::::\n" << std::endl;
 
     uint32_t FrequencyHandlerCount = 0;
     ctl_result_t res               = ctlEnumFrequencyDomains(hDAhandle, &FrequencyHandlerCount, nullptr);
     if ((res != CTL_RESULT_SUCCESS) || FrequencyHandlerCount == 0)
     {
-        std::cout << "Temperature component not supported. Error: " << DecodeRetCode(res) << std::endl;
+        PRINT_LOGS("\nTemperature component not supported. Error: %s", DecodeRetCode(res).c_str());
         return;
     }
     else
     {
-        std::cout << "Number of Frequency Handles [" << FrequencyHandlerCount << "]" << std::endl;
+        PRINT_LOGS("\nNumber of Frequency Handles [%d]", FrequencyHandlerCount);
     }
 
     ctl_freq_handle_t *pFrequencyHandle = new ctl_freq_handle_t[FrequencyHandlerCount];
@@ -286,66 +282,66 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
 
     if (res != CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error: " << DecodeRetCode(res) << " for Frequency handle." << std::endl;
+        PRINT_LOGS("\nError: %s for Frequency handle.", DecodeRetCode(res).c_str());
         goto cleanUp;
     }
 
     for (uint32_t i = 0; i < FrequencyHandlerCount; i++)
     {
-        std::cout << "\nFor Frequency Handle [" << i << "] :" << std::endl;
+        PRINT_LOGS("\n\nFor Frequency Handle: [%d]", i);
 
-        std::cout << "\n[Frequency] Properties:" << std::endl;
+        PRINT_LOGS("\n\n[Frequency] Properties:");
 
         ctl_freq_properties_t freqProperties = { 0 };
         freqProperties.Size                  = sizeof(ctl_freq_properties_t);
         res                                  = ctlFrequencyGetProperties(pFrequencyHandle[i], &freqProperties);
         if (res)
         {
-            std::cout << DecodeRetCode(res) << " from Frequency get properties." << std::endl;
+            PRINT_LOGS("\n from Frequency get properties. %s", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Frequency] Min [" << freqProperties.min << "] Mhz" << std::endl;
-            std::cout << "[Frequency] Max [" << freqProperties.max << "] Mhz" << std::endl;
-            std::cout << "[Frequency] Can Control Frequency? [" << (uint32_t)freqProperties.canControl << "]" << std::endl;
-            std::cout << "[Frequency] Frequency Domain [" << ((freqProperties.type == CTL_FREQ_DOMAIN_GPU) ? "GPU" : "MEMORY") << "]" << std::endl;
+            PRINT_LOGS("\n[Frequency] Min [%f]] Mhz", freqProperties.min);
+            PRINT_LOGS("\n[Frequency] Max [%f]] Mhz", freqProperties.max);
+            PRINT_LOGS("\n[Frequency] Can Control Frequency? [%d]]", (uint32_t)freqProperties.canControl);
+            PRINT_LOGS("\n[Frequency] Frequency Domain [%s]]", ((freqProperties.type == CTL_FREQ_DOMAIN_GPU) ? "GPU" : "MEMORY"));
         }
 
-        std::cout << "\n[Frequency] State:" << std::endl;
+        PRINT_LOGS("\n\n[Frequency] State:");
 
         ctl_freq_state_t freqState = { 0 };
         freqState.Size             = sizeof(ctl_freq_state_t);
         res                        = ctlFrequencyGetState(pFrequencyHandle[i], &freqState);
         if (res)
         {
-            std::cout << DecodeRetCode(res) << " from Frequency get state." << std::endl;
+            PRINT_LOGS("\n %s from Frequency get state.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Frequency] Actual Frequency [" << freqState.actual << "] Mhz" << std::endl;
-            std::cout << "[Frequency] Efficient Frequency [" << freqState.efficient << "] Mhz" << std::endl;
-            std::cout << "[Frequency] Requested Frequency [" << freqState.request << "] Mhz" << std::endl;
-            std::cout << "[Frequency] Actual TDP [" << freqState.tdp << "] Watts" << std::endl;
-            std::cout << "[Frequency] Throttle Reasons [" << freqState.throttleReasons << "]" << std::endl;
-            std::cout << "[Frequency] Voltage [" << freqState.currentVoltage << "] Volts" << std::endl;
+            PRINT_LOGS("\n[Frequency] Actual Frequency [%f] Mhz", freqState.actual);
+            PRINT_LOGS("\n[Frequency] Efficient Frequency [%f] Mhz", freqState.efficient);
+            PRINT_LOGS("\n[Frequency] Requested Frequency [%f] Mhz", freqState.request);
+            PRINT_LOGS("\n[Frequency] Actual TDP [%f] Watts", freqState.tdp);
+            PRINT_LOGS("\n[Frequency] Throttle Reasons [%d]", freqState.throttleReasons);
+            PRINT_LOGS("\n[Frequency] Voltage [%f] Volts", freqState.currentVoltage);
         }
 
-        std::cout << "\n[Frequency] Get throttle time:" << std::endl;
+        PRINT_LOGS("\n\n[Frequency] Get throttle time:");
 
         ctl_freq_throttle_time_t throttleTime = { 0 };
         throttleTime.Size                     = sizeof(ctl_freq_throttle_time_t);
         res                                   = ctlFrequencyGetThrottleTime(pFrequencyHandle[i], &throttleTime);
         if (res)
         {
-            std::cout << DecodeRetCode(res) << " from Frequency get throttle time." << std::endl;
+            PRINT_LOGS("\n %s from Frequency get throttle time.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Frequency] Throttle Time [" << throttleTime.throttleTime << "] s" << std::endl;
-            std::cout << "[Frequency] Timestamp [" << throttleTime.timestamp << "] s" << std::endl;
+            PRINT_LOGS("\n[Frequency] Throttle Time [%I64u ] s", throttleTime.throttleTime);
+            PRINT_LOGS("\n[Frequency] Timestamp [%I64u] s", throttleTime.timestamp);
         }
 
-        std::cout << "\n[Frequency] Available clocks:" << std::endl;
+        PRINT_LOGS("\n\n[Frequency] Available clocks:");
 
         uint32_t numClocks = 0;
         double *clocks     = nullptr;
@@ -353,11 +349,11 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
 
         if (res || numClocks == 0)
         {
-            std::cout << DecodeRetCode(res) << " from Frequency get available clocks." << std::endl;
+            PRINT_LOGS("\n %s from Frequency get available clocks.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Frequency] Number of Available clocks [" << numClocks << "]" << std::endl;
+            PRINT_LOGS("\n[Frequency] Number of Available clocks [%d]", numClocks);
 
             clocks = new double[numClocks];
 
@@ -365,14 +361,14 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
 
             for (uint32_t i = 0; i < numClocks; i++)
             {
-                std::cout << "[Frequency] Clock [" << i << "] Freq[" << clocks[i] << "] Mhz" << std::endl;
+                PRINT_LOGS("\n[Frequency] Clock [%d]  Freq[%f] Mhz", i, clocks[i]);
             }
 
             delete[] clocks;
             clocks = nullptr;
         }
 
-        std::cout << "\n[Frequency] Frequency range:" << std::endl;
+        PRINT_LOGS("\n\n[Frequency] Frequency range:");
 
         ctl_freq_range_t freqRange = { 0 };
         freqRange.Size             = sizeof(ctl_freq_range_t);
@@ -380,26 +376,26 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
 
         if (res)
         {
-            std::cout << DecodeRetCode(res) << " from Frequency get range." << std::endl;
+            PRINT_LOGS("\n %s from Frequency get range.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Frequency] Range Max [" << freqRange.max << "] Mhz" << std::endl;
-            std::cout << "[Frequency] Range Min [" << freqRange.min << "] Mhz" << std::endl;
+            PRINT_LOGS("\n[Frequency] Range Max [%f] Mhz", freqRange.max);
+            PRINT_LOGS("\n[Frequency] Range Min [%f] Mhz", freqRange.min);
         }
 
-        std::cout << "\n[Frequency] Set Frequency range:" << std::endl;
+        PRINT_LOGS("\n\n[Frequency] Set Frequency range:");
 
         res = ctlFrequencySetRange(pFrequencyHandle[i], &freqRange);
 
         if (res)
         {
-            std::cout << DecodeRetCode(res) << " from Frequency set range." << std::endl;
+            PRINT_LOGS("\n %s from Frequency set range.", DecodeRetCode(res).c_str());
         }
         else
         {
 
-            std::cout << "\n[Frequency] Success for Set Range" << std::endl;
+            PRINT_LOGS("\n\n[Frequency] Success for Set Range");
         }
     }
 
@@ -410,18 +406,16 @@ cleanUp:
 
 void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Power Properties::::::::::::::\n" << std::endl;
-
     uint32_t PowerHandlerCount = 0;
     ctl_result_t res           = ctlEnumPowerDomains(hDAhandle, &PowerHandlerCount, nullptr);
     if ((res != CTL_RESULT_SUCCESS) || PowerHandlerCount == 0)
     {
-        std::cout << "Power component not supported. Error: " << DecodeRetCode(res) << std::endl;
+        PRINT_LOGS("\nPower component not supported. Error: %s", DecodeRetCode(res).c_str());
         return;
     }
     else
     {
-        std::cout << "Number of Power Handles [" << PowerHandlerCount << "]" << std::endl;
+        PRINT_LOGS("\nNumber of Power Handles [%d]", PowerHandlerCount);
     }
 
     ctl_pwr_handle_t *pPowerHandle = new ctl_pwr_handle_t[PowerHandlerCount];
@@ -430,32 +424,32 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
 
     if (res != CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error: " << DecodeRetCode(res) << " for Power handle." << std::endl;
+        PRINT_LOGS("\nError: %s for Power handle.", DecodeRetCode(res).c_str());
         goto cleanUp;
     }
 
     for (uint32_t i = 0; i < PowerHandlerCount; i++)
     {
-        std::cout << "\nFor Power Handle [" << i << "]." << std::endl;
+        PRINT_LOGS("\n\nFor Power Handle [%d]", i);
 
         ctl_power_properties_t properties = { 0 };
         properties.Size                   = sizeof(ctl_power_properties_t);
         res                               = ctlPowerGetProperties(pPowerHandle[i], &properties);
 
-        std::cout << "\n[Power] Properties:" << std::endl;
+        PRINT_LOGS("\n\n[Power] Properties:");
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << DecodeRetCode(res) << " from Power get properties." << std::endl;
+            PRINT_LOGS("\n %s from Power get properties.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Power] Can Control [" << (uint32_t)properties.canControl << "]" << std::endl;
-            std::cout << "[Power] Max Power Limit [" << properties.maxLimit << "] mW" << std::endl;
-            std::cout << "[Power] Min Power Limit [" << properties.minLimit << "] mW" << std::endl;
+            PRINT_LOGS("\n[Power] Can Control [%d]", (uint32_t)properties.canControl);
+            PRINT_LOGS("\n[Power] Max Power Limit [%d] mW", properties.maxLimit);
+            PRINT_LOGS("\n[Power] Min Power Limit [%d] mW", properties.minLimit);
         }
 
-        std::cout << "\n[Power] Energy counter:" << std::endl;
+        PRINT_LOGS("\n\n[Power] Energy counter:");
 
         ctl_power_energy_counter_t energyCounter = { 0 };
         energyCounter.Size                       = sizeof(ctl_power_energy_counter_t);
@@ -463,15 +457,15 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << DecodeRetCode(res) << " from Power get energy counter." << std::endl;
+            PRINT_LOGS("\n %s from Power get energy counter.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Power] Energy Counter [" << energyCounter.energy << "] micro J" << std::endl;
-            std::cout << "[Power] Time Stamp [" << energyCounter.timestamp << "] time stamp" << std::endl;
+            PRINT_LOGS("\n[Power] Energy Counter [%I64u] micro J", energyCounter.energy);
+            PRINT_LOGS("\n[Power] Time Stamp [%I64u] time stamp", energyCounter.timestamp);
         }
 
-        std::cout << "\n[Power] Get Limits:" << std::endl;
+        PRINT_LOGS("\n\n[Power] Get Limits:");
 
         ctl_power_limits_t powerLimits = {};
         powerLimits.Size               = sizeof(ctl_power_limits_t);
@@ -479,30 +473,30 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << DecodeRetCode(res) << " from Power get limits." << std::endl;
+            PRINT_LOGS("\n %s from Power get limits.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Power] Sustained Power Limit Enabled [" << (uint32_t)powerLimits.sustainedPowerLimit.enabled << "]" << std::endl
-                      << "[Power] Sustained Power (PL1) Value [" << powerLimits.sustainedPowerLimit.power << "] mW" << std::endl
-                      << "[Power] Sustained Power (PL1 Tau) Time Window [" << powerLimits.sustainedPowerLimit.interval << "] ms" << std::endl
-                      << "[Power] Burst Power Limit Enabled [" << (uint32_t)powerLimits.burstPowerLimit.enabled << "]" << std::endl
-                      << "[Power] Burst Power (PL2) Value [" << powerLimits.burstPowerLimit.power << "] mW" << std::endl
-                      << "[Power] Peak Power (PL4) AC Value [" << powerLimits.peakPowerLimits.powerAC << "] mW" << std::endl
-                      << "[Power] Peak Power (PL4) DC Value [" << powerLimits.peakPowerLimits.powerDC << "] mW" << std::endl;
+            PRINT_LOGS("\n[Power] Sustained Power Limit Enabled [%d]", (uint32_t)powerLimits.sustainedPowerLimit.enabled);
+            PRINT_LOGS("\n[Power] Sustained Power (PL1) Value [%d] mW", powerLimits.sustainedPowerLimit.power);
+            PRINT_LOGS("\n[Power] Sustained Power (PL1 Tau) Time Window [%d] ms", powerLimits.sustainedPowerLimit.interval);
+            PRINT_LOGS("\n[Power] Burst Power Limit Enabled [%d]", (uint32_t)powerLimits.burstPowerLimit.enabled);
+            PRINT_LOGS("\n[Power] Burst Power (PL2) Value [%d] mW", powerLimits.burstPowerLimit.power);
+            PRINT_LOGS("\n[Power] Peak Power (PL4) AC Value [%d] mW", powerLimits.peakPowerLimits.powerAC);
+            PRINT_LOGS("\n[Power] Peak Power (PL4) DC Value [%d] mW", powerLimits.peakPowerLimits.powerDC);
         }
 
-        std::cout << "\n[Power] Set Limits:" << std::endl;
+        PRINT_LOGS("\n\n[Power] Set Limits:");
 
         res = ctlPowerSetLimits(pPowerHandle[i], &powerLimits);
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << DecodeRetCode(res) << " from Power set limits." << std::endl;
+            PRINT_LOGS("\n %s from Power set limits.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "\n[Power] Set Limits Success!" << std::endl;
+            PRINT_LOGS("\n\n[Power] Set Limits Success!");
         }
     }
 
@@ -519,18 +513,18 @@ cleanUp:
  ***************************************************************/
 void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Fan Properties::::::::::::::\n" << std::endl;
+    PRINT_LOGS("\n::::::::::::::Print Fan Properties::::::::::::::\n");
 
     uint32_t FanHandlerCount = 0;
     ctl_result_t res         = ctlEnumFans(hDAhandle, &FanHandlerCount, nullptr);
     if ((res != CTL_RESULT_SUCCESS) || FanHandlerCount == 0)
     {
-        std::cout << "Fan component not supported. Error: " << DecodeRetCode(res) << std::endl;
+        PRINT_LOGS("\nFan component not supported. Error: %s", DecodeRetCode(res).c_str());
         return;
     }
     else
     {
-        std::cout << "Number of Fan Handles [" << FanHandlerCount << "]" << std::endl;
+        PRINT_LOGS("\nNumber of Fan Handles [%d]", FanHandlerCount);
     }
 
     ctl_fan_handle_t *pFanHandle = new ctl_fan_handle_t[FanHandlerCount];
@@ -539,33 +533,33 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
 
     if (res != CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error: " << DecodeRetCode(res) << " for Fan handle." << std::endl;
+        PRINT_LOGS("\nError: %s  for Fan handle.", DecodeRetCode(res).c_str());
         goto cleanUp;
     }
 
     for (uint32_t i = 0; i < FanHandlerCount; i++)
     {
-        std::cout << "\nFor Fan Handle [" << i << "]" << std::endl;
+        PRINT_LOGS("\n\nFor Fan Handle [%d]", i);
 
-        std::cout << "[Fan] Fan get properties:" << std::endl;
+        PRINT_LOGS("\n[Fan] Fan get properties:");
         ctl_fan_properties_t Fan_properties = {};
         Fan_properties.Size                 = sizeof(ctl_fan_properties_t);
         res                                 = ctlFanGetProperties(pFanHandle[i], &Fan_properties);
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << DecodeRetCode(res) << " from Fan get state." << std::endl;
+            PRINT_LOGS("\n %s from Fan get state.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Fan] Can Control [" << (uint32_t)Fan_properties.canControl << "]" << std::endl;
-            std::cout << "[Fan] Max Points [" << (uint32_t)Fan_properties.maxPoints << "]" << std::endl;
-            std::cout << "[Fan] Max RPM [" << (uint32_t)Fan_properties.maxRPM << "]" << std::endl;
-            std::cout << "[Fan] Supported Modes [" << (uint32_t)Fan_properties.supportedModes << "]" << std::endl;
-            std::cout << "[Fan] Supported Units [" << (uint32_t)Fan_properties.supportedUnits << "]" << std::endl;
+            PRINT_LOGS("\n[Fan] Can Control [%d]", (uint32_t)Fan_properties.canControl);
+            PRINT_LOGS("\n[Fan] Max Points [%d]", (uint32_t)Fan_properties.maxPoints);
+            PRINT_LOGS("\n[Fan] Max RPM [%d]", (uint32_t)Fan_properties.maxRPM);
+            PRINT_LOGS("\n[Fan] Supported Modes [%d]", (uint32_t)Fan_properties.supportedModes);
+            PRINT_LOGS("\n[Fan] Supported Units [%d]", (uint32_t)Fan_properties.supportedUnits);
         }
 
-        std::cout << "[Fan] Fan get state:" << std::endl;
+        PRINT_LOGS("\n[Fan] Fan get state:");
 
         for (uint32_t index = 0; index < 10; index++)
         {
@@ -575,11 +569,11 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
 
             if (res != CTL_RESULT_SUCCESS)
             {
-                std::cout << DecodeRetCode(res) << " from Fan get state." << std::endl;
+                PRINT_LOGS("\n %s   from Fan get state.", DecodeRetCode(res).c_str());
             }
             else
             {
-                std::cout << "[Fan] Speed [" << speed << "] RPM" << std::endl;
+                PRINT_LOGS("\n[Fan] Speed [%d] RPM", speed);
             }
 
             Sleep(100);
@@ -599,26 +593,25 @@ cleanUp:
  ***************************************************************/
 void CtlPciTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print PCI Properties::::::::::::::\n" << std::endl;
 
-    std::cout << "[Temperature] Get Temperature properties:" << std::endl;
+    PRINT_LOGS("\n[Temperature] Get Temperature properties:");
     ctl_pci_properties_t Pci_properties = { 0 };
     Pci_properties.Size                 = sizeof(ctl_pci_properties_t);
     ctl_result_t res                    = ctlPciGetProperties(hDAhandle, &Pci_properties);
 
     if (res != CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error: " << DecodeRetCode(res) << " from PCI get properties." << std::endl;
+        PRINT_LOGS("\nError: %s from PCI get properties.", DecodeRetCode(res).c_str());
     }
     else
     {
-        std::cout << "[Pci] Domain [" << Pci_properties.address.domain << "]" << std::endl;
-        std::cout << "[Pci] Bus [" << Pci_properties.address.bus << "]" << std::endl;
-        std::cout << "[Pci] Device [" << Pci_properties.address.device << "]" << std::endl;
-        std::cout << "[Pci] Function [" << Pci_properties.address.function << "]" << std::endl;
-        std::cout << "[Pci] Gen [" << Pci_properties.maxSpeed.gen << "]" << std::endl;
-        std::cout << "[Pci] Width [" << Pci_properties.maxSpeed.width << "]" << std::endl;
-        std::cout << "[Pci] Max Bandwidth [" << Pci_properties.maxSpeed.maxBandwidth << "] bytes per second" << std::endl;
+        PRINT_LOGS("\n[Pci] Domain [%d]", Pci_properties.address.domain);
+        PRINT_LOGS("\n[Pci] Bus [%d]", Pci_properties.address.bus);
+        PRINT_LOGS("\n[Pci] Device [%d]", Pci_properties.address.device);
+        PRINT_LOGS("\n[Pci] Function [%d]", Pci_properties.address.function);
+        PRINT_LOGS("\n[Pci] Gen [%d]", Pci_properties.maxSpeed.gen);
+        PRINT_LOGS("\n[Pci] Width [%d]", Pci_properties.maxSpeed.width);
+        PRINT_LOGS("\n[Pci] Max Bandwidth [%I64u] bytes per second", Pci_properties.maxSpeed.maxBandwidth);
     }
 
     ctl_pci_state_t Pci_state = { 0 };
@@ -626,16 +619,16 @@ void CtlPciTest(ctl_device_adapter_handle_t hDAhandle)
     res                       = ctlPciGetState(hDAhandle, &Pci_state);
     if (res != CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error: " << DecodeRetCode(res) << " from PCI get state." << std::endl;
+        PRINT_LOGS("\nError: %s from PCI get state.", DecodeRetCode(res).c_str());
     }
     else
     {
-        std::cout << "[Pci] Current Gen Speed [" << Pci_state.speed.gen << "]" << std::endl;
-        std::cout << "[Pci] Current Width [" << Pci_state.speed.width << "]" << std::endl;
-        std::cout << "[Pci] Current Max Bandwidth [" << Pci_state.speed.maxBandwidth << "] bytes per second" << std::endl;
+        PRINT_LOGS("\n[Pci] Current Gen Speed [%d]", Pci_state.speed.gen);
+        PRINT_LOGS("\n[Pci] Current Width [%d]", Pci_state.speed.width);
+        PRINT_LOGS("\n[Pci] Current Max Bandwidth [%I64u] bytes per second", Pci_state.speed.maxBandwidth);
     }
 
-    std::cout << std::endl << std::endl;
+    PRINT_LOGS("\n \n");
 }
 
 /***************************************************************
@@ -646,18 +639,17 @@ void CtlPciTest(ctl_device_adapter_handle_t hDAhandle)
  ***************************************************************/
 void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Memory Properties::::::::::::::\n" << std::endl;
 
     uint32_t MemoryHandlerCount = 0;
     ctl_result_t res            = ctlEnumMemoryModules(hDAhandle, &MemoryHandlerCount, nullptr);
     if ((res != CTL_RESULT_SUCCESS) || MemoryHandlerCount == 0)
     {
-        std::cout << "Memory component not supported. Error: " << DecodeRetCode(res) << std::endl;
+        PRINT_LOGS("\nMemory component not supported. Error: %s", DecodeRetCode(res).c_str());
         return;
     }
     else
     {
-        std::cout << "Number of Memory Handles [" << MemoryHandlerCount << "]" << std::endl;
+        PRINT_LOGS("\nNumber of Memory Handles [%d]", MemoryHandlerCount);
     }
 
     ctl_mem_handle_t *pMemoryHandle = new ctl_mem_handle_t[MemoryHandlerCount];
@@ -666,15 +658,15 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
 
     if (res != CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error: " << DecodeRetCode(res) << " for Memory handle." << std::endl;
+        PRINT_LOGS("\nError: %s for Memory handle.", DecodeRetCode(res).c_str());
         goto cleanUp;
     }
 
     for (uint32_t i = 0; i < MemoryHandlerCount; i++)
     {
-        std::cout << "\nFor Memory Handle [" << i << "]" << std::endl;
+        PRINT_LOGS("\n\nFor Memory Handle [%d]", i);
 
-        std::cout << "[Memory] Get Memory properties:" << std::endl;
+        PRINT_LOGS("\n[Memory] Get Memory properties:");
 
         ctl_mem_properties_t memoryProperties = { 0 };
         memoryProperties.Size                 = sizeof(ctl_mem_properties_t);
@@ -682,18 +674,18 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << "Error: " << DecodeRetCode(res) << " from Memory get properties." << std::endl;
+            PRINT_LOGS("\nError: %s from Memory get properties.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Memory] Bus Width [" << memoryProperties.busWidth << "]" << std::endl
-                      << "[Memory] Location [" << (uint32_t)memoryProperties.location << "]" << std::endl
-                      << "[Memory] Number of Channels [" << memoryProperties.numChannels << "]" << std::endl
-                      << "[Memory] Physical Size [" << memoryProperties.physicalSize << "]" << std::endl
-                      << "[Memory] Memory Type [" << memoryProperties.type << "]" << std::endl;
+            PRINT_LOGS("\n[Memory] Bus Width [%d]", memoryProperties.busWidth);
+            PRINT_LOGS("\n[Memory] Location [%d]", (uint32_t)memoryProperties.location);
+            PRINT_LOGS("\n[Memory] Number of Channels [%d]", memoryProperties.numChannels);
+            PRINT_LOGS("\n[Memory] Physical Size [%I64u]", memoryProperties.physicalSize);
+            PRINT_LOGS("\n[Memory] Memory Type [%d]", memoryProperties.type);
         }
 
-        std::cout << "[Memory] Get Memory State:" << std::endl;
+        PRINT_LOGS("\n[Memory] Get Memory State:");
 
         ctl_mem_state_t state = { 0 };
         state.Size            = sizeof(ctl_mem_state_t);
@@ -701,15 +693,15 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << "Error: " << DecodeRetCode(res) << " from Memory get State." << std::endl;
+            PRINT_LOGS("\nError: %s from Memory get State.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Memory] Memory Size [" << state.size << "]" << std::endl;
-            std::cout << "[Memory] Memory Free [" << state.free << "]" << std::endl;
+            PRINT_LOGS("\n[Memory] Memory Size [%I64u]", state.size);
+            PRINT_LOGS("\n[Memory] Memory Free [%I64u]", state.free);
         }
 
-        std::cout << "[Memory] Get Memory Bandwidth:" << std::endl;
+        PRINT_LOGS("\n[Memory] Get Memory Bandwidth:");
 
         ctl_mem_bandwidth_t bandwidth = { 0 };
         bandwidth.Size                = sizeof(ctl_mem_bandwidth_t);
@@ -717,16 +709,14 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
 
         if (res != CTL_RESULT_SUCCESS)
         {
-            std::cout << "Error: " << DecodeRetCode(res) << " from Memory get Bandwidth." << std::endl;
+            PRINT_LOGS("\nError: %s from Memory get Bandwidth.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Memory] Max Bandwidth [" << bandwidth.maxBandwidth << "]" << std::endl;
-            std::cout << "[Memory] Time Stamp [" << bandwidth.timestamp << "]" << std::endl;
+            PRINT_LOGS("\n[Memory] Max Bandwidth [%I64u]", bandwidth.maxBandwidth);
+            PRINT_LOGS("\n[Memory] Time Stamp [%I64u] \n \n", bandwidth.timestamp);
         }
     }
-
-    std::cout << std::endl << std::endl;
 
 cleanUp:
     delete[] pMemoryHandle;
@@ -741,18 +731,18 @@ cleanUp:
  ***************************************************************/
 void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Engine Properties::::::::::::::\n" << std::endl;
+    PRINT_LOGS("\n::::::::::::::Print Engine Properties::::::::::::::\n");
 
     uint32_t EngineHandlerCount = 0;
     ctl_result_t res            = ctlEnumEngineGroups(hDAhandle, &EngineHandlerCount, nullptr);
     if ((res != CTL_RESULT_SUCCESS) || EngineHandlerCount == 0)
     {
-        std::cout << "Engine component not supported. Error: " << DecodeRetCode(res) << std::endl;
+        PRINT_LOGS("\nEngine component not supported. Error: %s", DecodeRetCode(res).c_str());
         return;
     }
     else
     {
-        std::cout << "Number of Engine Handles [" << EngineHandlerCount << "]" << std::endl;
+        PRINT_LOGS("\nNumber of Engine Handles [%d]", EngineHandlerCount);
     }
 
     ctl_engine_handle_t *pEngineHandle = new ctl_engine_handle_t[EngineHandlerCount];
@@ -761,28 +751,26 @@ void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle)
 
     if (res != CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error: " << DecodeRetCode(res) << " for Engine handle." << std::endl;
+        PRINT_LOGS("\nError: %s for Engine handle.", DecodeRetCode(res).c_str());
         goto cleanUp;
     }
 
     for (uint32_t i = 0; i < EngineHandlerCount; i++)
     {
-        std::cout << "\nFor Engine Handle [" << i << "]" << std::endl;
+        PRINT_LOGS("\n\nFor Engine Handle [%d]", i);
         ctl_engine_properties_t engineProperties = { 0 };
         engineProperties.Size                    = sizeof(ctl_engine_properties_t);
         res                                      = ctlEngineGetProperties(pEngineHandle[i], &engineProperties);
         if (res)
         {
-            std::cout << "Error: " << DecodeRetCode(res) << " from Engine get properties." << std::endl;
+            PRINT_LOGS("\nError: %s from Engine get properties.", DecodeRetCode(res).c_str());
         }
         else
         {
-            std::cout << "[Engine] Engine type ["
-                      << ((engineProperties.type == CTL_ENGINE_GROUP_GT)     ? "Gt" :
-                          (engineProperties.type == CTL_ENGINE_GROUP_RENDER) ? "Render" :
-                          (engineProperties.type == CTL_ENGINE_GROUP_MEDIA)  ? "Media" :
-                                                                               "Unknown")
-                      << "]" << std::endl;
+            PRINT_LOGS("\n[Engine] Engine type [%s]", ((engineProperties.type == CTL_ENGINE_GROUP_GT)     ? "Gt" :
+                                                       (engineProperties.type == CTL_ENGINE_GROUP_RENDER) ? "Render" :
+                                                       (engineProperties.type == CTL_ENGINE_GROUP_MEDIA)  ? "Media" :
+                                                                                                            "Unknown"));
         }
 
         ctl_engine_stats_t engineStats = { 0 };
@@ -795,7 +783,7 @@ void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle)
 
             if (res != CTL_RESULT_SUCCESS)
             {
-                std::cout << "Error: " << DecodeRetCode(res) << " from Engine get activity." << std::endl;
+                PRINT_LOGS("\nError: %s  from Engine get activity.", DecodeRetCode(res).c_str());
             }
             else
             {
@@ -805,9 +793,9 @@ void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle)
                 double percentActivity = static_cast<double>(activeDiff) / static_cast<double>(timeWindow);
                 percentActivity *= 100.0;
 
-                std::cout << "[Engine] Active Time [" << activeDiff << "] time stamp" << std::endl
-                          << "[Engine] Time Stamp [" << timeWindow << "] time stamp" << std::endl
-                          << "[Engine] Usage [" << percentActivity << "] %" << std::endl;
+                PRINT_LOGS("\n[Engine] Active Time [%I64u]\n", activeDiff);
+                PRINT_LOGS("[Engine] Time Stamp [%I64u]\n", timeWindow);
+                PRINT_LOGS("[Engine] Usage [%f] \n \n \n", percentActivity);
 
                 prevActiveCounter = engineStats.activeTime;
                 prevTimeStamp     = engineStats.timestamp;
@@ -817,8 +805,6 @@ void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle)
             Sleep(200);
         } while (iterations > 0);
     }
-
-    std::cout << std::endl << std::endl;
 
 cleanUp:
     delete[] pEngineHandle;
@@ -833,7 +819,6 @@ cleanUp:
  ***************************************************************/
 void CtlOverclockPropertiesTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Overclock Properties::::::::::::::\n" << std::endl;
 
     ctl_oc_properties_t OcProperties = {};
     OcProperties.Size                = sizeof(ctl_oc_properties_t);
@@ -842,54 +827,54 @@ void CtlOverclockPropertiesTest(ctl_device_adapter_handle_t hDAhandle)
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
 
-        std::cout << "Oc Supported? " << ((OcProperties.bSupported) ? "true" : "false") << std::endl << std::endl;
+        PRINT_LOGS("\nOc Supported? %s", ((OcProperties.bSupported) ? "true" : "false"));
 
-        std::cout << "Gpu Frequency Offset Supported? " << ((OcProperties.gpuFrequencyOffset.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Gpu Frequency Offset Is Relative? " << ((OcProperties.gpuFrequencyOffset.bRelative) ? "true" : "false") << std::endl;
-        std::cout << "Gpu Frequency Offset Have Reference? " << ((OcProperties.gpuFrequencyOffset.bReference) ? "true" : "false") << std::endl;
-        std::cout << "Gpu Frequency Offset Default: " << OcProperties.gpuFrequencyOffset.Default << std::endl;
-        std::cout << "Gpu Frequency Offset Min: " << OcProperties.gpuFrequencyOffset.min << std::endl;
-        std::cout << "Gpu Frequency Offset Max: " << OcProperties.gpuFrequencyOffset.max << std::endl;
-        std::cout << "Gpu Frequency Offset Reference: " << OcProperties.gpuFrequencyOffset.reference << std::endl;
-        std::cout << "Gpu Frequency Offset Step: " << OcProperties.gpuFrequencyOffset.step << std::endl;
-        std::cout << "Gpu Frequency Offset Units: " << printUnits(OcProperties.gpuFrequencyOffset.units) << std::endl << std::endl;
+        PRINT_LOGS("\nGpu Frequency Offset Supported? %s", ((OcProperties.gpuFrequencyOffset.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nGpu Frequency Offset Is Relative? %s", ((OcProperties.gpuFrequencyOffset.bRelative) ? "true" : "false"));
+        PRINT_LOGS("\nGpu Frequency Offset Have Reference? %s", ((OcProperties.gpuFrequencyOffset.bReference) ? "true" : "false"));
+        PRINT_LOGS("\nGpu Frequency Offset Default: %f", OcProperties.gpuFrequencyOffset.Default);
+        PRINT_LOGS("\nGpu Frequency Offset Min: %f", OcProperties.gpuFrequencyOffset.min);
+        PRINT_LOGS("\nGpu Frequency Offset Max: %f", OcProperties.gpuFrequencyOffset.max);
+        PRINT_LOGS("\nGpu Frequency Offset Reference: %f", OcProperties.gpuFrequencyOffset.reference);
+        PRINT_LOGS("\nGpu Frequency Offset Step: %f", OcProperties.gpuFrequencyOffset.step);
+        PRINT_LOGS("\nGpu Frequency Offset Units: %s", printUnits(OcProperties.gpuFrequencyOffset.units));
 
-        std::cout << "Gpu Voltage Offset Supported? " << ((OcProperties.gpuVoltageOffset.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Gpu Voltage Offset Is Relative? " << ((OcProperties.gpuVoltageOffset.bRelative) ? "true" : "false") << std::endl;
-        std::cout << "Gpu Voltage Offset Have Reference? " << ((OcProperties.gpuVoltageOffset.bReference) ? "true" : "false") << std::endl;
-        std::cout << "Gpu Voltage Offset Default: " << OcProperties.gpuVoltageOffset.Default << std::endl;
-        std::cout << "Gpu Voltage Offset Min: " << OcProperties.gpuVoltageOffset.min << std::endl;
-        std::cout << "Gpu Voltage Offset Max: " << OcProperties.gpuVoltageOffset.max << std::endl;
-        std::cout << "Gpu Voltage Offset Reference: " << OcProperties.gpuVoltageOffset.reference << std::endl;
-        std::cout << "Gpu Voltage Offset Step: " << OcProperties.gpuVoltageOffset.step << std::endl;
-        std::cout << "Gpu Voltage Offset Units: " << printUnits(OcProperties.gpuVoltageOffset.units) << std::endl << std::endl;
+        PRINT_LOGS("\nGpu Voltage Offset Supported? %s", ((OcProperties.gpuVoltageOffset.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nGpu Voltage Offset Is Relative? %s", ((OcProperties.gpuVoltageOffset.bRelative) ? "true" : "false"));
+        PRINT_LOGS("\nGpu Voltage Offset Have Reference? %s", ((OcProperties.gpuVoltageOffset.bReference) ? "true" : "false"));
+        PRINT_LOGS("\nGpu Voltage Offset Default: %f", OcProperties.gpuVoltageOffset.Default);
+        PRINT_LOGS("\nGpu Voltage Offset Min: %f", OcProperties.gpuVoltageOffset.min);
+        PRINT_LOGS("\nGpu Voltage Offset Max: %f", OcProperties.gpuVoltageOffset.max);
+        PRINT_LOGS("\nGpu Voltage Offset Reference: %f", OcProperties.gpuVoltageOffset.reference);
+        PRINT_LOGS("\nGpu Voltage Offset Step: %f", OcProperties.gpuVoltageOffset.step);
+        PRINT_LOGS("\nGpu Voltage Offset Units: %s", printUnits(OcProperties.gpuVoltageOffset.units));
 
-        std::cout << "Power Limit Supported? " << ((OcProperties.powerLimit.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Power Limit Is Relative? " << ((OcProperties.powerLimit.bRelative) ? "true" : "false") << std::endl;
-        std::cout << "Power Limit Have Reference? " << ((OcProperties.powerLimit.bReference) ? "true" : "false") << std::endl;
-        std::cout << "Power Limit Default: " << OcProperties.powerLimit.Default << std::endl;
-        std::cout << "Power Limit Min: " << OcProperties.powerLimit.min << std::endl;
-        std::cout << "Power Limit Max: " << OcProperties.powerLimit.max << std::endl;
-        std::cout << "Power Limit Reference: " << OcProperties.powerLimit.reference << std::endl;
-        std::cout << "Power Limit Step: " << OcProperties.powerLimit.step << std::endl;
-        std::cout << "Power Limit Units: " << printUnits(OcProperties.powerLimit.units) << std::endl << std::endl;
+        PRINT_LOGS("\nPower Limit Supported? %s", ((OcProperties.powerLimit.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nPower Limit Is Relative? %s", ((OcProperties.powerLimit.bRelative) ? "true" : "false"));
+        PRINT_LOGS("\nPower Limit Have Reference? %s", ((OcProperties.powerLimit.bReference) ? "true" : "false"));
+        PRINT_LOGS("\nPower Limit Default: %f", OcProperties.powerLimit.Default);
+        PRINT_LOGS("\nPower Limit Min: %f", OcProperties.powerLimit.min);
+        PRINT_LOGS("\nPower Limit Max: %f", OcProperties.powerLimit.max);
+        PRINT_LOGS("\nPower Limit Reference: %f", OcProperties.powerLimit.reference);
+        PRINT_LOGS("\nPower Limit Step: %f", OcProperties.powerLimit.step);
+        PRINT_LOGS("\nPower Limit Units: %s", printUnits(OcProperties.powerLimit.units));
 
-        std::cout << "Temperature Limit Supported? " << ((OcProperties.temperatureLimit.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Temperature Limit Is Relative? " << ((OcProperties.temperatureLimit.bRelative) ? "true" : "false") << std::endl;
-        std::cout << "Temperature Limit Have Reference? " << ((OcProperties.temperatureLimit.bReference) ? "true" : "false") << std::endl;
-        std::cout << "Temperature Limit Default: " << OcProperties.temperatureLimit.Default << std::endl;
-        std::cout << "Temperature Limit Min: " << OcProperties.temperatureLimit.min << std::endl;
-        std::cout << "Temperature Limit Max: " << OcProperties.temperatureLimit.max << std::endl;
-        std::cout << "Temperature Limit Reference: " << OcProperties.temperatureLimit.reference << std::endl;
-        std::cout << "Temperature Limit Step: " << OcProperties.temperatureLimit.step << std::endl;
-        std::cout << "Temperature Limit Units: " << printUnits(OcProperties.temperatureLimit.units) << std::endl << std::endl;
+        PRINT_LOGS("\nTemperature Limit Supported? %s", ((OcProperties.temperatureLimit.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nTemperature Limit Is Relative? %s", ((OcProperties.temperatureLimit.bRelative) ? "true" : "false"));
+        PRINT_LOGS("\nTemperature Limit Have Reference? %s", ((OcProperties.temperatureLimit.bReference) ? "true" : "false"));
+        PRINT_LOGS("\nTemperature Limit Default: %f", OcProperties.temperatureLimit.Default);
+        PRINT_LOGS("\nTemperature Limit Min: %f", OcProperties.temperatureLimit.min);
+        PRINT_LOGS("\nTemperature Limit Max: %f", OcProperties.temperatureLimit.max);
+        PRINT_LOGS("\nTemperature Limit Reference: %f", OcProperties.temperatureLimit.reference);
+        PRINT_LOGS("\nTemperature Limit Step: %f", OcProperties.temperatureLimit.step);
+        PRINT_LOGS("\nTemperature Limit Units: %s", printUnits(OcProperties.temperatureLimit.units));
     }
     else
     {
-        std::cout << "Error: " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nError: %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << std::endl << std::endl;
+    PRINT_LOGS("\n \n");
 }
 
 /***************************************************************
@@ -902,86 +887,80 @@ void CtlOverclockFrequencyOffsetTest(ctl_device_adapter_handle_t hDAhandle, doub
 {
     double GPUFrequencyOffset = 0.0;
     double VrelOffset         = 0.0;
-    std::cout << "\n::::::::::::::Overclocking Tests::::::::::::::\n" << std::endl;
-    std::cout << "\n::::::::::::::1.0 Frequency Offset::::::::::::::\n" << std::endl;
-    std::cout << "\n::::::::::::::1.1 Get Frequency Offset::::::::::::::\n" << std::endl;
-    std::cout << "\n1.1.1 Get Frequency Offset:::::::::::::::\n" << std::endl;
+    PRINT_LOGS("\n::::::::::::::Overclocking Tests::::::::::::::\n");
+    PRINT_LOGS("\n::::::::::::::1.0 Frequency Offset::::::::::::::\n");
+    PRINT_LOGS("\n::::::::::::::1.1 Get Frequency Offset::::::::::::::\n");
+    PRINT_LOGS("\n1.1.1 Get Frequency Offset:::::::::::::::\n");
     ctl_result_t status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
         if (GPUFrequencyOffset == 0.0)
         {
-            std::cout << "Result: Overclocking disabled, Frequency Offset is 0" << std::endl;
+            PRINT_LOGS("\nResult: Overclocking disabled, Frequency Offset is 0");
         }
         else
         {
-            std::cout << "Result: Overclocking enabled, Frequency Offset is:" << GPUFrequencyOffset << std::endl;
+            PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is:%f", GPUFrequencyOffset);
         }
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
-
-    std::cout << "\n1.1.2 Set Frequency Offset without calling waiver::::::::::::::\n" << std::endl;
 
     GPUFrequencyOffset = FreqOffset; //  Setting Offset to FreqOffset MHz
 
-    std::cout << "Set Frequency Offset with: " << GPUFrequencyOffset << " MHz" << std::endl;
+    PRINT_LOGS("\nSet Frequency Offset with: %f MHz", GPUFrequencyOffset);
     status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SET)
     {
-        std::cout << "Result: Correctly returned: " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Correctly returned: %s", DecodeRetCode(status).c_str());
     }
     else
     {
-        std::cout << "Result: Incorrectly returned: " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Incorrectly returned: %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << "\n1.1.3 Calling waiver::::::::::::::\n" << std::endl;
     status = ctlOverclockWaiverSet(hDAhandle);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Waiver Called correctly" << std::endl;
+        PRINT_LOGS("\nResult: Waiver Called correctly");
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << "\n1.2.0 Set Frequency Offset with waiver::::::::::::::\n" << std::endl;
-    std::cout << "Set Frequency Offset with: " << GPUFrequencyOffset << " MHz" << std::endl;
+    PRINT_LOGS("\nSet Frequency Offset with: %f MHz", GPUFrequencyOffset);
     status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Frequency Offset Set Correctly " << std::endl;
+        PRINT_LOGS("\nResult: Frequency Offset Set Correctly ");
     }
     else
     {
-        std::cout << "Result: Incorrectly returned: " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Incorrectly returned: %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << "\n1.2.1 Get Modified Frequency Offset:::::::::::::::\n" << std::endl;
     status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking enabled, Frequency Offset is:" << GPUFrequencyOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is:%f", GPUFrequencyOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
     status = ctlOverclockGpuVoltageOffsetGet(hDAhandle, &VrelOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking enabled, Voltage Offset is:" << VrelOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking enabled, Voltage Offset is:%f", VrelOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
-    std::cout << "\n1.2.2 Set Frequency Offset to 0 MHz and Vrel Offset to 0 v to disable OC:::::::::::::::\n" << std::endl;
 
     GPUFrequencyOffset = 0.0; //  Setting Offset to 0 MHz
     VrelOffset         = 0.0;
@@ -989,96 +968,86 @@ void CtlOverclockFrequencyOffsetTest(ctl_device_adapter_handle_t hDAhandle, doub
     status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Frequency Offset successfully Set to 0" << std::endl;
+        PRINT_LOGS("\nResult: Frequency Offset successfully Set to 0");
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
     status = ctlOverclockGpuVoltageOffsetSet(hDAhandle, VrelOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Voltage Offset successfully Set to 0" << std::endl;
+        PRINT_LOGS("\nResult: Voltage Offset successfully Set to 0");
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
-
-    std::cout << "\n1.2.3 Reading Back Frequency Offset to confirm OC is disabled:::::::::::::::\n" << std::endl;
     status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking disabled, Frequency Offset is:" << GPUFrequencyOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking disabled, Frequency Offset is:%f", GPUFrequencyOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
     status = ctlOverclockGpuVoltageOffsetGet(hDAhandle, &VrelOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking disabled, Voltage Offset is:" << VrelOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking disabled, Voltage Offset is: %f", VrelOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
-
-    std::cout << "\n1.3.0 Set Frequency Offset to -100 MHz to test negative offset OC:::::::::::::::\n" << std::endl;
 
     GPUFrequencyOffset = -FreqOffset; //  Setting Offset to -FreqOffset MHz
     status             = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking enabled, Frequency Offset is:" << GPUFrequencyOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is:%f", GPUFrequencyOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
-
-    std::cout << "\n1.3.1 Get Modified Frequency Offset:::::::::::::::\n" << std::endl;
 
     status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking enabled, Frequency Offset is: " << GPUFrequencyOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is: %f", GPUFrequencyOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
-
-    std::cout << "\n1.3.2 Set Frequency Offset to 0 MHz to disable OC:::::::::::::::\n" << std::endl;
 
     GPUFrequencyOffset = 0.0; //  Setting Offset to 0 MHz
 
     status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Offset successfully Set to 0" << std::endl;
+        PRINT_LOGS("\nResult: Offset successfully Set to 0");
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
-
-    std::cout << "\n1.3.3 Reading Back Frequency Offset to confirm OC is disabled:::::::::::::::\n" << std::endl;
 
     status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking disabled, Frequency Offset is:" << GPUFrequencyOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking disabled, Frequency Offset is:%f", GPUFrequencyOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << std::endl << std::endl;
+    PRINT_LOGS("\n \n");
 }
 
 /***************************************************************
@@ -1091,97 +1060,88 @@ void CtlOverclockFrequencyAndVoltageOffsetTest(ctl_device_adapter_handle_t hDAha
 {
     double GPUFrequencyOffset = 0.0;
     double VrelOffset         = 0.0;
-    std::cout << "\n::::::::::::::Overclocking Tests::::::::::::::\n" << std::endl;
-    std::cout << "\n::::::::::::::2.0 Frequency Offset::::::::::::::\n" << std::endl;
-    std::cout << "\n::::::::::::::2.1 Get Frequency Offset::::::::::::::\n" << std::endl;
-    std::cout << "\n2.1.2 Get Frequency Offset:::::::::::::::\n" << std::endl;
-
-    std::cout << "\n2.1.3 Set Frequency Offset and Vrel Offset::::::::::::::\n" << std::endl;
 
     GPUFrequencyOffset = 100.0;
-    VrelOffset         = 0.05;
+    VrelOffset         = 50; // in mV
 
-    std::cout << "Set Frequency Offset with: " << GPUFrequencyOffset << " MHz Vrel Offset: " << VrelOffset << std::endl;
+    PRINT_LOGS("\nSet Frequency Offset with: %f  MHz Vrel Offset: %f", GPUFrequencyOffset, VrelOffset);
 
     ctl_result_t status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Frequency Offset Set Correctly " << std::endl;
+        PRINT_LOGS("\nResult: Frequency Offset Set Correctly ");
     }
     else
     {
-        std::cout << "Result: Incorrectly returned: " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Incorrectly returned: %s", DecodeRetCode(status).c_str());
     }
 
     status = ctlOverclockGpuVoltageOffsetSet(hDAhandle, VrelOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Vrel Offset Set Correctly " << std::endl;
+        PRINT_LOGS("\nResult: Vrel Offset Set Correctly ");
     }
     else
     {
-        std::cout << "Result: Incorrectly returned: " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Incorrectly returned: %s", DecodeRetCode(status).c_str());
     }
-
-    std::cout << "\n2.1.4 Get Modified Frequency and Vrel Offset:::::::::::::::\n" << std::endl;
+    PRINT_LOGS("\n2.1.4 Get Modified Frequency and Vrel Offset:::::::::::::::\n");
     if (ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset) == ctl_result_t::CTL_RESULT_SUCCESS &&
         ctlOverclockGpuVoltageOffsetGet(hDAhandle, &VrelOffset) == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking enabled, Frequency Offset is: " << GPUFrequencyOffset << " Vrel Offset is: " << VrelOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is: %f Vrel Offset is: %f", GPUFrequencyOffset, VrelOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << "\n2.1.5 Set Frequency Offset to 0 MHz and Vrel Offset to 0 v to disable OC:::::::::::::::\n" << std::endl;
-
+    PRINT_LOGS("\n2.1.5 Set Frequency Offset to 0 MHz and Vrel Offset to 0 v to disable OC:::::::::::::::\n");
     GPUFrequencyOffset = 0.0; //  Setting Offset to 0 MHz
     VrelOffset         = 0.0;
 
     status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Frequency Offset successfully Set to 0" << std::endl;
+        PRINT_LOGS("\nResult: Frequency Offset successfully Set to 0");
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
     status = ctlOverclockGpuVoltageOffsetSet(hDAhandle, VrelOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Voltage Offset successfully Set to 0" << std::endl;
+        PRINT_LOGS("\nResult: Voltage Offset successfully Set to 0");
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << "\n2.1.6 Reading Back Frequency Offset to confirm OC is disabled:::::::::::::::\n" << std::endl;
-
+    PRINT_LOGS("\n2.1.6 Reading Back Frequency Offset to confirm OC is disabled:::::::::::::::\n");
     status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking disabled, Frequency Offset is:" << GPUFrequencyOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking disabled, Frequency Offset is:%f", GPUFrequencyOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
     status = ctlOverclockGpuVoltageOffsetGet(hDAhandle, &VrelOffset);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Result: Overclocking disabled, Voltage Offset is:" << VrelOffset << std::endl;
+        PRINT_LOGS("\nResult: Overclocking disabled, Voltage Offset is: %f", VrelOffset);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << std::endl << std::endl;
+    PRINT_LOGS("\n \n");
 }
 
 /***************************************************************
@@ -1193,7 +1153,7 @@ void CtlOverclockFrequencyAndVoltageOffsetTest(ctl_device_adapter_handle_t hDAha
  ***************************************************************/
 void CtlOverclockPowerTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Power Limit::::::::::::::\n" << std::endl;
+    PRINT_LOGS("\n::::::::::::::Print Power Limit::::::::::::::\n");
 
     ctl_oc_properties_t OcProperties = {};
     OcProperties.Size                = sizeof(ctl_oc_properties_t);
@@ -1201,24 +1161,24 @@ void CtlOverclockPowerTest(ctl_device_adapter_handle_t hDAhandle)
 
     if (status != ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error Getting Properties" << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nError Getting Properties%s", DecodeRetCode(status).c_str());
         return;
     }
 
-    std::cout << "Getting current Power Limit" << std::endl << std::endl;
+    PRINT_LOGS("\nGetting current Power Limit\n");
     double CurrentPowerLimit = 0.0;
 
     status = ctlOverclockPowerLimitGet(hDAhandle, &CurrentPowerLimit);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Current Sustained Power Limit:" << CurrentPowerLimit << std::endl;
+        PRINT_LOGS("\nCurrent Sustained Power Limit: %f", CurrentPowerLimit);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << "\nSetting current Power Limit outside limits:" << std::endl << std::endl;
+    PRINT_LOGS("\n\nSetting current Power Limit outside limits:");
 
     // Convert to mW and get min -1 W to be out of bounds
     CurrentPowerLimit = OcProperties.powerLimit.min * 1000.0 - 1000.0;
@@ -1226,39 +1186,39 @@ void CtlOverclockPowerTest(ctl_device_adapter_handle_t hDAhandle)
     status = ctlOverclockPowerLimitSet(hDAhandle, CurrentPowerLimit);
     if (status == ctl_result_t::CTL_RESULT_ERROR_CORE_OVERCLOCK_POWER_OUTSIDE_RANGE)
     {
-        std::cout << "Correctly returned out of bounds." << std::endl;
+        PRINT_LOGS("\nCorrectly returned out of bounds.");
     }
 
-    std::cout << "\nSetting current Power Limit inside limits:" << std::endl << std::endl;
+    PRINT_LOGS("\n\nSetting current Power Limit inside limits:\n");
     // Convert to mW and get min + 1 W to be in bounds.
     CurrentPowerLimit = OcProperties.powerLimit.min * 1000.0 + 1000.0;
 
     status = ctlOverclockPowerLimitSet(hDAhandle, CurrentPowerLimit);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Power Limit set correctly." << std::endl;
+        PRINT_LOGS("\nPower Limit set correctly.");
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << "\nGetting the now current Power Limit:" << std::endl << std::endl;
+    PRINT_LOGS("\n\nGetting the now current Power Limit:\n");
 
     double NewCurrentPowerLimit = 0.0;
 
     status = ctlOverclockPowerLimitGet(hDAhandle, &NewCurrentPowerLimit);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Current Sustained Power Limit:" << NewCurrentPowerLimit << std::endl;
-        std::cout << "Requested Sustained Power Limit:" << CurrentPowerLimit << std::endl;
+        PRINT_LOGS("\nCurrent Sustained Power Limit: %f", NewCurrentPowerLimit);
+        PRINT_LOGS("\nRequested Sustained Power Limit: %f", CurrentPowerLimit);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << std::endl << std::endl;
+    PRINT_LOGS("\n \n");
 }
 
 /***************************************************************
@@ -1270,7 +1230,7 @@ void CtlOverclockPowerTest(ctl_device_adapter_handle_t hDAhandle)
  ***************************************************************/
 void CtlOverclockTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Temperature Limit::::::::::::::\n" << std::endl;
+    PRINT_LOGS("\n::::::::::::::Print Temperature Limit::::::::::::::\n");
 
     ctl_oc_properties_t OcProperties = {};
     OcProperties.Size                = sizeof(ctl_oc_properties_t);
@@ -1278,63 +1238,63 @@ void CtlOverclockTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
 
     if (status != ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Error Getting Properties" << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nError Getting Properties %s", DecodeRetCode(status).c_str());
         return;
     }
 
-    std::cout << "Getting current Temperature Limit" << std::endl << std::endl;
+    PRINT_LOGS("\nGetting current Temperature Limit  \n");
     double CurrentTemperatureLimit = 0.0;
 
     status = ctlOverclockTemperatureLimitGet(hDAhandle, &CurrentTemperatureLimit);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Current Temperature Limit:" << CurrentTemperatureLimit << std::endl;
+        PRINT_LOGS("\nCurrent Temperature Limit: %f", CurrentTemperatureLimit);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << "\nSetting current Temperature Limit outside limits:" << std::endl << std::endl;
+    PRINT_LOGS("\n\nSetting current Temperature Limit outside limits: \n");
 
     CurrentTemperatureLimit = OcProperties.temperatureLimit.min - 1.0;
 
     status = ctlOverclockTemperatureLimitSet(hDAhandle, CurrentTemperatureLimit);
     if (status == ctl_result_t::CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE)
     {
-        std::cout << "Correctly returned out of bounds." << std::endl;
+        PRINT_LOGS("\nCorrectly returned out of bounds.");
     }
 
-    std::cout << "\nSetting current Temperature Limit inside limits:" << std::endl << std::endl;
+    PRINT_LOGS("\n\nSetting current Temperature Limit inside limits: \n");
 
     CurrentTemperatureLimit = OcProperties.temperatureLimit.min + 1.0;
 
     status = ctlOverclockTemperatureLimitSet(hDAhandle, CurrentTemperatureLimit);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Temperature Limit set correctly." << std::endl;
+        PRINT_LOGS("\nTemperature Limit set correctly.");
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << "\nGetting the now current Temperature Limit:" << std::endl << std::endl;
+    PRINT_LOGS("\n\nGetting the now current Temperature Limit: \n");
 
     double NewCurrentTemperatureLimit = 0.0;
 
     status = ctlOverclockTemperatureLimitGet(hDAhandle, &NewCurrentTemperatureLimit);
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Current Temperature Limit:" << NewCurrentTemperatureLimit << std::endl;
-        std::cout << "Requested Temperature Limit:" << CurrentTemperatureLimit << std::endl;
+        PRINT_LOGS("\nCurrent Temperature Limit: %f", NewCurrentTemperatureLimit);
+        PRINT_LOGS("\nRequested Temperature Limit: %f", CurrentTemperatureLimit);
     }
     else
     {
-        std::cout << "Result: Error " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << std::endl << std::endl;
+    PRINT_LOGS("\n \n");
 }
 
 /***************************************************************
@@ -1346,7 +1306,7 @@ void CtlOverclockTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
  ***************************************************************/
 void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    std::cout << "\n::::::::::::::Print Telemetry::::::::::::::\n" << std::endl;
+    PRINT_LOGS("\n:: :: :: :: :: :: ::Print Telemetry:: :: :: :: :: :: ::\n");
 
     ctl_power_telemetry_t pPowerTelemetry = {};
     pPowerTelemetry.Size                  = sizeof(ctl_power_telemetry_t);
@@ -1354,110 +1314,110 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
 
     if (status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        std::cout << "Telemetry Success" << std::endl << std::endl;
+        PRINT_LOGS("\nTelemetry Success \n");
 
-        std::cout << "TimeStamp:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.timeStamp.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.timeStamp.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.timeStamp.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.timeStamp.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nTimeStamp:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.timeStamp.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.timeStamp.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.timeStamp.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.timeStamp.value.datadouble);
 
-        std::cout << "Gpu Energy Counter:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.gpuEnergyCounter.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.gpuEnergyCounter.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.gpuEnergyCounter.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.gpuEnergyCounter.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nGpu Energy Counter:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.gpuEnergyCounter.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.gpuEnergyCounter.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.gpuEnergyCounter.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.gpuEnergyCounter.value.datadouble);
 
-        std::cout << "Gpu Voltage:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.gpuVoltage.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.gpuVoltage.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.gpuVoltage.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.gpuVoltage.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nGpu Voltage:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.gpuVoltage.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.gpuVoltage.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.gpuVoltage.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.gpuVoltage.value.datadouble);
 
-        std::cout << "Gpu Current Frequency:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.gpuCurrentClockFrequency.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.gpuCurrentClockFrequency.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.gpuCurrentClockFrequency.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.gpuCurrentClockFrequency.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nGpu Current Frequency:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.gpuCurrentClockFrequency.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.gpuCurrentClockFrequency.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.gpuCurrentClockFrequency.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.gpuCurrentClockFrequency.value.datadouble);
 
-        std::cout << "Gpu Current Temperature:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.gpuCurrentTemperature.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.gpuCurrentTemperature.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.gpuCurrentTemperature.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.gpuCurrentTemperature.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nGpu Current Temperature:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.gpuCurrentTemperature.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.gpuCurrentTemperature.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.gpuCurrentTemperature.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.gpuCurrentTemperature.value.datadouble);
 
-        std::cout << "Gpu Activity Counter:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.globalActivityCounter.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.globalActivityCounter.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.globalActivityCounter.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.globalActivityCounter.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nGpu Activity Counter:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.globalActivityCounter.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.globalActivityCounter.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.globalActivityCounter.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.globalActivityCounter.value.datadouble);
 
-        std::cout << "Render Activity Counter:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.renderComputeActivityCounter.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.renderComputeActivityCounter.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.renderComputeActivityCounter.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.renderComputeActivityCounter.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nRender Activity Counter:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.renderComputeActivityCounter.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.renderComputeActivityCounter.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.renderComputeActivityCounter.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.renderComputeActivityCounter.value.datadouble);
 
-        std::cout << "Media Activity Counter:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.mediaActivityCounter.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.mediaActivityCounter.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.mediaActivityCounter.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.mediaActivityCounter.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nMedia Activity Counter:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.mediaActivityCounter.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.mediaActivityCounter.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.mediaActivityCounter.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.mediaActivityCounter.value.datadouble);
 
-        std::cout << "VRAM Energy Counter:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.vramEnergyCounter.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.vramEnergyCounter.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.vramEnergyCounter.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.vramEnergyCounter.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nVRAM Energy Counter:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramEnergyCounter.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramEnergyCounter.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramEnergyCounter.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramEnergyCounter.value.datadouble);
 
-        std::cout << "VRAM Voltage:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.vramVoltage.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.vramVoltage.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.vramVoltage.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.vramVoltage.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nVRAM Voltage:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramVoltage.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramVoltage.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramVoltage.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramVoltage.value.datadouble);
 
-        std::cout << "VRAM Frequency:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.vramCurrentClockFrequency.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.vramCurrentClockFrequency.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.vramCurrentClockFrequency.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.vramCurrentClockFrequency.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nVRAM Frequency:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramCurrentClockFrequency.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramCurrentClockFrequency.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramCurrentClockFrequency.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramCurrentClockFrequency.value.datadouble);
 
-        std::cout << "VRAM Effective Frequency:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.vramCurrentEffectiveFrequency.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.vramCurrentEffectiveFrequency.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.vramCurrentEffectiveFrequency.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.vramCurrentEffectiveFrequency.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nVRAM Effective Frequency:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramCurrentEffectiveFrequency.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramCurrentEffectiveFrequency.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramCurrentEffectiveFrequency.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramCurrentEffectiveFrequency.value.datadouble);
 
-        std::cout << "VRAM Read Bandwidth:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.vramReadBandwidthCounter.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.vramReadBandwidthCounter.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.vramReadBandwidthCounter.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.vramReadBandwidthCounter.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nVRAM Read Bandwidth:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramReadBandwidthCounter.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramReadBandwidthCounter.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramReadBandwidthCounter.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramReadBandwidthCounter.value.datadouble);
 
-        std::cout << "VRAM Write Bandwidth:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.vramWriteBandwidthCounter.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.vramWriteBandwidthCounter.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.vramWriteBandwidthCounter.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.vramWriteBandwidthCounter.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nVRAM Write Bandwidth:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramWriteBandwidthCounter.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramWriteBandwidthCounter.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramWriteBandwidthCounter.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramWriteBandwidthCounter.value.datadouble);
 
-        std::cout << "VRAM Temperature:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.vramCurrentTemperature.bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.vramCurrentTemperature.units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.vramCurrentTemperature.type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.vramCurrentTemperature.value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nVRAM Temperature:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramCurrentTemperature.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramCurrentTemperature.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramCurrentTemperature.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramCurrentTemperature.value.datadouble);
 
-        std::cout << "Fan Speed:" << std::endl;
-        std::cout << "Supported: " << ((pPowerTelemetry.fanSpeed[0].bSupported) ? "true" : "false") << std::endl;
-        std::cout << "Units: " << printUnits(pPowerTelemetry.fanSpeed[0].units) << std::endl;
-        std::cout << "Type: " << printType(pPowerTelemetry.fanSpeed[0].type) << std::endl;
-        std::cout << "Value: " << pPowerTelemetry.fanSpeed[0].value.datadouble << std::endl << std::endl;
+        PRINT_LOGS("\nFan Speed:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.fanSpeed[0].bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.fanSpeed[0].units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.fanSpeed[0].type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.fanSpeed[0].value.datadouble);
     }
     else
     {
-        std::cout << "Error: " << DecodeRetCode(status) << std::endl;
+        PRINT_LOGS("\nError: %s", DecodeRetCode(status).c_str());
     }
 
-    std::cout << std::endl << std::endl;
+    PRINT_LOGS("\n \n");
 }
 
 /***************************************************************
@@ -1548,15 +1508,15 @@ int main()
                 if (NULL != StDeviceAdapterProperties.pDeviceID)
                 {
                     AdapterID = *(reinterpret_cast<LUID *>(StDeviceAdapterProperties.pDeviceID));
-                    std::cout << "Adapter ID " << AdapterID.LowPart << "\n";
+                    PRINT_LOGS("\nAdapter ID %d \n", AdapterID.LowPart);
                 }
 
                 if (0x8086 == StDeviceAdapterProperties.pci_vendor_id)
                 {
-                    std::cout << "Intel Adapter Name " << StDeviceAdapterProperties.name << "\n";
-                    std::cout << "Vendor id  " << StDeviceAdapterProperties.pci_vendor_id << "\n";
-                    std::cout << "Device id " << StDeviceAdapterProperties.pci_device_id << "\n";
-                    std::cout << "Rev id " << StDeviceAdapterProperties.rev_id << "\n";
+                    PRINT_LOGS("\nIntel Adapter Name %s", StDeviceAdapterProperties.name);
+                    PRINT_LOGS("\nVendor id  %d", StDeviceAdapterProperties.pci_vendor_id);
+                    PRINT_LOGS("\nDevice id %d", StDeviceAdapterProperties.pci_device_id);
+                    PRINT_LOGS("\nRev id %d", StDeviceAdapterProperties.rev_id);
                 }
 
                 // Per Component Tests
