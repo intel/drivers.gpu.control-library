@@ -67,6 +67,8 @@
         STORE_AND_RESET_ERROR(Result);                                      \
     }
 
+#define PRINT_LOGS(...) printf(__VA_ARGS__)
+
 /***************************************************************
  * @brief Method to get 3D feature name
  ***************************************************************/
@@ -129,18 +131,25 @@ inline char *GetProfileTypeName(ctl_3d_tier_type_flags_t Flag)
  * @param
  * @return char*
  ***************************************************************/
-inline char *GetProfileTierName(ctl_3d_tier_profile_flags_t Flags)
+inline char *GetProfileTierName(ctl_3d_tier_profile_flags_t Flags, char *pTierName, rsize_t NameLength)
 {
-    if ((Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_1) && (Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_2))
-        return "Tier 1 & 2";
-    else if (Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_1)
-        return "Tier 1";
-    else if (Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_2)
-        return "Tier 2";
-    else if (0 == Flags)
-        return "None";
+    strcpy_s(pTierName, NameLength, "");
 
-    return "Unknown tier";
+    if (0 == Flags)
+    {
+        strcat_s(pTierName, NameLength, "None");
+    }
+    else
+    {
+        if (Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_1)
+            strcat_s(pTierName, NameLength, "Tier1, ");
+        if (Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_2)
+            strcat_s(pTierName, NameLength, "Tier2, ");
+        if (Flags & CTL_3D_TIER_PROFILE_FLAG_TIER_RECOMMENDED)
+            strcat_s(pTierName, NameLength, "Recommended Tier");
+    }
+
+    return pTierName;
 }
 
 /***************************************************************

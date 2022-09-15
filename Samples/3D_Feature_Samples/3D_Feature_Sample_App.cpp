@@ -35,6 +35,8 @@ ctl_result_t GResult = CTL_RESULT_SUCCESS;
         GResult = result;             \
     result = CTL_RESULT_SUCCESS;
 
+char TierName[100] = "";
+
 /***************************************************************
  * @brief
  * Method to test Endurance Gaming
@@ -525,7 +527,7 @@ ctl_result_t CtlGetGamingAppProfile(ctl_device_adapter_handle_t hDevices, ctl_3d
             if (Result == CTL_RESULT_ERROR_DATA_NOT_FOUND)
             {
                 printf(" Reason: Value not found\n");
-                printf(" Use DefaultEnabledTierProfiles (=%s) for UI default selection if required\n", GetProfileTierName(AppProfileGet.DefaultEnabledTierProfiles));
+                printf(" Use DefaultEnabledTierProfiles (=%s) for UI default selection if required\n", GetProfileTierName(AppProfileGet.DefaultEnabledTierProfiles, TierName, 100));
             }
         }
         else if (Get3DProperty.CustomValueSize > 0)
@@ -533,10 +535,10 @@ ctl_result_t CtlGetGamingAppProfile(ctl_device_adapter_handle_t hDevices, ctl_3d
             printf("ctlGetSet3DFeature returned success(Get AppProfile)\n");
             printf(" App name = %s\n", ApplicationName == NULL ? "Global" : ApplicationName);
             printf(" AppProfileGet.TierType = %s\n", GetProfileTypeName(AppProfileGet.TierType));
-            printf(" AppProfileGet.EnabledTierProfiles = %s\n", GetProfileTierName(AppProfileGet.EnabledTierProfiles));
-            printf(" AppProfileGet.DefaultEnabledTierProfiles = %s\n", GetProfileTierName(AppProfileGet.DefaultEnabledTierProfiles));
-            printf(" AppProfileGet.CustomizationSupportedTierProfiles = %s\n", GetProfileTierName(AppProfileGet.CustomizationSupportedTierProfiles));
-            printf(" AppProfileGet.CustomizationEnabledTierProfiles = %s\n", GetProfileTierName(AppProfileGet.CustomizationEnabledTierProfiles));
+            printf(" AppProfileGet.EnabledTierProfiles = %s\n", GetProfileTierName(AppProfileGet.EnabledTierProfiles, TierName, 100));
+            printf(" AppProfileGet.DefaultEnabledTierProfiles = %s\n", GetProfileTierName(AppProfileGet.DefaultEnabledTierProfiles, TierName, 100));
+            printf(" AppProfileGet.CustomizationSupportedTierProfiles = %s\n", GetProfileTierName(AppProfileGet.CustomizationSupportedTierProfiles, TierName, 100));
+            printf(" AppProfileGet.CustomizationEnabledTierProfiles = %s\n", GetProfileTierName(AppProfileGet.CustomizationEnabledTierProfiles, TierName, 100));
         }
     }
 
@@ -583,8 +585,8 @@ ctl_result_t CtlSetGamingAppProfile(ctl_device_adapter_handle_t hDevices, ctl_3d
             printf("ctlGetSet3DFeature returned success(Set AppProfile)\n");
             printf(" App name = %s\n", ApplicationName == NULL ? "Global" : ApplicationName);
             printf(" AppProfileSet.TierType = %s\n", GetProfileTypeName(AppProfileSet.TierType));
-            printf(" AppProfileSet.EnabledTierProfiles = %s\n", GetProfileTierName(AppProfileSet.EnabledTierProfiles));
-            printf(" AppProfileSet.CustomizationSupportedTierProfiles = %s\n", GetProfileTierName(AppProfileSet.CustomizationSupportedTierProfiles));
+            printf(" AppProfileSet.EnabledTierProfiles = %s\n", GetProfileTierName(AppProfileSet.EnabledTierProfiles, TierName, 100));
+            printf(" AppProfileSet.CustomizationSupportedTierProfiles = %s\n", GetProfileTierName(AppProfileSet.CustomizationSupportedTierProfiles, TierName, 100));
         }
     }
 

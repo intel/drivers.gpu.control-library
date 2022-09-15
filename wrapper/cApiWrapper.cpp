@@ -9,7 +9,7 @@
 /**
  *
  * @file ctl_api.cpp
- * @version v1-r0
+ * @version v1-r1
  *
  */
 
@@ -222,6 +222,7 @@ ctlSetRuntimePath(
     else if (pArgs->pRuntimePath)
     {
         // this is a case where the caller app is interested in loading a RT directly
+	// IMPORTANT NOTE: Free pArgs and pArgs->pRuntimePath only after ctlInit() call
         pRuntimeArgs = pArgs;
         result = CTL_RESULT_SUCCESS;
     }
@@ -1815,6 +1816,150 @@ ctlEdidManagement(
         if (pfnEdidManagement)
         {
             result = pfnEdidManagement(hDisplayOutput, pEdidManagementArgs);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get/Set Custom mode.
+* 
+* @details
+*     - To get or set custom mode.
+*     - Add custom source mode operation supports only single mode additon at
+*       a time.
+*     - Remove custom source mode operation supports single or multiple mode
+*       removal at a time.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pCustomModeArgs`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+*     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernal mode driver call failure"
+*     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid combination of parameters"
+*     - ::CTL_RESULT_ERROR_CUSTOM_MODE_STANDARD_CUSTOM_MODE_EXISTS - "Standard custom mode exists"
+*     - ::CTL_RESULT_ERROR_CUSTOM_MODE_NON_CUSTOM_MATCHING_MODE_EXISTS - "Non custom matching mode exists"
+*     - ::CTL_RESULT_ERROR_CUSTOM_MODE_INSUFFICIENT_MEMORY - "Custom mode insufficent memory"
+*/
+ctl_result_t CTL_APICALL
+ctlGetSetCustomMode(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
+    ctl_get_set_custom_mode_args_t* pCustomModeArgs ///< [in,out] Custom mode arguments
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetSetCustomMode_t pfnGetSetCustomMode = (ctl_pfnGetSetCustomMode_t)GetProcAddress(hinstLib, "ctlGetSetCustomMode");
+        if (pfnGetSetCustomMode)
+        {
+            result = pfnGetSetCustomMode(hDisplayOutput, pCustomModeArgs);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get/Set Combined Display
+* 
+* @details
+*     - To get or set combined display.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceAdapter`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pCombinedDisplayArgs`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+*     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+*     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+*     - ::CTL_RESULT_ERROR_FEATURE_NOT_SUPPORTED - "Combined Display feature is not supported in this platform"
+*/
+ctl_result_t CTL_APICALL
+ctlGetSetCombinedDisplay(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] Handle to control device adapter
+    ctl_combined_display_args_t* pCombinedDisplayArgs   ///< [in,out] Setup and get combined display arguments
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetSetCombinedDisplay_t pfnGetSetCombinedDisplay = (ctl_pfnGetSetCombinedDisplay_t)GetProcAddress(hinstLib, "ctlGetSetCombinedDisplay");
+        if (pfnGetSetCombinedDisplay)
+        {
+            result = pfnGetSetCombinedDisplay(hDeviceAdapter, pCombinedDisplayArgs);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get/Set Display Genlock
+* 
+* @details
+*     - To get or set Display Genlock.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == hDeviceAdapter`
+*         + `nullptr == pGenlockArgs`
+*         + `nullptr == hFailureDeviceAdapter`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+*     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*     - ::CTL_RESULT_ERROR_INVALID_SIZE - "Invalid topology structure size"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+*/
+ctl_result_t CTL_APICALL
+ctlGetSetDisplayGenlock(
+    ctl_device_adapter_handle_t* hDeviceAdapter,    ///< [in][release] Handle to control device adapter
+    ctl_genlock_args_t** pGenlockArgs,              ///< [in,out] Display Genlock operation and information
+    uint8_t AdapterCount,                           ///< [in] Number of device adapters
+    ctl_device_adapter_handle_t* hFailureDeviceAdapter  ///< [out] Handle to address the failure device adapter in an error case
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetSetDisplayGenlock_t pfnGetSetDisplayGenlock = (ctl_pfnGetSetDisplayGenlock_t)GetProcAddress(hinstLib, "ctlGetSetDisplayGenlock");
+        if (pfnGetSetDisplayGenlock)
+        {
+            result = pfnGetSetDisplayGenlock(hDeviceAdapter, pGenlockArgs, AdapterCount, hFailureDeviceAdapter);
         }
     }
 
