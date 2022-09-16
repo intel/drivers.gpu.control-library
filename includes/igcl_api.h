@@ -12,7 +12,7 @@
 /** 
  *
  * @file ctl_api.h
- * @version v1-r0
+ * @version v1-r1
  *
  */
 #ifndef _CTL_API_H
@@ -60,7 +60,7 @@ extern "C" {
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef CTL_IMPL_MINOR_VERSION
 /// @brief ::'ctlApi' API minor version of this implementation
-#define CTL_IMPL_MINOR_VERSION  0
+#define CTL_IMPL_MINOR_VERSION  1
 #endif // CTL_IMPL_MINOR_VERSION
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -779,6 +779,29 @@ typedef struct _ctl_wait_property_change_args_t
 } ctl_wait_property_change_args_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Display orientation (rotation)
+typedef enum _ctl_display_orientation_t
+{
+    CTL_DISPLAY_ORIENTATION_0 = 0,                  ///< 0 Degree
+    CTL_DISPLAY_ORIENTATION_90 = 1,                 ///< 90 Degree
+    CTL_DISPLAY_ORIENTATION_180 = 2,                ///< 180 Degree
+    CTL_DISPLAY_ORIENTATION_270 = 3,                ///< 270 Degree
+    CTL_DISPLAY_ORIENTATION_MAX
+
+} ctl_display_orientation_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Rectangle
+typedef struct _ctl_rect_t
+{
+    int32_t Left;                                   ///< [in,out] Left
+    int32_t Top;                                    ///< [in,out] Top
+    int32_t Right;                                  ///< [in,out] Right
+    int32_t Bottom;                                 ///< [in,out] Bottom
+
+} ctl_rect_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Wait for a property change. Note that this is a blocking call
 /// 
 /// @details
@@ -926,12 +949,20 @@ typedef struct _ctl_revision_datatype_t ctl_revision_datatype_t;
 typedef struct _ctl_wait_property_change_args_t ctl_wait_property_change_args_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_rect_t
+typedef struct _ctl_rect_t ctl_rect_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_endurance_gaming_caps_t
 typedef struct _ctl_endurance_gaming_caps_t ctl_endurance_gaming_caps_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_endurance_gaming_t
 typedef struct _ctl_endurance_gaming_t ctl_endurance_gaming_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_endurance_gaming2_t
+typedef struct _ctl_endurance_gaming2_t ctl_endurance_gaming2_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_adaptivesync_caps_t
@@ -1124,6 +1155,34 @@ typedef struct _ctl_get_set_custom_mode_args_t ctl_get_set_custom_mode_args_t;
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_custom_src_mode_t
 typedef struct _ctl_custom_src_mode_t ctl_custom_src_mode_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_child_display_target_mode_t
+typedef struct _ctl_child_display_target_mode_t ctl_child_display_target_mode_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_combined_display_child_info_t
+typedef struct _ctl_combined_display_child_info_t ctl_combined_display_child_info_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_combined_display_args_t
+typedef struct _ctl_combined_display_args_t ctl_combined_display_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_genlock_display_info_t
+typedef struct _ctl_genlock_display_info_t ctl_genlock_display_info_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_genlock_target_mode_list_t
+typedef struct _ctl_genlock_target_mode_list_t ctl_genlock_target_mode_list_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_genlock_topology_t
+typedef struct _ctl_genlock_topology_t ctl_genlock_topology_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_genlock_args_t
+typedef struct _ctl_genlock_args_t ctl_genlock_args_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_engine_properties_t
@@ -1493,6 +1552,19 @@ typedef struct _ctl_endurance_gaming_t
 } ctl_endurance_gaming_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Endurance Gaming version2 Get/Set
+typedef struct _ctl_endurance_gaming2_t
+{
+    ctl_3d_endurance_gaming_control_t EGControl;    ///< [in,out] Endurance Gaming control - Off/On/Auto
+    ctl_3d_endurance_gaming_mode_t EGMode;          ///< [in,out] Endurance Gaming mode - Better Performance/Balanced/Maximum
+                                                    ///< Battery
+    bool IsFPRequired;                              ///< [out] Is frame pacing required, dynamic state
+    uint32_t TargetFPS;                             ///< [out] Target FPS for frame pacing
+    uint32_t Reserved[4];                           ///< [out] Reserved fields
+
+} ctl_endurance_gaming2_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Adaptive sync plus caps
 typedef struct _ctl_adaptivesync_caps_t
 {
@@ -1532,6 +1604,7 @@ typedef enum _ctl_3d_tier_profile_flag_t
 {
     CTL_3D_TIER_PROFILE_FLAG_TIER_1 = CTL_BIT(0),   ///< Tier 1 Profile
     CTL_3D_TIER_PROFILE_FLAG_TIER_2 = CTL_BIT(1),   ///< Tier 2 Profile
+    CTL_3D_TIER_PROFILE_FLAG_TIER_RECOMMENDED = CTL_BIT(30),///< Recommended Tier Profile. If set other tier values shouldn't be set
     CTL_3D_TIER_PROFILE_FLAG_MAX = 0x80000000
 
 } ctl_3d_tier_profile_flag_t;
@@ -1647,7 +1720,7 @@ typedef struct _ctl_kmd_load_features_t
     ctl_application_id_t ReservedFuncID;            ///< [in] Unique ID for reserved/special function
     bool bLoad;                                     ///< [in] If set, will load known KMD features. If not set will reset known
                                                     ///< KMD features to default
-    int64_t SubsetFeatureMask;                      ///< [out] Mask indicating the subset of KMD features within
+    int64_t SubsetFeatureMask;                      ///< [in,out] Mask indicating the subset of KMD features within
                                                     ///< ::ctl_3d_feature_t values. Default of 0 indicate all KMD features
     char* ApplicationName;                          ///< [in] Application name for which the KMD properties are loaded for. If
                                                     ///< this is an empty string then this will load global settings for the
@@ -2369,7 +2442,8 @@ typedef enum _ctl_power_optimization_flag_t
     CTL_POWER_OPTIMIZATION_FLAG_PSR = CTL_BIT(1),   ///< Panel self refresh
     CTL_POWER_OPTIMIZATION_FLAG_DPST = CTL_BIT(2),  ///< Display power saving technology (Panel technology dependent)
     CTL_POWER_OPTIMIZATION_FLAG_LRR = CTL_BIT(3),   ///< Low refresh rate (LRR/ALRR/UBRR), UBRR is supported only for IGCC and
-                                                    ///< NDA clients
+                                                    ///< NDA clients. UBZRR and UBLRR both can not be enabled at the same time,
+                                                    ///< only one can be enabled at a given time
     CTL_POWER_OPTIMIZATION_FLAG_MAX = 0x80000000
 
 } ctl_power_optimization_flag_t;
@@ -3747,6 +3821,175 @@ CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlGetSetCustomMode(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_get_set_custom_mode_args_t* pCustomModeArgs ///< [in,out] Custom mode arguments
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Combined Display operation type
+typedef enum _ctl_combined_display_optype_t
+{
+    CTL_COMBINED_DISPLAY_OPTYPE_IS_SUPPORTED_CONFIG = 1,///< To check whether given outputs can form a combined display, no changes
+                                                    ///< are applied
+    CTL_COMBINED_DISPLAY_OPTYPE_ENABLE = 2,         ///< To setup and enable a combined display
+    CTL_COMBINED_DISPLAY_OPTYPE_DISABLE = 3,        ///< To disable combined display
+    CTL_COMBINED_DISPLAY_OPTYPE_QUERY_CONFIG = 4,   ///< To query combined display configuration
+    CTL_COMBINED_DISPLAY_OPTYPE_MAX
+
+} ctl_combined_display_optype_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Combined Display's child display target mode
+typedef struct _ctl_child_display_target_mode_t
+{
+    uint32_t Width;                                 ///< [in,out] Width
+    uint32_t Height;                                ///< [in,out] Height
+    float RefreshRate;                              ///< [in,out] Refresh Rate
+    uint32_t ReservedFields[4];                     ///< [out] Reserved field of 16 bytes
+
+} ctl_child_display_target_mode_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Combined Display's child display information
+typedef struct _ctl_combined_display_child_info_t
+{
+    ctl_display_output_handle_t hDisplayOutput;     ///< [in,out] Display output handle under combined display configuration
+    ctl_rect_t FbSrc;                               ///< [in,out] FrameBuffer source's RECT within Combined Display respective
+    ctl_rect_t FbPos;                               ///< [in,out] FrameBuffer target's RECT within output size
+    ctl_display_orientation_t DisplayOrientation;   ///< [in,out] 0/180 Degree Display orientation (rotation)
+    ctl_child_display_target_mode_t TargetMode;     ///< [in,out] Desired target mode (width, height, refresh)
+
+} ctl_combined_display_child_info_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Combined Display arguments
+typedef struct _ctl_combined_display_args_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    ctl_combined_display_optype_t OpType;           ///< [in] Combined display operation type
+    bool IsSupported;                               ///< [out] Returns yes/no in response to IS_SUPPORTED_CONFIG command
+    uint8_t NumOutputs;                             ///< [in,out] Number of outputs part of desired combined display
+                                                    ///< configuration
+    uint32_t CombinedDesktopWidth;                  ///< [in,out] Width of desired combined display configuration
+    uint32_t CombinedDesktopHeight;                 ///< [in,out] Height of desired combined display configuration
+    ctl_combined_display_child_info_t* pChildInfo;  ///< [in,out] List of child display information respective to each output
+    ctl_display_output_handle_t hCombinedDisplayOutput; ///< [in,out] Handle to combined display output
+
+} ctl_combined_display_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Combined Display
+/// 
+/// @details
+///     - To get or set combined display.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDeviceAdapter`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pCombinedDisplayArgs`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+///     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+///     - ::CTL_RESULT_ERROR_FEATURE_NOT_SUPPORTED - "Combined Display feature is not supported in this platform"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetSetCombinedDisplay(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] Handle to control device adapter
+    ctl_combined_display_args_t* pCombinedDisplayArgs   ///< [in,out] Setup and get combined display arguments
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Display Genlock Operations
+typedef enum _ctl_genlock_operation_t
+{
+    CTL_GENLOCK_OPERATION_GET_TIMING_DETAILS = 0,   ///< Get details of GENLOCK support and timing information
+    CTL_GENLOCK_OPERATION_VALIDATE = 1,             ///< Driver to verify that the topology is Genlock capable
+    CTL_GENLOCK_OPERATION_ENABLE = 2,               ///< Enable GENLOCK
+    CTL_GENLOCK_OPERATION_DISABLE = 3,              ///< Disable GENLOCK
+    CTL_GENLOCK_OPERATION_GET_TOPOLOGY = 4,         ///< Get details of the current Genlock topology that is applied
+    CTL_GENLOCK_OPERATION_MAX
+
+} ctl_genlock_operation_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Display Genlock Info
+typedef struct _ctl_genlock_display_info_t
+{
+    ctl_display_output_handle_t hDisplayOutput;     ///< [in,out] Display output handle under Genlock topology
+    bool IsPrimary;                                 ///< [in,out] Genlock Primary
+
+} ctl_genlock_display_info_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Genlock Target Mode List
+typedef struct _ctl_genlock_target_mode_list_t
+{
+    ctl_display_output_handle_t hDisplayOutput;     ///< [in] Display output handle for whom target mode list is required
+    uint32_t NumModes;                              ///< [in,out] Number of supported Modes that is returned from a driver
+    ctl_display_timing_t* pTargetModes;             ///< [out] Display Genlock operation and information
+
+} ctl_genlock_target_mode_list_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Genlock Topology
+typedef struct _ctl_genlock_topology_t
+{
+    uint8_t NumGenlockDisplays;                     ///< [in,out] Number of Genlock displays
+    bool IsPrimaryGenlockSystem;                    ///< [in,out] Primary Genlock system
+    ctl_display_timing_t CommonTargetMode;          ///< [in] Common target mode
+    ctl_genlock_display_info_t* pGenlockDisplayInfo;///< [in,out] List of Genlock display info
+    ctl_genlock_target_mode_list_t* pGenlockModeList;   ///< [out] List of Genlock target modes
+
+} ctl_genlock_topology_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Display Genlock Arg type
+typedef struct _ctl_genlock_args_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    ctl_genlock_operation_t Operation;              ///< [in] Display Genlock Operation
+    ctl_genlock_topology_t GenlockTopology;         ///< [in,out] Display Genlock array of topology structures
+    bool IsGenlockEnabled;                          ///< [out] Whether the feature is currently enabled or not
+    bool IsGenlockPossible;                         ///< [out] Indicates if Genlock can be enabled/disabled with the given
+                                                    ///< topology
+
+} ctl_genlock_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Display Genlock
+/// 
+/// @details
+///     - To get or set Display Genlock.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == hDeviceAdapter`
+///         + `nullptr == pGenlockArgs`
+///         + `nullptr == hFailureDeviceAdapter`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+///     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_INVALID_SIZE - "Invalid topology structure size"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetSetDisplayGenlock(
+    ctl_device_adapter_handle_t* hDeviceAdapter,    ///< [in][release] Handle to control device adapter
+    ctl_genlock_args_t** pGenlockArgs,              ///< [in,out] Display Genlock operation and information
+    uint8_t AdapterCount,                           ///< [in] Number of device adapters
+    ctl_device_adapter_handle_t* hFailureDeviceAdapter  ///< [out] Handle to address the failure device adapter in an error case
     );
 
 
@@ -6480,6 +6723,24 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnEdidManagement_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetCustomMode_t)(
     ctl_display_output_handle_t,
     ctl_get_set_custom_mode_args_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetSetCombinedDisplay 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetCombinedDisplay_t)(
+    ctl_device_adapter_handle_t,
+    ctl_combined_display_args_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetSetDisplayGenlock 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetDisplayGenlock_t)(
+    ctl_device_adapter_handle_t*,
+    ctl_genlock_args_t**,
+    uint8_t,
+    ctl_device_adapter_handle_t*
     );
 
 
