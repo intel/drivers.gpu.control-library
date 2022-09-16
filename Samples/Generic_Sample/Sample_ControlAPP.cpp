@@ -49,8 +49,8 @@ ctl_result_t CtlLevel0HandleTest(ctl_device_adapter_handle_t hDevices)
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
     ze_device_handle_t Ze_device;
-    ze_device_module_properties_t ZemoduleProperties;
-    HINSTANCE hLevel0Loader = NULL;
+    ze_device_module_properties_t ZemoduleProperties = { 0 };
+    HINSTANCE hLevel0Loader                          = NULL;
 
     Result = ctlGetZeDevice(hDevices, &Ze_device, &(void *)hLevel0Loader);
     if (CTL_RESULT_SUCCESS == Result && Ze_device != NULL)
@@ -89,6 +89,7 @@ ctl_result_t CtlLevel0HandleTest(ctl_device_adapter_handle_t hDevices)
             std::cout << "Error: Not able to get level0 loader function\n";
         }
 
+#if 0
         // try releasing the lib - a mistake which an app might do and then
         // call control API again!
         FreeLibrary(hLevel0Loader);
@@ -104,6 +105,7 @@ ctl_result_t CtlLevel0HandleTest(ctl_device_adapter_handle_t hDevices)
             std::cout << "Success: After FreeLibrary() not able to get "
                          "function from Level0, we are ok\n";
         }
+#endif
     }
     else
     {
@@ -607,6 +609,9 @@ void PrintAdapterProperties(ctl_device_adapter_properties_t StDeviceAdapterPrope
     sprintf(DriverVersion, "%d.%d.%d.%d", HIWORD(LIDriverVersion.HighPart), LOWORD(LIDriverVersion.HighPart), HIWORD(LIDriverVersion.LowPart), LOWORD(LIDriverVersion.LowPart));
 
     printf("Intel Graphics Driver Version : %s\n", DriverVersion);
+    printf("GOP Version : %lld.%lld.%lld\n", StDeviceAdapterProperties.firmware_version.major_version, StDeviceAdapterProperties.firmware_version.minor_version,
+           StDeviceAdapterProperties.firmware_version.build_number);
+
     printf("Intel Adapter Name: %s\n", StDeviceAdapterProperties.name);
     printf("Vendor ID: 0x%X\n", StDeviceAdapterProperties.pci_vendor_id);
     printf("Device ID: 0x%X\n", StDeviceAdapterProperties.pci_device_id);
@@ -746,6 +751,8 @@ int main()
     if (CTL_RESULT_SUCCESS == Result)
     {
         // Initialization successful
+        printf("IGCL Version in platform: %d.%d\n", CTL_MAJOR_VERSION(CtlInitArgs.SupportedVersion), CTL_MINOR_VERSION(CtlInitArgs.SupportedVersion));
+
         // Get the list of Intel Adapters
 
         Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
