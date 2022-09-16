@@ -1,7 +1,7 @@
 ..
   Copyright 2022 Intel Corporation
 
-.. IGCL Specification v1.0
+.. IGCL Specification v1.1
 
 .. _l0-section:
 

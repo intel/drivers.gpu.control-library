@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>IGCL: 1.0 &mdash; IGCL Specification  documentation</title>
+  <title>IGCL: 1.1 &mdash; IGCL Specification  documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -148,7 +148,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="l0-full-name-l0-spec-version">
-<span id="l0-section"></span><h1>IGCL: 1.0<a class="headerlink" href="#l0-full-name-l0-spec-version" title="Permalink to this headline">¶</a></h1>
+<span id="l0-section"></span><h1>IGCL: 1.1<a class="headerlink" href="#l0-full-name-l0-spec-version" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Control/INTRO.html">Introduction</a><ul>
@@ -217,6 +217,7 @@
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-adapter-properties-flags-t">ctl_adapter_properties_flags_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-operation-type-t">ctl_operation_type_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-property-type-flags-t">ctl_property_type_flags_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-display-orientation-t">ctl_display_orientation_t</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#common-structures">Common Structures</a><ul>
@@ -249,6 +250,7 @@
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-generic-void-datatype-t">ctl_generic_void_datatype_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-revision-datatype-t">ctl_revision_datatype_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-wait-property-change-args-t">ctl_wait_property_change_args_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-rect-t">ctl_rect_t</a></li>
 </ul>
 </li>
 </ul>
@@ -279,6 +281,7 @@
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#d-structures">3d Structures</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-endurance-gaming-caps-t">ctl_endurance_gaming_caps_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-endurance-gaming-t">ctl_endurance_gaming_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-endurance-gaming2-t">ctl_endurance_gaming2_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-adaptivesync-caps-t">ctl_adaptivesync_caps_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-adaptivesync-getset-t">ctl_adaptivesync_getset_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-3d-app-profiles-caps-t">ctl_3d_app_profiles_caps_t</a></li>
@@ -330,6 +333,8 @@
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlsetintelarcsyncprofile">ctlSetIntelArcSyncProfile</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctledidmanagement">ctlEdidManagement</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsetcustommode">ctlGetSetCustomMode</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsetcombineddisplay">ctlGetSetCombinedDisplay</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctlgetsetdisplaygenlock">ctlGetSetDisplayGenlock</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#display-enums">Display Enums</a><ul>
@@ -368,6 +373,8 @@
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-edid-type-t">ctl_edid_type_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-edid-management-out-flags-t">ctl_edid_management_out_flags_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-custom-mode-operation-types-t">ctl_custom_mode_operation_types_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-combined-display-optype-t">ctl_combined_display_optype_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-genlock-operation-t">ctl_genlock_operation_t</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="Control/api.html#display-structures">Display Structures</a><ul>
@@ -414,6 +421,13 @@
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-edid-management-args-t">ctl_edid_management_args_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-get-set-custom-mode-args-t">ctl_get_set_custom_mode_args_t</a></li>
 <li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-custom-src-mode-t">ctl_custom_src_mode_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-child-display-target-mode-t">ctl_child_display_target_mode_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-combined-display-child-info-t">ctl_combined_display_child_info_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-combined-display-args-t">ctl_combined_display_args_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-genlock-display-info-t">ctl_genlock_display_info_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-genlock-target-mode-list-t">ctl_genlock_target_mode_list_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-genlock-topology-t">ctl_genlock_topology_t</a></li>
+<li class="toctree-l5"><a class="reference internal" href="Control/api.html#ctl-genlock-args-t">ctl_genlock_args_t</a></li>
 </ul>
 </li>
 </ul>
