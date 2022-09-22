@@ -3,7 +3,7 @@
 ==============================
 Control API
 ==============================
-Control API Specification - Version 0
+Control API Specification - Version 1
 
  
 
@@ -32,6 +32,7 @@ Common
     * :ref:`ctl-adapter-properties-flags-t`
     * :ref:`ctl-operation-type-t`
     * :ref:`ctl-property-type-flags-t`
+    * :ref:`ctl-display-orientation-t`
 
  
 * Structures
@@ -66,6 +67,7 @@ Common
     * :ref:`ctl-generic-void-datatype-t`
     * :ref:`ctl-revision-datatype-t`
     * :ref:`ctl-wait-property-change-args-t`
+    * :ref:`ctl-rect-t`
 
 
 Common Functions
@@ -209,6 +211,15 @@ ctl_property_type_flags_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_property_type_flag_t
+    :project: ControlApi
+
+
+.. _ctl-display-orientation-t:
+
+ctl_display_orientation_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_orientation_t
     :project: ControlApi
 
  
@@ -499,6 +510,16 @@ ctl_wait_property_change_args_t
     :members:
     :undoc-members:
 
+.. _ctl-rect-t:
+
+ctl_rect_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_rect_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
 
  
 
@@ -535,6 +556,7 @@ ctl_wait_property_change_args_t
 
     * :ref:`ctl-endurance-gaming-caps-t`
     * :ref:`ctl-endurance-gaming-t`
+    * :ref:`ctl-endurance-gaming2-t`
     * :ref:`ctl-adaptivesync-caps-t`
     * :ref:`ctl-adaptivesync-getset-t`
     * :ref:`ctl-3d-app-profiles-caps-t`
@@ -722,6 +744,16 @@ ctl_endurance_gaming_t
     :members:
     :undoc-members:
 
+.. _ctl-endurance-gaming2-t:
+
+ctl_endurance_gaming2_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_endurance_gaming2_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
 .. _ctl-adaptivesync-caps-t:
 
 ctl_adaptivesync_caps_t
@@ -856,6 +888,8 @@ Display
     * :ref:`ctlSetIntelArcSyncProfile`
     * :ref:`ctlEdidManagement`
     * :ref:`ctlGetSetCustomMode`
+    * :ref:`ctlGetSetCombinedDisplay`
+    * :ref:`ctlGetSetDisplayGenlock`
 
  
 * Enumerations
@@ -896,6 +930,8 @@ Display
     * :ref:`ctl-edid-type-t`
     * :ref:`ctl-edid-management-out-flags-t`
     * :ref:`ctl-custom-mode-operation-types-t`
+    * :ref:`ctl-combined-display-optype-t`
+    * :ref:`ctl-genlock-operation-t`
 
  
 * Structures
@@ -944,6 +980,13 @@ Display
     * :ref:`ctl-edid-management-args-t`
     * :ref:`ctl-get-set-custom-mode-args-t`
     * :ref:`ctl-custom-src-mode-t`
+    * :ref:`ctl-child-display-target-mode-t`
+    * :ref:`ctl-combined-display-child-info-t`
+    * :ref:`ctl-combined-display-args-t`
+    * :ref:`ctl-genlock-display-info-t`
+    * :ref:`ctl-genlock-target-mode-list-t`
+    * :ref:`ctl-genlock-topology-t`
+    * :ref:`ctl-genlock-args-t`
 
 
 Display Functions
@@ -1274,6 +1317,24 @@ ctlGetSetCustomMode
     :project: ControlApi
 
 
+.. _ctlGetSetCombinedDisplay:
+
+ctlGetSetCombinedDisplay
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSetCombinedDisplay
+    :project: ControlApi
+
+
+.. _ctlGetSetDisplayGenlock:
+
+ctlGetSetDisplayGenlock
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSetDisplayGenlock
+    :project: ControlApi
+
+
 
 Display Enums
 ------------------------------------------------------------------------------
@@ -1591,6 +1652,24 @@ ctl_custom_mode_operation_types_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_custom_mode_operation_types_t
+    :project: ControlApi
+
+
+.. _ctl-combined-display-optype-t:
+
+ctl_combined_display_optype_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_combined_display_optype_t
+    :project: ControlApi
+
+
+.. _ctl-genlock-operation-t:
+
+ctl_genlock_operation_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_genlock_operation_t
     :project: ControlApi
 
  
@@ -2015,6 +2094,76 @@ ctl_custom_src_mode_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_custom_src_mode_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-child-display-target-mode-t:
+
+ctl_child_display_target_mode_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_child_display_target_mode_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-combined-display-child-info-t:
+
+ctl_combined_display_child_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_combined_display_child_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-combined-display-args-t:
+
+ctl_combined_display_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_combined_display_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-genlock-display-info-t:
+
+ctl_genlock_display_info_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_genlock_display_info_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-genlock-target-mode-list-t:
+
+ctl_genlock_target_mode_list_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_genlock_target_mode_list_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-genlock-topology-t:
+
+ctl_genlock_topology_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_genlock_topology_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-genlock-args-t:
+
+ctl_genlock_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_genlock_args_t
     :project: ControlApi
     :members:
     :undoc-members:
