@@ -199,7 +199,7 @@ void CtlTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
     }
     else
     {
-        PRINT_LOGS("\nNumber of Temperature Handles [%d]", TemperatureHandlerCount);
+        PRINT_LOGS("\nNumber of Temperature Handles [%u]", TemperatureHandlerCount);
     }
 
     ctl_temp_handle_t *pTtemperatureHandle = new ctl_temp_handle_t[TemperatureHandlerCount];
@@ -214,7 +214,7 @@ void CtlTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
 
     for (uint32_t i = 0; i < TemperatureHandlerCount; i++)
     {
-        PRINT_LOGS("\n\nFor Temperature Handle [%d]", i);
+        PRINT_LOGS("\n\nFor Temperature Handle [%u]", i);
 
         PRINT_LOGS("\n[Temperature] Get Temperature properties:");
 
@@ -228,7 +228,7 @@ void CtlTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Temperature] Max temp [%d]", (uint32_t)temperatureProperties.maxTemperature);
+            PRINT_LOGS("\n[Temperature] Max temp [%u]", (uint32_t)temperatureProperties.maxTemperature);
             PRINT_LOGS("\n[Temperature] Sensor type [%s]", ((temperatureProperties.type == CTL_TEMP_SENSORS_GLOBAL) ? "Global" :
                                                             (temperatureProperties.type == CTL_TEMP_SENSORS_GPU)    ? "Gpu" :
                                                             (temperatureProperties.type == CTL_TEMP_SENSORS_MEMORY) ? "Memory" :
@@ -273,7 +273,7 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
     }
     else
     {
-        PRINT_LOGS("\nNumber of Frequency Handles [%d]", FrequencyHandlerCount);
+        PRINT_LOGS("\nNumber of Frequency Handles [%u]", FrequencyHandlerCount);
     }
 
     ctl_freq_handle_t *pFrequencyHandle = new ctl_freq_handle_t[FrequencyHandlerCount];
@@ -288,7 +288,7 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
 
     for (uint32_t i = 0; i < FrequencyHandlerCount; i++)
     {
-        PRINT_LOGS("\n\nFor Frequency Handle: [%d]", i);
+        PRINT_LOGS("\n\nFor Frequency Handle: [%u]", i);
 
         PRINT_LOGS("\n\n[Frequency] Properties:");
 
@@ -303,7 +303,7 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
         {
             PRINT_LOGS("\n[Frequency] Min [%f]] Mhz", freqProperties.min);
             PRINT_LOGS("\n[Frequency] Max [%f]] Mhz", freqProperties.max);
-            PRINT_LOGS("\n[Frequency] Can Control Frequency? [%d]]", (uint32_t)freqProperties.canControl);
+            PRINT_LOGS("\n[Frequency] Can Control Frequency? [%u]]", (uint32_t)freqProperties.canControl);
             PRINT_LOGS("\n[Frequency] Frequency Domain [%s]]", ((freqProperties.type == CTL_FREQ_DOMAIN_GPU) ? "GPU" : "MEMORY"));
         }
 
@@ -322,7 +322,7 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
             PRINT_LOGS("\n[Frequency] Efficient Frequency [%f] Mhz", freqState.efficient);
             PRINT_LOGS("\n[Frequency] Requested Frequency [%f] Mhz", freqState.request);
             PRINT_LOGS("\n[Frequency] Actual TDP [%f] Watts", freqState.tdp);
-            PRINT_LOGS("\n[Frequency] Throttle Reasons [%d]", freqState.throttleReasons);
+            PRINT_LOGS("\n[Frequency] Throttle Reasons [%u]", freqState.throttleReasons);
             PRINT_LOGS("\n[Frequency] Voltage [%f] Volts", freqState.currentVoltage);
         }
 
@@ -337,8 +337,8 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Frequency] Throttle Time [%I64u ] s", throttleTime.throttleTime);
-            PRINT_LOGS("\n[Frequency] Timestamp [%I64u] s", throttleTime.timestamp);
+            PRINT_LOGS("\n[Frequency] Throttle Time [%llu ] s", throttleTime.throttleTime);
+            PRINT_LOGS("\n[Frequency] Timestamp [%llu] s", throttleTime.timestamp);
         }
 
         PRINT_LOGS("\n\n[Frequency] Available clocks:");
@@ -353,7 +353,7 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Frequency] Number of Available clocks [%d]", numClocks);
+            PRINT_LOGS("\n[Frequency] Number of Available clocks [%u]", numClocks);
 
             clocks = new double[numClocks];
 
@@ -361,7 +361,7 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
 
             for (uint32_t i = 0; i < numClocks; i++)
             {
-                PRINT_LOGS("\n[Frequency] Clock [%d]  Freq[%f] Mhz", i, clocks[i]);
+                PRINT_LOGS("\n[Frequency] Clock [%u]  Freq[%f] Mhz", i, clocks[i]);
             }
 
             delete[] clocks;
@@ -415,7 +415,7 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
     }
     else
     {
-        PRINT_LOGS("\nNumber of Power Handles [%d]", PowerHandlerCount);
+        PRINT_LOGS("\nNumber of Power Handles [%u]", PowerHandlerCount);
     }
 
     ctl_pwr_handle_t *pPowerHandle = new ctl_pwr_handle_t[PowerHandlerCount];
@@ -430,7 +430,7 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
 
     for (uint32_t i = 0; i < PowerHandlerCount; i++)
     {
-        PRINT_LOGS("\n\nFor Power Handle [%d]", i);
+        PRINT_LOGS("\n\nFor Power Handle [%u]", i);
 
         ctl_power_properties_t properties = { 0 };
         properties.Size                   = sizeof(ctl_power_properties_t);
@@ -444,9 +444,9 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Power] Can Control [%d]", (uint32_t)properties.canControl);
-            PRINT_LOGS("\n[Power] Max Power Limit [%d] mW", properties.maxLimit);
-            PRINT_LOGS("\n[Power] Min Power Limit [%d] mW", properties.minLimit);
+            PRINT_LOGS("\n[Power] Can Control [%u]", (uint32_t)properties.canControl);
+            PRINT_LOGS("\n[Power] Max Power Limit [%i] mW", properties.maxLimit);
+            PRINT_LOGS("\n[Power] Min Power Limit [%i] mW", properties.minLimit);
         }
 
         PRINT_LOGS("\n\n[Power] Energy counter:");
@@ -461,8 +461,8 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Power] Energy Counter [%I64u] micro J", energyCounter.energy);
-            PRINT_LOGS("\n[Power] Time Stamp [%I64u] time stamp", energyCounter.timestamp);
+            PRINT_LOGS("\n[Power] Energy Counter [%llu] micro J", energyCounter.energy);
+            PRINT_LOGS("\n[Power] Time Stamp [%llu] time stamp", energyCounter.timestamp);
         }
 
         PRINT_LOGS("\n\n[Power] Get Limits:");
@@ -477,13 +477,13 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Power] Sustained Power Limit Enabled [%d]", (uint32_t)powerLimits.sustainedPowerLimit.enabled);
-            PRINT_LOGS("\n[Power] Sustained Power (PL1) Value [%d] mW", powerLimits.sustainedPowerLimit.power);
-            PRINT_LOGS("\n[Power] Sustained Power (PL1 Tau) Time Window [%d] ms", powerLimits.sustainedPowerLimit.interval);
-            PRINT_LOGS("\n[Power] Burst Power Limit Enabled [%d]", (uint32_t)powerLimits.burstPowerLimit.enabled);
-            PRINT_LOGS("\n[Power] Burst Power (PL2) Value [%d] mW", powerLimits.burstPowerLimit.power);
-            PRINT_LOGS("\n[Power] Peak Power (PL4) AC Value [%d] mW", powerLimits.peakPowerLimits.powerAC);
-            PRINT_LOGS("\n[Power] Peak Power (PL4) DC Value [%d] mW", powerLimits.peakPowerLimits.powerDC);
+            PRINT_LOGS("\n[Power] Sustained Power Limit Enabled [%u]", (uint32_t)powerLimits.sustainedPowerLimit.enabled);
+            PRINT_LOGS("\n[Power] Sustained Power (PL1) Value [%i] mW", powerLimits.sustainedPowerLimit.power);
+            PRINT_LOGS("\n[Power] Sustained Power (PL1 Tau) Time Window [%i] ms", powerLimits.sustainedPowerLimit.interval);
+            PRINT_LOGS("\n[Power] Burst Power Limit Enabled [%u]", (uint32_t)powerLimits.burstPowerLimit.enabled);
+            PRINT_LOGS("\n[Power] Burst Power (PL2) Value [%i] mW", powerLimits.burstPowerLimit.power);
+            PRINT_LOGS("\n[Power] Peak Power (PL4) AC Value [%i] mW", powerLimits.peakPowerLimits.powerAC);
+            PRINT_LOGS("\n[Power] Peak Power (PL4) DC Value [%i] mW", powerLimits.peakPowerLimits.powerDC);
         }
 
         PRINT_LOGS("\n\n[Power] Set Limits:");
@@ -524,7 +524,7 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
     }
     else
     {
-        PRINT_LOGS("\nNumber of Fan Handles [%d]", FanHandlerCount);
+        PRINT_LOGS("\nNumber of Fan Handles [%u]", FanHandlerCount);
     }
 
     ctl_fan_handle_t *pFanHandle = new ctl_fan_handle_t[FanHandlerCount];
@@ -539,7 +539,7 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
 
     for (uint32_t i = 0; i < FanHandlerCount; i++)
     {
-        PRINT_LOGS("\n\nFor Fan Handle [%d]", i);
+        PRINT_LOGS("\n\nFor Fan Handle [%u]", i);
 
         PRINT_LOGS("\n[Fan] Fan get properties:");
         ctl_fan_properties_t Fan_properties = {};
@@ -552,11 +552,11 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Fan] Can Control [%d]", (uint32_t)Fan_properties.canControl);
-            PRINT_LOGS("\n[Fan] Max Points [%d]", (uint32_t)Fan_properties.maxPoints);
-            PRINT_LOGS("\n[Fan] Max RPM [%d]", (uint32_t)Fan_properties.maxRPM);
-            PRINT_LOGS("\n[Fan] Supported Modes [%d]", (uint32_t)Fan_properties.supportedModes);
-            PRINT_LOGS("\n[Fan] Supported Units [%d]", (uint32_t)Fan_properties.supportedUnits);
+            PRINT_LOGS("\n[Fan] Can Control [%u]", (uint32_t)Fan_properties.canControl);
+            PRINT_LOGS("\n[Fan] Max Points [%i]", Fan_properties.maxPoints);
+            PRINT_LOGS("\n[Fan] Max RPM [%i]", Fan_properties.maxRPM);
+            PRINT_LOGS("\n[Fan] Supported Modes [%u]", Fan_properties.supportedModes);
+            PRINT_LOGS("\n[Fan] Supported Units [%u]", Fan_properties.supportedUnits);
         }
 
         PRINT_LOGS("\n[Fan] Fan get state:");
@@ -573,7 +573,7 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
             }
             else
             {
-                PRINT_LOGS("\n[Fan] Speed [%d] RPM", speed);
+                PRINT_LOGS("\n[Fan] Speed [%i] RPM", speed);
             }
 
             Sleep(100);
@@ -605,13 +605,13 @@ void CtlPciTest(ctl_device_adapter_handle_t hDAhandle)
     }
     else
     {
-        PRINT_LOGS("\n[Pci] Domain [%d]", Pci_properties.address.domain);
-        PRINT_LOGS("\n[Pci] Bus [%d]", Pci_properties.address.bus);
-        PRINT_LOGS("\n[Pci] Device [%d]", Pci_properties.address.device);
-        PRINT_LOGS("\n[Pci] Function [%d]", Pci_properties.address.function);
-        PRINT_LOGS("\n[Pci] Gen [%d]", Pci_properties.maxSpeed.gen);
-        PRINT_LOGS("\n[Pci] Width [%d]", Pci_properties.maxSpeed.width);
-        PRINT_LOGS("\n[Pci] Max Bandwidth [%I64u] bytes per second", Pci_properties.maxSpeed.maxBandwidth);
+        PRINT_LOGS("\n[Pci] Domain [%u]", Pci_properties.address.domain);
+        PRINT_LOGS("\n[Pci] Bus [%u]", Pci_properties.address.bus);
+        PRINT_LOGS("\n[Pci] Device [%u]", Pci_properties.address.device);
+        PRINT_LOGS("\n[Pci] Function [%u]", Pci_properties.address.function);
+        PRINT_LOGS("\n[Pci] Gen [%i]", Pci_properties.maxSpeed.gen);
+        PRINT_LOGS("\n[Pci] Width [%i]", Pci_properties.maxSpeed.width);
+        PRINT_LOGS("\n[Pci] Max Bandwidth [%lli] bytes per second", Pci_properties.maxSpeed.maxBandwidth);
     }
 
     ctl_pci_state_t Pci_state = { 0 };
@@ -623,9 +623,9 @@ void CtlPciTest(ctl_device_adapter_handle_t hDAhandle)
     }
     else
     {
-        PRINT_LOGS("\n[Pci] Current Gen Speed [%d]", Pci_state.speed.gen);
-        PRINT_LOGS("\n[Pci] Current Width [%d]", Pci_state.speed.width);
-        PRINT_LOGS("\n[Pci] Current Max Bandwidth [%I64u] bytes per second", Pci_state.speed.maxBandwidth);
+        PRINT_LOGS("\n[Pci] Current Gen Speed [%i]", Pci_state.speed.gen);
+        PRINT_LOGS("\n[Pci] Current Width [%i]", Pci_state.speed.width);
+        PRINT_LOGS("\n[Pci] Current Max Bandwidth [%lli] bytes per second", Pci_state.speed.maxBandwidth);
     }
 
     PRINT_LOGS("\n \n");
@@ -649,7 +649,7 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
     }
     else
     {
-        PRINT_LOGS("\nNumber of Memory Handles [%d]", MemoryHandlerCount);
+        PRINT_LOGS("\nNumber of Memory Handles [%u]", MemoryHandlerCount);
     }
 
     ctl_mem_handle_t *pMemoryHandle = new ctl_mem_handle_t[MemoryHandlerCount];
@@ -664,7 +664,7 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
 
     for (uint32_t i = 0; i < MemoryHandlerCount; i++)
     {
-        PRINT_LOGS("\n\nFor Memory Handle [%d]", i);
+        PRINT_LOGS("\n\nFor Memory Handle [%u]", i);
 
         PRINT_LOGS("\n[Memory] Get Memory properties:");
 
@@ -678,11 +678,11 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Memory] Bus Width [%d]", memoryProperties.busWidth);
-            PRINT_LOGS("\n[Memory] Location [%d]", (uint32_t)memoryProperties.location);
-            PRINT_LOGS("\n[Memory] Number of Channels [%d]", memoryProperties.numChannels);
-            PRINT_LOGS("\n[Memory] Physical Size [%I64u]", memoryProperties.physicalSize);
-            PRINT_LOGS("\n[Memory] Memory Type [%d]", memoryProperties.type);
+            PRINT_LOGS("\n[Memory] Bus Width [%i]", memoryProperties.busWidth);
+            PRINT_LOGS("\n[Memory] Location [%u]", (uint32_t)memoryProperties.location);
+            PRINT_LOGS("\n[Memory] Number of Channels [%i]", memoryProperties.numChannels);
+            PRINT_LOGS("\n[Memory] Physical Size [%llu]", memoryProperties.physicalSize);
+            PRINT_LOGS("\n[Memory] Memory Type [%u]", (uint32_t)memoryProperties.type);
         }
 
         PRINT_LOGS("\n[Memory] Get Memory State:");
@@ -697,8 +697,8 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Memory] Memory Size [%I64u]", state.size);
-            PRINT_LOGS("\n[Memory] Memory Free [%I64u]", state.free);
+            PRINT_LOGS("\n[Memory] Memory Size [%llu]", state.size);
+            PRINT_LOGS("\n[Memory] Memory Free [%llu]", state.free);
         }
 
         PRINT_LOGS("\n[Memory] Get Memory Bandwidth:");
@@ -713,8 +713,8 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Memory] Max Bandwidth [%I64u]", bandwidth.maxBandwidth);
-            PRINT_LOGS("\n[Memory] Time Stamp [%I64u] \n \n", bandwidth.timestamp);
+            PRINT_LOGS("\n[Memory] Max Bandwidth [%llu]", bandwidth.maxBandwidth);
+            PRINT_LOGS("\n[Memory] Time Stamp [%llu] \n \n", bandwidth.timestamp);
         }
     }
 
@@ -742,7 +742,7 @@ void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle)
     }
     else
     {
-        PRINT_LOGS("\nNumber of Engine Handles [%d]", EngineHandlerCount);
+        PRINT_LOGS("\nNumber of Engine Handles [%u]", EngineHandlerCount);
     }
 
     ctl_engine_handle_t *pEngineHandle = new ctl_engine_handle_t[EngineHandlerCount];
@@ -757,7 +757,7 @@ void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle)
 
     for (uint32_t i = 0; i < EngineHandlerCount; i++)
     {
-        PRINT_LOGS("\n\nFor Engine Handle [%d]", i);
+        PRINT_LOGS("\n\nFor Engine Handle [%u]", i);
         ctl_engine_properties_t engineProperties = { 0 };
         engineProperties.Size                    = sizeof(ctl_engine_properties_t);
         res                                      = ctlEngineGetProperties(pEngineHandle[i], &engineProperties);
@@ -793,8 +793,8 @@ void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle)
                 double percentActivity = static_cast<double>(activeDiff) / static_cast<double>(timeWindow);
                 percentActivity *= 100.0;
 
-                PRINT_LOGS("\n[Engine] Active Time [%I64u]\n", activeDiff);
-                PRINT_LOGS("[Engine] Time Stamp [%I64u]\n", timeWindow);
+                PRINT_LOGS("\n[Engine] Active Time [%llu]\n", activeDiff);
+                PRINT_LOGS("[Engine] Time Stamp [%llu]\n", timeWindow);
                 PRINT_LOGS("[Engine] Usage [%f] \n \n \n", percentActivity);
 
                 prevActiveCounter = engineStats.activeTime;
@@ -1508,15 +1508,15 @@ int main()
                 if (NULL != StDeviceAdapterProperties.pDeviceID)
                 {
                     AdapterID = *(reinterpret_cast<LUID *>(StDeviceAdapterProperties.pDeviceID));
-                    PRINT_LOGS("\nAdapter ID %d \n", AdapterID.LowPart);
+                    PRINT_LOGS("\nAdapter ID %lu \n", AdapterID.LowPart);
                 }
 
                 if (0x8086 == StDeviceAdapterProperties.pci_vendor_id)
                 {
                     PRINT_LOGS("\nIntel Adapter Name %s", StDeviceAdapterProperties.name);
-                    PRINT_LOGS("\nVendor id  %d", StDeviceAdapterProperties.pci_vendor_id);
-                    PRINT_LOGS("\nDevice id %d", StDeviceAdapterProperties.pci_device_id);
-                    PRINT_LOGS("\nRev id %d", StDeviceAdapterProperties.rev_id);
+                    PRINT_LOGS("\nVendor id  0x%X", StDeviceAdapterProperties.pci_vendor_id);
+                    PRINT_LOGS("\nDevice id 0x%X", StDeviceAdapterProperties.pci_device_id);
+                    PRINT_LOGS("\nRev id 0x%X", StDeviceAdapterProperties.rev_id);
                 }
 
                 // Per Component Tests

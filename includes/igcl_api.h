@@ -1397,6 +1397,7 @@ typedef enum _ctl_3d_feature_t
     CTL_3D_FEATURE_APP_PROFILES = 11,               ///< Game Compatibility & Performance Profiles. Refer custom field
                                                     ///< ::ctl_3d_app_profiles_caps_t & ::ctl_3d_app_profiles_t
     CTL_3D_FEATURE_APP_PROFILE_DETAILS = 12,        ///< Game Profile Customization. Refer custom field ::ctl_3d_tier_details_t
+    CTL_3D_FEATURE_EMULATED_TYPED_64BIT_ATOMICS = 13,   ///< Emulated Typed 64bit Atomics support in DG2
     CTL_3D_FEATURE_MAX
 
 } ctl_3d_feature_t;
@@ -1559,7 +1560,7 @@ typedef struct _ctl_endurance_gaming2_t
     ctl_3d_endurance_gaming_mode_t EGMode;          ///< [in,out] Endurance Gaming mode - Better Performance/Balanced/Maximum
                                                     ///< Battery
     bool IsFPRequired;                              ///< [out] Is frame pacing required, dynamic state
-    uint32_t TargetFPS;                             ///< [out] Target FPS for frame pacing
+    double TargetFPS;                               ///< [out] Target FPS for frame pacing
     uint32_t Reserved[4];                           ///< [out] Reserved fields
 
 } ctl_endurance_gaming2_t;
@@ -1645,6 +1646,17 @@ typedef struct _ctl_3d_tier_details_t
     uint64_t Reserved[4];                           ///< [in,out] Reserved for future
 
 } ctl_3d_tier_details_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Emulated Typed 64bit Atomics
+typedef enum _ctl_emulated_typed_64bit_atomics_types_t
+{
+    CTL_EMULATED_TYPED_64BIT_ATOMICS_TYPES_DEFAULT = 0, ///< Default settings is based on workload/driver decision.
+    CTL_EMULATED_TYPED_64BIT_ATOMICS_TYPES_TURN_ON = 1, ///< Force Turn on
+    CTL_EMULATED_TYPED_64BIT_ATOMICS_TYPES_TURN_OFF = 2,///< Force Turn off
+    CTL_EMULATED_TYPED_64BIT_ATOMICS_TYPES_MAX
+
+} ctl_emulated_typed_64bit_atomics_types_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief 3D feature capability details which will have range/supported and

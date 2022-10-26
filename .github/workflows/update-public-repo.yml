@@ -1,0 +1,22 @@
+name: Update Public Repo
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  trigger-jenkins:
+    runs-on: [ self-hosted, X64, Windows, gfx, large ]
+
+    steps:
+      - name: Trigger IGCL Public Repo Jenkins Job
+        run: |
+          git log -1 --pretty=format:"%s" > tmpFile
+          set /p message= < tmpFile 
+          python -c "a='%message%'.split(' ')[-1];print('v' + a if a.isnumeric() else 'UNKNOWN')" > tmpFile
+          set /p message= < tmpFile 
+          del tmpFile 
+          echo %message%
+          echo "http://displaydev.intel.com/job/IgclUpdatePublicRepo/buildWithParameters?token=hnxDRc4MPisnj8aNW33fUCJW8zdNAdqH&VERSION=&VERSION=%message%"
+        continue-on-error: true
+        shell: cmd
