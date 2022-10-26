@@ -549,6 +549,7 @@ ctl_rect_t
     * :ref:`ctl-gaming-flip-mode-flags-t`
     * :ref:`ctl-3d-tier-type-flags-t`
     * :ref:`ctl-3d-tier-profile-flags-t`
+    * :ref:`ctl-emulated-typed-64bit-atomics-types-t`
 
  
 * Structures
@@ -718,6 +719,15 @@ ctl_3d_tier_profile_flags_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_3d_tier_profile_flag_t
+    :project: ControlApi
+
+
+.. _ctl-emulated-typed-64bit-atomics-types-t:
+
+ctl_emulated_typed_64bit_atomics_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_emulated_typed_64bit_atomics_types_t
     :project: ControlApi
 
  
