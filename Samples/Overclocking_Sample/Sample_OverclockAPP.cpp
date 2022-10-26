@@ -831,9 +831,9 @@ int main()
                 if (0x8086 == StDeviceAdapterProperties.pci_vendor_id)
                 {
                     PRINT_LOGS("Intel Adapter Name %s\n", StDeviceAdapterProperties.name);
-                    PRINT_LOGS("Vendor id  %i\n", StDeviceAdapterProperties.pci_vendor_id);
-                    PRINT_LOGS("Device id %i\n", StDeviceAdapterProperties.pci_device_id);
-                    PRINT_LOGS("Rev id %i\n", StDeviceAdapterProperties.rev_id);
+                    PRINT_LOGS("Vendor id  0x%X\n", StDeviceAdapterProperties.pci_vendor_id);
+                    PRINT_LOGS("Device id 0x%X\n", StDeviceAdapterProperties.pci_device_id);
+                    PRINT_LOGS("Rev id 0x%X\n", StDeviceAdapterProperties.rev_id);
                 }
 
                 OverclockProperties(hDevices[Index]);
