@@ -1947,7 +1947,7 @@ ctl_result_t CTL_APICALL
 ctlGetSetDisplayGenlock(
     ctl_device_adapter_handle_t* hDeviceAdapter,    ///< [in][release] Handle to control device adapter
     ctl_genlock_args_t** pGenlockArgs,              ///< [in,out] Display Genlock operation and information
-    uint8_t AdapterCount,                           ///< [in] Number of device adapters
+    uint32_t AdapterCount,                          ///< [in] Number of device adapters
     ctl_device_adapter_handle_t* hFailureDeviceAdapter  ///< [out] Handle to address the failure device adapter in an error case
     )
 {
@@ -3150,8 +3150,8 @@ ctlOverclockGpuVoltageOffsetGet(
 *       voltages beyond the part warrantee limits. This can permit running at
 *       even higher frequencies than can be obtained using the frequency
 *       offset setting, but at the risk of reducing the lifetime of the part.
-*     - The voltage offset is expressed in units of ±Volts with decimal
-*       values permitted down to a resolution of 1 millivolt.
+*     - The voltage offset is expressed in units of ±millivolts with values
+*       permitted down to a resolution of 1 millivolt.
 *     - The overclock waiver must be set before calling this function
 *       otherwise and error will be returned.
 *     - There is no guarantee that a workload can operate at the higher
@@ -3237,9 +3237,9 @@ ctlOverclockGpuLockGet(
 *     - The purpose of this function is to provide an interface for scanners
 *       to lock the frequency and voltage to fixed values.
 *     - The frequency is expressed in units of MHz with a resolution of 1MHz.
-*     - The voltage is expressed in units of ±Volts with decimal values
+*     - The voltage is expressed in units of ±millivolts with values
 *       permitted down to a resolution of 1 millivolt.
-*     - The overclock waiver must be set since fixing the frequency at a high
+*     - The overclock waiver must be set since fixing the voltage at a high
 *       value puts unnecessary stress on the part.
 *     - The actual frequency may reduce depending on power/thermal
 *       limitations.
@@ -3393,8 +3393,8 @@ ctlOverclockVramFrequencyOffsetSet(
 * @details
 *     - The purpose of this function is to increase/decrease the voltage of
 *       VRAM.
-*     - The voltage offset is expressed in units of Volts with a minimum step
-*       size given by ::ctlOverclockGetProperties.
+*     - The voltage offset is expressed in units of millivolts with a minimum
+*       step size given by ::ctlOverclockGetProperties.
 *     - The waiver must be set using ::ctlOverclockWaiverSet before this
 *       function can be called.
 *     - This setting is not persistent through system reboots or driver

@@ -701,9 +701,10 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
             PRINT_LOGS("\n[Memory] Memory Free [%llu]", state.free);
         }
 
-        PRINT_LOGS("\n[Memory] Get Memory Bandwidth:");
+        PRINT_LOGS("\n\n[Memory] Get Memory Bandwidth Version 1:");
 
         ctl_mem_bandwidth_t bandwidth = { 0 };
+        bandwidth.Version             = 1;
         bandwidth.Size                = sizeof(ctl_mem_bandwidth_t);
         res                           = ctlMemoryGetBandwidth(pMemoryHandle[i], &bandwidth);
 
@@ -713,6 +714,8 @@ void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
+            PRINT_LOGS("\n[Memory] Read Counter (in bytes) [%llu]", bandwidth.readCounter);
+            PRINT_LOGS("\n[Memory] Write Counter (in bytes) [%llu]", bandwidth.writeCounter);
             PRINT_LOGS("\n[Memory] Max Bandwidth [%llu]", bandwidth.maxBandwidth);
             PRINT_LOGS("\n[Memory] Time Stamp [%llu] \n \n", bandwidth.timestamp);
         }

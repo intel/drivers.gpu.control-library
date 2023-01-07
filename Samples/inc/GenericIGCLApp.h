@@ -26,6 +26,7 @@
 #include <iostream>
 #include <windows.h>
 #include <stdio.h>
+#include <vector>
 
 #include "igcl_api.h"
 
@@ -68,6 +69,14 @@
     }
 
 #define PRINT_LOGS(...) printf(__VA_ARGS__)
+
+#define CONTROL_BIT(_i) (1 << _i)
+
+typedef enum _feature_control_type
+{
+    ENDURANCE_GAMING_CONTROLS = 0, ///< Endurance gaming controls
+    ENDURANCE_GAMING_MODES    = 1, ///< Endurance gaming modes
+} feature_control_type;
 
 /***************************************************************
  * @brief Method to get 3D feature name
@@ -183,6 +192,115 @@ inline void Print3DFeatureSupport(ctl_3d_feature_details_t *pFeatureDetails)
 }
 
 /***************************************************************
+ * @brief Method to Print Endurance Gaming Control
+ *
+ * @param Control
+ * @return
+ ***************************************************************/
+inline void PrintEnduranceGamingControl(uint32_t Control)
+{
+    switch (Control)
+    {
+        case CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_OFF:
+            printf("  pEGCaps->EGControlCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_OFF\n");
+
+            break;
+
+        case CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_ON:
+            printf("  pEGCaps->EGControlCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_ON\n");
+
+            break;
+
+        case CTL_3D_ENDURANCE_GAMING_CONTROL_AUTO:
+            printf("  pEGCaps->EGControlCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_CONTROL_AUTO\n");
+
+            break;
+
+        default:
+            return;
+    }
+}
+
+/***************************************************************
+ * @brief Method to Print Endurance Gaming Mode
+ *
+ * @param Control
+ * @return
+ ***************************************************************/
+inline void PrintEnduranceGamingMode(uint32_t Mode)
+{
+    switch (Mode)
+    {
+        case CTL_3D_ENDURANCE_GAMING_MODE_BETTER_PERFORMANCE:
+            printf("  pEGCaps->EGModeCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_MODE_BETTER_PERFORMANCE\n");
+
+            break;
+
+        case CTL_3D_ENDURANCE_GAMING_MODE_BALANCED:
+            printf("  pEGCaps->EGModeCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_MODE_BALANCED\n");
+
+            break;
+
+        case CTL_3D_ENDURANCE_GAMING_MODE_MAXIMUM_BATTERY:
+            printf("  pEGCaps->EGModeCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_MODE_MAXIMUM_BATTERY\n");
+
+            break;
+
+        default:
+            return;
+    }
+}
+
+/***************************************************************
+ * @brief Method to print 3d feature setting type
+ *
+ * @param Setting
+ * @param SettingType
+ * @return
+ ***************************************************************/
+inline void Print3DFeatureSupportedSettingType(uint32_t Setting, feature_control_type ControlType)
+{
+    switch (ControlType)
+    {
+        case ENDURANCE_GAMING_CONTROLS:
+
+            PrintEnduranceGamingControl(Setting);
+
+            break;
+
+        case ENDURANCE_GAMING_MODES:
+
+            PrintEnduranceGamingMode(Setting);
+
+            break;
+
+        default:
+            return;
+    }
+}
+
+/***************************************************************
+ * @brief Method to print 3d feature supported settings in a generic way
+ *
+ * @param SupportMask
+ * @param Settings
+ * @param SettingType
+ * @return
+ ***************************************************************/
+inline void Print3DFeatureSupportedSettings(uint64_t SupportMask, std::vector<uint32_t> Settings, feature_control_type ControlType)
+{
+    for (uint8_t i = 0; i < Settings.size(); i++)
+    {
+        uint32_t Setting = CONTROL_BIT(Settings[i]);
+
+        if (Setting & SupportMask)
+        {
+            Print3DFeatureSupportedSettingType(Settings[i], ControlType);
+        }
+    }
+}
+
+/***************************************************************
  * @brief Method to print 3d feature details struct in a generic way
  *
  * place_holder_for_Detailed_desc
@@ -285,8 +403,13 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
                     case CTL_3D_FEATURE_ENDURANCE_GAMING:
                     {
                         ctl_endurance_gaming_caps_t *pEGCaps = (ctl_endurance_gaming_caps_t *)pFeatureDetails->pCustomValue;
+                        std::vector<uint32_t> EGControls     = { CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_OFF, CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_ON, CTL_3D_ENDURANCE_GAMING_CONTROL_AUTO };
+                        std::vector<uint32_t> EGModes        = { CTL_3D_ENDURANCE_GAMING_MODE_BETTER_PERFORMANCE, CTL_3D_ENDURANCE_GAMING_MODE_BALANCED, CTL_3D_ENDURANCE_GAMING_MODE_MAXIMUM_BATTERY };
                         printf("  pEGCaps->EGControlCaps.DefaultType = %d\n", pEGCaps->EGControlCaps.DefaultType);
                         printf("  pEGCaps->EGModeCaps.DefaultType = %d\n", pEGCaps->EGModeCaps.DefaultType);
+
+                        Print3DFeatureSupportedSettings(pEGCaps->EGControlCaps.SupportedTypes, EGControls, ENDURANCE_GAMING_CONTROLS);
+                        Print3DFeatureSupportedSettings(pEGCaps->EGModeCaps.SupportedTypes, EGModes, ENDURANCE_GAMING_MODES);
                     }
                     break;
 

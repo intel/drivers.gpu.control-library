@@ -456,7 +456,7 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
     uint8_t CombinedDisplayCount = 0;
     uint8_t MaxNumDisplayOutputs = 0;
 
-    for (uint8_t Index = 0; Index < AdapterCount; Index++)
+    for (uint32_t Index = 0; Index < AdapterCount; Index++)
     {
         DisplayCount         = 0;
         ActiveDisplayCount   = 0;

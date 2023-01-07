@@ -1,5 +1,5 @@
 # Intel Graphics Control Library (IGCL)
-Header, wrapper library and samples of IGCL version 1.1
+Header, wrapper library and samples of IGCL version 1.0
  
 
 # Introduction
