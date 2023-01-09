@@ -764,7 +764,7 @@ typedef enum _ctl_property_type_flag_t
 } ctl_property_type_flag_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief Generic Structure for Revision datatypes
+/// @brief Arguments related to wait for a property change function
 typedef struct _ctl_wait_property_change_args_t
 {
     uint32_t Size;                                  ///< [in] size of this structure
@@ -4000,7 +4000,7 @@ CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlGetSetDisplayGenlock(
     ctl_device_adapter_handle_t* hDeviceAdapter,    ///< [in][release] Handle to control device adapter
     ctl_genlock_args_t** pGenlockArgs,              ///< [in,out] Display Genlock operation and information
-    uint8_t AdapterCount,                           ///< [in] Number of device adapters
+    uint32_t AdapterCount,                          ///< [in] Number of device adapters
     ctl_device_adapter_handle_t* hFailureDeviceAdapter  ///< [out] Handle to address the failure device adapter in an error case
     );
 
@@ -5123,13 +5123,15 @@ typedef struct _ctl_mem_bandwidth_t
     uint32_t Size;                                  ///< [in] size of this structure
     uint8_t Version;                                ///< [in] version of this structure
     uint64_t maxBandwidth;                          ///< [out] Current maximum bandwidth in units of bytes/sec
-    uint64_t timestamp;                             ///< [out] The timestamp when these measurements were sampled.
+    uint64_t timestamp;                             ///< [out] The timestamp (in microseconds) when these measurements were sampled.
                                                     ///< This timestamp should only be used to calculate delta time between
                                                     ///< snapshots of this structure.
                                                     ///< Never take the delta of this timestamp with the timestamp from a
                                                     ///< different structure since they are not guaranteed to have the same base.
                                                     ///< The absolute value of the timestamp is only valid during within the
                                                     ///< application and may be different on the next execution.
+    uint64_t readCounter;                           ///< [out] Total bytes read from memory. Supported only for Version > 0
+    uint64_t writeCounter;                          ///< [out] Total bytes written to memory. Supported only for Version > 0
 
 } ctl_mem_bandwidth_t;
 
@@ -5318,8 +5320,8 @@ typedef struct _ctl_oc_vf_pair_t
 {
     uint32_t Size;                                  ///< [in] size of this structure
     uint8_t Version;                                ///< [in] version of this structure
-    double Voltage;                                 ///< [in,out] Voltage component of the pair in Volts.
-    double Frequency;                               ///< [in,out] Frequency component of the pair in Frequency.
+    double Voltage;                                 ///< [in,out] Voltage component of the pair in mV.
+    double Frequency;                               ///< [in,out] Frequency component of the pair in MHz.
 
 } ctl_oc_vf_pair_t;
 
@@ -5595,8 +5597,8 @@ ctlOverclockGpuVoltageOffsetGet(
 ///       voltages beyond the part warrantee limits. This can permit running at
 ///       even higher frequencies than can be obtained using the frequency
 ///       offset setting, but at the risk of reducing the lifetime of the part.
-///     - The voltage offset is expressed in units of ±Volts with decimal
-///       values permitted down to a resolution of 1 millivolt.
+///     - The voltage offset is expressed in units of ±millivolts with values
+///       permitted down to a resolution of 1 millivolt.
 ///     - The overclock waiver must be set before calling this function
 ///       otherwise and error will be returned.
 ///     - There is no guarantee that a workload can operate at the higher
@@ -5648,9 +5650,9 @@ ctlOverclockGpuLockGet(
 ///     - The purpose of this function is to provide an interface for scanners
 ///       to lock the frequency and voltage to fixed values.
 ///     - The frequency is expressed in units of MHz with a resolution of 1MHz.
-///     - The voltage is expressed in units of ±Volts with decimal values
+///     - The voltage is expressed in units of ±millivolts with values
 ///       permitted down to a resolution of 1 millivolt.
-///     - The overclock waiver must be set since fixing the frequency at a high
+///     - The overclock waiver must be set since fixing the voltage at a high
 ///       value puts unnecessary stress on the part.
 ///     - The actual frequency may reduce depending on power/thermal
 ///       limitations.
@@ -5753,8 +5755,8 @@ ctlOverclockVramFrequencyOffsetSet(
 /// @details
 ///     - The purpose of this function is to increase/decrease the voltage of
 ///       VRAM.
-///     - The voltage offset is expressed in units of Volts with a minimum step
-///       size given by ::ctlOverclockGetProperties.
+///     - The voltage offset is expressed in units of millivolts with a minimum
+///       step size given by ::ctlOverclockGetProperties.
 ///     - The waiver must be set using ::ctlOverclockWaiverSet before this
 ///       function can be called.
 ///     - This setting is not persistent through system reboots or driver
@@ -6751,7 +6753,7 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetCombinedDisplay_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetDisplayGenlock_t)(
     ctl_device_adapter_handle_t*,
     ctl_genlock_args_t**,
-    uint8_t,
+    uint32_t,
     ctl_device_adapter_handle_t*
     );
 
