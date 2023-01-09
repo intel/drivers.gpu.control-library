@@ -7,11 +7,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-=========
- Versions
-=========
+==================
+ Previous Versions
+==================
 
-Version 1.0: <https://github.com/intel/drivers.gpu.control-library/tree/DocV1>`__
+`Version 1.0 Samples & Header <https://github.com/intel/drivers.gpu.control-library/releases/tag/Code_Ver1.0>`__
+
+`Version 1.0 Documentation <https://github.com/intel/drivers.gpu.control-library/releases/tag/Doc_Ver1.0>`__
 
 Latest Release
 ==============
