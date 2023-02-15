@@ -1465,7 +1465,7 @@ int main()
             hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * Adapter_count);
             if (hDevices == NULL)
             {
-                return ERROR;
+                return EXIT_FAILURE;
             }
             Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
         }
@@ -1486,7 +1486,7 @@ int main()
 
                 if (NULL == StDeviceAdapterProperties.pDeviceID)
                 {
-                    return ERROR;
+                    return EXIT_FAILURE;
                 }
 
                 Result = ctlGetDeviceProperties(hDevices[Index], &StDeviceAdapterProperties);
