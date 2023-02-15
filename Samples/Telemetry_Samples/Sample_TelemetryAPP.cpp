@@ -612,6 +612,8 @@ void CtlPciTest(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\n[Pci] Gen [%i]", Pci_properties.maxSpeed.gen);
         PRINT_LOGS("\n[Pci] Width [%i]", Pci_properties.maxSpeed.width);
         PRINT_LOGS("\n[Pci] Max Bandwidth [%lli] bytes per second", Pci_properties.maxSpeed.maxBandwidth);
+        PRINT_LOGS("\n[Pci] Resizable Bar Supported [%s]", (Pci_properties.resizable_bar_supported) ? "true" : "false");
+        PRINT_LOGS("\n[Pci] Resizable Bar Enabled [%s]", (Pci_properties.resizable_bar_enabled) ? "true" : "false");
     }
 
     ctl_pci_state_t Pci_state = { 0 };
