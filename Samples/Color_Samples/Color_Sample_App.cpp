@@ -24,6 +24,7 @@
                       // including igcl_api.h
 #include "igcl_api.h"
 #include "GenericIGCLApp.h"
+#include "ColorAlgorithms.h"
 
 ctl_result_t GResult = CTL_RESULT_SUCCESS;
 
@@ -37,7 +38,6 @@ ctl_result_t GResult = CTL_RESULT_SUCCESS;
 #define UV_MAX_VAL 255.0
 #define CLIP_DOUBLE(Val, Min, Max) (((Val) < (Min)) ? (Min) : (((Val) > (Max)) ? (Max) : (Val)))
 #define ABS_DOUBLE(x) ((x) < 0 ? (-x) : (x))
-
 // Convert RGB to YUV
 const double RGB2YCbCr709[3][3] = { { 0.2126, 0.7152, 0.0722 }, { -0.1146, -0.3854, 0.5000 }, { 0.5000, -0.4542, -0.0458 } };
 
@@ -156,25 +156,6 @@ bool IsDefaultPartialSaturationSettings(double *pSatWeights)
     }
 
     return true;
-}
-
-/***************************************************************
- * @brief
- * MatrixMult3x3With3x1
- * @param Matrix1, Matrix2, Result
- * @return void
- ***************************************************************/
-void MatrixMult3x3With3x1(const double Matrix1[3][3], double Matrix2[3], double Result[3])
-{
-    double Tmp[3];
-
-    Tmp[0] = Matrix1[0][0] * Matrix2[0] + Matrix1[0][1] * Matrix2[1] + Matrix1[0][2] * Matrix2[2];
-    Tmp[1] = Matrix1[1][0] * Matrix2[0] + Matrix1[1][1] * Matrix2[1] + Matrix1[1][2] * Matrix2[2];
-    Tmp[2] = Matrix1[2][0] * Matrix2[0] + Matrix1[2][1] * Matrix2[1] + Matrix1[2][2] * Matrix2[2];
-
-    Result[0] = Tmp[0];
-    Result[1] = Tmp[1];
-    Result[2] = Tmp[2];
 }
 
 /***************************************************************
@@ -457,27 +438,6 @@ void ChangePixelSaturation(ctl_pixtx_3dlut_sample_t &PixelRGB, double *pBasicCol
     PixelYCbCr.Cr = SatFactor * PixelYCbCr.Cr;
 
     PerformYCbCr2RGB(PixelYCbCr, PixelRGB);
-}
-
-/***************************************************************
- * @brief
- * MatrixMult3x3
- * @param Matrix1, Matrix2, Result
- * @return void
- ***************************************************************/
-void MatrixMult3x3(double Matrix1[3][3], double Matrix2[3][3], double Result[3][3])
-{
-    double Tmp[3][3];
-
-    for (uint8_t y = 0; y < 3; y++)
-    {
-        for (uint8_t x = 0; x < 3; x++)
-        {
-            Tmp[y][x] = Matrix1[y][0] * Matrix2[0][x] + Matrix1[y][1] * Matrix2[1][x] + Matrix1[y][2] * Matrix2[2][x];
-        }
-    }
-
-    memcpy_s(Result, sizeof(Tmp), Tmp, sizeof(Tmp));
 }
 
 /***************************************************************

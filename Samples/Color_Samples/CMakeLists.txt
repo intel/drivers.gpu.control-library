@@ -3,7 +3,9 @@ set(TARGET_NAME Color_Samples)
 get_filename_component(ROOT_DIR ../../ ABSOLUTE)
 project(Color_Samples VERSION 1.0)
 add_executable(${TARGET_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/ColorAlgorithms.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Color_Sample_App.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ColorAlgorithms.h
     ${ROOT_DIR}/wrapper/cApiWrapper.cpp
 )
 

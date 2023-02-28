@@ -797,6 +797,7 @@ int main()
                 StDeviceAdapterProperties.Size           = sizeof(ctl_device_adapter_properties_t);
                 StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
                 StDeviceAdapterProperties.device_id_size = sizeof(LUID);
+                StDeviceAdapterProperties.Version        = 2;
 
                 if (NULL == StDeviceAdapterProperties.pDeviceID)
                 {
@@ -833,6 +834,8 @@ int main()
                     PRINT_LOGS("Intel Adapter Name %s\n", StDeviceAdapterProperties.name);
                     PRINT_LOGS("Vendor id  0x%X\n", StDeviceAdapterProperties.pci_vendor_id);
                     PRINT_LOGS("Device id 0x%X\n", StDeviceAdapterProperties.pci_device_id);
+                    PRINT_LOGS("SubSys id 0x%X\n", StDeviceAdapterProperties.pci_subsys_id);
+                    PRINT_LOGS("SubSys Vendor id 0x%X\n", StDeviceAdapterProperties.pci_subsys_vendor_id);
                     PRINT_LOGS("Rev id 0x%X\n", StDeviceAdapterProperties.rev_id);
                 }
 

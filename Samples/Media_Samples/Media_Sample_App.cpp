@@ -999,6 +999,7 @@ int main()
                 StDeviceAdapterProperties.Size           = sizeof(ctl_device_adapter_properties_t);
                 StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
                 StDeviceAdapterProperties.device_id_size = sizeof(LUID);
+                StDeviceAdapterProperties.Version        = 2;
 
                 if (NULL == StDeviceAdapterProperties.pDeviceID)
                 {
@@ -1035,6 +1036,8 @@ int main()
                     std::cout << "Intel Adapter Name " << StDeviceAdapterProperties.name << "\n";
                     std::cout << "Vendor id  " << StDeviceAdapterProperties.pci_vendor_id << "\n";
                     std::cout << "Device id " << StDeviceAdapterProperties.pci_device_id << "\n";
+                    std::cout << "SubSys id " << StDeviceAdapterProperties.pci_subsys_id << "\n";
+                    std::cout << "SubSys Vendor id " << StDeviceAdapterProperties.pci_subsys_vendor_id << "\n";
                     std::cout << "Rev id " << StDeviceAdapterProperties.rev_id << "\n";
                 }
 
