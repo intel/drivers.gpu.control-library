@@ -321,7 +321,7 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
             PRINT_LOGS("\n[Frequency] Actual Frequency [%f] Mhz", freqState.actual);
             PRINT_LOGS("\n[Frequency] Efficient Frequency [%f] Mhz", freqState.efficient);
             PRINT_LOGS("\n[Frequency] Requested Frequency [%f] Mhz", freqState.request);
-            PRINT_LOGS("\n[Frequency] Actual TDP [%f] Watts", freqState.tdp);
+            PRINT_LOGS("\n[Frequency] Max clock Frequency for a target TDP [%f] Mhz", freqState.tdp);
             PRINT_LOGS("\n[Frequency] Throttle Reasons [%u]", freqState.throttleReasons);
             PRINT_LOGS("\n[Frequency] Voltage [%f] Volts", freqState.currentVoltage);
         }
@@ -594,7 +594,7 @@ cleanUp:
 void CtlPciTest(ctl_device_adapter_handle_t hDAhandle)
 {
 
-    PRINT_LOGS("\n[Temperature] Get Temperature properties:");
+    PRINT_LOGS("\n[PCI] Get PCI properties:");
     ctl_pci_properties_t Pci_properties = { 0 };
     Pci_properties.Size                 = sizeof(ctl_pci_properties_t);
     ctl_result_t res                    = ctlPciGetProperties(hDAhandle, &Pci_properties);
@@ -1483,6 +1483,7 @@ int main()
                 StDeviceAdapterProperties.Size           = sizeof(ctl_device_adapter_properties_t);
                 StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
                 StDeviceAdapterProperties.device_id_size = sizeof(LUID);
+                StDeviceAdapterProperties.Version        = 2;
 
                 if (NULL == StDeviceAdapterProperties.pDeviceID)
                 {
@@ -1519,6 +1520,8 @@ int main()
                     PRINT_LOGS("\nIntel Adapter Name %s", StDeviceAdapterProperties.name);
                     PRINT_LOGS("\nVendor id  0x%X", StDeviceAdapterProperties.pci_vendor_id);
                     PRINT_LOGS("\nDevice id 0x%X", StDeviceAdapterProperties.pci_device_id);
+                    PRINT_LOGS("\nSubSys id 0x%X", StDeviceAdapterProperties.pci_subsys_id);
+                    PRINT_LOGS("\nSubSys Vendor id 0x%X", StDeviceAdapterProperties.pci_subsys_vendor_id);
                     PRINT_LOGS("\nRev id 0x%X", StDeviceAdapterProperties.rev_id);
                 }
 

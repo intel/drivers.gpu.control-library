@@ -452,7 +452,7 @@ typedef enum _ctl_result_t
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef CTL_MAX_RESERVED_SIZE
 /// @brief Maximum reserved size for future members.
-#define CTL_MAX_RESERVED_SIZE  120
+#define CTL_MAX_RESERVED_SIZE  116
 #endif // CTL_MAX_RESERVED_SIZE
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -717,6 +717,8 @@ typedef struct _ctl_device_adapter_properties_t
     char name[CTL_MAX_DEVICE_NAME_LEN];             ///< [out] Device name
     ctl_adapter_properties_flags_t graphics_adapter_properties; ///< [out] Graphics Adapter Properties
     uint32_t Frequency;                             ///< [out] Clock frequency for this device. Supported only for Version > 0
+    uint16_t pci_subsys_id;                         ///< [out] PCI SubSys ID, Supported only for Version > 1
+    uint16_t pci_subsys_vendor_id;                  ///< [out] PCI SubSys Vendor ID, Supported only for Version > 1
     char reserved[CTL_MAX_RESERVED_SIZE];           ///< [out] Reserved
 
 } ctl_device_adapter_properties_t;
@@ -1561,6 +1563,7 @@ typedef struct _ctl_endurance_gaming2_t
                                                     ///< Battery
     bool IsFPRequired;                              ///< [out] Is frame pacing required, dynamic state
     double TargetFPS;                               ///< [out] Target FPS for frame pacing
+    double RefreshRate;                             ///< [out] Refresh rate used to calculate target fps
     uint32_t Reserved[4];                           ///< [out] Reserved fields
 
 } ctl_endurance_gaming2_t;

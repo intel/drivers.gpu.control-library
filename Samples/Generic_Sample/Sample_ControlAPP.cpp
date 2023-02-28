@@ -615,6 +615,8 @@ void PrintAdapterProperties(ctl_device_adapter_properties_t StDeviceAdapterPrope
     printf("Intel Adapter Name: %s\n", StDeviceAdapterProperties.name);
     printf("Vendor ID: 0x%X\n", StDeviceAdapterProperties.pci_vendor_id);
     printf("Device ID: 0x%X\n", StDeviceAdapterProperties.pci_device_id);
+    printf("SubSys id 0x%X\n", StDeviceAdapterProperties.pci_subsys_id);
+    printf("SubSys Vendor id 0x%X\n", StDeviceAdapterProperties.pci_subsys_vendor_id);
     printf("Rev ID: 0x%X\n", StDeviceAdapterProperties.rev_id);
     printf("Graphics Frequency: %dMHz\n", StDeviceAdapterProperties.Frequency);
     printf("num_eus_per_sub_slice: %d\n", StDeviceAdapterProperties.num_eus_per_sub_slice);
@@ -777,7 +779,7 @@ int main()
         StDeviceAdapterProperties.Size           = sizeof(ctl_device_adapter_properties_t);
         StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
         StDeviceAdapterProperties.device_id_size = sizeof(LUID);
-        StDeviceAdapterProperties.Version        = 1;
+        StDeviceAdapterProperties.Version        = 2;
 
         if (NULL == StDeviceAdapterProperties.pDeviceID)
         {
