@@ -61,9 +61,9 @@ void PrintUsage(char *pArgv[])
     printf("\nCombined Display Port - 0 | 1\n");
     printf("\tCombined Display port number you want to disable or query. Default is 0.\n");
     printf("Config File - sample config file\n");
-    printf("\tCombinedDisplayArguments.txt - Enabling Combined Display\n");
-    printf("\tcd_d.txt - Disabling Combined Display\n");
-    printf("\tcd_q.txt - Querying current Combined Display topology\n");
+    printf("\tEnable.cfg - Enabling 1x2 mode of Combined Display with 1080p displays\n");
+    printf("\tDisable.cfg - Disabling Combined Display\n");
+    printf("\tQuery.cfg - Querying current Combined Display topology\n");
 }
 
 /***************************************************************
