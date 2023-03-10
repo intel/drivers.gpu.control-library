@@ -2884,8 +2884,9 @@ typedef struct _ctl_pixtx_1dlut_config_t
                                                     ///< sampling also but not vice versa.
     uint32_t NumSamplesPerChannel;                  ///< [in,out] Number of samples per channel. Resampled internally based on
                                                     ///< HW capability for uniformly sampled LUT.Maximum supported value is
-                                                    ///< MAX_NUM_SAMPLES_PER_CHANNEL_1D_LUT Caller needs to use exact sampling
-                                                    ///< position given in pSamplePositions for non-uniformly sampled LUTs.
+                                                    ///< ::CTL_MAX_NUM_SAMPLES_PER_CHANNEL_1D_LUT Caller needs to use exact
+                                                    ///< sampling position given in pSamplePositions for non-uniformly sampled
+                                                    ///< LUTs.
     uint32_t NumChannels;                           ///< [in,out] Number of channels, 1 for Grey scale LUT, 3 for RGB LUT
     double* pSampleValues;                          ///< [in,out] Pointer to sample values, R array followed by G and B arrays
                                                     ///< in case of multi-channel LUT. Allocation size for pSampleValues should
