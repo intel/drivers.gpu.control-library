@@ -764,7 +764,7 @@ int main()
             hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * Adapter_count);
             if (hDevices == NULL)
             {
-                return ERROR;
+                return EXIT_FAILURE;
             }
             Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
         }
@@ -783,7 +783,7 @@ int main()
 
         if (NULL == StDeviceAdapterProperties.pDeviceID)
         {
-            return ERROR;
+            return EXIT_FAILURE;
         }
 
         // test an additional caller from same process
@@ -856,7 +856,7 @@ int main()
                     stdisplayencoderproperties.Size                                     = sizeof(ctl_adapter_display_encoder_properties_t);
 
                     if (nullptr == hDisplayOutput)
-                        return ERROR;
+                        return EXIT_FAILURE;
 
                     for (Display_index = 0; Display_index < Display_count; Display_index++)
                     {
@@ -882,7 +882,7 @@ int main()
                 if (CTL_RESULT_SUCCESS == Result)
                 {
                     if (nullptr == hDisplayOutput)
-                        return ERROR;
+                        return EXIT_FAILURE;
 
                     for (Display_index = 0; Display_index < Display_count; Display_index++)
                     {
