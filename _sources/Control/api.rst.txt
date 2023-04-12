@@ -63,6 +63,7 @@ Common
     * :ref:`ctl-unlock-capability-t`
     * :ref:`ctl-runtime-path-args-t`
     * :ref:`ctl-firmware-version-t`
+    * :ref:`ctl-adapter-bdf-t`
     * :ref:`ctl-device-adapter-properties-t`
     * :ref:`ctl-generic-void-datatype-t`
     * :ref:`ctl-revision-datatype-t`
@@ -470,6 +471,16 @@ ctl_firmware_version_t
     :members:
     :undoc-members:
 
+.. _ctl-adapter-bdf-t:
+
+ctl_adapter_bdf_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_adapter_bdf_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
 .. _ctl-device-adapter-properties-t:
 
 ctl_device_adapter_properties_t
@@ -550,6 +561,7 @@ ctl_rect_t
     * :ref:`ctl-3d-tier-type-flags-t`
     * :ref:`ctl-3d-tier-profile-flags-t`
     * :ref:`ctl-emulated-typed-64bit-atomics-types-t`
+    * :ref:`ctl-3d-vrr-windowed-blt-reserved-t`
 
  
 * Structures
@@ -730,6 +742,15 @@ ctl_emulated_typed_64bit_atomics_types_t
 .. doxygenenum:: ctl_emulated_typed_64bit_atomics_types_t
     :project: ControlApi
 
+
+.. _ctl-3d-vrr-windowed-blt-reserved-t:
+
+ctl_3d_vrr_windowed_blt_reserved_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_vrr_windowed_blt_reserved_t
+    :project: ControlApi
+
  
 3d Structures
 ------------------------------------------------------------------------------
@@ -900,6 +921,10 @@ Display
     * :ref:`ctlGetSetCustomMode`
     * :ref:`ctlGetSetCombinedDisplay`
     * :ref:`ctlGetSetDisplayGenlock`
+    * :ref:`ctlGetVblankTimestamp`
+    * :ref:`ctlLinkDisplayAdapters`
+    * :ref:`ctlUnlinkDisplayAdapters`
+    * :ref:`ctlGetLinkedDisplayAdapters`
 
  
 * Enumerations
@@ -997,6 +1022,8 @@ Display
     * :ref:`ctl-genlock-target-mode-list-t`
     * :ref:`ctl-genlock-topology-t`
     * :ref:`ctl-genlock-args-t`
+    * :ref:`ctl-vblank-ts-args-t`
+    * :ref:`ctl-lda-args-t`
 
 
 Display Functions
@@ -1342,6 +1369,42 @@ ctlGetSetDisplayGenlock
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenfunction:: ctlGetSetDisplayGenlock
+    :project: ControlApi
+
+
+.. _ctlGetVblankTimestamp:
+
+ctlGetVblankTimestamp
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetVblankTimestamp
+    :project: ControlApi
+
+
+.. _ctlLinkDisplayAdapters:
+
+ctlLinkDisplayAdapters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlLinkDisplayAdapters
+    :project: ControlApi
+
+
+.. _ctlUnlinkDisplayAdapters:
+
+ctlUnlinkDisplayAdapters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlUnlinkDisplayAdapters
+    :project: ControlApi
+
+
+.. _ctlGetLinkedDisplayAdapters:
+
+ctlGetLinkedDisplayAdapters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetLinkedDisplayAdapters
     :project: ControlApi
 
 
@@ -2174,6 +2237,26 @@ ctl_genlock_args_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_genlock_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-vblank-ts-args-t:
+
+ctl_vblank_ts_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_vblank_ts_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-lda-args-t:
+
+ctl_lda_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_lda_args_t
     :project: ControlApi
     :members:
     :undoc-members:
