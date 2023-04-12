@@ -437,6 +437,9 @@ typedef enum _ctl_result_t
     CTL_RESULT_ERROR_CUSTOM_MODE_STANDARD_CUSTOM_MODE_EXISTS = 0x4800001a,  ///< Standard custom mode exists
     CTL_RESULT_ERROR_CUSTOM_MODE_NON_CUSTOM_MATCHING_MODE_EXISTS = 0x4800001b,  ///< Non custom matching mode exists
     CTL_RESULT_ERROR_CUSTOM_MODE_INSUFFICIENT_MEMORY = 0x4800001c,  ///< Custom mode insufficent memory
+    CTL_RESULT_ERROR_ADAPTER_ALREADY_LINKED = 0x4800001d,   ///< Adapter is already linked
+    CTL_RESULT_ERROR_ADAPTER_NOT_IDENTICAL = 0x4800001e,///< Adapter is not identical for linking
+    CTL_RESULT_ERROR_ADAPTER_NOT_SUPPORTED_ON_LDA_SECONDARY = 0x4800001f,   ///< Adapter is LDA Secondary, so not supporting requested operation
     CTL_RESULT_ERROR_DISPLAY_END = 0x4800FFFF,      ///< "Display error code end value, not to be used
                                                     ///< "
     CTL_RESULT_MAX
@@ -452,7 +455,7 @@ typedef enum _ctl_result_t
 ///////////////////////////////////////////////////////////////////////////////
 #ifndef CTL_MAX_RESERVED_SIZE
 /// @brief Maximum reserved size for future members.
-#define CTL_MAX_RESERVED_SIZE  116
+#define CTL_MAX_RESERVED_SIZE  112
 #endif // CTL_MAX_RESERVED_SIZE
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -692,9 +695,23 @@ typedef uint32_t ctl_adapter_properties_flags_t;
 typedef enum _ctl_adapter_properties_flag_t
 {
     CTL_ADAPTER_PROPERTIES_FLAG_INTEGRATED = CTL_BIT(0),///< [out] Is Integrated Graphics adapter
+    CTL_ADAPTER_PROPERTIES_FLAG_LDA_PRIMARY = CTL_BIT(1),   ///< [out] Is Primary (Lead) adapter in a Linked Display Adapter (LDA)
+                                                    ///< chain
+    CTL_ADAPTER_PROPERTIES_FLAG_LDA_SECONDARY = CTL_BIT(2), ///< [out] Is Secondary (Linked) adapter in a Linked Display Adapter (LDA)
+                                                    ///< chain
     CTL_ADAPTER_PROPERTIES_FLAG_MAX = 0x80000000
 
 } ctl_adapter_properties_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Adapter Pci Bus, Device, Function
+typedef struct _ctl_adapter_bdf_t
+{
+    uint8_t bus;                                    ///< [out] PCI Bus Number
+    uint8_t device;                                 ///< [out] PCI device number
+    uint8_t function;                               ///< [out] PCI function
+
+} ctl_adapter_bdf_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Device Adapter properties
@@ -719,6 +736,7 @@ typedef struct _ctl_device_adapter_properties_t
     uint32_t Frequency;                             ///< [out] Clock frequency for this device. Supported only for Version > 0
     uint16_t pci_subsys_id;                         ///< [out] PCI SubSys ID, Supported only for Version > 1
     uint16_t pci_subsys_vendor_id;                  ///< [out] PCI SubSys Vendor ID, Supported only for Version > 1
+    ctl_adapter_bdf_t adapter_bdf;                  ///< [out] Pci Bus, Device, Function. Supported only for Version > 1
     char reserved[CTL_MAX_RESERVED_SIZE];           ///< [out] Reserved
 
 } ctl_device_adapter_properties_t;
@@ -933,6 +951,10 @@ typedef struct _ctl_runtime_path_args_t ctl_runtime_path_args_t;
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_firmware_version_t
 typedef struct _ctl_firmware_version_t ctl_firmware_version_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_adapter_bdf_t
+typedef struct _ctl_adapter_bdf_t ctl_adapter_bdf_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_device_adapter_properties_t
@@ -1187,6 +1209,14 @@ typedef struct _ctl_genlock_topology_t ctl_genlock_topology_t;
 typedef struct _ctl_genlock_args_t ctl_genlock_args_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_vblank_ts_args_t
+typedef struct _ctl_vblank_ts_args_t ctl_vblank_ts_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_lda_args_t
+typedef struct _ctl_lda_args_t ctl_lda_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_engine_properties_t
 typedef struct _ctl_engine_properties_t ctl_engine_properties_t;
 
@@ -1400,6 +1430,7 @@ typedef enum _ctl_3d_feature_t
                                                     ///< ::ctl_3d_app_profiles_caps_t & ::ctl_3d_app_profiles_t
     CTL_3D_FEATURE_APP_PROFILE_DETAILS = 12,        ///< Game Profile Customization. Refer custom field ::ctl_3d_tier_details_t
     CTL_3D_FEATURE_EMULATED_TYPED_64BIT_ATOMICS = 13,   ///< Emulated Typed 64bit Atomics support in DG2
+    CTL_3D_FEATURE_VRR_WINDOWED_BLT = 14,           ///< VRR windowed blt. Control VRR for windowed mode game
     CTL_3D_FEATURE_MAX
 
 } ctl_3d_feature_t;
@@ -1660,6 +1691,17 @@ typedef enum _ctl_emulated_typed_64bit_atomics_types_t
     CTL_EMULATED_TYPED_64BIT_ATOMICS_TYPES_MAX
 
 } ctl_emulated_typed_64bit_atomics_types_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief VRR windowed BLT control possible. Reserved functionality
+typedef enum _ctl_3d_vrr_windowed_blt_reserved_t
+{
+    CTL_3D_VRR_WINDOWED_BLT_RESERVED_AUTO = 0,      ///< VRR windowed BLT auto
+    CTL_3D_VRR_WINDOWED_BLT_RESERVED_TURN_ON = 1,   ///< VRR windowed BLT enable
+    CTL_3D_VRR_WINDOWED_BLT_RESERVED_TURN_OFF = 2,  ///< VRR windowed BLT disable
+    CTL_3D_VRR_WINDOWED_BLT_RESERVED_MAX
+
+} ctl_3d_vrr_windowed_blt_reserved_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief 3D feature capability details which will have range/supported and
@@ -2016,6 +2058,7 @@ typedef enum _ctl_encoder_config_flag_t
     CTL_ENCODER_CONFIG_FLAG_COLLAGE_DISPLAY = CTL_BIT(7),   ///< [out] This BIT will be set if this is a collage display
     CTL_ENCODER_CONFIG_FLAG_SPLIT_DISPLAY = CTL_BIT(8), ///< [out] This BIT will be set if this is a split display
     CTL_ENCODER_CONFIG_FLAG_COMPANION_DISPLAY = CTL_BIT(9), ///< [out] This BIT will be set if this is a companion display
+    CTL_ENCODER_CONFIG_FLAG_MGPU_COLLAGE_DISPLAY = CTL_BIT(10), ///< [out] This BIT will be set if this is a Multi GPU collage display
     CTL_ENCODER_CONFIG_FLAG_MAX = 0x80000000
 
 } ctl_encoder_config_flag_t;
@@ -2110,12 +2153,19 @@ typedef struct _ctl_adapter_display_encoder_properties_t
                                                     ///< driver which occupies a portion of a real physical display  
                                                     ///<    Split=1,Virtual=0  : Indicates the physical display which got split
                                                     ///< to form multiple split displays  
-                                                    ///<    Split=1,Collage=1  : Invalid combination                  
+                                                    ///<    Split=1,Collage=1  : Invalid combination    
+                                                    ///<    MgpuCollage=1,Collage=1,Virtual=1: Indicates the fake display
+                                                    ///< output created by driver which has the combined resolution of multiple
+                                                    ///< physical displays spread across multiple GPUs involved in Multi-GPU
+                                                    ///< collage configuration
+                                                    ///<    MgpuCollage=1,Collage=1,Virtual=0: Indicates the child physical
+                                                    ///< displays involved in a Multi-GPU collage configuration. These are real
+                                                    ///< physical outputs 
     ctl_std_display_feature_flags_t FeatureSupportedFlags;  ///< [out] Adapter Supported feature flags. Refer
                                                     ///< ::ctl_std_display_feature_flag_t
     ctl_intel_display_feature_flags_t AdvancedFeatureSupportedFlags;///< [out] Advanced Features Supported by the Adapter. Refer
                                                     ///< ::ctl_intel_display_feature_flag_t
-    uint32_t ReservedFields[16];                    ///< [out] Reserved field of 64 bytes
+    uint32_t ReservedFields[16];                    ///< [out] Reserved field of 60 bytes
 
 } ctl_adapter_display_encoder_properties_t;
 
@@ -3887,7 +3937,8 @@ typedef struct _ctl_combined_display_args_t
                                                     ///< configuration
     uint32_t CombinedDesktopWidth;                  ///< [in,out] Width of desired combined display configuration
     uint32_t CombinedDesktopHeight;                 ///< [in,out] Height of desired combined display configuration
-    ctl_combined_display_child_info_t* pChildInfo;  ///< [in,out] List of child display information respective to each output
+    ctl_combined_display_child_info_t* pChildInfo;  ///< [in,out] List of child display information respective to each output.
+                                                    ///< Up to 16 displays are supported with up to 4 displays per GPU.
     ctl_display_output_handle_t hCombinedDisplayOutput; ///< [in,out] Handle to combined display output
 
 } ctl_combined_display_args_t;
@@ -3915,6 +3966,7 @@ typedef struct _ctl_combined_display_args_t
 ///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
 ///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
 ///     - ::CTL_RESULT_ERROR_FEATURE_NOT_SUPPORTED - "Combined Display feature is not supported in this platform"
+///     - ::CTL_RESULT_ERROR_ADAPTER_NOT_SUPPORTED_ON_LDA_SECONDARY - "Unsupported (secondary) adapter handle passed"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlGetSetCombinedDisplay(
     ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] Handle to control device adapter
@@ -4006,6 +4058,137 @@ ctlGetSetDisplayGenlock(
     ctl_genlock_args_t** pGenlockArgs,              ///< [in,out] Display Genlock operation and information
     uint32_t AdapterCount,                          ///< [in] Number of device adapters
     ctl_device_adapter_handle_t* hFailureDeviceAdapter  ///< [out] Handle to address the failure device adapter in an error case
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+#ifndef CTL_MAX_DISPLAYS_FOR_MGPU_COLLAGE
+/// @brief Maximum number of displays for Single Large Screen
+#define CTL_MAX_DISPLAYS_FOR_MGPU_COLLAGE  16
+#endif // CTL_MAX_DISPLAYS_FOR_MGPU_COLLAGE
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Vblank timestamp arguments
+typedef struct _ctl_vblank_ts_args_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    uint8_t NumOfTargets;                           ///< [out] Number of child targets
+    uint64_t VblankTS[CTL_MAX_DISPLAYS_FOR_MGPU_COLLAGE];   ///< [out] List of vblank timestamps per child target
+
+} ctl_vblank_ts_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Vblank Timestamp
+/// 
+/// @details
+///     - To get a list of vblank timestamps for each child target of a display.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pVblankTSArgs`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
+///     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetVblankTimestamp(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
+    ctl_vblank_ts_args_t* pVblankTSArgs             ///< [out] Get vblank timestamp arguments
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Link Display Adapters Arguments
+typedef struct _ctl_lda_args_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    uint8_t NumAdapters;                            ///< [in,out] Numbers of adapters to be linked. Up to 4 adapters are
+                                                    ///< supported
+    ctl_device_adapter_handle_t* hLinkedAdapters;   ///< [in,out][release] List of Control device adapter handles to be linked,
+                                                    ///< first one being Primary Adapter
+    uint64_t Reserved[4];                           ///< [out] Reserved fields. Set to zero.
+
+} ctl_lda_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Link Display Adapters
+/// 
+/// @details
+///     - To Link Display Adapters.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hPrimaryAdapter`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pLdaArgs`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+///     - ::CTL_RESULT_ERROR_ADAPTER_ALREADY_LINKED - "Adapter is already linked"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlLinkDisplayAdapters(
+    ctl_device_adapter_handle_t hPrimaryAdapter,    ///< [in][release] Handle to Primary adapter in LDA chain
+    ctl_lda_args_t* pLdaArgs                        ///< [in] Link Display Adapters Arguments
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Unlink Display Adapters
+/// 
+/// @details
+///     - To Unlink Display Adapters
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hPrimaryAdapter`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+///     - ::CTL_RESULT_ERROR_ADAPTER_NOT_SUPPORTED_ON_LDA_SECONDARY - "Unsupported (secondary) adapter handle passed"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlUnlinkDisplayAdapters(
+    ctl_device_adapter_handle_t hPrimaryAdapter     ///< [in][release] Handle to Primary adapter in LDA chain
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Linked Display Adapters
+/// 
+/// @details
+///     - To return list of Linked Display Adapters.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hPrimaryAdapter`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pLdaArgs`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+///     - ::CTL_RESULT_ERROR_ADAPTER_NOT_SUPPORTED_ON_LDA_SECONDARY - "Unsupported (secondary) adapter handle passed"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetLinkedDisplayAdapters(
+    ctl_device_adapter_handle_t hPrimaryAdapter,    ///< [in][release] Handle to Primary adapter in LDA chain
+    ctl_lda_args_t* pLdaArgs                        ///< [out] Link Display Adapters Arguments
     );
 
 
@@ -6759,6 +6942,37 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetDisplayGenlock_t)(
     ctl_genlock_args_t**,
     uint32_t,
     ctl_device_adapter_handle_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetVblankTimestamp 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetVblankTimestamp_t)(
+    ctl_display_output_handle_t,
+    ctl_vblank_ts_args_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlLinkDisplayAdapters 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnLinkDisplayAdapters_t)(
+    ctl_device_adapter_handle_t,
+    ctl_lda_args_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlUnlinkDisplayAdapters 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnUnlinkDisplayAdapters_t)(
+    ctl_device_adapter_handle_t
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetLinkedDisplayAdapters 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetLinkedDisplayAdapters_t)(
+    ctl_device_adapter_handle_t,
+    ctl_lda_args_t*
     );
 
 

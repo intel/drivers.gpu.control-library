@@ -1898,6 +1898,7 @@ ctlGetSetCustomMode(
 *     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
 *     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
 *     - ::CTL_RESULT_ERROR_FEATURE_NOT_SUPPORTED - "Combined Display feature is not supported in this platform"
+*     - ::CTL_RESULT_ERROR_ADAPTER_NOT_SUPPORTED_ON_LDA_SECONDARY - "Unsupported (secondary) adapter handle passed"
 */
 ctl_result_t CTL_APICALL
 ctlGetSetCombinedDisplay(
@@ -1960,6 +1961,174 @@ ctlGetSetDisplayGenlock(
         if (pfnGetSetDisplayGenlock)
         {
             result = pfnGetSetDisplayGenlock(hDeviceAdapter, pGenlockArgs, AdapterCount, hFailureDeviceAdapter);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get Vblank Timestamp
+* 
+* @details
+*     - To get a list of vblank timestamps for each child target of a display.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pVblankTSArgs`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
+*     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+*/
+ctl_result_t CTL_APICALL
+ctlGetVblankTimestamp(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
+    ctl_vblank_ts_args_t* pVblankTSArgs             ///< [out] Get vblank timestamp arguments
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetVblankTimestamp_t pfnGetVblankTimestamp = (ctl_pfnGetVblankTimestamp_t)GetProcAddress(hinstLib, "ctlGetVblankTimestamp");
+        if (pfnGetVblankTimestamp)
+        {
+            result = pfnGetVblankTimestamp(hDisplayOutput, pVblankTSArgs);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Link Display Adapters
+* 
+* @details
+*     - To Link Display Adapters.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hPrimaryAdapter`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pLdaArgs`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+*     - ::CTL_RESULT_ERROR_ADAPTER_ALREADY_LINKED - "Adapter is already linked"
+*/
+ctl_result_t CTL_APICALL
+ctlLinkDisplayAdapters(
+    ctl_device_adapter_handle_t hPrimaryAdapter,    ///< [in][release] Handle to Primary adapter in LDA chain
+    ctl_lda_args_t* pLdaArgs                        ///< [in] Link Display Adapters Arguments
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnLinkDisplayAdapters_t pfnLinkDisplayAdapters = (ctl_pfnLinkDisplayAdapters_t)GetProcAddress(hinstLib, "ctlLinkDisplayAdapters");
+        if (pfnLinkDisplayAdapters)
+        {
+            result = pfnLinkDisplayAdapters(hPrimaryAdapter, pLdaArgs);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Unlink Display Adapters
+* 
+* @details
+*     - To Unlink Display Adapters
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hPrimaryAdapter`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+*     - ::CTL_RESULT_ERROR_ADAPTER_NOT_SUPPORTED_ON_LDA_SECONDARY - "Unsupported (secondary) adapter handle passed"
+*/
+ctl_result_t CTL_APICALL
+ctlUnlinkDisplayAdapters(
+    ctl_device_adapter_handle_t hPrimaryAdapter     ///< [in][release] Handle to Primary adapter in LDA chain
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnUnlinkDisplayAdapters_t pfnUnlinkDisplayAdapters = (ctl_pfnUnlinkDisplayAdapters_t)GetProcAddress(hinstLib, "ctlUnlinkDisplayAdapters");
+        if (pfnUnlinkDisplayAdapters)
+        {
+            result = pfnUnlinkDisplayAdapters(hPrimaryAdapter);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get Linked Display Adapters
+* 
+* @details
+*     - To return list of Linked Display Adapters.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hPrimaryAdapter`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pLdaArgs`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+*     - ::CTL_RESULT_ERROR_ADAPTER_NOT_SUPPORTED_ON_LDA_SECONDARY - "Unsupported (secondary) adapter handle passed"
+*/
+ctl_result_t CTL_APICALL
+ctlGetLinkedDisplayAdapters(
+    ctl_device_adapter_handle_t hPrimaryAdapter,    ///< [in][release] Handle to Primary adapter in LDA chain
+    ctl_lda_args_t* pLdaArgs                        ///< [out] Link Display Adapters Arguments
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetLinkedDisplayAdapters_t pfnGetLinkedDisplayAdapters = (ctl_pfnGetLinkedDisplayAdapters_t)GetProcAddress(hinstLib, "ctlGetLinkedDisplayAdapters");
+        if (pfnGetLinkedDisplayAdapters)
+        {
+            result = pfnGetLinkedDisplayAdapters(hPrimaryAdapter, pLdaArgs);
         }
     }
 
