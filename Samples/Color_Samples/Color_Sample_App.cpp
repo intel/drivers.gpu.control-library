@@ -835,8 +835,11 @@ ctl_result_t ApplyLinearCSC(ctl_display_output_handle_t hDisplayOutput, ctl_pixt
     LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ctlPixelTransformationSetConfig");
 
 Exit:
-    CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues);
-    CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues);
+    if (NULL != SetPixTxArgs.pBlockConfigs)
+    {
+        CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues);
+        CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues);
+    }
     CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs);
     return Result;
 }
@@ -1271,7 +1274,7 @@ void GetSetDeGamma(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_ge
 
     if (DGLUTIndex < 0)
     {
-        printf("Invalid OneDLut Index\n");
+        printf("Invalid DGLut Index\n");
         goto Exit;
     }
 
@@ -1371,7 +1374,7 @@ void GetSet3DLUT(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_
 
     if (ThreeDLutBlockIndex < 0)
     {
-        printf("Invalid OneDLut Index\n");
+        printf("Invalid ThreeDLut Index\n");
         goto Exit;
     }
 
@@ -1606,61 +1609,93 @@ Exit:
  * @param hDisplayOutput
  * @return ctl_result_t
  ***************************************************************/
-ctl_result_t TestLaceGetSetConfig(ctl_display_output_handle_t hDisplayOutput)
+ctl_result_t TestLaceGetSetConfigForFixedAgressiveness(ctl_display_output_handle_t hDisplayOutput)
 {
-    ctl_result_t Result                     = CTL_RESULT_SUCCESS;
-    ctl_lace_config_t GetLaceConfigSettings = { 0 };
-    ctl_lace_config_t SetLaceConfigSettings = { 0 };
-    GetLaceConfigSettings.Size              = sizeof(ctl_lace_config_t);
-    GetLaceConfigSettings.OpTypeGet         = CTL_GET_OPERATION_FLAG_CAPABILITY;
-    uint32_t MaxNumEntries                  = 0;
+    ctl_result_t Result                         = CTL_RESULT_SUCCESS;
+    ctl_lace_config_t AppliedLaceConfigSettings = { 0 };
+    ctl_lace_config_t NewLaceConfigSettings     = { 0 };
 
-    // Caps calls to get MaxNumEntries for memory allocation
-    Result = ctlGetLACEConfig(hDisplayOutput, &GetLaceConfigSettings);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetLACEConfig");
+    NewLaceConfigSettings.Version                                    = 0;
+    NewLaceConfigSettings.Size                                       = sizeof(ctl_lace_config_t);
+    NewLaceConfigSettings.Enabled                                    = TRUE;
+    NewLaceConfigSettings.OpTypeSet                                  = CTL_SET_OPERATION_CUSTOM;
+    NewLaceConfigSettings.Trigger                                    = CTL_LACE_TRIGGER_FLAG_FIXED_AGGRESSIVENESS; // Set Lace Config call for fixed Aggr Percent Mode
+    NewLaceConfigSettings.LaceConfig.FixedAggressivenessLevelPercent = 50;
 
-    MaxNumEntries = GetLaceConfigSettings.LaceConfig.AggrLevelMap.MaxNumEntries;
-
-    SetLaceConfigSettings.Size      = sizeof(ctl_lace_config_t);
-    SetLaceConfigSettings.Enabled   = TRUE;
-    SetLaceConfigSettings.OpTypeSet = CTL_SET_OPERATION_CUSTOM;
-
-    // Set Lace Config call for fixed Aggr Percent Mode (Change the trigger to Ambient mode to set lace in Ambient Light Mode, refer commented code below for the same)
-    SetLaceConfigSettings.Trigger                                    = CTL_LACE_TRIGGER_FLAG_FIXED_AGGRESSIVENESS;
-    SetLaceConfigSettings.LaceConfig.FixedAggressivenessLevelPercent = 50;
-
-    /* Reference code for Ambient light Mode:
-    SetLaceConfigSettings.LaceConfig.AggrLevelMap.NumEntries = 6;
-    SetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable =
-    (ctl_lace_lux_aggr_map_entry_t *)malloc(sizeof(ctl_lace_lux_aggr_map_entry_t) * SetLaceConfigSettings.LaceConfig.AggrLevelMap.NumEntries);
-    SetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[0] = { 100, 20 };
-    SetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[1] = { 400, 40 };
-    SetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[2] = { 500, 50 };
-    SetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[3] = { 600, 60 };
-    SetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[4] = { 800, 80 };
-    SetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[5] = { 1500, 100 };
-    */
-
-    Result = ctlSetLACEConfig(hDisplayOutput, &SetLaceConfigSettings);
+    Result = ctlSetLACEConfig(hDisplayOutput, &NewLaceConfigSettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlSetLACEConfig");
 
-    printf("ctlSetLACEConfig returned Success \n");
-
     // Get Lace Config Call for current flag
-    GetLaceConfigSettings                                                = { 0 };
-    GetLaceConfigSettings.Size                                           = sizeof(ctl_lace_config_t);
-    GetLaceConfigSettings.OpTypeGet                                      = CTL_GET_OPERATION_FLAG_CURRENT;
-    GetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable = (ctl_lace_lux_aggr_map_entry_t *)malloc(sizeof(ctl_lace_lux_aggr_map_entry_t) * MaxNumEntries);
+    AppliedLaceConfigSettings           = { 0 };
+    AppliedLaceConfigSettings.Version   = 0;
+    AppliedLaceConfigSettings.Size      = sizeof(ctl_lace_config_t);
+    AppliedLaceConfigSettings.OpTypeGet = CTL_GET_OPERATION_FLAG_CURRENT;
 
-    EXIT_ON_MEM_ALLOC_FAILURE(GetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable, "GetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable");
-
-    Result = ctlGetLACEConfig(hDisplayOutput, &GetLaceConfigSettings);
+    Result = ctlGetLACEConfig(hDisplayOutput, &AppliedLaceConfigSettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetLACEConfig");
 
-    printf("ctlGetLACEConfig returned Success \n");
+Exit:
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Sample test for Get/Set Lace Config
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestLaceGetSetConfigForALS(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                         = CTL_RESULT_SUCCESS;
+    ctl_lace_config_t AppliedLaceConfigSettings = { 0 };
+    ctl_lace_config_t NewLaceConfigSettings     = { 0 };
+    AppliedLaceConfigSettings.Version           = 0;
+    AppliedLaceConfigSettings.Size              = sizeof(ctl_lace_config_t);
+    AppliedLaceConfigSettings.OpTypeGet         = CTL_GET_OPERATION_FLAG_CAPABILITY;
+    uint32_t MaxNumEntries                      = 0;
+
+    // Caps calls to get MaxNumEntries for memory allocation
+    Result = ctlGetLACEConfig(hDisplayOutput, &AppliedLaceConfigSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetLACEConfig");
+
+    MaxNumEntries = AppliedLaceConfigSettings.LaceConfig.AggrLevelMap.MaxNumEntries;
+
+    NewLaceConfigSettings.Version   = 0;
+    NewLaceConfigSettings.Size      = sizeof(ctl_lace_config_t);
+    NewLaceConfigSettings.Enabled   = TRUE;
+    NewLaceConfigSettings.OpTypeSet = CTL_SET_OPERATION_CUSTOM;
+    NewLaceConfigSettings.Trigger   = CTL_LACE_TRIGGER_FLAG_AMBIENT_LIGHT;
+
+    NewLaceConfigSettings.LaceConfig.AggrLevelMap.NumEntries = 6;
+    NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable =
+    (ctl_lace_lux_aggr_map_entry_t *)malloc(sizeof(ctl_lace_lux_aggr_map_entry_t) * NewLaceConfigSettings.LaceConfig.AggrLevelMap.NumEntries);
+    EXIT_ON_MEM_ALLOC_FAILURE(NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable, "NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable");
+    NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[0] = { 100, 20 };
+    NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[1] = { 400, 40 };
+    NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[2] = { 500, 50 };
+    NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[3] = { 600, 60 };
+    NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[4] = { 800, 80 };
+    NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable[5] = { 1500, 100 };
+
+    Result = ctlSetLACEConfig(hDisplayOutput, &NewLaceConfigSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlSetLACEConfig");
+
+    // Get Lace Config Call for current flag
+    AppliedLaceConfigSettings                                                = { 0 };
+    AppliedLaceConfigSettings.Version                                        = 0;
+    AppliedLaceConfigSettings.Size                                           = sizeof(ctl_lace_config_t);
+    AppliedLaceConfigSettings.OpTypeGet                                      = CTL_GET_OPERATION_FLAG_CURRENT;
+    AppliedLaceConfigSettings.LaceConfig.AggrLevelMap.NumEntries             = MaxNumEntries;
+    AppliedLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable = (ctl_lace_lux_aggr_map_entry_t *)malloc(sizeof(ctl_lace_lux_aggr_map_entry_t) * MaxNumEntries);
+
+    EXIT_ON_MEM_ALLOC_FAILURE(AppliedLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable, "AppliedLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable");
+
+    Result = ctlGetLACEConfig(hDisplayOutput, &AppliedLaceConfigSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetLACEConfig");
 
 Exit:
-    CTL_FREE_MEM(GetLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable);
+    CTL_FREE_MEM(AppliedLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable);
+    CTL_FREE_MEM(NewLaceConfigSettings.LaceConfig.AggrLevelMap.pLuxToAggrMappingTable);
     return Result;
 }
 
@@ -1695,7 +1730,10 @@ ctl_result_t TestColorForEnumDisplayHandles(ctl_display_output_handle_t *hDispla
         Result = TestPixTxGetSetConfig(hDisplayOutput[DisplayIndex]);
         STORE_AND_RESET_ERROR(Result);
 
-        Result = TestLaceGetSetConfig(hDisplayOutput[DisplayIndex]);
+        Result = TestLaceGetSetConfigForFixedAgressiveness(hDisplayOutput[DisplayIndex]);
+        STORE_AND_RESET_ERROR(Result);
+
+        Result = TestLaceGetSetConfigForALS(hDisplayOutput[DisplayIndex]);
         STORE_AND_RESET_ERROR(Result);
     }
 

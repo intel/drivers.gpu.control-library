@@ -111,6 +111,10 @@ inline char *Get3DFeatureName(ctl_3d_feature_t FeatureType)
             return "Application profile";
         case CTL_3D_FEATURE_APP_PROFILE_DETAILS:
             return "Application profile custom details";
+        case CTL_3D_FEATURE_EMULATED_TYPED_64BIT_ATOMICS:
+            return "Emulated typed 64 bit atomics";
+        case CTL_3D_FEATURE_VRR_WINDOWED_BLT:
+            return "VRR windowed blt";
         default:
             return "No Name";
     }

@@ -194,7 +194,8 @@ ctl_result_t ParseChildInfoArguments(const char *pCDArgFile, ctl_combined_displa
         {
             string SubValue;
             string Delimiter = ",";
-            uint32_t i, Index = 0;
+            uint32_t i       = 0;
+            uint32_t Index   = 0;
 
             Value.erase(remove(Value.begin(), Value.end(), '{'), Value.end());
             Value.erase(remove(Value.begin(), Value.end(), '}'), Value.end());
@@ -202,12 +203,6 @@ ctl_result_t ParseChildInfoArguments(const char *pCDArgFile, ctl_combined_displa
             DelimiterPos = Value.find(",");
             while (DelimiterPos != string::npos)
             {
-                // Skip parsing the line
-                if (true == IsSkipLine)
-                {
-                    break;
-                }
-
                 SubValue = Value.substr(0, DelimiterPos);
                 Value.erase(0, DelimiterPos + Delimiter.length());
                 switch (Index)
@@ -217,8 +212,7 @@ ctl_result_t ParseChildInfoArguments(const char *pCDArgFile, ctl_combined_displa
                         // Index of the selected display must be less than NumOutputs
                         if (i >= pCombinedDisplayArgs->NumOutputs)
                         {
-                            IsSkipLine = true;
-                            continue;
+                            goto Exit;
                         }
                         break;
                     case CHILDINFO_FBSRC_LEFT:
@@ -449,12 +443,12 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
     ctl_display_output_handle_t *pHCombinedDisplayOutputs = NULL;
     ctl_display_output_handle_t *pHActiveDisplayOutputs   = NULL;
     uint32_t *pSelectedDisplays                           = NULL;
-    ctl_combined_display_args_t CombinedDisplayArgs;
-    uint32_t DisplayCount        = 0;
-    uint32_t NumActiveOutputs    = 0;
-    uint8_t ActiveDisplayCount   = 0;
-    uint8_t CombinedDisplayCount = 0;
-    uint8_t MaxNumDisplayOutputs = 0;
+    ctl_combined_display_args_t CombinedDisplayArgs       = { 0 };
+    uint32_t DisplayCount                                 = 0;
+    uint32_t NumActiveOutputs                             = 0;
+    uint8_t ActiveDisplayCount                            = 0;
+    uint8_t CombinedDisplayCount                          = 0;
+    uint8_t MaxNumDisplayOutputs                          = 0;
 
     for (uint32_t Index = 0; Index < AdapterCount; Index++)
     {

@@ -101,6 +101,14 @@ ctl_result_t GetCmdlineArgs(int argc, char *pArgv[], genlock_sample_args *pGenlo
 
     switch (argc)
     {
+        case 2:
+            // vblank ts is the only valid case here
+            if (0 != strcmp(pArgv[1], "vblankts"))
+            {
+                Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
+            }
+            break;
+
         case 4:
             if (0 == strcmp(pArgv[1], "secondary"))
             {
@@ -559,6 +567,101 @@ Exit:
 }
 
 /***************************************************************
+ * @brief GetVblankTimestamp
+ * get vblank time stamp
+ * @param hDevices, AdapterCount
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t GetVblankTimestamp(ctl_device_adapter_handle_t *hDevices, uint32_t AdapterCount)
+{
+    ctl_result_t Result                                = CTL_RESULT_SUCCESS;
+    ctl_device_adapter_handle_t hFailureDeviceAdapter  = NULL;
+    ctl_display_output_handle_t *hDisplayOutput        = NULL;
+    ctl_display_output_handle_t *hActiveDisplayOutputs = NULL;
+    uint32_t DisplayCount                              = 0;
+    uint8_t ActiveDisplayCount                         = 0;
+    uint8_t MaxNumDisplayOutputs                       = 0;
+    bool IsDisplayActive                               = false;
+    bool IsDisplayAttached                             = false;
+    ctl_vblank_ts_args_t VblankTsArgs;
+
+    for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
+    {
+        ActiveDisplayCount = 0;
+
+        // Enumerate all the possible target displays for the adapters
+        // First step is to get the count
+        DisplayCount = 0;
+
+        Result = ctlEnumerateDisplayOutputs(hDevices[AdapterIndex], &DisplayCount, NULL);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+        }
+        else if (DisplayCount <= 0)
+        {
+            printf("Invalid Display Count. Skipping display enumeration for adapter: %d\n", AdapterIndex);
+            continue;
+        }
+
+        hDisplayOutput = (ctl_display_output_handle_t *)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+        Result = ctlEnumerateDisplayOutputs(hDevices[AdapterIndex], &DisplayCount, hDisplayOutput);
+        LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        for (uint8_t DisplayIndex = 0; DisplayIndex < DisplayCount; DisplayIndex++)
+        {
+            ctl_display_properties_t stDisplayProperties = {};
+            stDisplayProperties.Size                     = sizeof(ctl_display_properties_t);
+
+            if (NULL == hDisplayOutput[DisplayIndex])
+            {
+                printf("hDisplayOutput[%d] is NULL.\n", DisplayIndex);
+                Result = CTL_RESULT_ERROR_INVALID_NULL_HANDLE;
+                EXIT_ON_ERROR(Result);
+            }
+
+            Result = ctlGetDisplayProperties(hDisplayOutput[DisplayIndex], &stDisplayProperties);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetDisplayProperties");
+
+            ctl_adapter_display_encoder_properties_t stDisplayEncoderProperties = {};
+            stDisplayEncoderProperties.Size                                     = sizeof(ctl_adapter_display_encoder_properties_t);
+
+            Result = ctlGetAdaperDisplayEncoderProperties(hDisplayOutput[DisplayIndex], &stDisplayEncoderProperties);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetAdaperDisplayEncoderProperties");
+
+            IsDisplayActive   = stDisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ACTIVE;
+            IsDisplayAttached = stDisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ATTACHED;
+
+            memset(&VblankTsArgs, 0, sizeof(ctl_vblank_ts_args_t));
+
+            // Filter active display outputs
+            if (IsDisplayActive && IsDisplayAttached)
+            {
+                // get genlock status (vblank time stamp)
+                Result = ctlGetVblankTimestamp(hDisplayOutput[DisplayIndex], &VblankTsArgs);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlGetVblankTimestamp");
+            }
+
+            for (uint8_t i = 0; i < VblankTsArgs.NumOfTargets; i++)
+            {
+                printf("Target ID: %d Child[%d] vblank timestamp: %I64d\n", stDisplayProperties.Os_display_encoder_handle.WindowsDisplayEncoderID, i, VblankTsArgs.VblankTS[i]);
+            }
+        }
+
+        // Free dynamically allocated memories
+        CTL_FREE_MEM(hDisplayOutput);
+    }
+
+Exit:
+    CTL_FREE_MEM(hDisplayOutput);
+
+    return Result;
+}
+
+/***************************************************************
  * @brief TestDisplayGenlock
  * Test Display Genlock
  * @param hDevices, AdapterCount, GenlockSampleArgs
@@ -633,7 +736,8 @@ ctl_result_t TestDisplayGenlock(ctl_device_adapter_handle_t *hDevices, uint32_t 
                     Result = TestGenlockGetTopology(hDevices, &pGenlockArgs, AdapterCount);
                     LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockGetTopology");
 
-                    hSecondaryAdapters    = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount - 1);
+                    hSecondaryAdapters = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount - 1);
+                    EXIT_ON_MEM_ALLOC_FAILURE(hSecondaryAdapters, "hSecondaryAdapters");
                     SecondaryAdapterCount = 0;
 
                     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
@@ -693,16 +797,21 @@ Exit:
     // Free dynamic memories
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
-        if (CTL_GENLOCK_OPERATION_GET_TIMING_DETAILS == pGenlockArgs[AdapterIndex].Operation)
+        if (NULL != pGenlockArgs)
         {
-            for (uint8_t ModeListIndex = 0; ModeListIndex < pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays; ModeListIndex++)
+
+            if (CTL_GENLOCK_OPERATION_GET_TIMING_DETAILS == pGenlockArgs[AdapterIndex].Operation)
             {
-                CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList[ModeListIndex].pTargetModes);
+                for (uint8_t ModeListIndex = 0; ModeListIndex < pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays; ModeListIndex++)
+                {
+                    CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList[ModeListIndex].pTargetModes);
+                }
             }
+            CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo);
+            CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList);
         }
-        CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo);
-        CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList);
     }
+
     CTL_FREE_MEM(pGenlockArgs);
 
     return Result;
@@ -746,6 +855,14 @@ int main(int argc, char *pArgv[])
 
     Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+
+    if (argc == 2 && (strcmp(pArgv[1], "vblankts") == 0))
+    {
+        Result = GetVblankTimestamp(hDevices, AdapterCount);
+        if (CTL_RESULT_SUCCESS == Result)
+            goto Exit;
+        LOG_AND_EXIT_ON_ERROR(Result, "GetVblankTimestamp");
+    }
 
     Result = TestDisplayGenlock(hDevices, AdapterCount, GenlockSampleArgs);
     LOG_AND_EXIT_ON_ERROR(Result, "TestDisplayGenlock");

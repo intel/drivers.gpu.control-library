@@ -36,6 +36,7 @@ ctl_result_t GResult = CTL_RESULT_SUCCESS;
     if (result != CTL_RESULT_SUCCESS) \
         GResult = result;             \
     result = CTL_RESULT_SUCCESS;
+#define INVALID_ADAPTER_BDF 0xffui8
 
 // To call level zero api's directly .Please include the level zero header files .
 #ifdef _ZE_DDI_H
@@ -376,7 +377,7 @@ ctl_result_t CtlGet3DGlobalTest(ctl_device_adapter_handle_t hDevices)
  * @param
  * @return
  ***************************************************************/
-ctl_result_t CtlGetDisplayPropertiesTest(ctl_display_output_handle_t hDisplayOutput, ctl_display_properties_t *pStdisplayproperties)
+ctl_result_t CtlGetDisplayPropertiesTest(ctl_device_adapter_handle_t hAdapter, ctl_display_output_handle_t hDisplayOutput, ctl_display_properties_t *pStdisplayproperties)
 {
     ctl_result_t Result     = CTL_RESULT_SUCCESS;
     bool Isdisplay_active   = false;
@@ -410,6 +411,25 @@ ctl_result_t CtlGetDisplayPropertiesTest(ctl_display_output_handle_t hDisplayOut
 
 /***************************************************************
  * @brief
+ * Get Display properties wrapper
+ * @param
+ * @return
+ ***************************************************************/
+void GetDisplayPropertiesTest(ctl_device_adapter_handle_t *hDevices, ctl_display_output_handle_t *hDisplayOutput, ctl_result_t *pResult, uint32_t Index, uint32_t DisplayCount)
+{
+    ctl_display_properties_t DisplayProperties = {};
+    DisplayProperties.Size                     = sizeof(ctl_display_properties_t);
+    uint32_t DisplayIndex                      = 0;
+
+    for (DisplayIndex = 0; DisplayIndex < DisplayCount; DisplayIndex++)
+    {
+        *pResult = CtlGetDisplayPropertiesTest(hDevices[Index], hDisplayOutput[DisplayIndex], &DisplayProperties);
+        STORE_RESET_ERROR(*pResult);
+    }
+}
+
+/***************************************************************
+ * @brief
  * Encoder properties test
  * @param
  * @return
@@ -435,6 +455,25 @@ ctl_result_t CtlGetDisplayEncoderPropertiesTest(ctl_display_output_handle_t hDis
         }
     }
     return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Get Encoder properties wrapper
+ * @param
+ * @return
+ ***************************************************************/
+void GetDisplayEncoderPropertiesTest(ctl_display_output_handle_t *hDisplayOutput, ctl_result_t *pResult, uint32_t DisplayCount)
+{
+    ctl_adapter_display_encoder_properties_t DisplayEncoderProperties = {};
+    DisplayEncoderProperties.Size                                     = sizeof(ctl_adapter_display_encoder_properties_t);
+    uint32_t DisplayIndex                                             = 0;
+
+    for (DisplayIndex = 0; DisplayIndex < DisplayCount; DisplayIndex++)
+    {
+        *pResult = CtlGetDisplayEncoderPropertiesTest(hDisplayOutput[DisplayIndex], &DisplayEncoderProperties);
+        STORE_RESET_ERROR(*pResult);
+    }
 }
 
 /***************************************************************
@@ -623,6 +662,18 @@ void PrintAdapterProperties(ctl_device_adapter_properties_t StDeviceAdapterPrope
     printf("num_slices: %d\n", StDeviceAdapterProperties.num_slices);
     printf("num_sub_slices_per_slice: %d\n", StDeviceAdapterProperties.num_sub_slices_per_slice);
     printf("Graphics HW type: %s\n", StDeviceAdapterProperties.graphics_adapter_properties & CTL_ADAPTER_PROPERTIES_FLAG_INTEGRATED ? "Integrated" : "External GFX");
+
+    if ((INVALID_ADAPTER_BDF == StDeviceAdapterProperties.adapter_bdf.bus) && (INVALID_ADAPTER_BDF == StDeviceAdapterProperties.adapter_bdf.device) &&
+        (INVALID_ADAPTER_BDF == StDeviceAdapterProperties.adapter_bdf.function))
+    {
+        printf("ctlGetDeviceProperties returned invalid adapter BDF.\n");
+    }
+    else
+    {
+        printf("adapter_bdf.bus:%d\n", StDeviceAdapterProperties.adapter_bdf.bus);
+        printf("adapter_bdf.device:%d\n", StDeviceAdapterProperties.adapter_bdf.device);
+        printf("adapter_bdf.function:%d\n", StDeviceAdapterProperties.adapter_bdf.function);
+    }
 }
 
 /***************************************************************
@@ -850,31 +901,15 @@ int main()
                 }
 
                 // get display encoder properties
-                if (CTL_RESULT_SUCCESS == Result)
+                if (CTL_RESULT_SUCCESS == Result && hDisplayOutput)
                 {
-                    ctl_adapter_display_encoder_properties_t stdisplayencoderproperties = {};
-                    stdisplayencoderproperties.Size                                     = sizeof(ctl_adapter_display_encoder_properties_t);
-
-                    if (nullptr == hDisplayOutput)
-                        return ERROR;
-
-                    for (Display_index = 0; Display_index < Display_count; Display_index++)
-                    {
-                        Result = CtlGetDisplayEncoderPropertiesTest(hDisplayOutput[Display_index], &stdisplayencoderproperties);
-                    }
+                    GetDisplayEncoderPropertiesTest(hDisplayOutput, &Result, Display_count);
                 }
 
                 // get display properties
                 if (CTL_RESULT_SUCCESS == Result && hDisplayOutput)
                 {
-                    ctl_display_properties_t stdisplayproperties = {};
-                    stdisplayproperties.Size                     = sizeof(ctl_display_properties_t);
-
-                    for (Display_index = 0; Display_index < Display_count; Display_index++)
-                    {
-                        Result = CtlGetDisplayPropertiesTest(hDisplayOutput[Display_index], &stdisplayproperties);
-                        STORE_RESET_ERROR(Result);
-                    }
+                    GetDisplayPropertiesTest(hDevices, hDisplayOutput, &Result, Index, Display_count);
                 }
 
 #ifdef TEST_ENABLE_SETCALLS
