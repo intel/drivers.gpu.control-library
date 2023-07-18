@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <string>
+#include <fstream>
 using namespace std;
 
 #define CTL_APIEXPORT // caller of control API DLL shall define this before
@@ -30,6 +31,8 @@ using namespace std;
 static ctl_result_t GResult                        = CTL_RESULT_SUCCESS;
 static ctl_edid_management_optype_t EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_MAX; // init to MAX by default, test will run all scenarios by default
 static uint32_t TgtId                              = 0;
+static bool IsCustomEdid                           = false;
+static uint32_t AdapterNumber                      = 0;
 static uint8_t EdidOverrideBuf[] = { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x10, 0xAC, 0x16, 0xF0, 0x4C, 0x4E, 0x37, 0x30, 0x17, 0x15, 0x01, 0x03, 0x80, 0x34, 0x20, 0x78, 0xEA, 0x1E,
                                      0xC5, 0xAE, 0x4F, 0x34, 0xB1, 0x26, 0x0E, 0x50, 0x54, 0xA5, 0x4B, 0x00, 0x81, 0x80, 0xA9, 0x40, 0xD1, 0x00, 0x71, 0x4F, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
                                      0x01, 0x01, 0x28, 0x3C, 0x80, 0xA0, 0x70, 0xB0, 0x23, 0x40, 0x30, 0x20, 0x36, 0x00, 0x06, 0x44, 0x21, 0x00, 0x00, 0x1A, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x4A,
@@ -40,6 +43,36 @@ static uint8_t EdidOverrideBuf[] = { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0
                                      0x44, 0x21, 0x00, 0x00, 0x1E, 0x01, 0x1D, 0x80, 0x18, 0x71, 0x1C, 0x16, 0x20, 0x58, 0x2C, 0x25, 0x00, 0x06, 0x44, 0x21, 0x00, 0x00, 0x9E, 0x01, 0x1D, 0x00,
                                      0x72, 0x51, 0xD0, 0x1E, 0x20, 0x6E, 0x28, 0x55, 0x00, 0x06, 0x44, 0x21, 0x00, 0x00, 0x1E, 0x8C, 0x0A, 0xD0, 0x8A, 0x20, 0xE0, 0x2D, 0x10, 0x10, 0x3E, 0x96,
                                      0x00, 0x06, 0x44, 0x21, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3E };
+
+/***************************************************************
+ * @brief PrintUsage
+ * Print usage of EDID management sample app
+ * @param pArgv[]
+ * @return void
+ ***************************************************************/
+void PrintUsage(char *pArgv[])
+{
+    printf("EDID Management Sample Test Application.\n");
+    printf("\nUsage: %s [Operation] <-a Adapter#> <-t Target_ID> <-e Bin_Filename>\n", pArgv[0]);
+    printf("\nOperation\n");
+    printf("\t'-lock' : Locks Monitor EDID\n");
+    printf("\t'-unlock' : Unlock Previous Operation\n");
+    printf("\t'-over' : Override EDID\n");
+    printf("\t'-rem' : Remove EDID\n");
+    printf("\t'-read' : Read Current Active EDID\n");
+    printf("\t'-help' : Display usage\n");
+    printf("-a [Adapter #] : Optional Arg\n");
+    printf("\tSpecify adapter number [min:0, max:4]\n");
+    printf("\t0 (default) - applies to all adapters\n");
+    printf("\t1 - applies to the first enumerated adapter\n");
+    printf("\t2 - applies to the second enumerated adapter\n");
+    printf("\t3 - applies to the third enumerated adapter\n");
+    printf("\t4 - applies to the fourth enumerated adapter\n");
+    printf("-t [Target ID] : Optional Arg\n");
+    printf("\tSpecify Target ID in Hex. e.g '1040'\n");
+    printf("-e [path\\to\\EDID binary] : Optional Arg\n");
+    printf("\tSpecify EDID binary\n");
+}
 
 /**
  * \brief Wrapper to call ATL API.
@@ -56,6 +89,7 @@ ctl_result_t EdidMgmtApi(ctl_display_output_handle_t hDisplayOutput, const ctl_e
 {
     ctl_result_t Result;
     ctl_edid_management_args_t EdidMgmtArgs{ 0 };
+
     EdidMgmtArgs.Size     = sizeof(EdidMgmtArgs);
     EdidMgmtArgs.OpType   = OpType;
     EdidMgmtArgs.EdidType = EdidType;
@@ -86,7 +120,7 @@ ctl_result_t EdidMgmtApi(ctl_display_output_handle_t hDisplayOutput, const ctl_e
             // print EDID
             for (uint32_t j = 0; j < EdidMgmtArgs.EdidSize; j++)
             {
-                printf("0x%X ", pEdidBuf[j]);
+                printf("0x%02X ", pEdidBuf[j]);
             }
             printf("\n");
         }
@@ -122,13 +156,73 @@ ctl_result_t TestEDIDManagement(ctl_display_output_handle_t hDisplayOutput, ctl_
     uint32_t EdidSize      = 0;
     uint8_t *pEdidBuf      = nullptr;
     bool IsDisplayAttached = (0 != (DisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ATTACHED));
+
     printf("Info: Start EDID Management Tests for TargetID: %x, Type %d, Config 0x%x, DisplayMuxType %d, PConOutType %d.\n", DisplayProperties.Os_display_encoder_handle.WindowsDisplayEncoderID,
            DisplayProperties.Type, DisplayProperties.DisplayConfigFlags, DisplayProperties.AttachedDisplayMuxType, DisplayProperties.ProtocolConverterOutput);
-    if (IsDisplayAttached)
+    if (TgtId > 0) // individual display control
+    {
+        // Below operations possible on detached target
+        switch (EdidMgmtOpType)
+        {
+            case CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID:
+                // For Sample and quick testing purpose, lock edid (supplied) for detached display when commandline arg is passed for specific target id.
+                if (true == IsDisplayAttached)
+                {
+                    Result = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID, CTL_EDID_TYPE_MONITOR);
+                }
+                else
+                {
+                    EdidSize = sizeof(EdidOverrideBuf);
+                    Result   = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID, CTL_EDID_TYPE_OVERRIDE, &EdidSize, EdidOverrideBuf);
+                }
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:LOCK supplied EDID");
+                printf("Info: Passed Test Lock supplied EDID.\n");
+                break;
+            case CTL_EDID_MANAGEMENT_OPTYPE_UNLOCK_EDID:
+                Result = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_UNLOCK_EDID);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:UNLOCK EDID");
+                printf("Info: Passed Test Unlock EDID.\n");
+                break;
+            case CTL_EDID_MANAGEMENT_OPTYPE_OVERRIDE_EDID:
+                EdidSize = sizeof(EdidOverrideBuf);
+                Result   = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_OVERRIDE_EDID, CTL_EDID_TYPE_OVERRIDE, &EdidSize, EdidOverrideBuf);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:override EDID");
+                printf("Info: Passed Test override EDID.\n");
+                break;
+            case CTL_EDID_MANAGEMENT_OPTYPE_UNDO_OVERRIDE_EDID:
+                Result = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_UNDO_OVERRIDE_EDID);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:remove EDID");
+                printf("Info: Passed Test remove overridden EDID.\n");
+                break;
+            case CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID:
+                // Pass 1: read EDID size
+                EdidSize = 0;
+                Result   = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID, CTL_EDID_TYPE_CURRENT, &EdidSize);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:READ EDID 1");
+                // Pass 2: read block
+                pEdidBuf = (uint8_t *)malloc(EdidSize);
+                EXIT_ON_MEM_ALLOC_FAILURE(pEdidBuf, "pEdidBuf");
+                Result = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID, CTL_EDID_TYPE_CURRENT, &EdidSize, pEdidBuf);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:READ EDID 2");
+                printf("\nInfo: Passed Test read EDID.\n");
+                break;
+            default:
+                break;
+        }
+    }
+    else if (IsDisplayAttached) // attached displays
     {
         if (CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID == EdidMgmtOpType || CTL_EDID_MANAGEMENT_OPTYPE_MAX == EdidMgmtOpType)
         {
-            Result = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID, CTL_EDID_TYPE_MONITOR);
+            if (true == IsCustomEdid)
+            {
+                EdidSize = sizeof(EdidOverrideBuf);
+                Result   = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID, CTL_EDID_TYPE_OVERRIDE, &EdidSize, EdidOverrideBuf);
+            }
+            else
+            {
+                Result = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID, CTL_EDID_TYPE_MONITOR);
+            }
             LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:LOCK Monitor EDID");
             printf("Info: Passed Test Lock Monitor EDID.\n");
         }
@@ -198,45 +292,6 @@ ctl_result_t TestEDIDManagement(ctl_display_output_handle_t hDisplayOutput, ctl_
             printf("Info: Passed Test Unlock EDID.\n");
         }
     }
-    else if (TgtId > 0) // detached display
-    {
-        // Below operations possible on detached target
-        switch (EdidMgmtOpType)
-        {
-            case CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID:
-                // For Sample and quick testing purpose, lock edid (supplied) for detached display when commandline arg is passed for specific target id.
-                EdidSize = sizeof(EdidOverrideBuf);
-                Result   = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID, CTL_EDID_TYPE_OVERRIDE, &EdidSize, EdidOverrideBuf);
-                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:LOCK supplied EDID");
-                printf("Info: Passed Test Lock supplied EDID.\n");
-                break;
-            case CTL_EDID_MANAGEMENT_OPTYPE_OVERRIDE_EDID:
-                EdidSize = sizeof(EdidOverrideBuf);
-                Result   = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_OVERRIDE_EDID, CTL_EDID_TYPE_OVERRIDE, &EdidSize, EdidOverrideBuf);
-                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:override EDID");
-                printf("Info: Passed Test override EDID.\n");
-                break;
-            case CTL_EDID_MANAGEMENT_OPTYPE_UNDO_OVERRIDE_EDID:
-                Result = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_UNDO_OVERRIDE_EDID);
-                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:remove EDID");
-                printf("Info: Passed Test remove overridden EDID.\n");
-                break;
-            case CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID:
-                // Pass 1: read EDID size
-                EdidSize = 0;
-                Result   = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID, CTL_EDID_TYPE_CURRENT, &EdidSize);
-                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:READ EDID 1");
-                // Pass 2: read block
-                pEdidBuf = (uint8_t *)malloc(EdidSize);
-                EXIT_ON_MEM_ALLOC_FAILURE(pEdidBuf, "pEdidBuf");
-                Result = EdidMgmtApi(hDisplayOutput, CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID, CTL_EDID_TYPE_CURRENT, &EdidSize, pEdidBuf);
-                LOG_AND_EXIT_ON_ERROR(Result, "ctlEdidManagement:READ EDID 2");
-                printf("\nInfo: Passed Test read EDID.\n");
-                break;
-            default:
-                break;
-        }
-    }
 
 Exit:
     printf("Info: Exit EDID Management Tests for TargetID: %x.\n\n", DisplayProperties.Os_display_encoder_handle.WindowsDisplayEncoderID);
@@ -255,6 +310,7 @@ Exit:
 ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput, uint32_t DisplayCount)
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
+
     // iterating all displays for demo purpose.
     for (uint32_t DisplayIndex = 0; DisplayIndex < DisplayCount; DisplayIndex++)
     {
@@ -289,8 +345,14 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
     ctl_display_output_handle_t *hDisplayOutput = NULL;
     ctl_result_t Result                         = CTL_RESULT_SUCCESS;
     uint32_t DisplayCount                       = 0;
+
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
+        if ((0 != AdapterNumber) && ((AdapterIndex + 1) != AdapterNumber))
+        {
+            continue;
+        }
+
         // enumerate all the possible target display's for the adapters
         // first step is to get the count
         DisplayCount = 0;
@@ -340,53 +402,43 @@ Exit:
 }
 
 /***************************************************************
- * @brief Main Function which calls the Sample I2CAuxAccess API
+ * @brief Find option and get option argument from command arguments
+ * @param Argc
+ * @param pArgv
+ * @param Option
+ * @param OptionArg
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t FindOptionArg(int32_t Argc, char *pArgv[], const string &Option, string &OptionArg)
+{
+    for (int32_t i = 0; i < Argc; ++i)
+    {
+        string Opt = pArgv[i];
+        if (0 == Opt.find(Option))
+        {
+            if ((i + 1) < Argc)
+                OptionArg = pArgv[i + 1];
+
+            return CTL_RESULT_SUCCESS;
+        }
+    }
+
+    return CTL_RESULT_ERROR_INVALID_ARGUMENT;
+}
+
+/***************************************************************
+ * @brief Main Function which calls the Sample EDID management API
  * @param Argc
  * @param pArgv
  * @return int
  ***************************************************************/
 int main(int32_t Argc, char *pArgv[])
 {
-    ctl_result_t Result                   = CTL_RESULT_SUCCESS;
-    ctl_device_adapter_handle_t *hDevices = NULL;
-    // Get a handle to the DLL module.
-    uint32_t AdapterCount = 0;
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-    // parse test args
-    if (2 <= Argc)
-    {
-        if (strstr(pArgv[1], "-lock") != NULL)
-        {
-            EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID;
-        }
-        else if (strstr(pArgv[1], "-unlock") != NULL)
-        {
-            EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_UNLOCK_EDID;
-        }
-        else if (strstr(pArgv[1], "-over") != NULL)
-        {
-            EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_OVERRIDE_EDID;
-        }
-        else if (strstr(pArgv[1], "-rem") != NULL)
-        {
-            EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_UNDO_OVERRIDE_EDID;
-        }
-        else if (strstr(pArgv[1], "-read") != NULL)
-        {
-            EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID;
-        }
-
-        // get tgt id
-        if (3 == Argc)
-        {
-            string TgtIdStr = pArgv[2];
-            TgtId           = stoul(TgtIdStr, 0, 16);
-            printf("Test or Tgt ID %x\n", TgtId);
-        }
-    }
-
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
     ctl_init_args_t CtlInitArgs;
     ctl_api_handle_t hAPIHandle;
+    ctl_device_adapter_handle_t *hDevices = NULL;
+    string OptionArg;
 
     ZeroMemory(&CtlInitArgs, sizeof(ctl_init_args_t));
 
@@ -397,6 +449,106 @@ int main(int32_t Argc, char *pArgv[])
 
     Result = ctlInit(&CtlInitArgs, &hAPIHandle);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+
+    // Get a handle to the DLL module.
+    uint32_t AdapterCount = 0;
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    // parse test args
+    // Operation option
+    if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-lock", OptionArg))
+    {
+        EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_LOCK_EDID;
+    }
+    else if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-unlock", OptionArg))
+    {
+        EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_UNLOCK_EDID;
+    }
+    else if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-over", OptionArg))
+    {
+        EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_OVERRIDE_EDID;
+    }
+    else if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-rem", OptionArg))
+    {
+        EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_UNDO_OVERRIDE_EDID;
+    }
+    else if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-read", OptionArg))
+    {
+        EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID;
+    }
+    else if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-help", OptionArg))
+    {
+        PrintUsage(pArgv);
+        Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
+        EXIT_ON_ERROR(Result);
+    }
+
+    // Adapter number option
+    if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-a", OptionArg))
+    {
+        if ("" != OptionArg)
+        {
+            for (uint32_t Index = 0; Index < OptionArg.length(); Index++)
+            {
+                if (!isdigit(OptionArg[Index]))
+                {
+                    printf("Invalid Adapter Number.\n");
+                    Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
+                    EXIT_ON_ERROR(Result);
+                }
+            }
+            AdapterNumber = stoul(OptionArg, 0, 16);
+            printf("Adapter Number: %d\n", AdapterNumber);
+        }
+    }
+    // Target ID option
+    if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-t", OptionArg))
+    {
+        if ("" != OptionArg)
+        {
+            for (uint32_t Index = 0; Index < OptionArg.length(); Index++)
+            {
+                if (!isxdigit(OptionArg[Index]))
+                {
+                    printf("Invalid Target ID.\n");
+                    Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
+                    EXIT_ON_ERROR(Result);
+                }
+            }
+            TgtId = stoul(OptionArg, 0, 16);
+            printf("Test or Target ID: 0x%X\n", TgtId);
+        }
+    }
+    // EDID binary option
+    if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-e", OptionArg))
+    {
+        if ("" != OptionArg)
+        {
+            ifstream EdidFile;
+            streampos FileSize;
+
+            EdidFile.open(OptionArg, ios::in | ios::binary | ios::ate);
+
+            if (false == EdidFile.is_open())
+            {
+                printf("Cannot open a EDID file.\n");
+                Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
+                EXIT_ON_ERROR(Result);
+            }
+
+            FileSize = EdidFile.tellg();
+            ZeroMemory(&EdidOverrideBuf, sizeof(EdidOverrideBuf));
+            EdidFile.seekg(0, ios::beg);
+            EdidFile.read((char *)&EdidOverrideBuf, FileSize);
+            EdidFile.close();
+            IsCustomEdid = true;
+        }
+        else
+        {
+            printf("Fail to find the EDID binary file.\n");
+            Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
+            EXIT_ON_ERROR(Result);
+        }
+    }
 
     // Initialization successful
     // Get the list of Intel Adapters
@@ -418,7 +570,6 @@ int main(int32_t Argc, char *pArgv[])
     }
 
 Exit:
-
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDevices);
     printf("Overrall test result is 0x%X\n", GResult);

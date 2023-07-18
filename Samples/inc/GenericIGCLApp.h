@@ -115,6 +115,8 @@ inline char *Get3DFeatureName(ctl_3d_feature_t FeatureType)
             return "Emulated typed 64 bit atomics";
         case CTL_3D_FEATURE_VRR_WINDOWED_BLT:
             return "VRR windowed blt";
+        case CTL_3D_FEATURE_GLOBAL_OR_PER_APP:
+            return "global or per app settings";
         default:
             return "No Name";
     }

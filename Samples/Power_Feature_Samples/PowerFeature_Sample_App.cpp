@@ -365,6 +365,127 @@ Exit:
 }
 
 /***************************************************************
+ * @brief
+ * Power feature Test for APD
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestApdPowerFeature(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                                    = CTL_RESULT_SUCCESS;
+    ctl_power_optimization_settings_t NewPowerSettings     = { 0 };
+    ctl_power_optimization_settings_t AppliedPowerSettings = { 0 };
+    ctl_power_optimization_caps_t PowerCaps                = { 0 };
+
+    PowerCaps.Size                                = sizeof(ctl_power_optimization_caps_t);
+    AppliedPowerSettings.Size                     = sizeof(ctl_power_optimization_settings_t);
+    AppliedPowerSettings.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_DPST;
+    AppliedPowerSettings.PowerSource              = CTL_POWER_SOURCE_DC;
+
+    Result = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerCaps);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (APD)");
+
+    Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (APD)");
+
+    if ((CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST)) ||
+        (CTL_POWER_OPTIMIZATION_DPST_FLAG_APD != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_APD)))
+    {
+        printf("APD is not supported\n");
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
+
+    printf("APD MinLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
+    printf("APD MaxLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
+
+    uint8_t Levels[2] = { AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel, AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel };
+
+    NewPowerSettings.Size                                         = sizeof(ctl_power_optimization_settings_t);
+    NewPowerSettings.PowerOptimizationFeature                     = CTL_POWER_OPTIMIZATION_FLAG_DPST;
+    NewPowerSettings.Enable                                       = TRUE;
+    NewPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_APD;
+    NewPowerSettings.PowerSource                                  = CTL_POWER_SOURCE_DC;
+
+    for (uint8_t Count = 0; Count < 2; Count++)
+    {
+        // Set PowerFeature
+        NewPowerSettings.FeatureSpecificData.DPSTInfo.Level = Levels[Count];
+
+        Result = ctlSetPowerOptimizationSetting(hDisplayOutput, &NewPowerSettings);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlSetPowerOptimizationSetting (APD)");
+
+        Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (APD)");
+
+        if (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level != NewPowerSettings.FeatureSpecificData.DPSTInfo.Level)
+        {
+            printf("Current and Applied levels mismatched: %d, %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
+        }
+    }
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Power feature Test for PIXOPTIX
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestPixOptixPowerFeature(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                                    = CTL_RESULT_SUCCESS;
+    ctl_power_optimization_settings_t NewPowerSettings     = { 0 };
+    ctl_power_optimization_settings_t AppliedPowerSettings = { 0 };
+    ctl_power_optimization_caps_t PowerCaps                = { 0 };
+
+    PowerCaps.Size                                = sizeof(ctl_power_optimization_caps_t);
+    AppliedPowerSettings.Size                     = sizeof(ctl_power_optimization_settings_t);
+    AppliedPowerSettings.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_DPST;
+    AppliedPowerSettings.PowerSource              = CTL_POWER_SOURCE_DC;
+
+    Result = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerCaps);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (PIXOPTIX)");
+
+    Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (PIXOPTIX)");
+
+    if ((CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST)) ||
+        (CTL_POWER_OPTIMIZATION_DPST_FLAG_PIXOPTIX != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_PIXOPTIX)))
+    {
+        printf("PIXOPTIX is not supported\n");
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
+
+    NewPowerSettings.Size                                         = sizeof(ctl_power_optimization_settings_t);
+    NewPowerSettings.PowerOptimizationFeature                     = CTL_POWER_OPTIMIZATION_FLAG_DPST;
+    NewPowerSettings.Enable                                       = TRUE;
+    NewPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_PIXOPTIX;
+    NewPowerSettings.PowerSource                                  = CTL_POWER_SOURCE_DC;
+
+    Result = ctlSetPowerOptimizationSetting(hDisplayOutput, &NewPowerSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlSetPowerOptimizationSetting (PIXOPTIX)");
+
+    Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (PIXOPTIX)");
+
+    if (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_PIXOPTIX)
+    {
+        printf("PIXOPTIX is enabled");
+    }
+    else
+    {
+        printf("PIXOPTIX is not enabled");
+    }
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
  * @brief EnumerateDisplayHandles
  * Only for demonstration purpose, API is called for each of the display output handle in below snippet.
  * User has to filter through the available display output handle and has to call the API with particular display output handle.
@@ -416,6 +537,14 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
         STORE_AND_RESET_ERROR(Result);
 
         Result = TestBrightnessControl(hDisplayOutput[DisplayIndex]);
+
+        STORE_AND_RESET_ERROR(Result);
+
+        Result = TestApdPowerFeature(hDisplayOutput[DisplayIndex]);
+
+        STORE_AND_RESET_ERROR(Result);
+
+        Result = TestPixOptixPowerFeature(hDisplayOutput[DisplayIndex]);
 
         STORE_AND_RESET_ERROR(Result);
     }

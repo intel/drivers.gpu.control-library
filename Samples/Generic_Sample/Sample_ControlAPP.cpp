@@ -793,7 +793,7 @@ int main()
     ctl_init_args_t CtlInitArgs;
     ctl_api_handle_t hAPIHandle;
     CtlInitArgs.AppVersion = CTL_MAKE_VERSION(CTL_IMPL_MAJOR_VERSION, CTL_IMPL_MINOR_VERSION);
-    CtlInitArgs.flags      = CTL_INIT_FLAG_USE_LEVEL_ZERO;
+    CtlInitArgs.flags      = 0; // CTL_INIT_FLAG_USE_LEVEL_ZERO;
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
     // Init App UID appropriately

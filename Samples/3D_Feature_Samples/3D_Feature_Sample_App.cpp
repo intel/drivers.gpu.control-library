@@ -729,6 +729,85 @@ ctl_result_t CtlCMAAGamingFeatureTest(ctl_device_adapter_handle_t hDevices)
     return Result;
 }
 
+/***************************************************************
+ * @brief
+ * Method to test Endurance Gaming
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlGlobalOrPerAppTest(ctl_device_adapter_handle_t hDevices)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+    char *pAppName      = "GTA5.exe";
+
+    printf("======================Global Or Per App test======================\n");
+
+    ctl_3d_feature_getset_t Get3DProperty = { 0 };
+    ctl_3d_feature_getset_t Set3DProperty = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    // Set global or per app only
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_GLOBAL_OR_PER_APP;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.CustomValueSize           = 0;
+    Set3DProperty.pCustomValue              = NULL;
+    Set3DProperty.ApplicationName           = pAppName;
+    Set3DProperty.ApplicationNameLength     = (int8_t)strlen(pAppName);
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_GLOBAL_OR_PER_APP_TYPES_GLOBAL;
+    Set3DProperty.Version                   = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        printf(" Set3DProperty.ApplicationName = %s\n", Set3DProperty.ApplicationName);
+        printf(" Set3DProperty.Value.EnumType.EnableType = %d\n", Set3DProperty.Value.EnumType.EnableType);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature(Set Global Over Per App Setting (Set call)) returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success(Set Global Over Per App Setting (Set call))\n");
+        }
+    }
+
+    // Get global or per app only
+    Get3DProperty.FeatureType           = CTL_3D_FEATURE_GLOBAL_OR_PER_APP;
+    Get3DProperty.bSet                  = FALSE;
+    Get3DProperty.CustomValueSize       = 0;
+    Get3DProperty.pCustomValue          = NULL;
+    Get3DProperty.ApplicationName       = pAppName;
+    Get3DProperty.ApplicationNameLength = (int8_t)strlen(pAppName);
+    Get3DProperty.ValueType             = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.Version               = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature(Set Global Over Per App Setting (Get call)) returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success(Set Global Over Per App Setting (Get call))\n");
+            printf(" Get3DProperty.ApplicationName = %s\n", Get3DProperty.ApplicationName);
+            printf(" Get3DProperty.Value.EnumType.EnableTypee = %d\n", Get3DProperty.Value.EnumType.EnableType);
+        }
+    }
+
+    return Result;
+}
+
 int main()
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
@@ -811,6 +890,13 @@ int main()
                 if (CTL_RESULT_SUCCESS != Result)
                 {
                     printf("CtlCMAAGamingFeatureTest failure code: 0x%X\n", Result);
+                }
+                STORE_RESET_ERROR(Result);
+
+                CtlGlobalOrPerAppTest(hDevices[Index]);
+                if (CTL_RESULT_SUCCESS != Result)
+                {
+                    printf("CtlGlobalOrPerAppTest failure code: 0x%X\n", Result);
                 }
                 STORE_RESET_ERROR(Result);
 
