@@ -38,12 +38,15 @@ ctl_result_t TestI2CAUXAccess(ctl_display_output_handle_t hDisplayOutput)
     ctl_result_t Result           = CTL_RESULT_SUCCESS;
     ctl_aux_access_args_t AUXArgs = { 0 }; // AUX Access WRITE
     ctl_i2c_access_args_t I2CArgs = { 0 }; // I2C Access
-    AUXArgs.Size                  = sizeof(ctl_aux_access_args_t);
-    AUXArgs.OpType                = CTL_OPERATION_TYPE_WRITE;
-    AUXArgs.Address               = 0x103; // DPCD offset for TRAINING_LANE0_SET
-    AUXArgs.DataSize              = 1;
-    AUXArgs.Flags                 = CTL_AUX_FLAG_NATIVE_AUX; // CTL_AUX_FLAG_NATIVE_AUX for DPCD Access & CTL_AUX_FLAG_I2C_AUX for EDID access for DP/eDP displays.
-    AUXArgs.Data[0]               = 0x01;
+
+    printf("Aux Read Test.\n");
+
+    AUXArgs.Size     = sizeof(ctl_aux_access_args_t);
+    AUXArgs.OpType   = CTL_OPERATION_TYPE_WRITE;
+    AUXArgs.Address  = 0x103; // DPCD offset for TRAINING_LANE0_SET
+    AUXArgs.DataSize = 1;
+    AUXArgs.Flags    = CTL_AUX_FLAG_NATIVE_AUX; // CTL_AUX_FLAG_NATIVE_AUX for DPCD Access & CTL_AUX_FLAG_I2C_AUX for EDID access for DP/eDP displays.
+    AUXArgs.Data[0]  = 0x01;
 
     Result = ctlAUXAccess(hDisplayOutput, &AUXArgs);
 
@@ -78,6 +81,8 @@ ctl_result_t TestI2CAUXAccess(ctl_display_output_handle_t hDisplayOutput)
         }
     }
 
+    printf("I2C Write Test.\n");
+
     // I2C WRITE : 82 01 10 AC at adddress 6E and subaddress 51
     // If we write these BYTEs ( 82 01 10  AC) to adddress 6E and
     // subaddress 51, it should update the current brightness to the 10th
@@ -110,7 +115,7 @@ ctl_result_t TestI2CAUXAccess(ctl_display_output_handle_t hDisplayOutput)
         printf("ctlI2CAccess for I2C write returned failure code: 0x%X\n", Result);
         STORE_AND_RESET_ERROR(Result);
     }
-
+    printf("I2C Read Test.\n");
     // I2C READ : 82 01 10 AC at adddress 6E and subaddress 51
     I2CArgs.Size     = sizeof(ctl_i2c_access_args_t);
     I2CArgs.OpType   = CTL_OPERATION_TYPE_READ;
@@ -134,6 +139,79 @@ Exit:
 }
 
 /***************************************************************
+ * @brief Tests I2C Access on enumerated Pin Pairs.
+ * Reference code to use ctlI2CAccessOnPinPair API
+ * @param hI2cPinPair
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestI2CAUXAccessOnPinPair(ctl_i2c_pin_pair_handle_t hI2cPinPair)
+{
+    ctl_result_t Result                   = CTL_RESULT_SUCCESS;
+    ctl_i2c_access_pinpair_args_t I2CArgs = { 0 }; // I2C Access
+
+    // I2C WRITE : 82 01 10 AC at adddress 6E and subaddress 51
+    // If we write these BYTEs ( 82 01 10  AC) to adddress 6E and
+    // subaddress 51, it should update the current brightness to the 10th
+    // byte at adddress 6E and subaddress 51. One can verify by changing
+    // panel brightness from panel buttons and the writing to adddress 6E
+    // and subaddress 51 ( 82 01 10  AC), and then reading 10th byte at
+    // adddress 6E and subaddress 51. For Example : The following 11 byte
+    // values should be shown by the I2C Read post I2C write. Values are
+    // 6E 88 02 00 10 00 00 64 00 19 D9.  (If HDMI panel brightness is set
+    // to 25%) 10th byte value is current  brightness value of the
+    // panel.To confirm that value is correct or not, convert the Hex
+    // value to Decimal.
+
+    I2CArgs.Size     = sizeof(I2CArgs);
+    I2CArgs.OpType   = CTL_OPERATION_TYPE_WRITE;
+    I2CArgs.Address  = 0x6E; // Address used for demonstration purpose
+    I2CArgs.Offset   = 0x51; // Offset used for demonstration purpose
+    I2CArgs.DataSize = 4;
+    I2CArgs.Data[0]  = 0x82;
+    I2CArgs.Data[1]  = 0x01;
+    I2CArgs.Data[2]  = 0x10;
+    I2CArgs.Data[3]  = 0xAC;
+
+    printf("I2C Write Test: Address %#x, Offset %#x, size %d.\n", I2CArgs.Address, I2CArgs.Offset, I2CArgs.DataSize);
+    Result = ctlI2CAccessOnPinPair(hI2cPinPair, &I2CArgs);
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        printf("I2C write returned failure code: 0x%X\n", Result);
+        STORE_AND_RESET_ERROR(Result);
+    }
+    else
+    {
+        printf("I2C Write Test Success.\n");
+    }
+
+    ZeroMemory(&I2CArgs, sizeof(I2CArgs));
+    // I2C READ : 82 01 10 AC at adddress 6E and subaddress 51
+    I2CArgs.Size     = sizeof(I2CArgs);
+    I2CArgs.OpType   = CTL_OPERATION_TYPE_READ;
+    I2CArgs.Address  = 0x6E; // Address used for demonstration purpose
+    I2CArgs.Offset   = 0x51; // Offset used for demonstration purpose
+    I2CArgs.DataSize = 11;
+    // Optional Flag examples:
+    // I2CArgs.Flags  = CTL_I2C_FLAG_2BYTE_INDEX;
+    // I2CArgs.Flags |= CTL_I2C_FLAG_SPEED_BIT_BASH;
+    // I2CArgs.Flags = CTL_I2C_FLAG_ATOMICI2C;  // Need to set this to do Atomic I2C call
+
+    printf("I2C Read Test: Address %#X, Offset %#X, size %d, Flags %#X.\n", I2CArgs.Address, I2CArgs.Offset, I2CArgs.DataSize, I2CArgs.Flags);
+    Result = ctlI2CAccessOnPinPair(hI2cPinPair, &I2CArgs);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlI2CAccessOnPinPair for I2C read");
+
+    //  Print the data
+    for (uint32_t j = 0; j < I2CArgs.DataSize; j++)
+    {
+        printf("Read data[%d] = : 0x%X\n", j, I2CArgs.Data[j]);
+    }
+
+Exit:
+    printf("\n-------------------------\n");
+    return Result;
+}
+
+/***************************************************************
  * @brief EnumerateDisplayHandles
  * Only for demonstration purpose, API is called for each of the display output handle in below snippet.
  * User has to filter through the available display output handle and has to call the API with particular display output handle.
@@ -148,7 +226,7 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
     {
         ctl_display_properties_t DisplayProperties = { 0 };
         DisplayProperties.Size                     = sizeof(ctl_display_properties_t);
-
+        printf("Display Handle: %p\n-------------------------\n", hDisplayOutput[DisplayIndex]);
         Result = ctlGetDisplayProperties(hDisplayOutput[DisplayIndex], &DisplayProperties);
         LOG_AND_EXIT_ON_ERROR(Result, "ctlGetDisplayProperties");
 
@@ -169,6 +247,25 @@ Exit:
 }
 
 /***************************************************************
+ * @brief For demonstration purpose, API is called for each of the I2c Pin Pair handle in below snippet.
+ *
+ * @param hI2cPinPair, PinPairCount
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestI2cAccessOnEmumeratedPinPairs(ctl_i2c_pin_pair_handle_t *hI2cPinPair, uint32_t PinPairCount)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+    for (uint32_t Index = 0; Index < PinPairCount; Index++)
+    {
+        printf("I2CAccessOnPinPair Test for Pin Pair[%d] handle: %p\n-------------------------\n", Index, hI2cPinPair[Index]);
+        Result = TestI2CAUXAccessOnPinPair(hI2cPinPair[Index]);
+        STORE_AND_RESET_ERROR(Result);
+    }
+
+    return Result;
+}
+
+/***************************************************************
  * @brief EnumerateTargetDisplays
  * Enumerates all the possible target display's for the adapters
  * @param hDisplayOutput, AdapterCount, hDevices
@@ -182,6 +279,8 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
 
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
+        printf("Adapter Handle: %p\n===============================\n", hDevices[AdapterIndex]);
+
         // enumerate all the possible target display's for the adapters
         // first step is to get the count
         DisplayCount = 0;
@@ -230,6 +329,68 @@ Exit:
 }
 
 /***************************************************************
+ * @brief EnumerateI2CDevices
+ * Enumerates all the possible I2C PinPairs for the adapters
+ * @param AdapterCount, hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t EnumerateI2CDevices(uint32_t AdapterCount, ctl_device_adapter_handle_t *hDevices)
+{
+    ctl_i2c_pin_pair_handle_t *hI2cPinPair = NULL;
+    ctl_result_t Result                    = CTL_RESULT_SUCCESS;
+    uint32_t PinCount                      = 0;
+
+    for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
+    {
+        printf("\nI2C Access Test For Adapter[%d] handle: %p\n===========================\n", AdapterIndex, hDevices[AdapterIndex]);
+        // enumerate all the possible target display's for the adapters
+        // first step is to get the count
+        PinCount = 0;
+
+        Result = ctlEnumerateI2CPinPairs(hDevices[AdapterIndex], &PinCount, hI2cPinPair);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlEnumerateI2CPinPairs returned failure code: 0x%X\n", Result);
+            STORE_AND_RESET_ERROR(Result);
+            continue;
+        }
+        else if (PinCount <= 0)
+        {
+            printf("Invalid Display Count. skipping pin pair enumration for adapter:%d\n", AdapterIndex);
+            continue;
+        }
+
+        hI2cPinPair = (ctl_i2c_pin_pair_handle_t *)malloc(sizeof(ctl_i2c_pin_pair_handle_t) * PinCount);
+        EXIT_ON_MEM_ALLOC_FAILURE(hI2cPinPair, "hI2cPinPair");
+
+        Result = ctlEnumerateI2CPinPairs(hDevices[AdapterIndex], &PinCount, hI2cPinPair);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlEnumerateI2CPinPairs returned failure code: 0x%X\n", Result);
+            STORE_AND_RESET_ERROR(Result);
+        }
+
+        // Only for demonstration purpose, API is called for each of the display output handle in below snippet.
+        // User has to filter through the available display output handle and has to call the API with particular display output handle.
+        Result = TestI2cAccessOnEmumeratedPinPairs(hI2cPinPair, PinCount);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("TestI2cAccessOnEmumeratedPinPairs returned failure code: 0x%X\n", Result);
+        }
+
+        CTL_FREE_MEM(hI2cPinPair);
+    }
+
+Exit:
+
+    CTL_FREE_MEM(hI2cPinPair);
+    return Result;
+}
+
+/***************************************************************
  * @brief Main Function which calls the Sample I2CAuxAccess API
  * @param
  * @return int
@@ -273,7 +434,14 @@ int main()
         printf("EnumerateTargetDisplays returned failure code: 0x%X\n", Result);
         STORE_AND_RESET_ERROR(Result);
     }
-
+#if 0 // Keeping the call disabled as not needed for regular Display use cases. Mainly intended for non-display devices.
+    Result = EnumerateI2CDevices(AdapterCount, hDevices);
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        printf("EnumerateI2CDevices returned failure code: 0x%X\n", Result);
+        STORE_AND_RESET_ERROR(Result);
+    }
+#endif
 Exit:
 
     ctlClose(hAPIHandle);
