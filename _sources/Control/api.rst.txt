@@ -562,6 +562,7 @@ ctl_rect_t
     * :ref:`ctl-3d-tier-profile-flags-t`
     * :ref:`ctl-emulated-typed-64bit-atomics-types-t`
     * :ref:`ctl-3d-vrr-windowed-blt-reserved-t`
+    * :ref:`ctl-3d-global-or-per-app-types-t`
 
  
 * Structures
@@ -751,6 +752,15 @@ ctl_3d_vrr_windowed_blt_reserved_t
 .. doxygenenum:: ctl_3d_vrr_windowed_blt_reserved_t
     :project: ControlApi
 
+
+.. _ctl-3d-global-or-per-app-types-t:
+
+ctl_3d_global_or_per_app_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_global_or_per_app_types_t
+    :project: ControlApi
+
  
 3d Structures
 ------------------------------------------------------------------------------
@@ -886,6 +896,7 @@ Display
     * :ref:`ctlCheckDriverVersion`
     * :ref:`ctlEnumerateDevices`
     * :ref:`ctlEnumerateDisplayOutputs`
+    * :ref:`ctlEnumerateI2CPinPairs`
     * :ref:`ctlGetDeviceProperties`
     * :ref:`ctlGetDisplayProperties`
     * :ref:`ctlGetAdaperDisplayEncoderProperties`
@@ -894,6 +905,7 @@ Display
     * :ref:`ctlGetCurrentSharpness`
     * :ref:`ctlSetCurrentSharpness`
     * :ref:`ctlI2CAccess`
+    * :ref:`ctlI2CAccessOnPinPair`
     * :ref:`ctlAUXAccess`
     * :ref:`ctlGetPowerOptimizationCaps`
     * :ref:`ctlGetPowerOptimizationSetting`
@@ -941,6 +953,7 @@ Display
     * :ref:`ctl-encoder-config-flags-t`
     * :ref:`ctl-sharpness-filter-type-flags-t`
     * :ref:`ctl-i2c-flags-t`
+    * :ref:`ctl-i2c-pinpair-flags-t`
     * :ref:`ctl-aux-flags-t`
     * :ref:`ctl-power-optimization-flags-t`
     * :ref:`ctl-power-optimization-dpst-flags-t`
@@ -980,6 +993,7 @@ Display
     * :ref:`ctl-sharpness-caps-t`
     * :ref:`ctl-sharpness-settings-t`
     * :ref:`ctl-i2c-access-args-t`
+    * :ref:`ctl-i2c-access-pinpair-args-t`
     * :ref:`ctl-aux-access-args-t`
     * :ref:`ctl-power-optimization-caps-t`
     * :ref:`ctl-power-optimization-lrr-t`
@@ -1057,6 +1071,15 @@ ctlEnumerateDisplayOutputs
     :project: ControlApi
 
 
+.. _ctlEnumerateI2CPinPairs:
+
+ctlEnumerateI2CPinPairs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumerateI2CPinPairs
+    :project: ControlApi
+
+
 .. _ctlGetDeviceProperties:
 
 ctlGetDeviceProperties
@@ -1126,6 +1149,15 @@ ctlI2CAccess
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenfunction:: ctlI2CAccess
+    :project: ControlApi
+
+
+.. _ctlI2CAccessOnPinPair:
+
+ctlI2CAccessOnPinPair
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlI2CAccessOnPinPair
     :project: ControlApi
 
 
@@ -1512,6 +1544,15 @@ ctl_i2c_flags_t
     :project: ControlApi
 
 
+.. _ctl-i2c-pinpair-flags-t:
+
+ctl_i2c_pinpair_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_i2c_pinpair_flag_t
+    :project: ControlApi
+
+
 .. _ctl-aux-flags-t:
 
 ctl_aux_flags_t
@@ -1823,6 +1864,16 @@ ctl_i2c_access_args_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_i2c_access_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-i2c-access-pinpair-args-t:
+
+ctl_i2c_access_pinpair_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_i2c_access_pinpair_args_t
     :project: ControlApi
     :members:
     :undoc-members:
