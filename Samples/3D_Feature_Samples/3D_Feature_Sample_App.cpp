@@ -47,8 +47,9 @@ ctl_result_t CtlEnduranceGamingTest(ctl_device_adapter_handle_t hDevices)
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
 
-    printf("======================Endurance Gaming test======================\n");
+    printf("======================Endurance Gaming test -> Per Application settings======================\n");
 
+    char *pAppName                        = "GTA5.exe";
     ctl_3d_feature_getset_t Get3DProperty = { 0 };
     ctl_3d_feature_getset_t Set3DProperty = { 0 };
 
@@ -64,7 +65,88 @@ ctl_result_t CtlEnduranceGamingTest(ctl_device_adapter_handle_t hDevices)
     SetEnduranceGaming.EGMode                 = CTL_3D_ENDURANCE_GAMING_MODE_BALANCED;
     Set3DProperty.pCustomValue                = &SetEnduranceGaming;
     Set3DProperty.ValueType                   = CTL_PROPERTY_VALUE_TYPE_CUSTOM;
+    Set3DProperty.ApplicationName             = pAppName;
+    Set3DProperty.ApplicationNameLength       = (int8_t)strlen(pAppName);
     Set3DProperty.Version                     = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        printf(" Set3DProperty.ApplicationName = %s\n", Set3DProperty.ApplicationName);
+        printf(" SetEnduranceGaming.EGControl = %d\n", SetEnduranceGaming.EGControl);
+        printf(" SetEnduranceGaming.EGMode = %d\n", SetEnduranceGaming.EGMode);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature(Set EnduranceGaming) returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success(Set EnduranceGaming)\n");
+        }
+    }
+
+    // Get Endurance gaming only
+    Get3DProperty.FeatureType           = CTL_3D_FEATURE_ENDURANCE_GAMING;
+    Get3DProperty.bSet                  = FALSE;
+    Get3DProperty.CustomValueSize       = sizeof(ctl_endurance_gaming_t);
+    Get3DProperty.pCustomValue          = (ctl_endurance_gaming_t *)malloc(sizeof(ctl_endurance_gaming_t));
+    Get3DProperty.ValueType             = CTL_PROPERTY_VALUE_TYPE_CUSTOM;
+    Get3DProperty.ApplicationName       = pAppName;
+    Get3DProperty.ApplicationNameLength = (int8_t)strlen(pAppName);
+    Get3DProperty.Version               = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature(Get EnduranceGaming) returned failure code: 0x%X\n", Result);
+
+            if (nullptr != Get3DProperty.pCustomValue)
+            {
+                free(Get3DProperty.pCustomValue);
+                Get3DProperty.pCustomValue = nullptr;
+            }
+
+            return Result;
+        }
+        else
+        {
+            ctl_endurance_gaming_t *pGetEnduranceGaming = (ctl_endurance_gaming_t *)Get3DProperty.pCustomValue;
+            printf("ctlGetSet3DFeature returned success(Get EnduranceGaming)\n");
+
+            printf(" Get3DProperty.ApplicationName = %s\n", Get3DProperty.ApplicationName);
+            printf(" pGetEnduranceGaming->EGControl = %d\n", pGetEnduranceGaming->EGControl);
+            printf(" pGetEnduranceGaming->EGMode = %d\n", pGetEnduranceGaming->EGMode);
+        }
+    }
+
+    if (nullptr != Get3DProperty.pCustomValue)
+    {
+        free(Get3DProperty.pCustomValue);
+        Get3DProperty.pCustomValue = NULL;
+    }
+
+    printf("======================Endurance Gaming test -> Global settings======================\n");
+
+    Get3DProperty      = { 0 };
+    Set3DProperty      = { 0 };
+    SetEnduranceGaming = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    Set3DProperty.FeatureType     = CTL_3D_FEATURE_ENDURANCE_GAMING;
+    Set3DProperty.bSet            = TRUE;
+    Set3DProperty.CustomValueSize = sizeof(ctl_endurance_gaming_t);
+    SetEnduranceGaming.EGControl  = CTL_3D_ENDURANCE_GAMING_CONTROL_AUTO;
+    SetEnduranceGaming.EGMode     = CTL_3D_ENDURANCE_GAMING_MODE_BETTER_PERFORMANCE;
+    Set3DProperty.pCustomValue    = &SetEnduranceGaming;
+    Set3DProperty.ValueType       = CTL_PROPERTY_VALUE_TYPE_CUSTOM;
+    Set3DProperty.Version         = 0;
 
     if (NULL != hDevices)
     {
@@ -109,11 +191,11 @@ ctl_result_t CtlEnduranceGamingTest(ctl_device_adapter_handle_t hDevices)
         }
         else
         {
-            ctl_endurance_gaming_t *pGetEnduranceGaming = (ctl_endurance_gaming_t *)Get3DProperty.pCustomValue;
+            ctl_endurance_gaming_t *pGetEnduranceGamingGlobal = (ctl_endurance_gaming_t *)Get3DProperty.pCustomValue;
             printf("ctlGetSet3DFeature returned success(Get EnduranceGaming)\n");
 
-            printf(" pGetEnduranceGaming->EGControl = %d\n", pGetEnduranceGaming->EGControl);
-            printf(" pGetEnduranceGaming->EGMode = %d\n", pGetEnduranceGaming->EGMode);
+            printf(" pGetEnduranceGamingGlobal->EGControl = %d\n", pGetEnduranceGamingGlobal->EGControl);
+            printf(" pGetEnduranceGamingGlobal->EGMode = %d\n", pGetEnduranceGamingGlobal->EGMode);
         }
     }
 

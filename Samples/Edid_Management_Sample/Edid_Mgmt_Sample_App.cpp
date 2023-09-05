@@ -28,11 +28,21 @@ using namespace std;
 #include "igcl_api.h"
 #include "GenericIGCLApp.h"
 
+#define EDID_BLOCK_SIZE 128
+#define CHECKSUM_OFFSET (EDID_BLOCK_SIZE - 1)
+#define CEA_AUDIO_DATABLOCK 1
+#define CEA_DATABLOCK_HEADER_SIZE 1
+
 static ctl_result_t GResult                        = CTL_RESULT_SUCCESS;
 static ctl_edid_management_optype_t EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_MAX; // init to MAX by default, test will run all scenarios by default
 static uint32_t TgtId                              = 0;
 static bool IsCustomEdid                           = false;
 static uint32_t AdapterNumber                      = 0;
+static uint32_t NumCeaV3ExtensionsFound            = 0;
+static bool WriteBinaryFile                        = false;
+static bool DisableAudioInEdid                     = false;
+static char EdidBinFileName[MAX_PATH]              = { 0 };
+
 static uint8_t EdidOverrideBuf[] = { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x10, 0xAC, 0x16, 0xF0, 0x4C, 0x4E, 0x37, 0x30, 0x17, 0x15, 0x01, 0x03, 0x80, 0x34, 0x20, 0x78, 0xEA, 0x1E,
                                      0xC5, 0xAE, 0x4F, 0x34, 0xB1, 0x26, 0x0E, 0x50, 0x54, 0xA5, 0x4B, 0x00, 0x81, 0x80, 0xA9, 0x40, 0xD1, 0x00, 0x71, 0x4F, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
                                      0x01, 0x01, 0x28, 0x3C, 0x80, 0xA0, 0x70, 0xB0, 0x23, 0x40, 0x30, 0x20, 0x36, 0x00, 0x06, 0x44, 0x21, 0x00, 0x00, 0x1A, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x4A,
@@ -60,6 +70,7 @@ void PrintUsage(char *pArgv[])
     printf("\t'-over' : Override EDID\n");
     printf("\t'-rem' : Remove EDID\n");
     printf("\t'-read' : Read Current Active EDID\n");
+    printf("\t'-noaud' : Disable Display Audio. NOTE: You Must Specify an EDID binary\n");
     printf("\t'-help' : Display usage\n");
     printf("-a [Adapter #] : Optional Arg\n");
     printf("\tSpecify adapter number [min:0, max:4]\n");
@@ -70,8 +81,155 @@ void PrintUsage(char *pArgv[])
     printf("\t4 - applies to the fourth enumerated adapter\n");
     printf("-t [Target ID] : Optional Arg\n");
     printf("\tSpecify Target ID in Hex. e.g '1040'\n");
-    printf("-e [path\\to\\EDID binary] : Optional Arg\n");
+    printf("-e [path\\to\\EDID binary file(read)] : Optional Arg\n");
     printf("\tSpecify EDID binary\n");
+    printf("-we [path\\to\\EDID binary file(write)] : Optional Arg\n");
+    printf("\tSpecify EDID binary\n");
+}
+
+/***************************************************************
+ * @brief WriteEdidToFile
+ * Copy the contents of an EDID buffer to a binary file
+ * @params pEdidBuf, EdidSize
+ * @return bool success = true
+ ***************************************************************/
+bool WriteEdidToFile(uint8_t *const pEdidBuf, uint32_t EdidSize)
+{
+    size_t BytesWritten = 0;
+    FILE *pFile         = NULL;
+
+    pFile = fopen(EdidBinFileName, "wb");
+
+    if (pFile)
+    {
+        BytesWritten = fwrite(pEdidBuf, 1, EdidSize, pFile);
+        fclose(pFile);
+        if (BytesWritten != (1 * EdidSize))
+        {
+            printf("Number of bytes differ when writing Edid binary file.\n");
+            return false;
+        }
+    }
+    else
+    {
+        printf("Failure opening Edid binary file for writing.\n");
+        return false;
+    }
+
+    return true;
+}
+
+/***************************************************************
+ * @brief CalcEdidChecksum
+ * Calculate 8 bit checksum after making any changes to an EDID buffer
+ * @param pBuffer
+ * @return uint8_t checksum
+ ***************************************************************/
+uint8_t CalcEdidChecksum(const uint8_t *pBuffer)
+{
+    uint8_t Chksum = 0;
+
+    for (uint32_t count = (EDID_BLOCK_SIZE - 1); count != 0; count--)
+    {
+        Chksum += *pBuffer++;
+    }
+
+    return (uint8_t)(256 - Chksum);
+}
+
+/***************************************************************
+ * @brief RemoveAudioCapsFromEdid
+ * Remove Display Audio Capabilities from a specified EDID Buffer
+ * @params pEdidBuf, EdidSize
+ * @return uint32_t NumAudioBlocksRemoved
+ ***************************************************************/
+uint32_t RemoveAudioCapsFromEdid(uint8_t *pEdidBuf, uint32_t EdidSize)
+{
+    uint32_t NumEdidBlocks         = (EdidSize / EDID_BLOCK_SIZE);
+    uint32_t NumAudioBlocksRemoved = 0;
+    uint32_t BaseAddress           = 0;
+    uint32_t CheckSumAddress       = 0;
+    uint32_t TimingDescStart       = 0;
+    uint32_t TimingDescStartOffset = 0;
+    uint32_t BlockHeaderStart      = 0;
+    uint32_t NextBlockHeaderStart  = 0;
+    uint32_t TotalBlockLen         = 0;
+    uint32_t BlockTag              = 0;
+    uint32_t BlockLen              = 0;
+    uint32_t CopyAmount            = 0;
+    uint8_t Version                = 0;
+
+    for (uint32_t EdidBlock = 1; EdidBlock < NumEdidBlocks; EdidBlock++)
+    {
+        BaseAddress = (EdidBlock * EDID_BLOCK_SIZE);
+
+        // Check for CEA Extension Block Tag Code - CEA Extensions should be in the first part of each 128 byte block.
+        if (pEdidBuf[BaseAddress] == 0x02)
+        {
+            Version = pEdidBuf[BaseAddress + 1];
+            if (Version != 3)
+            {
+                continue; // Can't handle version... Search in the next large EDID block
+            }
+
+            NumCeaV3ExtensionsFound++;
+
+            // Begin by clearing bit 6 of the CEA861 Extension Block Header to deselect Base Audio
+            pEdidBuf[BaseAddress + 3] &= ~(uint8_t)0x40;
+
+            TimingDescStartOffset = pEdidBuf[BaseAddress + 2];
+            if (TimingDescStartOffset <= 4)
+            {
+                continue;
+            }
+
+            TimingDescStart  = BaseAddress + TimingDescStartOffset;
+            BlockHeaderStart = BaseAddress + 4;
+            CheckSumAddress  = BaseAddress + CHECKSUM_OFFSET;
+
+            do
+            {
+                BlockTag = (pEdidBuf[BlockHeaderStart] & 0xE0) >> 5;
+                BlockLen = (pEdidBuf[BlockHeaderStart] & 0x1F);
+
+                if (BlockTag == 0x07 && BlockLen) // Tag 0x07 means to 'use extended tag'
+                {
+                    // Extended tags are 16 bit... 0x07 - "use extended tag" belongs in leftmost byte,
+                    // then put the actual extended tag from the next byte into the rightmost byte
+                    BlockTag = 0x700 + pEdidBuf[BlockHeaderStart + 1];
+                    BlockLen -= 1; // CEA Spec says that extended tag is included in the data length, so adjust for it
+                }
+
+                TotalBlockLen = (BlockLen + CEA_DATABLOCK_HEADER_SIZE); // TotalBlockLen is data length plus header
+
+                // BlockTag for Audio must be either 0x01, 0x710 = CEA Miscellaneous Audio, 0x711 = Vendor Specific Audio, 0x712 = HDMI Audio Data
+                // or Reserved for audio-related blocks which are 0x713 - 0x71F.
+                if (BlockTag == CEA_AUDIO_DATABLOCK || (BlockTag >= 0x0710 && BlockTag <= 0x071F))
+                {
+                    // Update the Detailed Timing Descriptor's shifted starting location
+                    pEdidBuf[BaseAddress + 2] -= TotalBlockLen;
+
+                    // Now shrink the data in the EDID buffer and pad with zeroes due to remove audio capabilities
+                    CopyAmount = CheckSumAddress - (BlockHeaderStart + TotalBlockLen);
+                    memcpy_s(&pEdidBuf[BlockHeaderStart], EdidSize, &pEdidBuf[BlockHeaderStart + TotalBlockLen], CopyAmount);
+                    memset(&pEdidBuf[CheckSumAddress - TotalBlockLen], 0, TotalBlockLen);
+
+                    pEdidBuf[CheckSumAddress] = CalcEdidChecksum(&pEdidBuf[BaseAddress]);
+
+                    NumAudioBlocksRemoved++;
+                    BlockHeaderStart -= TotalBlockLen;
+                    TimingDescStart -= TotalBlockLen;
+                }
+
+                BlockHeaderStart += TotalBlockLen; // Point to the address of the next tag header in the list
+
+            } while (BlockHeaderStart < TimingDescStart);
+        }
+    }
+
+    printf("Number of Audio blocks removed from Edid = %d.\n", NumAudioBlocksRemoved);
+    printf("Number of Basic Audio flags disabled in Edid = %d.\n", NumCeaV3ExtensionsFound);
+    return NumAudioBlocksRemoved;
 }
 
 /**
@@ -117,9 +275,39 @@ ctl_result_t EdidMgmtApi(ctl_display_output_handle_t hDisplayOutput, const ctl_e
         }
         if (pEdidBuf)
         {
+            if (DisableAudioInEdid)
+            {
+                printf("Attempting to remove audio from Edid...\n");
+                if (0 == RemoveAudioCapsFromEdid(pEdidBuf, EdidMgmtArgs.EdidSize))
+                {
+                    if (NumCeaV3ExtensionsFound)
+                    {
+                        printf("Audio descriptor blocks not found and only Basic Audio was removed from Edid,\n");
+                        printf("so override operations may fail to disable monitor audio.\n");
+                    }
+                    else
+                    {
+                        printf("No CEA Extensions found in Edid, binary file will fail to disable monitor audio\n");
+                    }
+                }
+            }
+
+            if (WriteBinaryFile)
+            {
+                printf("Writing binary file: %s\n", EdidBinFileName);
+                if (false == WriteEdidToFile(pEdidBuf, EdidMgmtArgs.EdidSize))
+                {
+                    printf("Failure writing Edid binary file.\n");
+                }
+            }
+
             // print EDID
             for (uint32_t j = 0; j < EdidMgmtArgs.EdidSize; j++)
             {
+                if (0 == (j % 16)) // Format EDID to make it easier to analyze
+                {
+                    printf("\n");
+                }
                 printf("0x%02X ", pEdidBuf[j]);
             }
             printf("\n");
@@ -475,6 +663,11 @@ int main(int32_t Argc, char *pArgv[])
     {
         EdidMgmtOpType = CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID;
     }
+    else if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-noaud", OptionArg))
+    {
+        EdidMgmtOpType     = CTL_EDID_MANAGEMENT_OPTYPE_READ_EDID;
+        DisableAudioInEdid = true;
+    }
     else if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-help", OptionArg))
     {
         PrintUsage(pArgv);
@@ -518,33 +711,73 @@ int main(int32_t Argc, char *pArgv[])
             printf("Test or Target ID: 0x%X\n", TgtId);
         }
     }
-    // EDID binary option
-    if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-e", OptionArg))
+
+    // EDID binary options... OptionArg holds the filename and optional path
+    if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-we", OptionArg)) // '-we' designates write edid
     {
         if ("" != OptionArg)
         {
-            ifstream EdidFile;
-            streampos FileSize;
-
-            EdidFile.open(OptionArg, ios::in | ios::binary | ios::ate);
-
-            if (false == EdidFile.is_open())
+            // If we want to read a monitor EDID and save away a copy, we'll wait to write the file later
+            // after we have read the EDID and we can also modify the capabilities of the EDID if we wish
+            switch (EdidMgmtOpType)
             {
-                printf("Cannot open a EDID file.\n");
-                Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
-                EXIT_ON_ERROR(Result);
+                case CTL_EDID_MANAGEMENT_OPTYPE_UNDO_OVERRIDE_EDID:
+                    printf("Info: Ignoring write of binary file for Undo Override operation.\n");
+                    break;
+                case CTL_EDID_MANAGEMENT_OPTYPE_UNLOCK_EDID:
+                    printf("Info: Ignoring write of binary file for Unlock operation.\n");
+                    break;
+                default:
+                    ZeroMemory(&EdidBinFileName, sizeof(EdidBinFileName));
+                    OptionArg.copy(EdidBinFileName, OptionArg.length(), 0);
+                    WriteBinaryFile = true;
+                    break;
             }
-
-            FileSize = EdidFile.tellg();
-            ZeroMemory(&EdidOverrideBuf, sizeof(EdidOverrideBuf));
-            EdidFile.seekg(0, ios::beg);
-            EdidFile.read((char *)&EdidOverrideBuf, FileSize);
-            EdidFile.close();
-            IsCustomEdid = true;
         }
         else
         {
-            printf("Fail to find the EDID binary file.\n");
+            printf("Failed to write the EDID binary file - NULL filename.\n");
+            Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
+            EXIT_ON_ERROR(Result);
+        }
+    }
+    else if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-e", OptionArg)) // '-e' designates read edid
+    {
+        if ("" != OptionArg)
+        {
+            switch (EdidMgmtOpType)
+            {
+                case CTL_EDID_MANAGEMENT_OPTYPE_UNDO_OVERRIDE_EDID:
+                    printf("Info: Ignoring read of binary file for Undo Override operation.\n");
+                    break;
+                case CTL_EDID_MANAGEMENT_OPTYPE_UNLOCK_EDID:
+                    printf("Info: Ignoring read of binary file for Unlock operation.\n");
+                    break;
+                default:
+                    ifstream EdidFile;
+                    streampos FileSize;
+
+                    EdidFile.open(OptionArg, ios::in | ios::binary | ios::ate);
+
+                    if (false == EdidFile.is_open())
+                    {
+                        printf("Cannot open a EDID file.\n");
+                        Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
+                        EXIT_ON_ERROR(Result);
+                    }
+
+                    FileSize = EdidFile.tellg();
+                    ZeroMemory(&EdidOverrideBuf, sizeof(EdidOverrideBuf));
+                    EdidFile.seekg(0, ios::beg);
+                    EdidFile.read((char *)&EdidOverrideBuf, FileSize);
+                    EdidFile.close();
+                    IsCustomEdid = true;
+                    break;
+            }
+        }
+        else
+        {
+            printf("Failed to find the EDID binary file.\n");
             Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
             EXIT_ON_ERROR(Result);
         }

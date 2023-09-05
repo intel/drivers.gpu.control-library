@@ -170,6 +170,21 @@ const char *printUnits(ctl_units_t Units)
             return "Angular Speed in RPM";
         }
         break;
+        case ctl_units_t::CTL_UNITS_POWER_MILLIWATTS:
+        {
+            return "Power in Milli Watts";
+        }
+        break;
+        case ctl_units_t::CTL_UNITS_PERCENT:
+        {
+            return "Units in Percentage";
+        }
+        break;
+        case ctl_units_t::CTL_UNITS_MEM_SPEED_GBPS:
+        {
+            return "Units in Gigabyte Per Second";
+        }
+        break;
         default:
             return "Unknown units";
     }
@@ -433,7 +448,7 @@ void OverclockLockFrequency(ctl_device_adapter_handle_t hDAhandle)
         goto Exit;
     }
 
-    PRINT_LOGS("\nCurrent Locked Frequency: %f Mhz", VfPair.Frequency);
+    PRINT_LOGS("\nCurrent Locked Frequency: %f MHz", VfPair.Frequency);
     PRINT_LOGS("\nCurrent Locked Voltage: %f mV", VfPair.Voltage);
 
     VfPair = {};
