@@ -175,6 +175,21 @@ const char *printUnits(ctl_units_t Units)
             return "Angular Speed in RPM";
         }
         break;
+        case ctl_units_t::CTL_UNITS_POWER_MILLIWATTS:
+        {
+            return "Power in Milli Watts";
+        }
+        break;
+        case ctl_units_t::CTL_UNITS_PERCENT:
+        {
+            return "Units in Percentage";
+        }
+        break;
+        case ctl_units_t::CTL_UNITS_MEM_SPEED_GBPS:
+        {
+            return "Units in Gigabyte Per Second";
+        }
+        break;
         default:
             return "Unknown units";
     }
@@ -301,8 +316,8 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Frequency] Min [%f]] Mhz", freqProperties.min);
-            PRINT_LOGS("\n[Frequency] Max [%f]] Mhz", freqProperties.max);
+            PRINT_LOGS("\n[Frequency] Min [%f]] MHz", freqProperties.min);
+            PRINT_LOGS("\n[Frequency] Max [%f]] MHz", freqProperties.max);
             PRINT_LOGS("\n[Frequency] Can Control Frequency? [%u]]", (uint32_t)freqProperties.canControl);
             PRINT_LOGS("\n[Frequency] Frequency Domain [%s]]", ((freqProperties.type == CTL_FREQ_DOMAIN_GPU) ? "GPU" : "MEMORY"));
         }
@@ -361,7 +376,7 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
 
             for (uint32_t i = 0; i < numClocks; i++)
             {
-                PRINT_LOGS("\n[Frequency] Clock [%u]  Freq[%f] Mhz", i, clocks[i]);
+                PRINT_LOGS("\n[Frequency] Clock [%u]  Freq[%f] MHz", i, clocks[i]);
             }
 
             delete[] clocks;
@@ -380,8 +395,8 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Frequency] Range Max [%f] Mhz", freqRange.max);
-            PRINT_LOGS("\n[Frequency] Range Min [%f] Mhz", freqRange.min);
+            PRINT_LOGS("\n[Frequency] Range Max [%f] MHz", freqRange.max);
+            PRINT_LOGS("\n[Frequency] Range Min [%f] MHz", freqRange.min);
         }
 
         PRINT_LOGS("\n\n[Frequency] Set Frequency range:");
@@ -557,6 +572,36 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
             PRINT_LOGS("\n[Fan] Max RPM [%i]", Fan_properties.maxRPM);
             PRINT_LOGS("\n[Fan] Supported Modes [%u]", Fan_properties.supportedModes);
             PRINT_LOGS("\n[Fan] Supported Units [%u]", Fan_properties.supportedUnits);
+        }
+
+        PRINT_LOGS("\n[Fan] Fan get Config:");
+
+        ctl_fan_config_t FanConfig = {};
+        FanConfig.Size             = sizeof(ctl_fan_config_t);
+        res                        = ctlFanGetConfig(pFanHandle[i], &FanConfig);
+
+        if (res != CTL_RESULT_SUCCESS)
+        {
+            PRINT_LOGS("\n %s from Fan get Config.", DecodeRetCode(res).c_str());
+        }
+        else
+        {
+            PRINT_LOGS("\n[Fan] Fan Config Mode [%u]", FanConfig.mode);
+            if (CTL_FAN_SPEED_MODE_FIXED == FanConfig.mode)
+            {
+                PRINT_LOGS("\n[Fan] Fan Config Fixed Speed [%u]", FanConfig.speedFixed.speed);
+                PRINT_LOGS("\n[Fan] Fan Config Fixed Speed Unit [%u]", FanConfig.speedFixed.units);
+            }
+            else if (CTL_FAN_SPEED_MODE_TABLE == FanConfig.mode)
+            {
+                PRINT_LOGS("\n[Fan] Fan Config Fan Table NumPoints [%u]", FanConfig.speedTable.numPoints);
+                for (int32_t numPoints = 0; numPoints < FanConfig.speedTable.numPoints; numPoints++)
+                {
+                    PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Speed Unit [%u]", FanConfig.speedTable.table[numPoints].speed.units);
+                    PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Speed [%u]", FanConfig.speedTable.table[numPoints].speed.speed);
+                    PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Temperature [%u]", FanConfig.speedTable.table[numPoints].temperature);
+                }
+            }
         }
 
         PRINT_LOGS("\n[Fan] Fan get state:");
