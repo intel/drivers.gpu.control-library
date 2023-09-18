@@ -511,6 +511,55 @@ ctlEnumerateDisplayOutputs(
 
 
 /**
+* @brief Enumerate I2C Pin Pairs
+* 
+* @details
+*     - Returns available list of I2C Pin-Pairs on a requested adapter
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceAdapter`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pCount`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "The incoming pointer pCount is null"
+*     - ::CTL_RESULT_ERROR_INVALID_SIZE - "The supplied Count is not equal to actual number of i2c pin-pair instances"
+*/
+ctl_result_t CTL_APICALL
+ctlEnumerateI2CPinPairs(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to device adapter
+    uint32_t* pCount,                               ///< [in,out][release] pointer to the number of i2c pin-pair instances. If
+                                                    ///< count is zero, then the api will update the value with the total
+                                                    ///< number of i2c pin-pair instances available. If count is non-zero and
+                                                    ///< matches the avaialble number of pin-pairs, then the api will only
+                                                    ///< return the avaialble number of i2c pin-pair instances in phI2cPinPairs.
+    ctl_i2c_pin_pair_handle_t* phI2cPinPairs        ///< [out][optional][release][range(0, *pCount)] array of i2c pin pair
+                                                    ///< instance handles. Need to be allocated by Caller when supplying the
+                                                    ///< *pCount > 0. 
+                                                    ///< If Count is not equal to actual number of i2c pin-pair instances, it
+                                                    ///< will return CTL_RESULT_ERROR_INVALID_SIZE.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnEnumerateI2CPinPairs_t pfnEnumerateI2CPinPairs = (ctl_pfnEnumerateI2CPinPairs_t)GetProcAddress(hinstLib, "ctlEnumerateI2CPinPairs");
+        if (pfnEnumerateI2CPinPairs)
+        {
+            result = pfnEnumerateI2CPinPairs(hDeviceAdapter, pCount, phI2cPinPairs);
+        }
+    }
+
+    return result;
+}
+
+
+/**
 * @brief Get Device Properties
 * 
 * @details
@@ -783,7 +832,7 @@ ctlSetCurrentSharpness(
 * @brief I2C Access
 * 
 * @details
-*     - The application does I2C aceess
+*     - Interface to access I2C using display handle as identifier.
 * 
 * @returns
 *     - CTL_RESULT_SUCCESS
@@ -826,10 +875,58 @@ ctlI2CAccess(
 
 
 /**
+* @brief I2C Access On Pin Pair
+* 
+* @details
+*     - Interface to access I2C using pin-pair handle as identifier.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hI2cPinPair`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pI2cAccessArgs`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+*     - ::CTL_RESULT_ERROR_INVALID_SIZE - "Invalid I2C data size"
+*     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid Args passed"
+*     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+*     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernal mode driver call failure"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid or Null handle passed"
+*/
+ctl_result_t CTL_APICALL
+ctlI2CAccessOnPinPair(
+    ctl_i2c_pin_pair_handle_t hI2cPinPair,          ///< [in] Handle to I2C pin pair.
+    ctl_i2c_access_pinpair_args_t* pI2cAccessArgs   ///< [in,out] I2c access arguments.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnI2CAccessOnPinPair_t pfnI2CAccessOnPinPair = (ctl_pfnI2CAccessOnPinPair_t)GetProcAddress(hinstLib, "ctlI2CAccessOnPinPair");
+        if (pfnI2CAccessOnPinPair)
+        {
+            result = pfnI2CAccessOnPinPair(hI2cPinPair, pI2cAccessArgs);
+        }
+    }
+
+    return result;
+}
+
+
+/**
 * @brief Aux Access
 * 
 * @details
-*     - The application does Aux aceess, PSR needs to be disabled for AUX
+*     - The application does Aux access, PSR needs to be disabled for AUX
 *       call.
 * 
 * @returns
@@ -1879,7 +1976,16 @@ ctlGetSetCustomMode(
 * @brief Get/Set Combined Display
 * 
 * @details
-*     - To get or set combined display.
+*     - To get or set combined display with given Child Targets on a Single
+*       GPU or across identical GPUs. Multi-GPU(MGPU) combined display is
+*       reserved i.e. it is not public and requires special application GUID.
+*       MGPU Combined Display will get activated or deactivated in next boot.
+*       MGPU scenario will internally link the associated adapters via Linked
+*       Display Adapter Call, with supplied hDeviceAdapter being the LDA
+*       Primary. If Genlock and enabled in Driver registry and supported by
+*       given Display Config, MGPU Combined Display will enable MGPU Genlock
+*       with supplied hDeviceAdapter being the Genlock Primary Adapter and the
+*       First Child Display being the Primary Display.
 * 
 * @returns
 *     - CTL_RESULT_SUCCESS
@@ -1947,7 +2053,7 @@ ctlGetSetCombinedDisplay(
 ctl_result_t CTL_APICALL
 ctlGetSetDisplayGenlock(
     ctl_device_adapter_handle_t* hDeviceAdapter,    ///< [in][release] Handle to control device adapter
-    ctl_genlock_args_t** pGenlockArgs,              ///< [in,out] Display Genlock operation and information
+    ctl_genlock_args_t* pGenlockArgs,               ///< [in,out] Display Genlock operation and information
     uint32_t AdapterCount,                          ///< [in] Number of device adapters
     ctl_device_adapter_handle_t* hFailureDeviceAdapter  ///< [out] Handle to address the failure device adapter in an error case
     )

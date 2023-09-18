@@ -472,6 +472,9 @@ typedef enum _ctl_units_t
     CTL_UNITS_TIME_SECONDS = 7,                     ///< Type is Time with units in Seconds.
     CTL_UNITS_MEMORY_BYTES = 8,                     ///< Type is Memory with units in Bytes.
     CTL_UNITS_ANGULAR_SPEED_RPM = 9,                ///< Type is Angular Speed with units in Revolutions per Minute.
+    CTL_UNITS_POWER_MILLIWATTS = 10,                ///< Type is Power with units in MilliWatts.
+    CTL_UNITS_PERCENT = 11,                         ///< Type is Percentage.
+    CTL_UNITS_MEM_SPEED_GBPS = 12,                  ///< Type is Memory Speed in Gigabyte per Seconds (Gbps)
     CTL_UNITS_UNKNOWN = 0x4800FFFF,                 ///< Type of units unknown.
     CTL_UNITS_MAX
 
@@ -1053,6 +1056,10 @@ typedef struct _ctl_sharpness_settings_t ctl_sharpness_settings_t;
 typedef struct _ctl_i2c_access_args_t ctl_i2c_access_args_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_i2c_access_pinpair_args_t
+typedef struct _ctl_i2c_access_pinpair_args_t ctl_i2c_access_pinpair_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_aux_access_args_t
 typedef struct _ctl_aux_access_args_t ctl_aux_access_args_t;
 
@@ -1431,6 +1438,7 @@ typedef enum _ctl_3d_feature_t
     CTL_3D_FEATURE_APP_PROFILE_DETAILS = 12,        ///< Game Profile Customization. Refer custom field ::ctl_3d_tier_details_t
     CTL_3D_FEATURE_EMULATED_TYPED_64BIT_ATOMICS = 13,   ///< Emulated Typed 64bit Atomics support in DG2
     CTL_3D_FEATURE_VRR_WINDOWED_BLT = 14,           ///< VRR windowed blt. Control VRR for windowed mode game
+    CTL_3D_FEATURE_GLOBAL_OR_PER_APP = 15,          ///< Set global settings or per application settings
     CTL_3D_FEATURE_MAX
 
 } ctl_3d_feature_t;
@@ -1704,6 +1712,17 @@ typedef enum _ctl_3d_vrr_windowed_blt_reserved_t
 } ctl_3d_vrr_windowed_blt_reserved_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Global or per app values possible
+typedef enum _ctl_3d_global_or_per_app_types_t
+{
+    CTL_3D_GLOBAL_OR_PER_APP_TYPES_NONE = 0,        ///< none
+    CTL_3D_GLOBAL_OR_PER_APP_TYPES_PER_APP = 1,     ///< Opt for per app settings
+    CTL_3D_GLOBAL_OR_PER_APP_TYPES_GLOBAL = 2,      ///< Opt for global settings
+    CTL_3D_GLOBAL_OR_PER_APP_TYPES_MAX
+
+} ctl_3d_global_or_per_app_types_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief 3D feature capability details which will have range/supported and
 ///        default values
 typedef struct _ctl_3d_feature_details_t
@@ -1784,6 +1803,8 @@ typedef struct _ctl_kmd_load_features_t
                                                     ///< given adapter. Note that this should contain only the name of the
                                                     ///< application and not the system specific path
     int8_t ApplicationNameLength;                   ///< [in] Length of ApplicationName string
+    int8_t CallerComponent;                         ///< [in] Caller component
+    int64_t Reserved[4];                            ///< [in] Reserved field
 
 } ctl_kmd_load_features_t;
 
@@ -1840,6 +1861,10 @@ ctlGetSet3DFeature(
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Handle of a display output instance
 typedef struct _ctl_display_output_handle_t *ctl_display_output_handle_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Handle of a i2c pin-pair instance
+typedef struct _ctl_i2c_pin_pair_handle_t *ctl_i2c_pin_pair_handle_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Check Driver version
@@ -1915,6 +1940,38 @@ ctlEnumerateDisplayOutputs(
                                                     ///< will update the value with the correct number of drivers available.
     ctl_display_output_handle_t* phDisplayOutputs   ///< [in,out][optional][release][range(0, *pCount)] array of display output
                                                     ///< instance handles
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Enumerate I2C Pin Pairs
+/// 
+/// @details
+///     - Returns available list of I2C Pin-Pairs on a requested adapter
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDeviceAdapter`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pCount`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "The incoming pointer pCount is null"
+///     - ::CTL_RESULT_ERROR_INVALID_SIZE - "The supplied Count is not equal to actual number of i2c pin-pair instances"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlEnumerateI2CPinPairs(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to device adapter
+    uint32_t* pCount,                               ///< [in,out][release] pointer to the number of i2c pin-pair instances. If
+                                                    ///< count is zero, then the api will update the value with the total
+                                                    ///< number of i2c pin-pair instances available. If count is non-zero and
+                                                    ///< matches the avaialble number of pin-pairs, then the api will only
+                                                    ///< return the avaialble number of i2c pin-pair instances in phI2cPinPairs.
+    ctl_i2c_pin_pair_handle_t* phI2cPinPairs        ///< [out][optional][release][range(0, *pCount)] array of i2c pin pair
+                                                    ///< instance handles. Need to be allocated by Caller when supplying the
+                                                    ///< *pCount > 0. 
+                                                    ///< If Count is not equal to actual number of i2c pin-pair instances, it
+                                                    ///< will return CTL_RESULT_ERROR_INVALID_SIZE.
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2374,11 +2431,21 @@ ctlSetCurrentSharpness(
 #endif // CTL_I2C_MAX_DATA_SIZE
 
 ///////////////////////////////////////////////////////////////////////////////
-/// @brief I2CFlags bitmasks
+/// @brief I2C Access Args input Flags bitmasks
 typedef uint32_t ctl_i2c_flags_t;
 typedef enum _ctl_i2c_flag_t
 {
-    CTL_I2C_FLAG_ATOMICI2C = CTL_BIT(0),            ///< Force Atomic I2C
+    CTL_I2C_FLAG_ATOMICI2C = CTL_BIT(0),            ///< Force Atomic I2C.
+    CTL_I2C_FLAG_1BYTE_INDEX = CTL_BIT(1),          ///< 1-byte Indexed operation. If no Index Size flag set, decided based on
+                                                    ///< Offset Value.
+    CTL_I2C_FLAG_2BYTE_INDEX = CTL_BIT(2),          ///< 2-byte Indexed operation. If no Index Size flag set, decided based on
+                                                    ///< Offset Value.
+    CTL_I2C_FLAG_4BYTE_INDEX = CTL_BIT(3),          ///< 4-byte Indexed operation. If no Index Size flag set, decided based on
+                                                    ///< Offset Value.
+    CTL_I2C_FLAG_SPEED_SLOW = CTL_BIT(4),           ///< If no Speed Flag is set, defaults to Best Option possible.
+    CTL_I2C_FLAG_SPEED_FAST = CTL_BIT(5),           ///< If no Speed Flag is set, defaults to Best Option possible.
+    CTL_I2C_FLAG_SPEED_BIT_BASH = CTL_BIT(6),       ///< Uses Slower access using SW bit bashing method. If no Speed Flag is
+                                                    ///< set, defaults to Best Option possible.
     CTL_I2C_FLAG_MAX = 0x80000000
 
 } ctl_i2c_flag_t;
@@ -2390,7 +2457,7 @@ typedef struct _ctl_i2c_access_args_t
     uint32_t Size;                                  ///< [in] size of this structure
     uint8_t Version;                                ///< [in] version of this structure
     uint32_t DataSize;                              ///< [in,out] Valid data size
-    uint32_t Address;                               ///< [in] Adreess to read or write
+    uint32_t Address;                               ///< [in] Address to read or write
     ctl_operation_type_t OpType;                    ///< [in] Operation type, 1 for Read, 2 for Write, for Write operation, App
                                                     ///< needs to run with admin privileges
     uint32_t Offset;                                ///< [in] Offset
@@ -2405,7 +2472,7 @@ typedef struct _ctl_i2c_access_args_t
 /// @brief I2C Access
 /// 
 /// @details
-///     - The application does I2C aceess
+///     - Interface to access I2C using display handle as identifier.
 /// 
 /// @returns
 ///     - CTL_RESULT_SUCCESS
@@ -2428,6 +2495,74 @@ CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlI2CAccess(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_i2c_access_args_t* pI2cAccessArgs           ///< [in,out] I2c access arguments
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief I2C Access on PinPair Args input Flags bitmasks
+typedef uint32_t ctl_i2c_pinpair_flags_t;
+typedef enum _ctl_i2c_pinpair_flag_t
+{
+    CTL_I2C_PINPAIR_FLAG_ATOMICI2C = CTL_BIT(0),    ///< Force Atomic I2C.
+    CTL_I2C_PINPAIR_FLAG_1BYTE_INDEX = CTL_BIT(1),  ///< 1-byte Indexed operation. If no Index Size flag set, decided based on
+                                                    ///< Offset Value.
+    CTL_I2C_PINPAIR_FLAG_2BYTE_INDEX = CTL_BIT(2),  ///< 2-byte Indexed operation. If no Index Size flag set, decided based on
+                                                    ///< Offset Value.
+    CTL_I2C_PINPAIR_FLAG_4BYTE_INDEX = CTL_BIT(3),  ///< 4-byte Indexed operation. If no Index Size flag set, decided based on
+                                                    ///< Offset Value.
+    CTL_I2C_PINPAIR_FLAG_SPEED_SLOW = CTL_BIT(4),   ///< If no Speed Flag is set, defaults to Best Option possible.
+    CTL_I2C_PINPAIR_FLAG_SPEED_FAST = CTL_BIT(5),   ///< If no Speed Flag is set, defaults to Best Option possible.
+    CTL_I2C_PINPAIR_FLAG_SPEED_BIT_BASH = CTL_BIT(6),   ///< Uses Slower access using SW bit bashing method. If no Speed Flag is
+                                                    ///< set, defaults to Best Option possible.
+    CTL_I2C_PINPAIR_FLAG_MAX = 0x80000000
+
+} ctl_i2c_pinpair_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief I2C access on Pin Pair arguments
+typedef struct _ctl_i2c_access_pinpair_args_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    uint32_t DataSize;                              ///< [in,out] Valid data size
+    uint32_t Address;                               ///< [in] Address to read or write
+    ctl_operation_type_t OpType;                    ///< [in] Operation type, 1 for Read, 2 for Write, for Write operation, App
+                                                    ///< needs to run with admin privileges
+    uint32_t Offset;                                ///< [in] Offset
+    ctl_i2c_pinpair_flags_t Flags;                  ///< [in] I2C Flags. Refer ::ctl_i2c_pinpair_flag_t
+    uint8_t Data[CTL_I2C_MAX_DATA_SIZE];            ///< [in,out] Data array
+    uint32_t ReservedFields[4];                     ///< [in] Reserved for future use, must be set to Zero.
+
+} ctl_i2c_access_pinpair_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief I2C Access On Pin Pair
+/// 
+/// @details
+///     - Interface to access I2C using pin-pair handle as identifier.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hI2cPinPair`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pI2cAccessArgs`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+///     - ::CTL_RESULT_ERROR_INVALID_SIZE - "Invalid I2C data size"
+///     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid Args passed"
+///     - ::CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS - "Insufficient permissions"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+///     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernal mode driver call failure"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid or Null handle passed"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlI2CAccessOnPinPair(
+    ctl_i2c_pin_pair_handle_t hI2cPinPair,          ///< [in] Handle to I2C pin pair.
+    ctl_i2c_access_pinpair_args_t* pI2cAccessArgs   ///< [in,out] I2c access arguments.
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2457,7 +2592,7 @@ typedef struct _ctl_aux_access_args_t
     ctl_operation_type_t OpType;                    ///< [in] Operation type, 1 for Read, 2 for Write, for Write operation, App
                                                     ///< needs to run with admin privileges
     ctl_aux_flags_t Flags;                          ///< [in] Aux Flags. Refer ::ctl_aux_flag_t
-    uint32_t Address;                               ///< [in] Adreess to read or write
+    uint32_t Address;                               ///< [in] Address to read or write
     uint64_t RAD;                                   ///< [in] RAD, For Future use, to be used for branch devices, Interface
                                                     ///< will be provided to get RAD
     uint32_t PortID;                                ///< [in] Port ID, For Future use, to be used for SST tiled devices
@@ -2470,7 +2605,7 @@ typedef struct _ctl_aux_access_args_t
 /// @brief Aux Access
 /// 
 /// @details
-///     - The application does Aux aceess, PSR needs to be disabled for AUX
+///     - The application does Aux access, PSR needs to be disabled for AUX
 ///       call.
 /// 
 /// @returns
@@ -2523,6 +2658,8 @@ typedef enum _ctl_power_optimization_dpst_flag_t
     CTL_POWER_OPTIMIZATION_DPST_FLAG_OPST = CTL_BIT(2), ///< Intel OLED Power Saving Technology
     CTL_POWER_OPTIMIZATION_DPST_FLAG_ELP = CTL_BIT(3),  ///< TCON based Edge Luminance Profile
     CTL_POWER_OPTIMIZATION_DPST_FLAG_EPSM = CTL_BIT(4), ///< Extra power saving mode
+    CTL_POWER_OPTIMIZATION_DPST_FLAG_APD = CTL_BIT(5),  ///< Adaptive Pixel Dimming
+    CTL_POWER_OPTIMIZATION_DPST_FLAG_PIXOPTIX = CTL_BIT(6), ///< TCON+ based DPST like solution
     CTL_POWER_OPTIMIZATION_DPST_FLAG_MAX = 0x80000000
 
 } ctl_power_optimization_dpst_flag_t;
@@ -2633,7 +2770,8 @@ typedef struct _ctl_power_optimization_dpst_t
     uint8_t MaxLevel;                               ///< [out] Maximum supported aggressiveness level
     uint8_t Level;                                  ///< [in,out] Current aggressiveness level to be set
     ctl_power_optimization_dpst_flags_t SupportedFeatures;  ///< [out] Supported features
-    ctl_power_optimization_dpst_flags_t EnabledFeatures;///< [in,out] Features enabled or to be enabled
+    ctl_power_optimization_dpst_flags_t EnabledFeatures;///< [in,out] Features enabled or to be enabled. Fill only one feature for
+                                                    ///< SET call
 
 } ctl_power_optimization_dpst_t;
 
@@ -3947,7 +4085,16 @@ typedef struct _ctl_combined_display_args_t
 /// @brief Get/Set Combined Display
 /// 
 /// @details
-///     - To get or set combined display.
+///     - To get or set combined display with given Child Targets on a Single
+///       GPU or across identical GPUs. Multi-GPU(MGPU) combined display is
+///       reserved i.e. it is not public and requires special application GUID.
+///       MGPU Combined Display will get activated or deactivated in next boot.
+///       MGPU scenario will internally link the associated adapters via Linked
+///       Display Adapter Call, with supplied hDeviceAdapter being the LDA
+///       Primary. If Genlock and enabled in Driver registry and supported by
+///       given Display Config, MGPU Combined Display will enable MGPU Genlock
+///       with supplied hDeviceAdapter being the Genlock Primary Adapter and the
+///       First Child Display being the Primary Display.
 /// 
 /// @returns
 ///     - CTL_RESULT_SUCCESS
@@ -4055,7 +4202,7 @@ typedef struct _ctl_genlock_args_t
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlGetSetDisplayGenlock(
     ctl_device_adapter_handle_t* hDeviceAdapter,    ///< [in][release] Handle to control device adapter
-    ctl_genlock_args_t** pGenlockArgs,              ///< [in,out] Display Genlock operation and information
+    ctl_genlock_args_t* pGenlockArgs,               ///< [in,out] Display Genlock operation and information
     uint32_t AdapterCount,                          ///< [in] Number of device adapters
     ctl_device_adapter_handle_t* hFailureDeviceAdapter  ///< [out] Handle to address the failure device adapter in an error case
     );
@@ -5494,8 +5641,8 @@ typedef struct _ctl_oc_properties_t
     bool bSupported;                                ///< [out] Indicates if the adapter supports overclocking.
     ctl_oc_control_info_t gpuFrequencyOffset;       ///< [out] related to function ::ctlOverclockGpuFrequencyOffsetSet
     ctl_oc_control_info_t gpuVoltageOffset;         ///< [out] related to function ::ctlOverclockGpuVoltageOffsetSet
-    ctl_oc_control_info_t vramFrequencyOffset;      ///< [out] related to function ::ctlOverclockVramFrequencyOffsetSet
-    ctl_oc_control_info_t vramVoltageOffset;        ///< [out] related to function ::ctlOverclockVramVoltageOffsetSet
+    ctl_oc_control_info_t vramFrequencyOffset;      ///< [out] Property Field Deprecated / No Longer Supported
+    ctl_oc_control_info_t vramVoltageOffset;        ///< [out] Property Field Deprecated / No Longer Supported
     ctl_oc_control_info_t powerLimit;               ///< [out] related to function ::ctlOverclockPowerLimitSet
     ctl_oc_control_info_t temperatureLimit;         ///< [out] related to function ::ctlOverclockTemperatureLimitSet
 
@@ -6662,6 +6809,15 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnEnumerateDisplayOutputs_t)(
 
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlEnumerateI2CPinPairs 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnEnumerateI2CPinPairs_t)(
+    ctl_device_adapter_handle_t,
+    uint32_t*,
+    ctl_i2c_pin_pair_handle_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for ctlGetDeviceProperties 
 typedef ctl_result_t (CTL_APICALL *ctl_pfnGetDeviceProperties_t)(
     ctl_device_adapter_handle_t,
@@ -6723,6 +6879,14 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnSetCurrentSharpness_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnI2CAccess_t)(
     ctl_display_output_handle_t,
     ctl_i2c_access_args_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlI2CAccessOnPinPair 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnI2CAccessOnPinPair_t)(
+    ctl_i2c_pin_pair_handle_t,
+    ctl_i2c_access_pinpair_args_t*
     );
 
 
@@ -6939,7 +7103,7 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetCombinedDisplay_t)(
 /// @brief Function-pointer for ctlGetSetDisplayGenlock 
 typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetDisplayGenlock_t)(
     ctl_device_adapter_handle_t*,
-    ctl_genlock_args_t**,
+    ctl_genlock_args_t*,
     uint32_t,
     ctl_device_adapter_handle_t*
     );
