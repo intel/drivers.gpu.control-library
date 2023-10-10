@@ -534,7 +534,7 @@ ctl_rect_t
 
  
 
-3d
+_3d
 ============================================================
 * Functions
 
@@ -582,7 +582,7 @@ ctl_rect_t
     * :ref:`ctl-kmd-load-features-t`
 
 
-3d Functions
+_3d Functions
 ------------------------------------------------------------------------------
 
 
@@ -605,7 +605,7 @@ ctlGetSet3DFeature
 
 
 
-3d Enums
+_3d Enums
 ------------------------------------------------------------------------------
 
 
@@ -762,7 +762,7 @@ ctl_3d_global_or_per_app_types_t
     :project: ControlApi
 
  
-3d Structures
+_3d Structures
 ------------------------------------------------------------------------------
 
 .. _ctl-endurance-gaming-caps-t:
