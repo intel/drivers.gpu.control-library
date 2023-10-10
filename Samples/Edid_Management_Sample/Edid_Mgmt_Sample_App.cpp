@@ -604,6 +604,9 @@ ctl_result_t FindOptionArg(int32_t Argc, char *pArgv[], const string &Option, st
         string Opt = pArgv[i];
         if (0 == Opt.find(Option))
         {
+            if (0 != strcmp(Option.c_str(), Opt.c_str()))
+                continue;
+
             if ((i + 1) < Argc)
                 OptionArg = pArgv[i + 1];
 

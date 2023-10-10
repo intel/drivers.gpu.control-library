@@ -1410,7 +1410,7 @@ typedef struct _ctl_temp_properties_t ctl_temp_properties_t;
 #endif
 // Intel 'ctlApi' for Device Adapter
 #if !defined(__GNUC__)
-#pragma region 3D
+#pragma region _3D
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Feature type
@@ -1852,7 +1852,7 @@ ctlGetSet3DFeature(
 
 
 #if !defined(__GNUC__)
-#pragma endregion // 3D
+#pragma endregion // _3D
 #endif
 // Intel 'ctlApi' for Device Adapter
 #if !defined(__GNUC__)
@@ -2559,6 +2559,7 @@ typedef struct _ctl_i2c_access_pinpair_args_t
 ///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
 ///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernal mode driver call failure"
 ///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid or Null handle passed"
+///     - ::CTL_RESULT_ERROR_EXTERNAL_DISPLAY_ATTACHED - "Write to Address not allowed when Display is connected"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlI2CAccessOnPinPair(
     ctl_i2c_pin_pair_handle_t hI2cPinPair,          ///< [in] Handle to I2C pin pair.
@@ -2644,6 +2645,7 @@ typedef enum _ctl_power_optimization_flag_t
     CTL_POWER_OPTIMIZATION_FLAG_LRR = CTL_BIT(3),   ///< Low refresh rate (LRR/ALRR/UBRR), UBRR is supported only for IGCC and
                                                     ///< NDA clients. UBZRR and UBLRR both can not be enabled at the same time,
                                                     ///< only one can be enabled at a given time
+    CTL_POWER_OPTIMIZATION_FLAG_LACE = CTL_BIT(4),  ///< Lighting Aware Contrast Enhancement
     CTL_POWER_OPTIMIZATION_FLAG_MAX = 0x80000000
 
 } ctl_power_optimization_flag_t;
@@ -3022,6 +3024,8 @@ typedef enum _ctl_pixtx_color_model_t
     CTL_PIXTX_COLOR_MODEL_YCBCR_422_LR = 3,         ///< Color model YCBCR 422 limited range
     CTL_PIXTX_COLOR_MODEL_YCBCR_420_FR = 4,         ///< Color model YCBCR 420 full range
     CTL_PIXTX_COLOR_MODEL_YCBCR_420_LR = 5,         ///< Color model YCBCR 420 limited range
+    CTL_PIXTX_COLOR_MODEL_YCBCR_444_FR = 6,         ///< Color model YCBCR 444 full range
+    CTL_PIXTX_COLOR_MODEL_YCBCR_444_LR = 7,         ///< Color model YCBCR 444 limited range
     CTL_PIXTX_COLOR_MODEL_MAX
 
 } ctl_pixtx_color_model_t;

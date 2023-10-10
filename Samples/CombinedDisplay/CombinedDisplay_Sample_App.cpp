@@ -486,11 +486,13 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
         if (CTL_RESULT_SUCCESS != Result)
         {
             LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+            CTL_FREE_MEM(pSelectedDisplays);
             continue;
         }
         else if (DisplayCount <= 0)
         {
             printf("Invalid Display Count. Skipping display enumeration for adapter: %d\n", Index);
+            CTL_FREE_MEM(pSelectedDisplays);
             continue;
         }
 
