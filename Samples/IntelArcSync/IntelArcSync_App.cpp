@@ -326,6 +326,7 @@ void GetIntelArcSyncCaps()
             if (CTL_RESULT_SUCCESS != Result)
             {
                 printf("\nERROR: Failed to get display properties. Error Code= 0x%X", Result);
+                Destroy(hAPIHandle, hDevices);
                 return;
             }
 
@@ -387,6 +388,7 @@ void GetIntelArcSyncProfileDetails()
             if (CTL_RESULT_SUCCESS != Result)
             {
                 printf("\nERROR: Failed to get display properties. Error Code= 0x%X", Result);
+                Destroy(hAPIHandle, hDevices);
                 return;
             }
 
@@ -503,6 +505,7 @@ void SetIntelArcSyncProfile(char *pProfileName, float MinRr, float MaxRr, uint32
             if (CTL_RESULT_SUCCESS != Result)
             {
                 printf("\nERROR: Failed to get display properties. Error Code= 0x%X", Result);
+                Destroy(hAPIHandle, hDevices);
                 return;
             }
 

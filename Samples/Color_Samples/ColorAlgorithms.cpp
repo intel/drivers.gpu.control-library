@@ -179,12 +179,11 @@ void CreateRGB2XYZMatrix(ColorSpace Cspace, double RGB2XYZ[3][3])
     double XYZsum[3];
     double Z[4];
     double XYZw[3];
-    IPIXEL_xyY *pChroma = &Cspace.White;
 
-    for (int i = 0; i < 4; i++)
-    {
-        Z[i] = 1 - pChroma[i].CIEx - pChroma[i].CIEy;
-    }
+    Z[0] = 1 - Cspace.White.CIEx - Cspace.White.CIEy;
+    Z[1] = 1 - Cspace.Red.CIEx - Cspace.Red.CIEy;
+    Z[2] = 1 - Cspace.Green.CIEx - Cspace.Green.CIEy;
+    Z[3] = 1 - Cspace.Blue.CIEx - Cspace.Blue.CIEy;
 
     XYZw[0] = Cspace.White.CIEx / Cspace.White.CIEy;
     XYZw[1] = 1;

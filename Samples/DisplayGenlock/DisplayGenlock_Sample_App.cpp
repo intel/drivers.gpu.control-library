@@ -114,6 +114,9 @@ ctl_result_t FindOptionArg(int32_t Argc, char *pArgv[], const string &Option, st
         string Opt = pArgv[i];
         if (0 == Opt.find(Option))
         {
+            if (0 != strcmp(Option.c_str(), Opt.c_str()))
+                continue;
+
             if ((i + 1) < Argc)
                 OptionArg = pArgv[i + 1];
 
@@ -753,7 +756,8 @@ ctl_result_t TestDisplayGenlock(ctl_device_adapter_handle_t *hDevices, uint32_t 
                 {
                     printf("Number of primary adapters cannot be zero or bigger than plugged-in adapters count.\n");
                     Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
-                    EXIT_ON_ERROR(Result);
+                    CTL_FREE_MEM(pGenlockArgs);
+                    return Result;
                 }
                 // Enable primary target on the primary adapter#0
                 Result = InitGenlockArgs(hDevices, GenlockSampleArgs.NumberOfPrimaryAdapters, GenlockSampleArgs, pGenlockArgs);
@@ -877,8 +881,8 @@ ctl_result_t TestDisplayGenlock(ctl_device_adapter_handle_t *hDevices, uint32_t 
             break;
         default:
             Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
-            EXIT_ON_ERROR(Result);
-            break;
+            CTL_FREE_MEM(pGenlockArgs);
+            return Result;
     }
 
 Exit:

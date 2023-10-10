@@ -899,6 +899,7 @@ ctlI2CAccess(
 *     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
 *     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernal mode driver call failure"
 *     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid or Null handle passed"
+*     - ::CTL_RESULT_ERROR_EXTERNAL_DISPLAY_ATTACHED - "Write to Address not allowed when Display is connected"
 */
 ctl_result_t CTL_APICALL
 ctlI2CAccessOnPinPair(

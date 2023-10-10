@@ -1614,6 +1614,18 @@ ctl_result_t TestLaceGetSetConfigForFixedAgressiveness(ctl_display_output_handle
     ctl_result_t Result                         = CTL_RESULT_SUCCESS;
     ctl_lace_config_t AppliedLaceConfigSettings = { 0 };
     ctl_lace_config_t NewLaceConfigSettings     = { 0 };
+    ctl_power_optimization_caps_t PowerCaps     = { 0 };
+
+    PowerCaps.Size = sizeof(ctl_power_optimization_caps_t);
+    Result         = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerCaps);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (LACE)");
+
+    if (CTL_POWER_OPTIMIZATION_FLAG_LACE != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_LACE))
+    {
+        printf("LACE is not supported\n");
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
 
     NewLaceConfigSettings.Version                                    = 0;
     NewLaceConfigSettings.Size                                       = sizeof(ctl_lace_config_t);
@@ -1649,10 +1661,22 @@ ctl_result_t TestLaceGetSetConfigForALS(ctl_display_output_handle_t hDisplayOutp
     ctl_result_t Result                         = CTL_RESULT_SUCCESS;
     ctl_lace_config_t AppliedLaceConfigSettings = { 0 };
     ctl_lace_config_t NewLaceConfigSettings     = { 0 };
+    ctl_power_optimization_caps_t PowerCaps     = { 0 };
     AppliedLaceConfigSettings.Version           = 0;
     AppliedLaceConfigSettings.Size              = sizeof(ctl_lace_config_t);
     AppliedLaceConfigSettings.OpTypeGet         = CTL_GET_OPERATION_FLAG_CAPABILITY;
     uint32_t MaxNumEntries                      = 0;
+
+    PowerCaps.Size = sizeof(ctl_power_optimization_caps_t);
+    Result         = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerCaps);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (LACE)");
+
+    if (CTL_POWER_OPTIMIZATION_FLAG_LACE != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_LACE))
+    {
+        printf("LACE is not supported\n");
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
 
     // Caps calls to get MaxNumEntries for memory allocation
     Result = ctlGetLACEConfig(hDisplayOutput, &AppliedLaceConfigSettings);

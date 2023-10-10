@@ -699,11 +699,11 @@ ctl_result_t CtlTestAdditionalCaller(void)
     // Init App UID appropriately
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
 
-    ctl_runtime_path_args_t Ctl_RuntimeArgs;
-    Ctl_RuntimeArgs.DeviceID = 0x4096;
-    Ctl_RuntimeArgs.RevID    = 0x07;
-    Ctl_RuntimeArgs.Size     = sizeof(Ctl_RuntimeArgs);
-    Ctl_RuntimeArgs.Version  = 0;
+    ctl_runtime_path_args_t Ctl_RuntimeArgs = { 0 };
+    Ctl_RuntimeArgs.DeviceID                = 0x4096;
+    Ctl_RuntimeArgs.RevID                   = 0x07;
+    Ctl_RuntimeArgs.Size                    = sizeof(Ctl_RuntimeArgs);
+    Ctl_RuntimeArgs.Version                 = 0;
     ctlSetRuntimePath(&Ctl_RuntimeArgs);
 
     Result = ctlInit(&CtlInitArgs, &hAPIHandle);
