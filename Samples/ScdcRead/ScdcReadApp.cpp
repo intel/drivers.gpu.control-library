@@ -53,12 +53,6 @@ ctl_result_t ScdcReadFromPanel(ctl_display_output_handle_t hDisplayOutput)
     Result = ctlI2CAccess(hDisplayOutput, &I2CArgs);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlI2CAccess for I2C read");
 
-    if (CTL_RESULT_SUCCESS != Result)
-    {
-        printf("ctlI2CAccess for I2C read returned failure code: 0x%X\n", Result);
-        STORE_AND_RESET_ERROR(Result);
-    }
-
     //  Print the data
     for (uint32_t i = 0; i < I2CArgs.DataSize / 16; i++)
     {

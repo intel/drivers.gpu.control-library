@@ -486,6 +486,86 @@ Exit:
 }
 
 /***************************************************************
+ * @brief
+ * Power feature Test for Alrr
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestAlrrFeature(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                                        = CTL_RESULT_SUCCESS;
+    ctl_power_optimization_caps_t PowerOptimizationCaps        = { 0 };
+    ctl_power_optimization_settings_t PowerOptimizationSetting = { 0 };
+
+    PowerOptimizationCaps.Size = sizeof(ctl_pfnGetPowerOptimizationCaps_t);
+    Result                     = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerOptimizationCaps);
+
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (ALRR)");
+
+    if (PowerOptimizationCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_LRR)
+    {
+        PowerOptimizationSetting.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_LRR;
+        PowerOptimizationSetting.Size                     = sizeof(ctl_power_optimization_settings_t);
+        Result                                            = ctlGetPowerOptimizationSetting(hDisplayOutput, &PowerOptimizationSetting);
+
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting");
+
+        if (PowerOptimizationSetting.FeatureSpecificData.LRRInfo.CurrentLRRTypes & CTL_POWER_OPTIMIZATION_LRR_FLAG_ALRR)
+        {
+            printf("ALRR is enabled");
+        }
+        else
+        {
+            printf("ALRR is not enabled");
+        }
+    }
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Power feature Test for Fbc
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestFbcPowerFeature(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                                        = CTL_RESULT_SUCCESS;
+    ctl_power_optimization_caps_t PowerOptimizationCaps        = { 0 };
+    ctl_power_optimization_settings_t PowerOptimizationSetting = { 0 };
+
+    PowerOptimizationCaps.Size = sizeof(ctl_pfnGetPowerOptimizationCaps_t);
+    Result                     = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerOptimizationCaps);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (FBC)");
+
+    if (CTL_POWER_OPTIMIZATION_FLAG_FBC != (PowerOptimizationCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_FBC))
+    {
+        printf("FBC is not supported\n");
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
+    else
+    {
+        printf("FBC is supported\n");
+    }
+
+    if (PowerOptimizationCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_FBC)
+    {
+        PowerOptimizationSetting.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_FBC;
+        PowerOptimizationSetting.Size                     = sizeof(ctl_power_optimization_settings_t);
+        Result                                            = ctlGetPowerOptimizationSetting(hDisplayOutput, &PowerOptimizationSetting);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting");
+
+        printf("FBC Enable Status= %d\n", PowerOptimizationSetting.Enable);
+    }
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
  * @brief EnumerateDisplayHandles
  * Only for demonstration purpose, API is called for each of the display output handle in below snippet.
  * User has to filter through the available display output handle and has to call the API with particular display output handle.
@@ -545,6 +625,14 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
         STORE_AND_RESET_ERROR(Result);
 
         Result = TestPixOptixPowerFeature(hDisplayOutput[DisplayIndex]);
+
+        STORE_AND_RESET_ERROR(Result);
+
+        Result = TestAlrrFeature(hDisplayOutput[DisplayIndex]);
+
+        STORE_AND_RESET_ERROR(Result);
+
+        Result = TestFbcPowerFeature(hDisplayOutput[DisplayIndex]);
 
         STORE_AND_RESET_ERROR(Result);
     }
