@@ -24,7 +24,7 @@
                       // including igcl_api.h
 #include "igcl_api.h"
 #include "GenericIGCLApp.h"
-#include "ColorAlgorithms.h"
+#include "ColorAlgorithms_App.h"
 
 ctl_result_t GResult = CTL_RESULT_SUCCESS;
 
@@ -38,6 +38,8 @@ ctl_result_t GResult = CTL_RESULT_SUCCESS;
 #define UV_MAX_VAL 255.0
 #define CLIP_DOUBLE(Val, Min, Max) (((Val) < (Min)) ? (Min) : (((Val) > (Max)) ? (Max) : (Val)))
 #define ABS_DOUBLE(x) ((x) < 0 ? (-x) : (x))
+#define DEFAULT_GAMMA_VALUE 2.2
+
 // Convert RGB to YUV
 const double RGB2YCbCr709[3][3] = { { 0.2126, 0.7152, 0.0722 }, { -0.1146, -0.3854, 0.5000 }, { 0.5000, -0.4542, -0.0458 } };
 
@@ -47,7 +49,9 @@ const double YCbCr2RGB709[3][3] = { { 1.0000, 0.0000, 1.5748 }, { 1.0000, -0.187
 // convert RGB to XYZ
 const double RGB2XYZ_709[3][3] = { { 0.41239080, 0.35758434, 0.18048079 }, { 0.21263901, 0.71516868, 0.07219232 }, { 0.01933082, 0.11919478, 0.95053215 } };
 
-const double Pi = 3.1415926535897932;
+const double Pi    = 3.1415926535897932;
+const double Beta  = 0.018053968510807;
+const double Alpha = 1.09929682680944;
 
 typedef struct
 {
@@ -73,6 +77,13 @@ typedef enum HUE_ANCHOR
     HUE_ANCHOR_MAGENTA_SATURATION     = 5,
     HUE_ANCHOR_COLOR_COUNT_SATURATION = 6
 } HUE_ANCHOR;
+
+typedef enum
+{
+    GAMMA_ENCODING_TYPE_SRGB    = 0, // Gamma encoding SRGB
+    GAMMA_ENCODING_TYPE_REC709  = 1, // Gamma encoding REC709
+    GAMMA_ENCODING_TYPE_REC2020 = 2, // Gamma encoding REC2020
+} GAMMA_ENCODING_TYPE;
 
 // https://en.wikipedia.org/wiki/CIE_1931_color_space
 typedef struct
@@ -288,6 +299,111 @@ double GetSRGBEncodingValue(double Input)
     else
     {
         Output = (1.055 * pow(Input, 1.0 / 2.4)) - 0.055;
+    }
+
+    return Output;
+}
+
+/***************************************************************
+ * @brief
+ * GetRec709DecodingValue
+ * @param Input
+ * @return double
+ ***************************************************************/
+double GetRec709DecodingValue(double Input)
+{
+    /*
+    https://en.wikipedia.org/wiki/Rec._709
+    */
+
+    double Output;
+
+    if (Input < 0.081)
+    {
+        Output = Input / 4.5;
+    }
+    else
+    {
+        Output = pow(((Input + 0.099) / 1.099), (1 / 0.45));
+    }
+
+    return Output;
+}
+
+/***************************************************************
+ * @brief
+ * GetRec709EncodingValue
+ * @param Input
+ * @return double
+ ***************************************************************/
+double GetRec709EncodingValue(double Input)
+{
+    /*
+    https://en.wikipedia.org/wiki/Rec._709
+    */
+
+    double Output;
+
+    if (Input < 0.018)
+    {
+        Output = Input * 4.5;
+    }
+    else
+    {
+        Output = (1.099 * pow(Input, 0.45)) - 0.099;
+    }
+
+    return Output;
+}
+
+/***************************************************************
+ * @brief
+ * GetRec2020DecodingValue
+ * @param Input
+ * @return double
+ ***************************************************************/
+double GetRec2020DecodingValue(double Input)
+{
+    /*
+https://en.wikipedia.org/wiki/Rec._2020
+*/
+
+    double Output;
+    Input = abs(Input);
+
+    if (Input < Beta * 4.5)
+    {
+        Output = Input / 4.5;
+    }
+    else
+    {
+        Output = (pow((Input + Alpha - 1) / Alpha, 1 / 0.45));
+    }
+
+    return Output;
+}
+
+/***************************************************************
+ * @brief
+ * GetRec2020EncodingValue
+ * @param Input
+ * @return double
+ ***************************************************************/
+double GetRec2020EncodingValue(double Input)
+{
+    /*
+https://en.wikipedia.org/wiki/Rec._2020
+*/
+
+    double Output;
+
+    if (Input < Beta)
+    {
+        Output = 4.5 * Input;
+    }
+    else
+    {
+        Output = Alpha * pow(Input, 0.45) - (Alpha - 1);
     }
 
     return Output;
@@ -829,6 +945,198 @@ ctl_result_t ApplyLinearCSC(ctl_display_output_handle_t hDisplayOutput, ctl_pixt
     {
         double Input = (double)i / (double)((GLutSize / SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumChannels) - 1);
         pRedLut[i] = pGreenLut[i] = pBlueLut[i] = GetSRGBEncodingValue(Input);
+    }
+
+    Result = ctlPixelTransformationSetConfig(hDisplayOutput, &SetPixTxArgs);
+    LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ctlPixelTransformationSetConfig");
+
+Exit:
+    if (NULL != SetPixTxArgs.pBlockConfigs)
+    {
+        CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues);
+        CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues);
+    }
+    CTL_FREE_MEM(SetPixTxArgs.pBlockConfigs);
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * GetGammaDecodedValue
+ * @param Input,EncodingType
+ * @return void
+ ***************************************************************/
+double GetGammaDecodedValue(double Input, GAMMA_ENCODING_TYPE EncodingType)
+{
+    double DecodedValue;
+
+    switch (EncodingType)
+    {
+        case GAMMA_ENCODING_TYPE_SRGB:
+            DecodedValue = GetSRGBDecodingValue(Input);
+            break;
+        case GAMMA_ENCODING_TYPE_REC709:
+            DecodedValue = GetRec709DecodingValue(Input);
+            break;
+        case GAMMA_ENCODING_TYPE_REC2020:
+            DecodedValue = GetRec2020DecodingValue(Input);
+            break;
+        default:
+            DecodedValue = GetSRGBDecodingValue(Input);
+            break;
+    }
+
+    return DecodedValue;
+}
+
+/***************************************************************
+ * @brief
+ * RotateAndScalePanelColorSpaceToContentColorSpace DGLUT->CSC->GLUT
+ * @param hDisplayOutput
+ * @param pPixTxCaps
+ * @return
+ ***************************************************************/
+ctl_result_t RotateAndScalePanelColorSpaceToContentColorSpace(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_config_t *pPixTxCaps)
+{
+    // PanelColorSpace,ContentColorSpace, GammaValue, EncodingType are provided by User
+
+    // Sample PanelColorSpace
+    static ColorSpace PanelColorSpace = {
+        { 0.3144, 0.3364, 43.6710 }, // white x,y,Y
+        { 0.6756, 0.3159, 11.4200 }, // red
+        { 0.2381, 0.7154, 31.0450 }, // green
+        { 0.1409, 0.0556, 3.1100 }   // blue
+    };
+
+    // ContentColorSpace, standard SRGB color space  https://en.wikipedia.org/wiki/SRGB
+    static ColorSpace ContentColorSpace = {
+        { 0.3127, 0.3290, 1.0 }, // white x,y,Y
+        { 0.64, 0.33, 0.2126 },  // red
+        { 0.30, 0.60, 0.7152 },  // green
+        { 0.15, 0.060, 0.0722 }  // blue
+    };
+
+    double GammaValue                = DEFAULT_GAMMA_VALUE; // User provided GammaValue
+    GAMMA_ENCODING_TYPE EncodingType = GAMMA_ENCODING_TYPE_SRGB;
+
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    if (nullptr == hDisplayOutput)
+    {
+        return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    if (nullptr == pPixTxCaps)
+    {
+        return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+    }
+
+    // One approach could be check for CSC with offsets block, the block right before CSC with offset block is DGLUT and the Block Right after CSC with Offsets block is GLUT.
+    int32_t DGLUTIndex, CscIndex, GLUTIndex;
+    DGLUTIndex = CscIndex = GLUTIndex = -1;
+    uint32_t OneDLutOccurances        = 0;
+
+    for (uint32_t i = 0; i < pPixTxCaps->NumBlocks; i++)
+    {
+        if (CTL_PIXTX_BLOCK_TYPE_1D_LUT == pPixTxCaps->pBlockConfigs[i].BlockType)
+        {
+            if ((CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX_AND_OFFSETS == pPixTxCaps->pBlockConfigs[i + 1].BlockType) && (CTL_PIXTX_BLOCK_TYPE_1D_LUT == pPixTxCaps->pBlockConfigs[i + 2].BlockType))
+            {
+                DGLUTIndex = i;
+                CscIndex   = i + 1;
+                GLUTIndex  = i + 2;
+            }
+            break;
+        }
+    }
+
+    if (DGLUTIndex < 0 || CscIndex < 0 || GLUTIndex < 0)
+    {
+        printf("Invalid Index for DGLUT/CSC/GLUT\n");
+        return CTL_RESULT_ERROR_INVALID_ARGUMENT;
+    }
+
+    ctl_pixtx_block_config_t DGLUTConfig = pPixTxCaps->pBlockConfigs[DGLUTIndex];
+    ctl_pixtx_block_config_t CSCConfig   = pPixTxCaps->pBlockConfigs[CscIndex];
+    ctl_pixtx_block_config_t GLUTConfig  = pPixTxCaps->pBlockConfigs[GLUTIndex];
+
+    ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
+    SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
+    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.NumBlocks                   = 3; // We are trying to set only one block
+    SetPixTxArgs.pBlockConfigs               = (ctl_pixtx_block_config_t *)malloc(SetPixTxArgs.NumBlocks * sizeof(ctl_pixtx_block_config_t));
+    EXIT_ON_MEM_ALLOC_FAILURE(SetPixTxArgs.pBlockConfigs, " SetPixTxArgs.pBlockConfigs");
+
+    memset(SetPixTxArgs.pBlockConfigs, 0, SetPixTxArgs.NumBlocks * sizeof(ctl_pixtx_block_config_t));
+
+    // DGLUT values
+    const uint32_t DGLutSize                                                = DGLUTConfig.Config.OneDLutConfig.NumSamplesPerChannel * DGLUTConfig.Config.OneDLutConfig.NumChannels;
+    SetPixTxArgs.pBlockConfigs[0].BlockId                                   = DGLUTConfig.BlockId;
+    SetPixTxArgs.pBlockConfigs[0].BlockType                                 = DGLUTConfig.BlockType;
+    SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.NumChannels          = DGLUTConfig.Config.OneDLutConfig.NumChannels;
+    SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.NumSamplesPerChannel = DGLUTConfig.Config.OneDLutConfig.NumSamplesPerChannel;
+    SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.SamplingType         = DGLUTConfig.Config.OneDLutConfig.SamplingType;
+    SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues        = (double *)malloc(DGLutSize * sizeof(double));
+
+    EXIT_ON_MEM_ALLOC_FAILURE(SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues, " SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues");
+
+    memset(SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues, 0, DGLutSize * sizeof(double));
+
+    for (uint32_t i = 0; i < (DGLutSize / DGLUTConfig.Config.OneDLutConfig.NumChannels); i++)
+    {
+        double Input                                                        = (double)i / (double)(DGLutSize - 1);
+        SetPixTxArgs.pBlockConfigs[0].Config.OneDLutConfig.pSampleValues[i] = GetGammaDecodedValue(Input, EncodingType);
+    }
+
+    // CSC
+
+    double PostOffsets[3] = { 0, 0, 0 };
+    double PreOffsets[3]  = { 0, 0, 0 };
+    double GeneratedOutputMatrix[3][3];
+
+    CreateMatrixToScaleAndRotatePanelToContentColorSpace(PanelColorSpace, ContentColorSpace, GeneratedOutputMatrix);
+
+    SetPixTxArgs.pBlockConfigs[1].BlockId   = CSCConfig.BlockId;
+    SetPixTxArgs.pBlockConfigs[1].BlockType = CSCConfig.BlockType;
+
+    // Create a valid CSC Matrix.
+    for (uint32_t i = 0; i < 3; i++)
+    {
+        CSCConfig.Config.MatrixConfig.PreOffsets[i] = PreOffsets[i];
+    }
+    for (uint32_t i = 0; i < 3; i++)
+    {
+        CSCConfig.Config.MatrixConfig.PostOffsets[i] = PostOffsets[i];
+    }
+
+    memcpy_s(SetPixTxArgs.pBlockConfigs[1].Config.MatrixConfig.Matrix, sizeof(SetPixTxArgs.pBlockConfigs[1].Config.MatrixConfig.Matrix), GeneratedOutputMatrix, sizeof(GeneratedOutputMatrix));
+
+    // GLUT Values
+    // Create a valid 1D LUT.
+    const uint32_t GLutSize                                                 = GLUTConfig.Config.OneDLutConfig.NumSamplesPerChannel * GLUTConfig.Config.OneDLutConfig.NumChannels;
+    SetPixTxArgs.pBlockConfigs[2].BlockId                                   = GLUTConfig.BlockId;
+    SetPixTxArgs.pBlockConfigs[2].BlockType                                 = GLUTConfig.BlockType;
+    SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumChannels          = GLUTConfig.Config.OneDLutConfig.NumChannels;
+    SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumSamplesPerChannel = GLUTConfig.Config.OneDLutConfig.NumSamplesPerChannel;
+    SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.SamplingType         = GLUTConfig.Config.OneDLutConfig.SamplingType;
+    SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues        = (double *)malloc(GLutSize * sizeof(double));
+
+    EXIT_ON_MEM_ALLOC_FAILURE(SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues, " SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues");
+
+    memset(SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues, 0, GLutSize * sizeof(double));
+
+    double *pRedLut   = SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.pSampleValues;
+    double *pGreenLut = pRedLut + SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumSamplesPerChannel;
+    double *pBlueLut  = pGreenLut + SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumSamplesPerChannel;
+
+    for (uint32_t i = 0; i < (GLutSize / SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumChannels); i++)
+    {
+        double Input  = (double)i / (double)((GLutSize / SetPixTxArgs.pBlockConfigs[2].Config.OneDLutConfig.NumChannels) - 1);
+        double Output = 0;
+        Output        = (double)INT_MAX * pow(Input, (1.0 / GammaValue));
+        Output += 0.5;
+        Output     = min(Output, INT_MAX);
+        pRedLut[i] = pGreenLut[i] = pBlueLut[i] = Output;
     }
 
     Result = ctlPixelTransformationSetConfig(hDisplayOutput, &SetPixTxArgs);
@@ -1523,6 +1831,12 @@ ctl_result_t TestPixTxGetSetConfig(ctl_display_output_handle_t hDisplayOutput)
         Result = CTL_RESULT_ERROR_INVALID_SIZE;
         LOG_AND_EXIT_ON_ERROR(Result, "ctlPixelTransformationGetConfig for query type capability");
     }
+
+    // Logical Pipeline details in current mode
+    printf("Logical Pipeline Input Color Model : %d , Color Space %d, Encoding Type: %d \n", PixTxCaps.InputPixelFormat.ColorModel, PixTxCaps.InputPixelFormat.ColorSpace,
+           PixTxCaps.InputPixelFormat.EncodingType);
+    printf("Logical Pipeline Output Color Model : %d , Color Space %d, Encoding Type: %d , BPC: %d \n", PixTxCaps.InputPixelFormat.ColorModel, PixTxCaps.InputPixelFormat.ColorSpace,
+           PixTxCaps.InputPixelFormat.EncodingType, PixTxCaps.OutputPixelFormat.BitsPerColor);
 
     const uint8_t NumBlocksToQuery = PixTxCaps.NumBlocks; // Query about the blocks in the pipeline
 

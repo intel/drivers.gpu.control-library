@@ -1066,6 +1066,7 @@ ctlGetPowerOptimizationSetting(
 *     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 *     - ::CTL_RESULT_ERROR_INVALID_POWERFEATURE_OPTIMIZATION_FLAG - "Unsupported PowerOptimizationFeature"
 *     - ::CTL_RESULT_ERROR_INVALID_POWERSOURCE_TYPE_FOR_DPST - "DPST is supported only in DC Mode"
+*     - ::CTL_RESULT_ERROR_SET_FBC_FEATURE_NOT_SUPPORTED - "Set FBC Feature not supported"
 */
 ctl_result_t CTL_APICALL
 ctlSetPowerOptimizationSetting(
@@ -2079,7 +2080,8 @@ ctlGetSetDisplayGenlock(
 * @brief Get Vblank Timestamp
 * 
 * @details
-*     - To get a list of vblank timestamps for each child target of a display.
+*     - To get a list of vblank timestamps in microseconds for each child
+*       target of a display.
 * 
 * @returns
 *     - CTL_RESULT_SUCCESS
@@ -2236,6 +2238,53 @@ ctlGetLinkedDisplayAdapters(
         if (pfnGetLinkedDisplayAdapters)
         {
             result = pfnGetLinkedDisplayAdapters(hPrimaryAdapter, pLdaArgs);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get/Set Dynamic Contrast Enhancement
+* 
+* @details
+*     - To get the DCE feature status and, if feature is enabled, returns the
+*       current histogram, or to set the brightness at the phase-in speed
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pDceArgs`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid or Null handle passed"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+*     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+*     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid combination of parameters"
+*/
+ctl_result_t CTL_APICALL
+ctlGetSetDynamicContrastEnhancement(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
+    ctl_dce_args_t* pDceArgs                        ///< [in,out] Dynamic Contrast Enhancement arguments
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetSetDynamicContrastEnhancement_t pfnGetSetDynamicContrastEnhancement = (ctl_pfnGetSetDynamicContrastEnhancement_t)GetProcAddress(hinstLib, "ctlGetSetDynamicContrastEnhancement");
+        if (pfnGetSetDynamicContrastEnhancement)
+        {
+            result = pfnGetSetDynamicContrastEnhancement(hDisplayOutput, pDceArgs);
         }
     }
 
@@ -3961,6 +4010,44 @@ ctlPowerTelemetryGet(
         if (pfnPowerTelemetryGet)
         {
             result = pfnPowerTelemetryGet(hDeviceHandle, pTelemetryInfo);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Reset all Overclock Settings to stock
+* 
+* @details
+*     - Reset all Overclock setting to default using single API call
+*     - This request resets any changes made to GpuFrequencyOffset,
+*       GpuVoltageOffset, PowerLimit, TemperatureLimit, GpuLock
+*     - This Doesn't reset any Fan Curve Changes. It can be reset using
+*       ctlFanSetDefaultMode
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceHandle`
+*/
+ctl_result_t CTL_APICALL
+ctlOverclockResetToDefault(
+    ctl_device_adapter_handle_t hDeviceHandle       ///< [in][release] Handle to display adapter
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnOverclockResetToDefault_t pfnOverclockResetToDefault = (ctl_pfnOverclockResetToDefault_t)GetProcAddress(hinstLib, "ctlOverclockResetToDefault");
+        if (pfnOverclockResetToDefault)
+        {
+            result = pfnOverclockResetToDefault(hDeviceHandle);
         }
     }
 

@@ -118,7 +118,6 @@ const char *printType(ctl_data_type_t Type)
         default:
             return "Unknown units";
     }
-    return "Unknown units";
 }
 
 const char *printUnits(ctl_units_t Units)
@@ -190,10 +189,14 @@ const char *printUnits(ctl_units_t Units)
             return "Units in Gigabyte Per Second";
         }
         break;
+        case ctl_units_t::CTL_UNITS_VOLTAGE_MILLIVOLTS:
+        {
+            return "Voltage in MilliVolts";
+        }
+        break;
         default:
             return "Unknown units";
     }
-    return "Unknown units";
 }
 /***************************************************************
  * @brief
@@ -657,6 +660,8 @@ void CtlPciTest(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\n[Pci] Gen [%i]", Pci_properties.maxSpeed.gen);
         PRINT_LOGS("\n[Pci] Width [%i]", Pci_properties.maxSpeed.width);
         PRINT_LOGS("\n[Pci] Max Bandwidth [%lli] bytes per second", Pci_properties.maxSpeed.maxBandwidth);
+        PRINT_LOGS("\n[Pci] Resizable Bar Supported [%u]", Pci_properties.resizable_bar_supported);
+        PRINT_LOGS("\n[Pci] Resizable Bar Enabled [%u]", Pci_properties.resizable_bar_enabled);
     }
 
     ctl_pci_state_t Pci_state = { 0 };
@@ -1479,7 +1484,6 @@ int main()
 {
     ctl_result_t Result                                       = CTL_RESULT_SUCCESS;
     ctl_device_adapter_handle_t *hDevices                     = nullptr;
-    ctl_display_output_handle_t *hDisplayOutput               = nullptr;
     ctl_device_adapter_properties_t StDeviceAdapterProperties = { 0 };
     // Get a handle to the DLL module.
     uint32_t Adapter_count = 0;
@@ -1621,13 +1625,6 @@ int main()
 free_exit:
 
     ctlClose(hAPIHandle);
-
-    if (hDisplayOutput != nullptr)
-    {
-        free(hDisplayOutput);
-        hDisplayOutput = nullptr;
-    }
-    hDisplayOutput = nullptr;
 
     if (hDevices != nullptr)
     {

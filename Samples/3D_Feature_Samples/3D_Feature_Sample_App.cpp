@@ -961,21 +961,21 @@ int main()
                 }
                 STORE_RESET_ERROR(Result);
 
-                CtlGamingAppProfile(hDevices[Index]);
+                Result = CtlGamingAppProfile(hDevices[Index]);
                 if (CTL_RESULT_SUCCESS != Result)
                 {
                     printf("CtlGamingAppProfile failure code: 0x%X\n", Result);
                 }
                 STORE_RESET_ERROR(Result);
 
-                CtlCMAAGamingFeatureTest(hDevices[Index]);
+                Result = CtlCMAAGamingFeatureTest(hDevices[Index]);
                 if (CTL_RESULT_SUCCESS != Result)
                 {
                     printf("CtlCMAAGamingFeatureTest failure code: 0x%X\n", Result);
                 }
                 STORE_RESET_ERROR(Result);
 
-                CtlGlobalOrPerAppTest(hDevices[Index]);
+                Result = CtlGlobalOrPerAppTest(hDevices[Index]);
                 if (CTL_RESULT_SUCCESS != Result)
                 {
                     printf("CtlGlobalOrPerAppTest failure code: 0x%X\n", Result);

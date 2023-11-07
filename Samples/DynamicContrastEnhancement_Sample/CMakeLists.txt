@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
-set(TARGET_NAME Color_Samples)
+set(TARGET_NAME DynamicContrastEnhancement_Sample)
 get_filename_component(ROOT_DIR ../../ ABSOLUTE)
-project(Color_Samples VERSION 1.0)
+project(DynamicContrastEnhancement_Sample VERSION 1.0)
 add_executable(${TARGET_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/ColorAlgorithms_App.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Color_Sample_App.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ColorAlgorithms_App.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/DynamicContrastEnhancement_Sample_App.cpp
     ${ROOT_DIR}/wrapper/cApiWrapper.cpp
 )
 

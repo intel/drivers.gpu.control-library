@@ -440,6 +440,7 @@ typedef enum _ctl_result_t
     CTL_RESULT_ERROR_ADAPTER_ALREADY_LINKED = 0x4800001d,   ///< Adapter is already linked
     CTL_RESULT_ERROR_ADAPTER_NOT_IDENTICAL = 0x4800001e,///< Adapter is not identical for linking
     CTL_RESULT_ERROR_ADAPTER_NOT_SUPPORTED_ON_LDA_SECONDARY = 0x4800001f,   ///< Adapter is LDA Secondary, so not supporting requested operation
+    CTL_RESULT_ERROR_SET_FBC_FEATURE_NOT_SUPPORTED = 0x48000020,///< Set FBC Feature not supported
     CTL_RESULT_ERROR_DISPLAY_END = 0x4800FFFF,      ///< "Display error code end value, not to be used
                                                     ///< "
     CTL_RESULT_MAX
@@ -475,6 +476,7 @@ typedef enum _ctl_units_t
     CTL_UNITS_POWER_MILLIWATTS = 10,                ///< Type is Power with units in MilliWatts.
     CTL_UNITS_PERCENT = 11,                         ///< Type is Percentage.
     CTL_UNITS_MEM_SPEED_GBPS = 12,                  ///< Type is Memory Speed in Gigabyte per Seconds (Gbps)
+    CTL_UNITS_VOLTAGE_MILLIVOLTS = 13,              ///< Type is Voltage with units in milliVolts.
     CTL_UNITS_UNKNOWN = 0x4800FFFF,                 ///< Type of units unknown.
     CTL_UNITS_MAX
 
@@ -1222,6 +1224,10 @@ typedef struct _ctl_vblank_ts_args_t ctl_vblank_ts_args_t;
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_lda_args_t
 typedef struct _ctl_lda_args_t ctl_lda_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_dce_args_t
+typedef struct _ctl_dce_args_t ctl_dce_args_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_engine_properties_t
@@ -2871,6 +2877,7 @@ ctlGetPowerOptimizationSetting(
 ///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
 ///     - ::CTL_RESULT_ERROR_INVALID_POWERFEATURE_OPTIMIZATION_FLAG - "Unsupported PowerOptimizationFeature"
 ///     - ::CTL_RESULT_ERROR_INVALID_POWERSOURCE_TYPE_FOR_DPST - "DPST is supported only in DC Mode"
+///     - ::CTL_RESULT_ERROR_SET_FBC_FEATURE_NOT_SUPPORTED - "Set FBC Feature not supported"
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlSetPowerOptimizationSetting(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
@@ -4224,7 +4231,7 @@ typedef struct _ctl_vblank_ts_args_t
     uint32_t Size;                                  ///< [in] size of this structure
     uint8_t Version;                                ///< [in] version of this structure
     uint8_t NumOfTargets;                           ///< [out] Number of child targets
-    uint64_t VblankTS[CTL_MAX_DISPLAYS_FOR_MGPU_COLLAGE];   ///< [out] List of vblank timestamps per child target
+    uint64_t VblankTS[CTL_MAX_DISPLAYS_FOR_MGPU_COLLAGE];   ///< [out] List of vblank timestamps in microseconds per child target
 
 } ctl_vblank_ts_args_t;
 
@@ -4232,7 +4239,8 @@ typedef struct _ctl_vblank_ts_args_t
 /// @brief Get Vblank Timestamp
 /// 
 /// @details
-///     - To get a list of vblank timestamps for each child target of a display.
+///     - To get a list of vblank timestamps in microseconds for each child
+///       target of a display.
 /// 
 /// @returns
 ///     - CTL_RESULT_SUCCESS
@@ -4340,6 +4348,54 @@ CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlGetLinkedDisplayAdapters(
     ctl_device_adapter_handle_t hPrimaryAdapter,    ///< [in][release] Handle to Primary adapter in LDA chain
     ctl_lda_args_t* pLdaArgs                        ///< [out] Link Display Adapters Arguments
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Dynamic Contrast Enhancement arguments
+typedef struct _ctl_dce_args_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    bool Set;                                       ///< [in] Flag to indicate Set or Get operation
+    uint32_t TargetBrightnessPercent;               ///< [in] Target brightness percent
+    double PhaseinSpeedMultiplier;                  ///< [in] Phase-in speed multiplier for brightness to take effect
+    uint32_t NumBins;                               ///< [in,out] Number of histogram bins
+    bool Enable;                                    ///< [in,out] For get calls, this represents current state & for set this
+                                                    ///< represents future state
+    bool IsSupported;                               ///< [out] is DCE feature supported
+    uint32_t* pHistogram;                           ///< [out] Bin wise histogram data of size NumBins * sizeof(uint32_t) for
+                                                    ///< current frame
+
+} ctl_dce_args_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Dynamic Contrast Enhancement
+/// 
+/// @details
+///     - To get the DCE feature status and, if feature is enabled, returns the
+///       current histogram, or to set the brightness at the phase-in speed
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pDceArgs`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid or Null handle passed"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+///     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid combination of parameters"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetSetDynamicContrastEnhancement(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
+    ctl_dce_args_t* pDceArgs                        ///< [in,out] Dynamic Contrast Enhancement arguments
     );
 
 
@@ -6273,6 +6329,27 @@ ctlPowerTelemetryGet(
     ctl_power_telemetry_t* pTelemetryInfo           ///< [out] The overclocking properties for the specified domain.
     );
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Reset all Overclock Settings to stock
+/// 
+/// @details
+///     - Reset all Overclock setting to default using single API call
+///     - This request resets any changes made to GpuFrequencyOffset,
+///       GpuVoltageOffset, PowerLimit, TemperatureLimit, GpuLock
+///     - This Doesn't reset any Fan Curve Changes. It can be reset using
+///       ctlFanSetDefaultMode
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDeviceHandle`
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlOverclockResetToDefault(
+    ctl_device_adapter_handle_t hDeviceHandle       ///< [in][release] Handle to display adapter
+    );
+
 
 #if !defined(__GNUC__)
 #pragma endregion // overclock
@@ -7145,6 +7222,14 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnGetLinkedDisplayAdapters_t)(
 
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetSetDynamicContrastEnhancement 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetDynamicContrastEnhancement_t)(
+    ctl_display_output_handle_t,
+    ctl_dce_args_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for ctlEnumEngineGroups 
 typedef ctl_result_t (CTL_APICALL *ctl_pfnEnumEngineGroups_t)(
     ctl_device_adapter_handle_t,
@@ -7465,6 +7550,13 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnOverclockTemperatureLimitSet_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnPowerTelemetryGet_t)(
     ctl_device_adapter_handle_t,
     ctl_power_telemetry_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlOverclockResetToDefault 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnOverclockResetToDefault_t)(
+    ctl_device_adapter_handle_t
     );
 
 
