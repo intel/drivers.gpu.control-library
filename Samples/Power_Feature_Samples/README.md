@@ -1,1 +1,0 @@
-Sample Application for Power Feature interfaces
