@@ -937,6 +937,7 @@ Display
     * :ref:`ctlLinkDisplayAdapters`
     * :ref:`ctlUnlinkDisplayAdapters`
     * :ref:`ctlGetLinkedDisplayAdapters`
+    * :ref:`ctlGetSetDynamicContrastEnhancement`
 
  
 * Enumerations
@@ -1038,6 +1039,7 @@ Display
     * :ref:`ctl-genlock-args-t`
     * :ref:`ctl-vblank-ts-args-t`
     * :ref:`ctl-lda-args-t`
+    * :ref:`ctl-dce-args-t`
 
 
 Display Functions
@@ -1437,6 +1439,15 @@ ctlGetLinkedDisplayAdapters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenfunction:: ctlGetLinkedDisplayAdapters
+    :project: ControlApi
+
+
+.. _ctlGetSetDynamicContrastEnhancement:
+
+ctlGetSetDynamicContrastEnhancement
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSetDynamicContrastEnhancement
     :project: ControlApi
 
 
@@ -2312,6 +2323,16 @@ ctl_lda_args_t
     :members:
     :undoc-members:
 
+.. _ctl-dce-args-t:
+
+ctl_dce_args_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_dce_args_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
 
  
 
@@ -3114,6 +3135,7 @@ Overclock
     * :ref:`ctlOverclockTemperatureLimitGet`
     * :ref:`ctlOverclockTemperatureLimitSet`
     * :ref:`ctlPowerTelemetryGet`
+    * :ref:`ctlOverclockResetToDefault`
 
  
 * Enumerations
@@ -3287,6 +3309,15 @@ ctlPowerTelemetryGet
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenfunction:: ctlPowerTelemetryGet
+    :project: ControlApi
+
+
+.. _ctlOverclockResetToDefault:
+
+ctlOverclockResetToDefault
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockResetToDefault
     :project: ControlApi
 
 

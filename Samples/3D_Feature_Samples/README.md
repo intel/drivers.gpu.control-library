@@ -1,1 +1,0 @@
-Sample Application for 3D Feature interfaces

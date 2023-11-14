@@ -1,1 +1,0 @@
-Sample Application for Custom modes

@@ -1,1 +1,0 @@
-Sample Application for SCDC reads
