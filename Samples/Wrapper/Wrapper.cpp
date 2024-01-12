@@ -335,7 +335,7 @@ extern "C" {
     }
 
     // Get the list of Intel device handles
-    ctl_device_adapter_handle_t* GetIntelDevices(ctl_api_handle_t hAPIHandle, uint32_t* pAdapterCount)
+    ctl_device_adapter_handle_t* GetDevices(ctl_api_handle_t hAPIHandle, uint32_t* pAdapterCount)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
         ctl_device_adapter_handle_t* hDevices = NULL;
