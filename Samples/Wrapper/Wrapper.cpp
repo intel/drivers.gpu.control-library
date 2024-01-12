@@ -31,41 +31,55 @@ ctl_api_handle_t GAPIHandle;
 
 extern "C" {
 
-    ctl_retro_scaling_caps_t GetRetroScalingCaps(ctl_device_adapter_handle_t hDevice)
+    ctl_result_t GetRetroScalingCaps(ctl_device_adapter_handle_t hDevice, ctl_retro_scaling_caps_t* RetroScalingCaps)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
+        RetroScalingCaps->Size = sizeof(ctl_retro_scaling_caps_t);
 
-        ctl_retro_scaling_caps_t RetroScalingCaps = { 0 };
-        RetroScalingCaps.Size = sizeof(ctl_retro_scaling_caps_t);
+        Result = ctlGetSupportedRetroScalingCapability(hDevice, RetroScalingCaps);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSupportedRetroScalingCapability");
 
-        Result = ctlGetSupportedRetroScalingCapability(hDevice, &RetroScalingCaps);
-        return RetroScalingCaps;
+        cout << "======== GetRetroScalingCaps ========" << endl;
+        cout << "RetroScalingCaps.SupportedRetroScaling: " << RetroScalingCaps->SupportedRetroScaling << endl;
+
+    Exit:
+        return Result;
     }
 
-    ctl_retro_scaling_settings_t GetRetroScalingSettings(ctl_device_adapter_handle_t hDevice)
+    ctl_result_t GetRetroScalingSettings(ctl_device_adapter_handle_t hDevice, ctl_retro_scaling_settings_t* RetroScalingSettings)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
+        RetroScalingSettings->Get = TRUE;
+        RetroScalingSettings->Size = sizeof(ctl_retro_scaling_settings_t);
 
-        ctl_retro_scaling_settings_t RetroScalingSettings = { 0 };
-        RetroScalingSettings.Get = true;
+        Result = ctlGetSetRetroScaling(hDevice, RetroScalingSettings);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetRetroScaling");
+
+        cout << "======== GetRetroScalingSettings ========" << endl;
+        cout << "RetroScalingSettings.Get: " << RetroScalingSettings->Get << endl;
+        cout << "RetroScalingSettings.Enable: " << RetroScalingSettings->Enable << endl;
+        cout << "RetroScalingSettings.RetroScalingType: " << RetroScalingSettings->RetroScalingType << endl;
+
+    Exit:
+        return Result;
+    }
+
+    ctl_result_t SetRetroScalingSettings(ctl_device_adapter_handle_t hDevice, ctl_retro_scaling_settings_t RetroScalingSettings)
+    {
+        ctl_result_t Result = CTL_RESULT_SUCCESS;
+        RetroScalingSettings.Get = FALSE;
         RetroScalingSettings.Size = sizeof(ctl_retro_scaling_settings_t);
 
         Result = ctlGetSetRetroScaling(hDevice, &RetroScalingSettings);
-        return RetroScalingSettings;
-    }
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetRetroScaling");
 
-    bool SetRetroScalingSettings(ctl_device_adapter_handle_t hDevice, ctl_retro_scaling_settings_t retroScalingSettings)
-    {
-        ctl_result_t Result = CTL_RESULT_SUCCESS;
+        cout << "======== SetRetroScalingSettings ========" << endl;
+        cout << "RetroScalingSettings.Get: " << RetroScalingSettings.Get << endl;
+        cout << "RetroScalingSettings.Enable: " << RetroScalingSettings.Enable << endl;
+        cout << "RetroScalingSettings.RetroScalingType: " << RetroScalingSettings.RetroScalingType << endl;
 
-        ctl_retro_scaling_settings_t RetroScalingSettings = { 0 };
-        RetroScalingSettings.Get = false;
-        RetroScalingSettings.Enable = retroScalingSettings.Enable;
-        RetroScalingSettings.RetroScalingType = retroScalingSettings.RetroScalingType;
-        RetroScalingSettings.Size = sizeof(ctl_retro_scaling_settings_t);
-
-        Result = ctlGetSetRetroScaling(hDevice, &RetroScalingSettings);
-        return (Result == CTL_RESULT_SUCCESS);
+    Exit:
+        return Result;
     }
 
     ctl_result_t GetScalingCaps(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_scaling_caps_t* ScalingCaps)
@@ -206,50 +220,13 @@ extern "C" {
         return Result;
     }
 
-    ctl_sharpness_caps_t GetSharpnessCaps(ctl_device_adapter_handle_t hDevice, uint32_t idx)
+    ctl_result_t GetSharpnessCaps(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_sharpness_caps_t* SharpnessCaps)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
 
         ctl_display_output_handle_t* hDisplayOutput = NULL;
         uint32_t DisplayCount = 0;
-
-        ctl_sharpness_caps_t SharpnessCaps = { 0 };
-        SharpnessCaps.Size = sizeof(ctl_sharpness_caps_t);
-
-        // Enumerate all the possible target display's for the adapters
-        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-        if (Result == CTL_RESULT_SUCCESS)
-        {
-            STORE_AND_RESET_ERROR(Result);
-            if (DisplayCount > 0)
-            {
-                hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
-
-                Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-                if (Result == CTL_RESULT_SUCCESS)
-                {
-                    STORE_AND_RESET_ERROR(Result);
-                    if (idx <= DisplayCount)
-                    {
-                        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
-                    }
-                }
-            }
-        }
-
-        CTL_FREE_MEM(hDisplayOutput);
-        return SharpnessCaps;
-    }
-
-    ctl_result_t GetSharpnessSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_sharpness_settings_t* GetSharpness)
-    {
-        ctl_result_t Result = CTL_RESULT_SUCCESS;
-
-        ctl_display_output_handle_t* hDisplayOutput = NULL;
-        uint32_t DisplayCount = 0;
-        ctl_sharpness_caps_t SharpnessCaps = { 0 };
-        GetSharpness->Size = sizeof(ctl_sharpness_settings_t);
-        SharpnessCaps.Size = sizeof(ctl_sharpness_caps_t);
+        SharpnessCaps->Size = sizeof(ctl_sharpness_caps_t);
 
         // Enumerate all the possible target display's for the adapters
         Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
@@ -268,12 +245,40 @@ extern "C" {
         LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
 
         // Get Sharpness caps
-        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
+        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], SharpnessCaps);
         LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSharpnessCaps");
 
-        SharpnessCaps.pFilterProperty = (ctl_sharpness_filter_properties_t*)malloc(SharpnessCaps.NumFilterTypes * sizeof(ctl_sharpness_filter_properties_t));
-        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
-        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSharpnessCaps");
+        cout << "======== GetSharpnessCaps ========" << endl;
+        cout << "SharpnessCaps.SupportedFilterFlags: " << SharpnessCaps->SupportedFilterFlags << endl;
+
+    Exit:
+        CTL_FREE_MEM(hDisplayOutput);
+        return Result;
+    }
+
+    ctl_result_t GetSharpnessSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_sharpness_settings_t* GetSharpness)
+    {
+        ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+        ctl_display_output_handle_t* hDisplayOutput = NULL;
+        uint32_t DisplayCount = 0;
+        GetSharpness->Size = sizeof(ctl_sharpness_settings_t);
+
+        // Enumerate all the possible target display's for the adapters
+        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        if (DisplayCount <= 0)
+        {
+            printf("Invalid Display Count\n");
+            goto Exit;
+        }
+
+        hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
 
         Result = ctlGetCurrentSharpness(hDisplayOutput[idx], GetSharpness);
         LOG_AND_EXIT_ON_ERROR(Result, "ctlGetCurrentSharpness");
@@ -294,8 +299,6 @@ extern "C" {
 
         ctl_display_output_handle_t* hDisplayOutput = NULL;
         uint32_t DisplayCount = 0;
-        ctl_sharpness_caps_t SharpnessCaps = { 0 };
-        SharpnessCaps.Size = sizeof(ctl_sharpness_caps_t);
 
         // Enumerate all the possible target display's for the adapters
         Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
@@ -312,14 +315,6 @@ extern "C" {
 
         Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
         LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
-
-        // Get Sharpness caps
-        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
-        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSharpnessCaps");
-
-        SharpnessCaps.pFilterProperty = (ctl_sharpness_filter_properties_t*)malloc(SharpnessCaps.NumFilterTypes * sizeof(ctl_sharpness_filter_properties_t));
-        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
-        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSharpnessCaps");
 
         cout << "======== SetSharpnessSettings ========" << endl;
         cout << "SetSharpness.Enable: " << SetSharpness.Enable << endl;
