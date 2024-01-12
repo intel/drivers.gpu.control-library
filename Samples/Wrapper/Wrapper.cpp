@@ -158,13 +158,6 @@ extern "C" {
         ctl_scaling_caps_t ScalingCaps = { 0 };
         bool ModeSet;
 
-        cout << "======== SetScalingSettings ========" << endl;
-        cout << "ScalingSetting.Enable: " << ScalingSetting.Enable << endl;
-        cout << "ScalingSetting.ScalingType: " << ScalingSetting.ScalingType << endl;
-        cout << "ScalingSetting.HardwareModeSet: " << ScalingSetting.HardwareModeSet << endl;
-        cout << "ScalingSetting.CustomScalingX: " << ScalingSetting.CustomScalingX << endl;
-        cout << "ScalingSetting.CustomScalingY: " << ScalingSetting.CustomScalingY << endl;
-
         Result = GetScalingCaps(hDevice, idx, &ScalingCaps);
         LOG_AND_EXIT_ON_ERROR(Result, "GetScalingCaps");
 
@@ -193,6 +186,13 @@ extern "C" {
                 ModeSet = ((TRUE == ScalingSetting.Enable) && (CTL_SCALING_TYPE_FLAG_CUSTOM == ScalingSetting.ScalingType)) ? FALSE : TRUE;
                 ScalingSetting.HardwareModeSet = (TRUE == ModeSet) ? TRUE : FALSE;
             }
+
+            cout << "======== SetScalingSettings ========" << endl;
+            cout << "ScalingSetting.Enable: " << ScalingSetting.Enable << endl;
+            cout << "ScalingSetting.ScalingType: " << ScalingSetting.ScalingType << endl;
+            cout << "ScalingSetting.HardwareModeSet: " << ScalingSetting.HardwareModeSet << endl;
+            cout << "ScalingSetting.CustomScalingX: " << ScalingSetting.CustomScalingX << endl;
+            cout << "ScalingSetting.CustomScalingY: " << ScalingSetting.CustomScalingY << endl;
         }
 
         Result = ctlSetCurrentScaling(hDisplayOutput[idx], &ScalingSetting);
@@ -294,11 +294,6 @@ extern "C" {
         ctl_sharpness_caps_t SharpnessCaps = { 0 };
         SharpnessCaps.Size = sizeof(ctl_sharpness_caps_t);
 
-        cout << "======== SetSharpnessSettings ========" << endl;
-        cout << "SetSharpness.Enable: " << SetSharpness.Enable << endl;
-        cout << "SetSharpness.FilterType: " << SetSharpness.FilterType << endl;
-        cout << "SetSharpness.Intensity: " << SetSharpness.Intensity << endl;
-
         // Enumerate all the possible target display's for the adapters
         Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
         LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
@@ -322,6 +317,11 @@ extern "C" {
         SharpnessCaps.pFilterProperty = (ctl_sharpness_filter_properties_t*)malloc(SharpnessCaps.NumFilterTypes * sizeof(ctl_sharpness_filter_properties_t));
         Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
         LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSharpnessCaps");
+
+        cout << "======== SetSharpnessSettings ========" << endl;
+        cout << "SetSharpness.Enable: " << SetSharpness.Enable << endl;
+        cout << "SetSharpness.FilterType: " << SetSharpness.FilterType << endl;
+        cout << "SetSharpness.Intensity: " << SetSharpness.Intensity << endl;
 
         Result = ctlSetCurrentSharpness(hDisplayOutput[idx], &SetSharpness);
         LOG_AND_EXIT_ON_ERROR(Result, "ctlSetCurrentSharpness");
