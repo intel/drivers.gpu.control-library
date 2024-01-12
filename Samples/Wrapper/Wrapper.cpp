@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
-#include <sstream>
+using namespace std;
 
 #define CTL_APIEXPORT // caller of control API DLL shall define this before
                       // including igcl_api.h
@@ -48,7 +48,6 @@ extern "C" {
 
         ctl_retro_scaling_settings_t RetroScalingSettings = { 0 };
         RetroScalingSettings.Get = true;
-        RetroScalingSettings.RetroScalingType = RetroScalingSettings.RetroScalingType | CTL_RETRO_SCALING_TYPE_FLAG_INTEGER;
         RetroScalingSettings.Size = sizeof(ctl_retro_scaling_settings_t);
 
         Result = ctlGetSetRetroScaling(hDevice, &RetroScalingSettings);
@@ -60,6 +59,7 @@ extern "C" {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
 
         ctl_retro_scaling_settings_t RetroScalingSettings = { 0 };
+        RetroScalingSettings.Get = false;
         RetroScalingSettings.Enable = retroScalingSettings.Enable;
         RetroScalingSettings.RetroScalingType = retroScalingSettings.RetroScalingType;
         RetroScalingSettings.Size = sizeof(ctl_retro_scaling_settings_t);
@@ -68,141 +68,139 @@ extern "C" {
         return (Result == CTL_RESULT_SUCCESS);
     }
 
-    ctl_scaling_caps_t GetScalingCaps(ctl_device_adapter_handle_t hDevice, uint32_t idx)
+    ctl_result_t GetScalingCaps(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_scaling_caps_t* ScalingCaps)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
 
         ctl_display_output_handle_t* hDisplayOutput = NULL;
         uint32_t DisplayCount = 0;
-
-        ctl_scaling_caps_t ScalingCaps = { 0 };
-        ScalingCaps = { 0 };
-        ScalingCaps.Size = sizeof(ctl_scaling_caps_t);
+        ScalingCaps->Size = sizeof(ctl_scaling_caps_t);
 
         // Enumerate all the possible target display's for the adapters
         Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-        if (Result == CTL_RESULT_SUCCESS)
-        {
-            STORE_AND_RESET_ERROR(Result);
-            if (DisplayCount > 0)
-            {
-                hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
 
-                Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-                if (Result == CTL_RESULT_SUCCESS)
-                {
-                    STORE_AND_RESET_ERROR(Result);
-                    if (idx <= DisplayCount)
-                    {
-                        Result = ctlGetSupportedScalingCapability(hDisplayOutput[idx], &ScalingCaps);
-                    }
-                }
-            }
+        if (DisplayCount <= 0)
+        {
+            printf("Invalid Display Count\n");
+            goto Exit;
         }
 
+        hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        Result = ctlGetSupportedScalingCapability(hDisplayOutput[idx], ScalingCaps);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSupportedScalingCapability");
+
+        cout << "======== GetScalingCaps ========" << endl;
+        cout << "ScalingCaps.SupportedScaling: " << ScalingCaps->SupportedScaling << endl;
+
+    Exit:
         CTL_FREE_MEM(hDisplayOutput);
-        return ScalingCaps;
+        return Result;
     }
 
-    ctl_scaling_settings_t GetScalingSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx)
+    ctl_result_t GetScalingSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_scaling_settings_t* ScalingSetting)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
 
         ctl_display_output_handle_t* hDisplayOutput = NULL;
         uint32_t DisplayCount = 0;
+        ctl_scaling_caps_t ScalingCaps = { 0 };
 
-        ctl_scaling_caps_t ScalingCaps = GetScalingCaps(hDevice, idx);
-        ctl_scaling_settings_t ScalingSetting = { 0 };
-        ScalingSetting.Size = sizeof(ctl_scaling_settings_t);
+        Result = GetScalingCaps(hDevice, idx, &ScalingCaps);
+        LOG_AND_EXIT_ON_ERROR(Result, "GetScalingCaps");
 
-        // fill custom scaling details only if it is supported
-        if (0x1F == ScalingCaps.SupportedScaling)
+        // Enumerate all the possible target display's for the adapters
+        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        if (DisplayCount <= 0)
         {
-            // Enumerate all the possible target display's for the adapters
-            Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-            if (Result == CTL_RESULT_SUCCESS)
-            {
-                STORE_AND_RESET_ERROR(Result);
-                if (DisplayCount > 0)
-                {
-                    hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
-
-                    Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-                    if (Result == CTL_RESULT_SUCCESS)
-                    {
-                        STORE_AND_RESET_ERROR(Result);
-                        if (idx <= DisplayCount)
-                        {
-                            Result = ctlGetCurrentScaling(hDisplayOutput[idx], &ScalingSetting);
-                        }
-                    }
-                }
-            }
+            printf("Invalid Display Count\n");
+            goto Exit;
         }
 
+        hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        if (0 != ScalingCaps.SupportedScaling)
+        {
+            ScalingSetting->Size = sizeof(ctl_scaling_settings_t);
+            Result = ctlGetCurrentScaling(hDisplayOutput[idx], ScalingSetting);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetCurrentScaling");
+
+            cout << "======== GetScalingSettings ========" << endl;
+            cout << "ScalingSetting.Enable: " << ScalingSetting->Enable << endl;
+            cout << "ScalingSetting.ScalingType: " << ScalingSetting->ScalingType << endl;
+            cout << "ScalingSetting.HardwareModeSet: " << ScalingSetting->HardwareModeSet << endl;
+            cout << "ScalingSetting.CustomScalingX: " << ScalingSetting->CustomScalingX << endl;
+            cout << "ScalingSetting.CustomScalingY: " << ScalingSetting->CustomScalingY << endl;
+        }
+
+    Exit:
         CTL_FREE_MEM(hDisplayOutput);
-        return ScalingSetting;
+        return Result;
     }
 
-    bool SetScalingSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_scaling_settings_t scalingSettings)
+    ctl_result_t SetScalingSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_scaling_settings_t ScalingSetting)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
 
         ctl_display_output_handle_t* hDisplayOutput = NULL;
         uint32_t DisplayCount = 0;
-
-        ctl_scaling_caps_t ScalingCaps = GetScalingCaps(hDevice, idx);
+        ctl_scaling_caps_t ScalingCaps = { 0 };
         bool ModeSet;
 
-        // fill custom scaling details only if it is supported
-        if (0x1F == ScalingCaps.SupportedScaling)
+        cout << "======== SetScalingSettings ========" << endl;
+        cout << "ScalingSetting.Enable: " << ScalingSetting.Enable << endl;
+        cout << "ScalingSetting.ScalingType: " << ScalingSetting.ScalingType << endl;
+        cout << "ScalingSetting.HardwareModeSet: " << ScalingSetting.HardwareModeSet << endl;
+        cout << "ScalingSetting.CustomScalingX: " << ScalingSetting.CustomScalingX << endl;
+        cout << "ScalingSetting.CustomScalingY: " << ScalingSetting.CustomScalingY << endl;
+
+        Result = GetScalingCaps(hDevice, idx, &ScalingCaps);
+        LOG_AND_EXIT_ON_ERROR(Result, "GetScalingCaps");
+
+        // Enumerate all the possible target display's for the adapters
+        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        if (DisplayCount <= 0)
         {
-            // Enumerate all the possible target display's for the adapters
-            Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-            if (Result == CTL_RESULT_SUCCESS)
+            printf("Invalid Display Count\n");
+            goto Exit;
+        }
+
+        hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        if (0 != ScalingCaps.SupportedScaling)
+        {
+            // fill custom scaling details only if it is supported
+            if (0x1F == ScalingCaps.SupportedScaling)
             {
-                STORE_AND_RESET_ERROR(Result);
-                if (DisplayCount > 0)
-                {
-                    hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
-
-                    Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-                    if (Result == CTL_RESULT_SUCCESS)
-                    {
-                        STORE_AND_RESET_ERROR(Result);
-                        if (idx <= DisplayCount)
-                        {
-                            // check if hardware modeset required to apply custom scaling
-                            ModeSet = ((TRUE == scalingSettings.Enable) && (CTL_SCALING_TYPE_FLAG_CUSTOM == scalingSettings.ScalingType)) ? FALSE : TRUE;
-
-                            // filling custom scaling details
-                            ctl_scaling_settings_t ScalingSetting = { 0 };
-                            ScalingSetting.Size = sizeof(ctl_scaling_settings_t);
-                            ScalingSetting.Enable = scalingSettings.Enable;
-                            ScalingSetting.ScalingType = scalingSettings.ScalingType;
-                            ScalingSetting.CustomScalingX = scalingSettings.CustomScalingX;
-                            ScalingSetting.CustomScalingY = scalingSettings.CustomScalingY;
-
-                            // Display values in a message box
-                            std::ostringstream oss;
-                            oss << "Enable: " << ScalingSetting.Enable << "\n"
-                                << "ScalingType: " << ScalingSetting.ScalingType << "\n"
-                                << "Size: " << ScalingSetting.Size << "\n"
-                                << "HardwareModeSet: " << ScalingSetting.HardwareModeSet << "\n"
-                                << "CustomScalingX: " << ScalingSetting.CustomScalingX << "\n"
-                                << "CustomScalingY: " << ScalingSetting.CustomScalingY;
-
-                            MessageBox(NULL, oss.str().c_str(), "Scaling Settings", MB_OK);
-
-                            Result = ctlSetCurrentScaling(hDisplayOutput[idx], &ScalingSetting);
-                        }
-                    }
-                }
+                // check if hardware modeset required to apply custom scaling
+                ModeSet = ((TRUE == ScalingSetting.Enable) && (CTL_SCALING_TYPE_FLAG_CUSTOM == ScalingSetting.ScalingType)) ? FALSE : TRUE;
+                ScalingSetting.HardwareModeSet = (TRUE == ModeSet) ? TRUE : FALSE;
             }
         }
 
+        Result = ctlSetCurrentScaling(hDisplayOutput[idx], &ScalingSetting);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlSetCurrentScaling");
+
+    Exit:
         CTL_FREE_MEM(hDisplayOutput);
-        return (Result == CTL_RESULT_SUCCESS);
+        return Result;
     }
 
     ctl_sharpness_caps_t GetSharpnessCaps(ctl_device_adapter_handle_t hDevice, uint32_t idx)
@@ -240,77 +238,97 @@ extern "C" {
         return SharpnessCaps;
     }
 
-    ctl_sharpness_settings_t GetSharpnessSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx)
+    ctl_result_t GetSharpnessSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_sharpness_settings_t* GetSharpness)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
 
         ctl_display_output_handle_t* hDisplayOutput = NULL;
         uint32_t DisplayCount = 0;
-
-        ctl_sharpness_settings_t GetSharpness = { 0 };
-        GetSharpness.Size = sizeof(ctl_sharpness_settings_t);
+        ctl_sharpness_caps_t SharpnessCaps = { 0 };
+        GetSharpness->Size = sizeof(ctl_sharpness_settings_t);
+        SharpnessCaps.Size = sizeof(ctl_sharpness_caps_t);
 
         // Enumerate all the possible target display's for the adapters
         Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-        if (Result == CTL_RESULT_SUCCESS)
-        {
-            STORE_AND_RESET_ERROR(Result);
-            if (DisplayCount > 0)
-            {
-                hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
 
-                Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-                if (Result == CTL_RESULT_SUCCESS)
-                {
-                    STORE_AND_RESET_ERROR(Result);
-                    if (idx <= DisplayCount)
-                    {
-                        Result = ctlGetCurrentSharpness(hDisplayOutput[idx], &GetSharpness);
-                    }
-                }
-            }
+        if (DisplayCount <= 0)
+        {
+            printf("Invalid Display Count\n");
+            goto Exit;
         }
 
+        hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        // Get Sharpness caps
+        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSharpnessCaps");
+
+        SharpnessCaps.pFilterProperty = (ctl_sharpness_filter_properties_t*)malloc(SharpnessCaps.NumFilterTypes * sizeof(ctl_sharpness_filter_properties_t));
+        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSharpnessCaps");
+
+        Result = ctlGetCurrentSharpness(hDisplayOutput[idx], GetSharpness);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetCurrentSharpness");
+
+        cout << "======== GetSharpnessSettings ========" << endl;
+        cout << "GetSharpness.Enable: " << GetSharpness->Enable << endl;
+        cout << "GetSharpness.FilterType: " << GetSharpness->FilterType << endl;
+        cout << "GetSharpness.Intensity: " << GetSharpness->Intensity << endl;
+
+    Exit:
         CTL_FREE_MEM(hDisplayOutput);
-        return GetSharpness;
+        return Result;
     }
 
-    bool SetSharpnessSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_sharpness_settings_t sharpnessSettings)
+    ctl_result_t SetSharpnessSettings(ctl_device_adapter_handle_t hDevice, uint32_t idx, ctl_sharpness_settings_t SetSharpness)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
 
         ctl_display_output_handle_t* hDisplayOutput = NULL;
         uint32_t DisplayCount = 0;
+        ctl_sharpness_caps_t SharpnessCaps = { 0 };
+        SharpnessCaps.Size = sizeof(ctl_sharpness_caps_t);
 
-        ctl_sharpness_settings_t SetSharpness = { 0 };
-        SetSharpness.FilterType = sharpnessSettings.FilterType;
-        SetSharpness.Enable = sharpnessSettings.Enable;
-        SetSharpness.Intensity = sharpnessSettings.Intensity; // Current Implementation is to support 0-100.
-        SetSharpness.Size = sizeof(ctl_sharpness_settings_t);
+        cout << "======== SetSharpnessSettings ========" << endl;
+        cout << "SetSharpness.Enable: " << SetSharpness.Enable << endl;
+        cout << "SetSharpness.FilterType: " << SetSharpness.FilterType << endl;
+        cout << "SetSharpness.Intensity: " << SetSharpness.Intensity << endl;
 
         // Enumerate all the possible target display's for the adapters
         Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-        if (Result == CTL_RESULT_SUCCESS)
-        {
-            STORE_AND_RESET_ERROR(Result);
-            if (DisplayCount > 0)
-            {
-                hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
 
-                Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
-                if (Result == CTL_RESULT_SUCCESS)
-                {
-                    STORE_AND_RESET_ERROR(Result);
-                    if (idx <= DisplayCount)
-                    {
-                        Result = ctlSetCurrentSharpness(hDisplayOutput[idx], &SetSharpness);
-                    }
-                }
-            }
+        if (DisplayCount <= 0)
+        {
+            printf("Invalid Display Count\n");
+            goto Exit;
         }
 
+        hDisplayOutput = (ctl_display_output_handle_t*)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+        Result = ctlEnumerateDisplayOutputs(hDevice, &DisplayCount, hDisplayOutput);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        // Get Sharpness caps
+        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSharpnessCaps");
+
+        SharpnessCaps.pFilterProperty = (ctl_sharpness_filter_properties_t*)malloc(SharpnessCaps.NumFilterTypes * sizeof(ctl_sharpness_filter_properties_t));
+        Result = ctlGetSharpnessCaps(hDisplayOutput[idx], &SharpnessCaps);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSharpnessCaps");
+
+        Result = ctlSetCurrentSharpness(hDisplayOutput[idx], &SetSharpness);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlSetCurrentSharpness");
+
+    Exit:
         CTL_FREE_MEM(hDisplayOutput);
-        return (Result == CTL_RESULT_SUCCESS);
+        return Result;
     }
 
     // Get the list of Intel device handles
@@ -349,6 +367,9 @@ extern "C" {
 
     ctl_api_handle_t Init()
     {
+        AllocConsole();
+        freopen("CONOUT$", "w", stdout); // Redirect stdout to console
+
         ctl_result_t Result = CTL_RESULT_SUCCESS;
 
         ctl_init_args_t CtlInitArgs;
