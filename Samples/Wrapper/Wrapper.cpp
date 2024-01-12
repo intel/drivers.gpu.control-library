@@ -110,6 +110,7 @@ extern "C" {
         ctl_display_output_handle_t* hDisplayOutput = NULL;
         uint32_t DisplayCount = 0;
         ctl_scaling_caps_t ScalingCaps = { 0 };
+        ScalingSetting->Size = sizeof(ctl_scaling_settings_t);
 
         Result = GetScalingCaps(hDevice, idx, &ScalingCaps);
         LOG_AND_EXIT_ON_ERROR(Result, "GetScalingCaps");
@@ -132,7 +133,6 @@ extern "C" {
 
         if (0 != ScalingCaps.SupportedScaling)
         {
-            ScalingSetting->Size = sizeof(ctl_scaling_settings_t);
             Result = ctlGetCurrentScaling(hDisplayOutput[idx], ScalingSetting);
             LOG_AND_EXIT_ON_ERROR(Result, "ctlGetCurrentScaling");
 
@@ -179,6 +179,9 @@ extern "C" {
 
         if (0 != ScalingCaps.SupportedScaling)
         {
+            // filling custom scaling details
+            ScalingSetting.Size = sizeof(ctl_scaling_settings_t);
+
             // fill custom scaling details only if it is supported
             if (0x1F == ScalingCaps.SupportedScaling)
             {
