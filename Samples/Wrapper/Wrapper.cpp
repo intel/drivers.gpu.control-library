@@ -26,10 +26,87 @@ using namespace std;
 #include "igcl_api.h"
 #include "GenericIGCLApp.h"
 
-ctl_result_t GResult = CTL_RESULT_SUCCESS;
-ctl_api_handle_t GAPIHandle;
+typedef struct ctl_telemetry_data
+{
+    // GPU TDP
+    bool gpuEnergySupported = false;
+    double gpuEnergyValue;
+
+    // GPU Voltage
+    bool gpuVoltageSupported = false;
+    double gpuVoltagValue;
+
+    // GPU Core Frequency
+    bool gpuCurrentClockFrequencySupported = false;
+    double gpuCurrentClockFrequencyValue;
+
+    // GPU Core Temperature
+    bool gpuCurrentTemperatureSupported = false;
+    double gpuCurrentTemperatureValue;
+
+    // GPU Usage
+    bool globalActivitySupported = false;
+    double globalActivityValue;
+
+    // Render Engine Usage
+    bool renderComputeActivitySupported = false;
+    double renderComputeActivityValue;
+
+    // Media Engine Usage
+    bool mediaActivitySupported = false;
+    double mediaActivityValue;
+
+    // VRAM Power Consumption
+    bool vramEnergySupported = false;
+    double vramEnergyValue;
+
+    // VRAM Voltage
+    bool vramVoltageSupported = false;
+    double vramVoltageValue;
+
+    // VRAM Frequency
+    bool vramCurrentClockFrequencySupported = false;
+    double vramCurrentClockFrequencyValue;
+
+    // VRAM Read Bandwidth
+    bool vramReadBandwidthSupported = false;
+    double vramReadBandwidthValue;
+
+    // VRAM Write Bandwidth
+    bool vramWriteBandwidthSupported = false;
+    double vramWriteBandwidthValue;
+
+    // VRAM Temperature
+    bool vramCurrentTemperatureSupported = false;
+    double vramCurrentTemperatureValue;
+
+    // Fanspeed (n Fans)
+    bool fanSpeedSupported = false;
+    double fanSpeedValue;
+};
 
 extern "C" {
+
+    ctl_api_handle_t hAPIHandle;
+    ctl_device_adapter_handle_t* hDevices;
+
+    double deltatimestamp = 0;
+    double prevtimestamp = 0;
+    double curtimestamp = 0;
+    double prevgpuEnergyCounter = 0;
+    double curgpuEnergyCounter = 0;
+    double curglobalActivityCounter = 0;
+    double prevglobalActivityCounter = 0;
+    double currenderComputeActivityCounter = 0;
+    double prevrenderComputeActivityCounter = 0;
+    double curmediaActivityCounter = 0;
+    double prevmediaActivityCounter = 0;
+    double curvramEnergyCounter = 0;
+    double prevvramEnergyCounter = 0;
+    double curvramReadBandwidthCounter = 0;
+    double prevvramReadBandwidthCounter = 0;
+    double curvramWriteBandwidthCounter = 0;
+    double prevvramWriteBandwidthCounter = 0;
 
     ctl_result_t GetRetroScalingCaps(ctl_device_adapter_handle_t hDevice, ctl_retro_scaling_caps_t* RetroScalingCaps)
     {
@@ -330,10 +407,9 @@ extern "C" {
     }
 
     // Get the list of Intel device handles
-    ctl_device_adapter_handle_t* GetDevices(ctl_api_handle_t hAPIHandle, uint32_t* pAdapterCount)
+    ctl_device_adapter_handle_t* GetDevices(uint32_t* pAdapterCount)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
-        ctl_device_adapter_handle_t* hDevices = NULL;
 
         // Get the number of Intel Adapters
         Result = ctlEnumerateDevices(hAPIHandle, pAdapterCount, hDevices);
@@ -390,36 +466,133 @@ extern "C" {
         return Result;
     }
 
-    ctl_api_handle_t Init()
+    ctl_result_t GetTelemetryData(ctl_device_adapter_handle_t hDevice, ctl_telemetry_data* TelemetryData)
     {
-        AllocConsole();
-        freopen("CONOUT$", "w", stdout); // Redirect stdout to console
-
         ctl_result_t Result = CTL_RESULT_SUCCESS;
+        ctl_power_telemetry_t pPowerTelemetry = {};
+        pPowerTelemetry.Size = sizeof(ctl_power_telemetry_t);
 
-        ctl_init_args_t CtlInitArgs;
-
-        ZeroMemory(&CtlInitArgs, sizeof(ctl_init_args_t));
-
-        CtlInitArgs.AppVersion = CTL_MAKE_VERSION(CTL_IMPL_MAJOR_VERSION, CTL_IMPL_MINOR_VERSION);
-        CtlInitArgs.flags = 0;
-        CtlInitArgs.Size = sizeof(CtlInitArgs);
-        CtlInitArgs.Version = 0;
-
-        Result = ctlInit(&CtlInitArgs, &GAPIHandle);
-
+        Result = ctlPowerTelemetryGet(hDevice, &pPowerTelemetry);
         if (Result != CTL_RESULT_SUCCESS)
+            goto Exit;
+
+        prevtimestamp = curtimestamp;
+        curtimestamp = pPowerTelemetry.timeStamp.value.datadouble;
+        deltatimestamp = curtimestamp - prevtimestamp;
+
+        if (pPowerTelemetry.gpuEnergyCounter.bSupported)
         {
-            // Handle error
+            TelemetryData->gpuEnergySupported = true;
+            prevgpuEnergyCounter = curgpuEnergyCounter;
+            curgpuEnergyCounter = pPowerTelemetry.gpuEnergyCounter.value.datadouble;
+
+            TelemetryData->gpuEnergyValue = (curgpuEnergyCounter - prevgpuEnergyCounter) / deltatimestamp;
         }
 
-        // Initialization successful
-        return GAPIHandle;
+        TelemetryData->gpuVoltageSupported = pPowerTelemetry.gpuVoltage.bSupported;
+        TelemetryData->gpuVoltagValue = pPowerTelemetry.gpuVoltage.value.datadouble;
+
+        TelemetryData->gpuCurrentClockFrequencySupported = pPowerTelemetry.gpuCurrentClockFrequency.bSupported;
+        TelemetryData->gpuCurrentClockFrequencyValue = pPowerTelemetry.gpuCurrentClockFrequency.value.datadouble;
+
+        TelemetryData->gpuCurrentTemperatureSupported = pPowerTelemetry.gpuCurrentTemperature.bSupported;
+        TelemetryData->gpuCurrentTemperatureValue = pPowerTelemetry.gpuCurrentTemperature.value.datadouble;
+
+        if (pPowerTelemetry.globalActivityCounter.bSupported)
+        {
+            TelemetryData->globalActivitySupported = true;
+            prevglobalActivityCounter = curglobalActivityCounter;
+            curglobalActivityCounter = pPowerTelemetry.globalActivityCounter.value.datadouble;
+
+            TelemetryData->globalActivityValue = 100 * (curglobalActivityCounter - prevglobalActivityCounter) / deltatimestamp;
+        }
+
+        if (pPowerTelemetry.renderComputeActivityCounter.bSupported)
+        {
+            TelemetryData->renderComputeActivitySupported = true;
+            prevrenderComputeActivityCounter = currenderComputeActivityCounter;
+            currenderComputeActivityCounter = pPowerTelemetry.renderComputeActivityCounter.value.datadouble;
+
+            TelemetryData->renderComputeActivityValue = 100 * (currenderComputeActivityCounter - prevrenderComputeActivityCounter) / deltatimestamp;
+        }
+
+        if (pPowerTelemetry.mediaActivityCounter.bSupported)
+        {
+            TelemetryData->mediaActivitySupported = true;
+            prevmediaActivityCounter = curmediaActivityCounter;
+            curmediaActivityCounter = pPowerTelemetry.mediaActivityCounter.value.datadouble;
+
+            TelemetryData->mediaActivityValue = 100 * (curmediaActivityCounter - prevmediaActivityCounter) / deltatimestamp;
+        }
+
+        if (pPowerTelemetry.vramEnergyCounter.bSupported)
+        {
+            TelemetryData->vramEnergySupported = true;
+            prevvramEnergyCounter = curvramEnergyCounter;
+            curvramEnergyCounter = pPowerTelemetry.vramEnergyCounter.value.datadouble;
+
+            TelemetryData->vramEnergyValue = (curvramEnergyCounter - prevvramEnergyCounter) / deltatimestamp;
+        }
+
+        TelemetryData->vramVoltageSupported = pPowerTelemetry.vramVoltage.bSupported;
+        TelemetryData->vramVoltageValue = pPowerTelemetry.vramVoltage.value.datadouble;
+
+        TelemetryData->vramCurrentClockFrequencySupported = pPowerTelemetry.vramCurrentClockFrequency.bSupported;
+        TelemetryData->vramCurrentClockFrequencyValue = pPowerTelemetry.vramCurrentClockFrequency.value.datadouble;
+
+        if (pPowerTelemetry.vramReadBandwidthCounter.bSupported)
+        {
+            TelemetryData->vramReadBandwidthSupported = true;
+            prevvramReadBandwidthCounter = curvramReadBandwidthCounter;
+            curvramReadBandwidthCounter = pPowerTelemetry.vramReadBandwidthCounter.value.datadouble;
+
+            TelemetryData->vramReadBandwidthValue = (curvramReadBandwidthCounter - prevvramReadBandwidthCounter) / deltatimestamp;
+        }
+
+        if (pPowerTelemetry.vramWriteBandwidthCounter.bSupported)
+        {
+            TelemetryData->vramWriteBandwidthSupported = true;
+            prevvramWriteBandwidthCounter = curvramWriteBandwidthCounter;
+            curvramWriteBandwidthCounter = pPowerTelemetry.vramWriteBandwidthCounter.value.datadouble;
+
+            TelemetryData->vramWriteBandwidthValue = (curvramWriteBandwidthCounter - prevvramWriteBandwidthCounter) / deltatimestamp;
+        }
+
+        TelemetryData->vramCurrentTemperatureSupported = pPowerTelemetry.vramCurrentTemperature.bSupported;
+        TelemetryData->vramCurrentTemperatureValue = pPowerTelemetry.vramCurrentTemperature.value.datadouble;
+
+        TelemetryData->fanSpeedSupported = pPowerTelemetry.fanSpeed[0].bSupported;
+        TelemetryData->fanSpeedValue = pPowerTelemetry.fanSpeed[0].value.datadouble;
+
+    Exit:
+    return Result;
     }
 
-    bool Terminate()
+    ctl_result_t IntializeIgcl()
     {
-        ctlClose(GAPIHandle);
-        return GResult;
+        ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+        ctl_init_args_t ctlInitArgs;
+        ctlInitArgs.AppVersion = CTL_MAKE_VERSION(CTL_IMPL_MAJOR_VERSION, CTL_IMPL_MINOR_VERSION);
+        ctlInitArgs.flags = CTL_INIT_FLAG_USE_LEVEL_ZERO;
+        ctlInitArgs.Size = sizeof(ctlInitArgs);
+        ctlInitArgs.Version = 0;
+        ZeroMemory(&ctlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
+        Result = ctlInit(&ctlInitArgs, &hAPIHandle);
+
+        return Result;
+    }
+
+    void CloseIgcl()
+    {
+        ctlClose(hAPIHandle);
+
+        if (hDevices != nullptr)
+        {
+            free(hDevices);
+            hDevices = nullptr;
+        }
     }
 }
