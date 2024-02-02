@@ -351,19 +351,40 @@ int main()
     CtlInitArgs.Version    = 0;
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     // Initialization successful
     // Get the list of Intel Adapters
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "hDevices");
 
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     Result = EnumerateTargetDisplays(hDisplayOutput, AdapterCount, hDevices);
 

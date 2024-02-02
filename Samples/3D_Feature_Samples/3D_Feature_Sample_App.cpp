@@ -908,13 +908,29 @@ int main()
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     if (CTL_RESULT_SUCCESS == Result)
     {
         // Initialization successful
         // Get the list of Intel Adapters
-        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        try
+        {
+            Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+        }
+        catch (const std::bad_array_new_length &e)
+        {
+            printf("%s \n", e.what());
+        }
 
         if (CTL_RESULT_SUCCESS == Result)
         {
@@ -924,12 +940,20 @@ int main()
                 return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
             }
 
-            Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+            try
+            {
+                Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+            }
+            catch (const std::bad_array_new_length &e)
+            {
+                printf("%s \n", e.what());
+            }
         }
         if (CTL_RESULT_SUCCESS != Result)
         {
             printf("ctlEnumerateDevices returned failure code: 0x%X\n", Result);
-            goto free_exit;
+            goto Exit;
         }
 
         for (Index = 0; Index < AdapterCount; Index++)
@@ -937,7 +961,14 @@ int main()
             if (CTL_RESULT_SUCCESS == Result)
             {
 
-                Result = CtlGet3DFeatureCaps(hDevices[Index]);
+                try
+                {
+                    Result = CtlGet3DFeatureCaps(hDevices[Index]);
+                }
+                catch (const std::bad_array_new_length &e)
+                {
+                    printf("%s \n", e.what());
+                }
 
                 if (CTL_RESULT_SUCCESS != Result)
                 {
@@ -991,7 +1022,7 @@ int main()
     {
         STORE_RESET_ERROR(Result);
     }
-free_exit:
+Exit:
 
     ctlClose(hAPIHandle);
 

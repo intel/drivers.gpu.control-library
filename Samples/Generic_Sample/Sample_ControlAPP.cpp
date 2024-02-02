@@ -179,12 +179,28 @@ ctl_result_t CtlSharpnessTest(ctl_display_output_handle_t hDisplayOutput)
             }
         }
     }
-    if (Result == CTL_RESULT_SUCCESS && SharpnessCaps.SupportedFilterFlags == CTL_SHARPNESS_FILTER_TYPE_FLAG_NON_ADAPTIVE) // This Check is to be revisited when we have Adaptive Support
+    if ((Result == CTL_RESULT_SUCCESS) &&
+        ((SharpnessCaps.SupportedFilterFlags == CTL_SHARPNESS_FILTER_TYPE_FLAG_NON_ADAPTIVE) || (SharpnessCaps.SupportedFilterFlags == CTL_SHARPNESS_FILTER_TYPE_FLAG_ADAPTIVE)))
     {
         // SetSharpness
         if (NULL != hDisplayOutput)
         {
-            Result = ctlSetCurrentSharpness(hDisplayOutput, &SetSharpness);
+            if (SharpnessCaps.SupportedFilterFlags == CTL_SHARPNESS_FILTER_TYPE_FLAG_NON_ADAPTIVE)
+            {
+                SetSharpness.FilterType = CTL_SHARPNESS_FILTER_TYPE_FLAG_NON_ADAPTIVE;
+            }
+            else if (SharpnessCaps.SupportedFilterFlags == CTL_SHARPNESS_FILTER_TYPE_FLAG_ADAPTIVE)
+            {
+                SetSharpness.FilterType = CTL_SHARPNESS_FILTER_TYPE_FLAG_ADAPTIVE;
+            }
+            else
+            {
+                Result = CTL_RESULT_ERROR_INVALID_SHARPNESS_FILTER_FLAG;
+                printf("Result: 0x%X FilterType %d", Result, SharpnessCaps.SupportedFilterFlags);
+                return Result;
+            }
+            SetSharpness.FilterType = SharpnessCaps.SupportedFilterFlags;
+            Result                  = ctlSetCurrentSharpness(hDisplayOutput, &SetSharpness);
 
             if (Result != CTL_RESULT_SUCCESS)
             {
@@ -769,6 +785,144 @@ void PrintDetailsFromSysman(ctl_device_adapter_handle_t hDevice)
     return;
 }
 
+ctl_result_t CtlAdapterTesting(void)
+{
+    ctl_result_t Result                                       = CTL_RESULT_SUCCESS;
+    ctl_device_adapter_handle_t *hDevices                     = nullptr;
+    ctl_display_output_handle_t *hDisplayOutput               = nullptr;
+    ctl_device_adapter_properties_t StDeviceAdapterProperties = { 0 };
+
+    uint32_t Adapter_count = 0;
+    uint32_t Display_count = 0;
+    uint32_t Index         = 0;
+    uint32_t Display_index = 0;
+
+    LUID AdapterID;
+    StDeviceAdapterProperties.Size           = sizeof(ctl_device_adapter_properties_t);
+    StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
+    StDeviceAdapterProperties.device_id_size = sizeof(LUID);
+    StDeviceAdapterProperties.Version        = 2;
+
+    for (Index = 0; Index < Adapter_count; Index++)
+    {
+        if (NULL != hDevices[Index])
+        {
+            printf("\n\n*** Testing adapter #%d ***\n", Index);
+
+            Result = ctlGetDeviceProperties(hDevices[Index], &StDeviceAdapterProperties);
+
+            if (CTL_RESULT_ERROR_UNSUPPORTED_VERSION == Result) // reduce version if required & recheck
+            {
+                printf("ctlGetDeviceProperties() version mismatch - Reducing version to 0 and retrying\n");
+                StDeviceAdapterProperties.Version = 0;
+                Result                            = ctlGetDeviceProperties(hDevices[Index], &StDeviceAdapterProperties);
+            }
+
+            if (Result != CTL_RESULT_SUCCESS)
+            {
+                printf("ctlGetDeviceProperties returned failure code: 0x%X\n", Result);
+                continue;
+            }
+
+            if (CTL_DEVICE_TYPE_GRAPHICS != StDeviceAdapterProperties.device_type)
+            {
+                printf("This is not a Graphics device \n");
+                continue;
+            }
+
+            if (NULL != StDeviceAdapterProperties.pDeviceID)
+            {
+                AdapterID = *(reinterpret_cast<LUID *>(StDeviceAdapterProperties.pDeviceID));
+                std::cout << "Adapter ID " << AdapterID.LowPart << "\n";
+            }
+
+            if (0x8086 != StDeviceAdapterProperties.pci_vendor_id)
+                continue;
+
+            PrintAdapterProperties(StDeviceAdapterProperties);
+
+            // get max/P0 from L0 & print the same here
+            try
+            {
+                PrintDetailsFromSysman(hDevices[Index]);
+            }
+            catch (const std::bad_array_new_length &e)
+            {
+                printf("%s \n", e.what());
+            }
+
+            // enumerate all the possible target display's for the adapters
+            // first step is to get the count
+            Display_count = 0;
+            Result        = ctlEnumerateDisplayOutputs(hDevices[Index], &Display_count, hDisplayOutput);
+
+            printf("ctlEnumerateDisplayOutputs returned %d encoders\n", Display_count);
+
+            if (CTL_RESULT_SUCCESS == Result && (Display_count > 0))
+            {
+                hDisplayOutput = (ctl_display_output_handle_t *)malloc(sizeof(ctl_display_output_handle_t) * Display_count);
+                if (NULL == hDisplayOutput)
+                {
+                    return CTL_RESULT_ERROR_UNKNOWN;
+                }
+                Result = ctlEnumerateDisplayOutputs(hDevices[Index], &Display_count, hDisplayOutput);
+            }
+
+            if (Result != CTL_RESULT_SUCCESS)
+            {
+                printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+                STORE_RESET_ERROR(Result);
+            }
+
+            // get display encoder properties
+            if (CTL_RESULT_SUCCESS == Result && hDisplayOutput)
+            {
+                GetDisplayEncoderPropertiesTest(hDisplayOutput, &Result, Display_count);
+            }
+
+            // get display properties
+            if (CTL_RESULT_SUCCESS == Result && hDisplayOutput)
+            {
+                GetDisplayPropertiesTest(hDevices, hDisplayOutput, &Result, Index, Display_count);
+            }
+
+            // Sharpness Test
+            if (CTL_RESULT_SUCCESS == Result)
+            {
+                if (nullptr == hDisplayOutput)
+                    return CTL_RESULT_ERROR_UNKNOWN;
+
+                for (Display_index = 0; Display_index < Display_count; Display_index++)
+                {
+                    Result = CtlSharpnessTest(hDisplayOutput[Display_index]);
+                    STORE_RESET_ERROR(Result);
+                }
+            }
+
+            // get 3D global properties
+            if (CTL_RESULT_SUCCESS == Result)
+            {
+                try
+                {
+                    Result = CtlGet3DGlobalTest(hDevices[Index]);
+                    STORE_RESET_ERROR(Result);
+                }
+                catch (const std::bad_array_new_length &e)
+                {
+                    printf("%s \n", e.what());
+                }
+            }
+        }
+        if (hDisplayOutput != nullptr)
+        {
+            free(hDisplayOutput);
+            hDisplayOutput = nullptr;
+        }
+    }
+
+    return Result;
+}
+
 /***************************************************************
  * @brief Main Function
  *
@@ -799,7 +953,15 @@ int main()
     // Init App UID appropriately
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     if (CTL_RESULT_SUCCESS == Result)
     {
@@ -808,7 +970,15 @@ int main()
 
         // Get the list of Intel Adapters
 
-        Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+        try
+        {
+            Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+        }
+        catch (const std::bad_array_new_length &e)
+        {
+            printf("%s \n", e.what());
+        }
 
         if (CTL_RESULT_SUCCESS == Result)
         {
@@ -817,16 +987,23 @@ int main()
             {
                 return ERROR;
             }
-            Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+            try
+            {
+                Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+            }
+            catch (const std::bad_array_new_length &e)
+            {
+                printf("%s \n", e.what());
+            }
         }
         if (CTL_RESULT_SUCCESS != Result)
         {
             printf("ctlEnumerateDevices returned failure code: 0x%X\n", Result);
-            goto free_exit;
+            goto Exit;
         }
         printf("ctlEnumerateDevices returned %d adapters\n", Adapter_count);
 
-        LUID AdapterID;
         StDeviceAdapterProperties.Size           = sizeof(ctl_device_adapter_properties_t);
         StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
         StDeviceAdapterProperties.device_id_size = sizeof(LUID);
@@ -838,108 +1015,24 @@ int main()
         }
 
         // test an additional caller from same process
-        CtlTestAdditionalCaller();
-
-        for (Index = 0; Index < Adapter_count; Index++)
+        try
         {
-            if (NULL != hDevices[Index])
-            {
-                printf("\n\n*** Testing adapter #%d ***\n", Index);
-
-                Result = ctlGetDeviceProperties(hDevices[Index], &StDeviceAdapterProperties);
-
-                if (CTL_RESULT_ERROR_UNSUPPORTED_VERSION == Result) // reduce version if required & recheck
-                {
-                    printf("ctlGetDeviceProperties() version mismatch - Reducing version to 0 and retrying\n");
-                    StDeviceAdapterProperties.Version = 0;
-                    Result                            = ctlGetDeviceProperties(hDevices[Index], &StDeviceAdapterProperties);
-                }
-
-                if (Result != CTL_RESULT_SUCCESS)
-                {
-                    printf("ctlGetDeviceProperties returned failure code: 0x%X\n", Result);
-                    continue;
-                }
-
-                if (CTL_DEVICE_TYPE_GRAPHICS != StDeviceAdapterProperties.device_type)
-                {
-                    printf("This is not a Graphics device \n");
-                    continue;
-                }
-
-                if (NULL != StDeviceAdapterProperties.pDeviceID)
-                {
-                    AdapterID = *(reinterpret_cast<LUID *>(StDeviceAdapterProperties.pDeviceID));
-                    std::cout << "Adapter ID " << AdapterID.LowPart << "\n";
-                }
-
-                if (0x8086 != StDeviceAdapterProperties.pci_vendor_id)
-                    continue;
-
-                PrintAdapterProperties(StDeviceAdapterProperties);
-
-                // get max/P0 from L0 & print the same here
-                PrintDetailsFromSysman(hDevices[Index]);
-
-                // enumerate all the possible target display's for the adapters
-                // first step is to get the count
-                Display_count = 0;
-                Result        = ctlEnumerateDisplayOutputs(hDevices[Index], &Display_count, hDisplayOutput);
-
-                printf("ctlEnumerateDisplayOutputs returned %d encoders\n", Display_count);
-
-                if (CTL_RESULT_SUCCESS == Result && (Display_count > 0))
-                {
-                    hDisplayOutput = (ctl_display_output_handle_t *)malloc(sizeof(ctl_display_output_handle_t) * Display_count);
-                    Result         = ctlEnumerateDisplayOutputs(hDevices[Index], &Display_count, hDisplayOutput);
-                }
-
-                if (Result != CTL_RESULT_SUCCESS)
-                {
-                    printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
-                    STORE_RESET_ERROR(Result);
-                }
-
-                // get display encoder properties
-                if (CTL_RESULT_SUCCESS == Result && hDisplayOutput)
-                {
-                    GetDisplayEncoderPropertiesTest(hDisplayOutput, &Result, Display_count);
-                }
-
-                // get display properties
-                if (CTL_RESULT_SUCCESS == Result && hDisplayOutput)
-                {
-                    GetDisplayPropertiesTest(hDevices, hDisplayOutput, &Result, Index, Display_count);
-                }
-
-#ifdef TEST_ENABLE_SETCALLS
-                // Sharpness Test
-                if (CTL_RESULT_SUCCESS == Result)
-                {
-                    if (nullptr == hDisplayOutput)
-                        return ERROR;
-
-                    for (Display_index = 0; Display_index < Display_count; Display_index++)
-                    {
-                        Result = CtlSharpnessTest(hDisplayOutput[Display_index]);
-                        STORE_RESET_ERROR(Result);
-                    }
-                }
-#endif
-
-                // get 3D global properties
-                if (CTL_RESULT_SUCCESS == Result)
-                {
-                    Result = CtlGet3DGlobalTest(hDevices[Index]);
-                    STORE_RESET_ERROR(Result);
-                }
-            }
-            if (hDisplayOutput != nullptr)
-            {
-                free(hDisplayOutput);
-                hDisplayOutput = nullptr;
-            }
+            CtlTestAdditionalCaller();
         }
+        catch (const std::bad_array_new_length &e)
+        {
+            printf("%s \n", e.what());
+        }
+
+        try
+        {
+            CtlAdapterTesting();
+        }
+        catch (const std::ios_base::failure &e)
+        {
+            printf("%s \n", e.what());
+        }
+
 #ifdef _ZE_DDI_H
         // test level0 handle
         if ((CTL_RESULT_SUCCESS == Result) && (Adapter_count > 0))
@@ -965,7 +1058,7 @@ int main()
     {
         STORE_RESET_ERROR(Result);
     }
-free_exit:
+Exit:
 
     if (NULL != StDeviceAdapterProperties.pDeviceID)
     {
@@ -975,17 +1068,8 @@ free_exit:
 
     ctlClose(hAPIHandle);
 
-    if (hDisplayOutput != nullptr)
-    {
-        free(hDisplayOutput);
-        hDisplayOutput = nullptr;
-    }
-
-    if (hDevices != nullptr)
-    {
-        free(hDevices);
-        hDevices = nullptr;
-    }
+    CTL_FREE_MEM(hDisplayOutput);
+    CTL_FREE_MEM(hDevices);
 
     printf("Overrall test result is 0x%X\n", GResult);
     return GResult;

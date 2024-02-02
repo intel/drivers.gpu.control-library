@@ -2293,6 +2293,50 @@ ctlGetSetDynamicContrastEnhancement(
 
 
 /**
+* @brief Get/Set Color Format and Color Depth
+* 
+* @details
+*     - Get and Set the Color Format and Color Depth of a target
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDisplayOutput`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pGetSetWireFormatSetting`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid data passed as argument, WireFormat is not supported"
+*     - ::CTL_RESULT_ERROR_DISPLAY_NOT_ACTIVE - "Display not active"
+*     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+*     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+*     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+*     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+*/
+ctl_result_t CTL_APICALL
+ctlGetSetWireFormat(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_get_set_wire_format_config_t* pGetSetWireFormatSetting  ///< [in][release] Get/Set Wire Format settings to be fetched/applied
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    if (NULL != hinstLib)
+    {
+        ctl_pfnGetSetWireFormat_t pfnGetSetWireFormat = (ctl_pfnGetSetWireFormat_t)GetProcAddress(hinstLib, "ctlGetSetWireFormat");
+        if (pfnGetSetWireFormat)
+        {
+            result = pfnGetSetWireFormat(hDisplayOutput, pGetSetWireFormatSetting);
+        }
+    }
+
+    return result;
+}
+
+
+/**
 * @brief Get handle of engine groups
 * 
 * @details

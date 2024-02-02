@@ -1473,6 +1473,66 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
     PRINT_LOGS("\n \n");
 }
 
+void PerComponentTest(ctl_device_adapter_handle_t hDAhandle)
+{
+    try
+    {
+        CtlPowerTest(hDAhandle);
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+    try
+    {
+        CtlFrequencyTest(hDAhandle);
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+    try
+    {
+        CtlEngineTest(hDAhandle);
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+    try
+    {
+        CtlTemperatureTest(hDAhandle);
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+    try
+    {
+        CtlMemoryTest(hDAhandle);
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+    try
+    {
+        CtlPciTest(hDAhandle);
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+    try
+    {
+        CtlFanTest(hDAhandle);
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+}
+
 /***************************************************************
  * @brief Main Function
  *
@@ -1500,14 +1560,30 @@ int main()
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     if (CTL_RESULT_SUCCESS == Result)
     {
         // Initialization successful
         // Get the list of Intel Adapters
 
-        Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+        try
+        {
+            Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+        }
+        catch (const std::bad_array_new_length &e)
+        {
+            printf("%s \n", e.what());
+        }
 
         if (CTL_RESULT_SUCCESS == Result)
         {
@@ -1516,12 +1592,20 @@ int main()
             {
                 return ERROR;
             }
-            Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+            try
+            {
+                Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+            }
+            catch (const std::bad_array_new_length &e)
+            {
+                printf("%s \n", e.what());
+            }
         }
         if (CTL_RESULT_SUCCESS != Result)
         {
             printf("ctlEnumerateDevices returned failure code: 0x%X\n", Result);
-            goto free_exit;
+            goto Exit;
         }
 
         for (Index = 0; Index < Adapter_count; Index++)
@@ -1575,13 +1659,7 @@ int main()
                 }
 
                 // Per Component Tests
-                CtlPowerTest(hDevices[Index]);
-                CtlFrequencyTest(hDevices[Index]);
-                CtlEngineTest(hDevices[Index]);
-                CtlTemperatureTest(hDevices[Index]);
-                CtlMemoryTest(hDevices[Index]);
-                CtlPciTest(hDevices[Index]);
-                CtlFanTest(hDevices[Index]);
+                PerComponentTest(hDevices[Index]);
 
                 // Overclocking Test
                 CtlOverclockPropertiesTest(hDevices[Index]);
@@ -1622,7 +1700,7 @@ int main()
         }
     }
 
-free_exit:
+Exit:
 
     ctlClose(hAPIHandle);
 

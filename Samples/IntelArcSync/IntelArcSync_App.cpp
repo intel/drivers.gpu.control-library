@@ -591,11 +591,25 @@ int main(int argc, char *pArgv[])
 
         if ("caps" == SubOption)
         {
-            GetIntelArcSyncCaps();
+            try
+            {
+                GetIntelArcSyncCaps();
+            }
+            catch (const std::bad_array_new_length &e)
+            {
+                printf("%s \n", e.what());
+            }
         }
         else if ("profile" == SubOption)
         {
-            GetIntelArcSyncProfileDetails();
+            try
+            {
+                GetIntelArcSyncProfileDetails();
+            }
+            catch (const std::bad_array_new_length &e)
+            {
+                printf("%s \n", e.what());
+            }
         }
         else if ("profile-names" == SubOption)
         {
@@ -639,11 +653,25 @@ int main(int argc, char *pArgv[])
                 sscanf_s(pArgv[5], "%f", &MaxRr);
                 sscanf_s(pArgv[6], "%d", &SfditValue);
                 sscanf_s(pArgv[7], "%d", &SfddtValue);
-                SetIntelArcSyncProfile(pArgv[3], MinRr, MaxRr, SfditValue, SfddtValue);
+                try
+                {
+                    SetIntelArcSyncProfile(pArgv[3], MinRr, MaxRr, SfditValue, SfddtValue);
+                }
+                catch (const std::bad_array_new_length &e)
+                {
+                    printf("%s \n", e.what());
+                }
             }
             else
             {
-                SetIntelArcSyncProfile(pArgv[3], 0, 0, 0, 0);
+                try
+                {
+                    SetIntelArcSyncProfile(pArgv[3], 0, 0, 0, 0);
+                }
+                catch (const std::bad_array_new_length &e)
+                {
+                    printf("%s \n", e.what());
+                }
             }
         }
         else

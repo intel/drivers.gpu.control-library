@@ -781,13 +781,29 @@ int main()
     CtlInitArgs.Version    = 0;
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     if (CTL_RESULT_SUCCESS == Result)
     {
         // Initialization successful
         // Get the list of Intel Adapters
-        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        try
+        {
+            Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+        }
+        catch (const std::bad_array_new_length &e)
+        {
+            printf("%s \n", e.what());
+        }
 
         if (CTL_RESULT_SUCCESS == Result)
         {
@@ -798,7 +814,15 @@ int main()
                 goto Exit;
             }
 
-            Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+            try
+            {
+                Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+            }
+            catch (const std::bad_array_new_length &e)
+            {
+                printf("%s \n", e.what());
+            }
         }
 
         if (CTL_RESULT_SUCCESS != Result)
