@@ -1230,6 +1230,14 @@ typedef struct _ctl_lda_args_t ctl_lda_args_t;
 typedef struct _ctl_dce_args_t ctl_dce_args_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_wire_format_t
+typedef struct _ctl_wire_format_t ctl_wire_format_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_get_set_wire_format_config_t
+typedef struct _ctl_get_set_wire_format_config_t ctl_get_set_wire_format_config_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_engine_properties_t
 typedef struct _ctl_engine_properties_t ctl_engine_properties_t;
 
@@ -4398,6 +4406,86 @@ ctlGetSetDynamicContrastEnhancement(
     ctl_dce_args_t* pDceArgs                        ///< [in,out] Dynamic Contrast Enhancement arguments
     );
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Color model
+typedef enum _ctl_wire_format_color_model_t
+{
+    CTL_WIRE_FORMAT_COLOR_MODEL_RGB = 0,            ///< Color model RGB
+    CTL_WIRE_FORMAT_COLOR_MODEL_YCBCR_420 = 1,      ///< Color model YCBCR 420
+    CTL_WIRE_FORMAT_COLOR_MODEL_YCBCR_422 = 2,      ///< Color model YCBCR 422
+    CTL_WIRE_FORMAT_COLOR_MODEL_YCBCR_444 = 3,      ///< Color model YCBCR 444
+    CTL_WIRE_FORMAT_COLOR_MODEL_MAX
+
+} ctl_wire_format_color_model_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Operation type
+typedef enum _ctl_wire_format_operation_type_t
+{
+    CTL_WIRE_FORMAT_OPERATION_TYPE_GET = 0,         ///< Get request
+    CTL_WIRE_FORMAT_OPERATION_TYPE_SET = 1,         ///< Set request
+    CTL_WIRE_FORMAT_OPERATION_TYPE_RESTORE_DEFAULT = 2, ///< Restore to default values
+    CTL_WIRE_FORMAT_OPERATION_TYPE_MAX
+
+} ctl_wire_format_operation_type_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Wire Format
+typedef struct _ctl_wire_format_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    ctl_wire_format_color_model_t ColorModel;       ///< [in,out] Color model
+    ctl_output_bpc_flags_t ColorDepth;              ///< [in,out] Color Depth
+
+} ctl_wire_format_t;
+
+///////////////////////////////////////////////////////////////////////////////
+#ifndef CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED
+/// @brief Maximum Wire Formats Supported
+#define CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED  4
+#endif // CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Set Wire Format
+typedef struct _ctl_get_set_wire_format_config_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    ctl_wire_format_operation_type_t Operation;     ///< [in] Get/Set Operation
+    ctl_wire_format_t SupportedWireFormat[CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED];   ///< [out] Array of WireFormats supported
+    ctl_wire_format_t WireFormat;                   ///< [in,out]  Current/Requested WireFormat based on Operation. During SET
+                                                    ///< Operation, if multiple bpc is set, the MIN bpc will be applied
+
+} ctl_get_set_wire_format_config_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Color Format and Color Depth
+/// 
+/// @details
+///     - Get and Set the Color Format and Color Depth of a target
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pGetSetWireFormatSetting`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid data passed as argument, WireFormat is not supported"
+///     - ::CTL_RESULT_ERROR_DISPLAY_NOT_ACTIVE - "Display not active"
+///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+///     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetSetWireFormat(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_get_set_wire_format_config_t* pGetSetWireFormatSetting  ///< [in][release] Get/Set Wire Format settings to be fetched/applied
+    );
+
 
 #if !defined(__GNUC__)
 #pragma endregion // display
@@ -7226,6 +7314,14 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnGetLinkedDisplayAdapters_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetDynamicContrastEnhancement_t)(
     ctl_display_output_handle_t,
     ctl_dce_args_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetSetWireFormat 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetWireFormat_t)(
+    ctl_display_output_handle_t,
+    ctl_get_set_wire_format_config_t*
     );
 
 

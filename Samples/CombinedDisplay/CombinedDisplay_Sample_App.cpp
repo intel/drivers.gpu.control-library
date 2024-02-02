@@ -680,22 +680,58 @@ int main(int argc, char *pArgv[])
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     // Initialization successful
     // Get the list of Intel Adapters
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, NULL);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, NULL);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "hDevices");
 
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
-    Result = TestCombinedDisplay(AdapterCount, hDevices, pCDArgFile, CombinedPort);
-    LOG_AND_EXIT_ON_ERROR(Result, "TestCombinedDisplay");
+    try
+    {
+        Result = TestCombinedDisplay(AdapterCount, hDevices, pCDArgFile, CombinedPort);
+        LOG_AND_EXIT_ON_ERROR(Result, "TestCombinedDisplay");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+    catch (const std::ios_base::failure &e)
+    {
+        printf("%s \n", e.what());
+    }
+    catch (const std::bad_cast &e)
+    {
+        printf("%s \n", e.what());
+    }
 
 Exit:
 

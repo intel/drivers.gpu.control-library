@@ -638,8 +638,15 @@ int main(int32_t Argc, char *pArgv[])
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     // Get a handle to the DLL module.
     uint32_t AdapterCount = 0;
@@ -757,24 +764,31 @@ int main(int32_t Argc, char *pArgv[])
                     printf("Info: Ignoring read of binary file for Unlock operation.\n");
                     break;
                 default:
-                    ifstream EdidFile;
-                    streampos FileSize;
-
-                    EdidFile.open(OptionArg, ios::in | ios::binary | ios::ate);
-
-                    if (false == EdidFile.is_open())
+                    try
                     {
-                        printf("Cannot open a EDID file.\n");
-                        Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
-                        EXIT_ON_ERROR(Result);
-                    }
+                        ifstream EdidFile;
+                        streampos FileSize;
 
-                    FileSize = EdidFile.tellg();
-                    ZeroMemory(&EdidOverrideBuf, sizeof(EdidOverrideBuf));
-                    EdidFile.seekg(0, ios::beg);
-                    EdidFile.read((char *)&EdidOverrideBuf, FileSize);
-                    EdidFile.close();
-                    IsCustomEdid = true;
+                        EdidFile.open(OptionArg, ios::in | ios::binary | ios::ate);
+
+                        if (false == EdidFile.is_open())
+                        {
+                            printf("Cannot open a EDID file.\n");
+                            Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
+                            EXIT_ON_ERROR(Result);
+                        }
+
+                        FileSize = EdidFile.tellg();
+                        ZeroMemory(&EdidOverrideBuf, sizeof(EdidOverrideBuf));
+                        EdidFile.seekg(0, ios::beg);
+                        EdidFile.read((char *)&EdidOverrideBuf, FileSize);
+                        EdidFile.close();
+                        IsCustomEdid = true;
+                    }
+                    catch (const std::ios_base::failure &e)
+                    {
+                        printf("%s \n", e.what());
+                    }
                     break;
             }
         }
@@ -788,14 +802,28 @@ int main(int32_t Argc, char *pArgv[])
 
     // Initialization successful
     // Get the list of Intel Adapters
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "hDevices");
 
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     Result = EnumerateTargetDisplays(AdapterCount, hDevices);
 
