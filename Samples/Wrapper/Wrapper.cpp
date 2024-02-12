@@ -87,7 +87,7 @@ typedef struct ctl_telemetry_data
 
 extern "C" {
 
-    ctl_api_handle_t hAPIHandle;
+    static ctl_api_handle_t hAPIHandle;
 
     double deltatimestamp = 0;
     double prevtimestamp = 0;
@@ -427,26 +427,26 @@ extern "C" {
         return hDevices;
     }
 
-    ctl_result_t GetDeviceProperties(ctl_device_adapter_handle_t hDevice, ctl_device_adapter_properties_t StDeviceAdapterProperties)
+    ctl_result_t GetDeviceProperties(ctl_device_adapter_handle_t hDevice, ctl_device_adapter_properties_t* StDeviceAdapterProperties)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
 
-        StDeviceAdapterProperties.Size = sizeof(ctl_device_adapter_properties_t);
-        StDeviceAdapterProperties.pDeviceID = malloc(sizeof(LUID));
-        StDeviceAdapterProperties.device_id_size = sizeof(LUID);
-        StDeviceAdapterProperties.Version = 2;
+        StDeviceAdapterProperties->Size = sizeof(ctl_device_adapter_properties_t);
+        StDeviceAdapterProperties->pDeviceID = malloc(sizeof(LUID));
+        StDeviceAdapterProperties->device_id_size = sizeof(LUID);
+        StDeviceAdapterProperties->Version = 2;
 
-        Result = ctlGetDeviceProperties(hDevice, &StDeviceAdapterProperties);
+        Result = ctlGetDeviceProperties(hDevice, StDeviceAdapterProperties);
 
         if (CTL_RESULT_ERROR_UNSUPPORTED_VERSION == Result) // reduce version if required & recheck
         {
             printf("ctlGetDeviceProperties() version mismatch - Reducing version to 0 and retrying\n");
-            StDeviceAdapterProperties.Version = 0;
-            Result = ctlGetDeviceProperties(hDevice, &StDeviceAdapterProperties);
+            StDeviceAdapterProperties->Version = 0;
+            Result = ctlGetDeviceProperties(hDevice, StDeviceAdapterProperties);
         }
 
         cout << "======== GetDeviceProperties ========" << endl;
-        cout << "StDeviceAdapterProperties.Name: " << StDeviceAdapterProperties.name << endl;
+        cout << "StDeviceAdapterProperties.Name: " << StDeviceAdapterProperties->name << endl;
 
         LOG_AND_EXIT_ON_ERROR(Result, "ctlGetDeviceProperties");
 
