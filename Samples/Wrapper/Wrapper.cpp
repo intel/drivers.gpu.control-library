@@ -409,7 +409,7 @@ extern "C" {
     ctl_device_adapter_handle_t* EnumerateDevices(uint32_t* pAdapterCount)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
-        ctl_device_adapter_handle_t* hDevices;
+        ctl_device_adapter_handle_t* hDevices = NULL;
 
         // Get the number of Intel Adapters
         Result = ctlEnumerateDevices(hAPIHandle, pAdapterCount, hDevices);
