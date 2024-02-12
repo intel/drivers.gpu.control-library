@@ -88,7 +88,6 @@ typedef struct ctl_telemetry_data
 extern "C" {
 
     ctl_api_handle_t hAPIHandle;
-    ctl_device_adapter_handle_t* hDevices;
 
     double deltatimestamp = 0;
     double prevtimestamp = 0;
@@ -407,35 +406,24 @@ extern "C" {
     }
 
     // Get the list of Intel device handles
-    ctl_device_adapter_handle_t* GetDevices(uint32_t* pAdapterCount)
+    ctl_device_adapter_handle_t* EnumerateDevices(uint32_t* pAdapterCount)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
+        ctl_device_adapter_handle_t* hDevices;
 
         // Get the number of Intel Adapters
         Result = ctlEnumerateDevices(hAPIHandle, pAdapterCount, hDevices);
-        if (Result != CTL_RESULT_SUCCESS)
-        {
-            // Handle error
-            return NULL;
-        }
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
 
         // Allocate memory for the device handles
         hDevices = (ctl_device_adapter_handle_t*)malloc(sizeof(ctl_device_adapter_handle_t) * (*pAdapterCount));
-        if (hDevices == NULL)
-        {
-            // Handle memory allocation failure
-            return NULL;
-        }
+        EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "EnumerateDevices");
 
         // Get the device handles
         Result = ctlEnumerateDevices(hAPIHandle, pAdapterCount, hDevices);
-        if (Result != CTL_RESULT_SUCCESS)
-        {
-            // Handle error
-            return NULL;
-        }
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
 
-        // Return the device handles
+    Exit:
         return hDevices;
     }
 
@@ -588,11 +576,5 @@ extern "C" {
     void CloseIgcl()
     {
         ctlClose(hAPIHandle);
-
-        if (hDevices != nullptr)
-        {
-            free(hDevices);
-            hDevices = nullptr;
-        }
     }
 }
