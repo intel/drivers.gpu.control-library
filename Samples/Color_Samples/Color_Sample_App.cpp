@@ -2038,6 +2038,52 @@ Exit:
 }
 
 /***************************************************************
+ * @brief
+ * Sample Test To Override Color Model And Color Depth
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestToOverrideColorModelAndColorDepth(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                                       = CTL_RESULT_SUCCESS;
+    ctl_get_set_wire_format_config_t CurrentWireFormatSetting = { 0 };
+    ctl_get_set_wire_format_config_t NewWireFormatSetting     = { 0 };
+
+    // GET call
+    CurrentWireFormatSetting.Size      = sizeof(ctl_get_set_wire_format_config_t);
+    CurrentWireFormatSetting.Operation = CTL_WIRE_FORMAT_OPERATION_TYPE_GET;
+    Result                             = ctlGetSetWireFormat(hDisplayOutput, &CurrentWireFormatSetting);
+    LOG_AND_EXIT_ON_ERROR(Result, "GET Call using ctlGetSetWireFormat");
+
+    printf("Current ColorModel %d", CurrentWireFormatSetting.WireFormat.ColorModel);
+    printf("Current ColorDepth %d", CurrentWireFormatSetting.WireFormat.ColorDepth);
+
+    for (uint32_t Index = 0; Index < CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED; Index++)
+    {
+        printf("Supported ColorModel %d", CurrentWireFormatSetting.SupportedWireFormat[Index].ColorModel);
+        printf("Supported ColorDepth %d", CurrentWireFormatSetting.SupportedWireFormat[Index].ColorDepth);
+    }
+
+    // SET call
+    NewWireFormatSetting.Size                  = sizeof(ctl_get_set_wire_format_config_t);
+    NewWireFormatSetting.Operation             = CTL_WIRE_FORMAT_OPERATION_TYPE_SET;
+    NewWireFormatSetting.WireFormat.ColorModel = CTL_WIRE_FORMAT_COLOR_MODEL_RGB;
+    NewWireFormatSetting.WireFormat.ColorDepth = CTL_OUTPUT_BPC_FLAG_8BPC;
+
+    Result = ctlGetSetWireFormat(hDisplayOutput, &NewWireFormatSetting);
+    LOG_AND_EXIT_ON_ERROR(Result, "SET Call using ctlGetSetWireFormat");
+
+    // Restore to default
+    NewWireFormatSetting.Size      = sizeof(ctl_get_set_wire_format_config_t);
+    NewWireFormatSetting.Operation = CTL_WIRE_FORMAT_OPERATION_TYPE_RESTORE_DEFAULT;
+    Result                         = ctlGetSetWireFormat(hDisplayOutput, &NewWireFormatSetting);
+    LOG_AND_EXIT_ON_ERROR(Result, "RESTORE DEFAULT Call using ctlGetSetWireFormat");
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
  * @brief TestColorForEnumDisplayHandles
  * Only for demonstration purpose, API is called for each of the display output handle in below snippet.
  * User has to filter through the available display output handle and has to call the API with particular display output handle.
@@ -2072,6 +2118,9 @@ ctl_result_t TestColorForEnumDisplayHandles(ctl_display_output_handle_t *hDispla
         STORE_AND_RESET_ERROR(Result);
 
         Result = TestLaceGetSetConfigForALS(hDisplayOutput[DisplayIndex]);
+        STORE_AND_RESET_ERROR(Result);
+
+        Result = TestToOverrideColorModelAndColorDepth(hDisplayOutput[DisplayIndex]);
         STORE_AND_RESET_ERROR(Result);
     }
 

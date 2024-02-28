@@ -6,7 +6,7 @@ add_executable(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/ColorAlgorithms_App.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Color_Sample_App.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ColorAlgorithms_App.h
-    ${ROOT_DIR}/wrapper/cApiWrapper.cpp
+    ${ROOT_DIR}/Source/cApiWrapper.cpp
 )
 
 if(MSVC)
@@ -20,5 +20,5 @@ if(MSVC)
     ADD_DEFINITIONS(-D_UNICODE)
 endif()
 
-include_directories(${ROOT_DIR}/includes)
+include_directories(${ROOT_DIR}/include)
 include_directories(${ROOT_DIR}/Samples/inc)

@@ -352,7 +352,11 @@ void OverclockFrequencyOffset(ctl_device_adapter_handle_t hDAhandle)
 
     // Setting the Offset to 0
     GPUFrequencyOffset = 0.0;
-    ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
+    Status             = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
+    if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
+    {
+        PRINT_LOGS("\nResult: Error %s\n", DecodeRetCode(Status).c_str());
+    }
 
 Exit:
     return;
@@ -415,7 +419,11 @@ void OverclockVoltageOffset(ctl_device_adapter_handle_t hDAhandle)
 
     // Setting the Offset to 0
     VoltageOffset = 0.0;
-    ctlOverclockGpuVoltageOffsetSet(hDAhandle, VoltageOffset);
+    Status        = ctlOverclockGpuVoltageOffsetSet(hDAhandle, VoltageOffset);
+    if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
+    {
+        PRINT_LOGS("\nResult: Error %s\n", DecodeRetCode(Status).c_str());
+    }
 
 Exit:
     return;

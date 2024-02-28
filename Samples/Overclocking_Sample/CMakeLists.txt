@@ -4,7 +4,7 @@ get_filename_component(ROOT_DIR ../../ ABSOLUTE)
 project(Overclocking_Sample VERSION 1.0)
 add_executable(${TARGET_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/Sample_OverclockAPP.cpp
-    ${ROOT_DIR}/wrapper/cApiWrapper.cpp
+    ${ROOT_DIR}/Source/cApiWrapper.cpp
 )
 
 if(MSVC)
@@ -18,5 +18,5 @@ if(MSVC)
     ADD_DEFINITIONS(-D_UNICODE)
 endif()
 
-include_directories(${ROOT_DIR}/includes)
+include_directories(${ROOT_DIR}/include)
 include_directories(${ROOT_DIR}/Samples/inc)
