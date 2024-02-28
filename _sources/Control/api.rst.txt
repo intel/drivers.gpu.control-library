@@ -939,6 +939,7 @@ Display
     * :ref:`ctlGetLinkedDisplayAdapters`
     * :ref:`ctlGetSetDynamicContrastEnhancement`
     * :ref:`ctlGetSetWireFormat`
+    * :ref:`ctlGetSetDisplaySettings`
 
  
 * Enumerations
@@ -984,6 +985,13 @@ Display
     * :ref:`ctl-genlock-operation-t`
     * :ref:`ctl-wire-format-color-model-t`
     * :ref:`ctl-wire-format-operation-type-t`
+    * :ref:`ctl-display-setting-flags-t`
+    * :ref:`ctl-display-setting-low-latency-t`
+    * :ref:`ctl-display-setting-sourcetm-t`
+    * :ref:`ctl-display-setting-content-type-t`
+    * :ref:`ctl-display-setting-quantization-range-t`
+    * :ref:`ctl-display-setting-picture-ar-flags-t`
+    * :ref:`ctl-display-setting-audio-t`
 
  
 * Structures
@@ -1045,6 +1053,7 @@ Display
     * :ref:`ctl-dce-args-t`
     * :ref:`ctl-wire-format-t`
     * :ref:`ctl-get-set-wire-format-config-t`
+    * :ref:`ctl-display-settings-t`
 
 
 Display Functions
@@ -1465,6 +1474,15 @@ ctlGetSetWireFormat
     :project: ControlApi
 
 
+.. _ctlGetSetDisplaySettings:
+
+ctlGetSetDisplaySettings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetSetDisplaySettings
+    :project: ControlApi
+
+
 
 Display Enums
 ------------------------------------------------------------------------------
@@ -1827,6 +1845,69 @@ ctl_wire_format_operation_type_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_wire_format_operation_type_t
+    :project: ControlApi
+
+
+.. _ctl-display-setting-flags-t:
+
+ctl_display_setting_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_setting_flag_t
+    :project: ControlApi
+
+
+.. _ctl-display-setting-low-latency-t:
+
+ctl_display_setting_low_latency_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_setting_low_latency_t
+    :project: ControlApi
+
+
+.. _ctl-display-setting-sourcetm-t:
+
+ctl_display_setting_sourcetm_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_setting_sourcetm_t
+    :project: ControlApi
+
+
+.. _ctl-display-setting-content-type-t:
+
+ctl_display_setting_content_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_setting_content_type_t
+    :project: ControlApi
+
+
+.. _ctl-display-setting-quantization-range-t:
+
+ctl_display_setting_quantization_range_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_setting_quantization_range_t
+    :project: ControlApi
+
+
+.. _ctl-display-setting-picture-ar-flags-t:
+
+ctl_display_setting_picture_ar_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_setting_picture_ar_flag_t
+    :project: ControlApi
+
+
+.. _ctl-display-setting-audio-t:
+
+ctl_display_setting_audio_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_setting_audio_t
     :project: ControlApi
 
  
@@ -2381,6 +2462,16 @@ ctl_get_set_wire_format_config_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_get_set_wire_format_config_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-display-settings-t:
+
+ctl_display_settings_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_display_settings_t
     :project: ControlApi
     :members:
     :undoc-members:
