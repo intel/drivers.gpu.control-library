@@ -97,7 +97,7 @@ ctl_result_t GetPanelDescriptor(ctl_display_output_handle_t hDisplayOutput, ctl_
         ExtBlockPanelDescArgs                    = { 0 };
         ExtBlockPanelDescArgs.Size               = sizeof(ctl_panel_descriptor_access_args_t);
         ExtBlockPanelDescArgs.OpType             = CTL_OPERATION_TYPE_READ; // Currently only Read operation is supported. Write operationnot supported.
-        ExtBlockPanelDescArgs.BlockNumber        = BlockIndex;              // Block number
+        ExtBlockPanelDescArgs.BlockNumber        = BlockIndex + 1;              // Block number
         ExtBlockPanelDescArgs.DescriptorDataSize = ExtBlockDescriptorDataSize;
         ExtBlockPanelDescArgs.pDescriptorData    = (uint8_t *)malloc(ExtBlockDescriptorDataSize * sizeof(uint8_t)); // Allocate memory for the descriptor data
 
