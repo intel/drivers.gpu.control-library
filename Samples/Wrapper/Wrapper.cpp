@@ -85,9 +85,10 @@ typedef struct ctl_telemetry_data
     double fanSpeedValue;
 };
 
-extern "C" {
+ctl_api_handle_t hAPIHandle;
+ctl_device_adapter_handle_t* hDevices;
 
-    static ctl_api_handle_t hAPIHandle;
+extern "C" {
 
     double deltatimestamp = 0;
     double prevtimestamp = 0;
@@ -409,7 +410,7 @@ extern "C" {
     ctl_device_adapter_handle_t* EnumerateDevices(uint32_t* pAdapterCount)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
-        ctl_device_adapter_handle_t* hDevices = NULL;
+        hDevices = NULL;
 
         // Get the number of Intel Adapters
         Result = ctlEnumerateDevices(hAPIHandle, pAdapterCount, hDevices);
@@ -576,5 +577,11 @@ extern "C" {
     void CloseIgcl()
     {
         ctlClose(hAPIHandle);
+
+        if (hDevices != nullptr)
+        {
+            free(hDevices);
+            hDevices = nullptr;
+        }
     }
 }
