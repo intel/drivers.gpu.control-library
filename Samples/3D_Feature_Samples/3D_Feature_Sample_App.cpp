@@ -367,6 +367,11 @@ ctl_result_t CtlGet3DFeatureCaps(ctl_device_adapter_handle_t hDevices)
         {
             printf("ctlGetSupported3DCapabilities returned success\n");
             FeatureCaps3D.pFeatureDetails = (ctl_3d_feature_details_t *)malloc(sizeof(ctl_3d_feature_details_t) * FeatureCaps3D.NumSupportedFeatures);
+            if (FeatureCaps3D.pFeatureDetails == NULL)
+            {
+                return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+            }
+
             memset(FeatureCaps3D.pFeatureDetails, 0x0, sizeof(ctl_3d_feature_details_t) * FeatureCaps3D.NumSupportedFeatures);
             Result = ctlGetSupported3DCapabilities(hDevices, &FeatureCaps3D);
             if (Result == CTL_RESULT_SUCCESS)
@@ -407,11 +412,9 @@ ctl_result_t CtlGet3DFeatureCaps(ctl_device_adapter_handle_t hDevices)
                 }
                 return Result;
             }
-            if (nullptr != FeatureCaps3D.pFeatureDetails)
-            {
-                free(FeatureCaps3D.pFeatureDetails);
-                FeatureCaps3D.pFeatureDetails = nullptr;
-            }
+
+            free(FeatureCaps3D.pFeatureDetails);
+            FeatureCaps3D.pFeatureDetails = nullptr;
         }
     }
 

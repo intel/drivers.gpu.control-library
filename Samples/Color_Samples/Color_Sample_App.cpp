@@ -1287,6 +1287,7 @@ ctl_result_t SetGammaLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_p
     SetPixTxArgs.pBlockConfigs               = &LutConfig; // for 1DLUT block
 
     double *pRedLut, *pGreenLut, *pBlueLut;
+    double LutMultiplier;
 
     // Create a valid 1D LUT.
     const uint32_t LutSize                       = LutConfig.Config.OneDLutConfig.NumSamplesPerChannel * LutConfig.Config.OneDLutConfig.NumChannels;
@@ -1298,10 +1299,30 @@ ctl_result_t SetGammaLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_p
     pGreenLut = pRedLut + LutConfig.Config.OneDLutConfig.NumSamplesPerChannel;
     pBlueLut  = pGreenLut + LutConfig.Config.OneDLutConfig.NumSamplesPerChannel;
 
-    for (uint32_t i = 0; i < (LutSize / LutConfig.Config.OneDLutConfig.NumChannels); i++)
+    // Applying a LUT which reduces the Red channel values by 30%.in linear format
+    // Based on the Pixel Encoding type , encode the multiplier 0.7 with the same function
+    // For example if Encoding is ST2084 then OETF2084(0.7) -> 0.962416136
+    //             if Encoding is SRGB   then sRGB(0.7)     -> 0.854305832
+
+    if (CTL_PIXTX_GAMMA_ENCODING_TYPE_ST2084 == pPixTxCaps->OutputPixelFormat.EncodingType)
     {
-        double Input = (double)i / (double)(LutSize / LutConfig.Config.OneDLutConfig.NumChannels - 1);
-        pRedLut[i] = pGreenLut[i] = pBlueLut[i] = GetSRGBEncodingValue(Input);
+        LutMultiplier = 0.962416136;
+    }
+    else if (CTL_PIXTX_GAMMA_ENCODING_TYPE_SRGB == pPixTxCaps->OutputPixelFormat.EncodingType)
+    {
+        LutMultiplier = 0.854305832;
+    }
+    else
+    {
+        LutMultiplier = 1.0;
+    }
+
+    // When calling Set for just OneDLUT the LUT is expected to be a Relative Correction LUT
+    for (uint32_t i = 0; i < LutConfig.Config.OneDLutConfig.NumSamplesPerChannel; i++)
+    {
+        double Input = (double)i / (double)(LutConfig.Config.OneDLutConfig.NumSamplesPerChannel - 1);
+        pRedLut[i] = pGreenLut[i] = pBlueLut[i] = Input;
+        pRedLut[i] *= LutMultiplier;
     }
 
     Result = ctlPixelTransformationSetConfig(hDisplayOutput, &SetPixTxArgs);

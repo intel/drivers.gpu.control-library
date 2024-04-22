@@ -33,7 +33,7 @@ ctl_result_t GResult = CTL_RESULT_SUCCESS;
  * @param hDevices
  * @return ctl_result_t
  ***************************************************************/
-ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices)
+ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices, uint8_t ScaleType, uint32_t PerX = 0, uint32_t PerY = 0)
 {
     ctl_display_output_handle_t *hDisplayOutput       = NULL;
     uint32_t DisplayCount                             = 0;
@@ -111,10 +111,34 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices)
 
         printf("ctlGetSupportedScalingCapability returned caps: 0x%X\n", ScalingCaps.SupportedScaling);
 
+        printf("\n******* Supported Scaling types ********\n");
+
+        if (CTL_SCALING_TYPE_FLAG_IDENTITY & ScalingCaps.SupportedScaling)
+        {
+            printf("CTL_SCALING_TYPE_FLAG_IDENTITY(1) is supported\n");
+        }
+        if (CTL_SCALING_TYPE_FLAG_CENTERED & ScalingCaps.SupportedScaling)
+        {
+            printf("CTL_SCALING_TYPE_FLAG_CENTERED(2) is supported\n");
+        }
+        if (CTL_SCALING_TYPE_FLAG_STRETCHED & ScalingCaps.SupportedScaling)
+        {
+            printf("CTL_SCALING_TYPE_FLAG_STRETCHED(4) is supported\n");
+        }
+        if (CTL_SCALING_TYPE_FLAG_ASPECT_RATIO_CENTERED_MAX & ScalingCaps.SupportedScaling)
+        {
+            printf("CTL_SCALING_TYPE_FLAG_ASPECT_RATIO_CENTERED_MAX(8) is supported\n");
+        }
+        if (CTL_SCALING_TYPE_FLAG_CUSTOM & ScalingCaps.SupportedScaling)
+        {
+            printf("CTL_SCALING_TYPE_FLAG_CUSTOM(16) is supported\n");
+        }
+
         if (0 != ScalingCaps.SupportedScaling)
         {
-            ScalingSetting.Size = sizeof(ctl_scaling_settings_t);
-            Result              = ctlGetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
+            ScalingSetting.Size    = sizeof(ctl_scaling_settings_t);
+            ScalingSetting.Version = 1;
+            Result                 = ctlGetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
 
             if (CTL_RESULT_SUCCESS != Result)
             {
@@ -122,11 +146,11 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices)
                 STORE_AND_RESET_ERROR(Result);
                 continue;
             }
-            printf("ctlGetCurrentScaling returned Enable: 0x%X type:0x%x\n", ScalingSetting.Enable, ScalingSetting.ScalingType);
+            printf("ctlGetCurrentScaling returned Enable: 0x%X ScalingType:0x%x PreferredScalingType:0x%x\n", ScalingSetting.Enable, ScalingSetting.ScalingType, ScalingSetting.PreferredScalingType);
         }
 
         // fill custom scaling details only if it is supported
-        if (0x1F == ScalingCaps.SupportedScaling)
+        if ((CTL_SCALING_TYPE_FLAG_CUSTOM & ScalingCaps.SupportedScaling) && (CTL_SCALING_TYPE_FLAG_CUSTOM == ScaleType))
         {
             // check if hardware modeset required to apply custom scaling
             ModeSet = ((TRUE == ScalingSetting.Enable) && (CTL_SCALING_TYPE_FLAG_CUSTOM == ScalingSetting.ScalingType)) ? FALSE : TRUE;
@@ -136,9 +160,25 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices)
             ScalingSetting.ScalingType     = CTL_SCALING_TYPE_FLAG_CUSTOM;
             ScalingSetting.Size            = sizeof(ctl_scaling_settings_t);
             ScalingSetting.HardwareModeSet = (TRUE == ModeSet) ? TRUE : FALSE;
-            ScalingSetting.CustomScalingX  = 1000;
-            ScalingSetting.CustomScalingY  = 1000;
+            ScalingSetting.Version         = 1;
+
+            printf("*** PerX:%d PerY:%d ***\n", PerX, PerY);
+
+            ScalingSetting.CustomScalingX = PerX;
+            ScalingSetting.CustomScalingY = PerY;
         }
+        else
+        {
+            // filling custom scaling details
+            ScalingSetting             = { 0 };
+            ScalingSetting.Enable      = true;
+            ScalingSetting.ScalingType = ScaleType;
+            ScalingSetting.Size        = sizeof(ctl_scaling_settings_t);
+            ScalingSetting.Version     = 1;
+        }
+
+        printf("ScalingSetting.ScalingType:%d\n", ScalingSetting.ScalingType);
+
         Result = ctlSetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
 
         if (CTL_RESULT_SUCCESS != Result)
@@ -148,16 +188,24 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices)
             continue;
         }
         // check if the applied scaling was successful
-        ScalingSetting      = { 0 };
-        ScalingSetting.Size = sizeof(ctl_scaling_settings_t);
-        Result              = ctlGetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
+        ScalingSetting         = { 0 };
+        ScalingSetting.Size    = sizeof(ctl_scaling_settings_t);
+        ScalingSetting.Version = 1;
+        Result                 = ctlGetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
         if (CTL_RESULT_SUCCESS != Result)
         {
             printf("ctlGetCurrentScaling returned failure code: 0x%X\n", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
-        printf("ctlGetCurrentScaling returned Enable: 0x%X type:0x%x\n", ScalingSetting.Enable, ScalingSetting.ScalingType);
+
+        printf("ctlGetCurrentScaling returned Enable: 0x%X ScalingType:0x%x PreferredScalingType:0x%x\n", ScalingSetting.Enable, ScalingSetting.ScalingType, ScalingSetting.PreferredScalingType);
+
+        if (CTL_SCALING_TYPE_FLAG_CUSTOM == ScalingSetting.ScalingType)
+        {
+            printf("ScalingSetting.CustomScalingX:%d\n", ScalingSetting.CustomScalingX);
+            printf("ScalingSetting.CustomScalingY:%d\n", ScalingSetting.CustomScalingY);
+        }
     }
 
 Exit:
@@ -171,8 +219,31 @@ Exit:
  * @param
  * @return
  ***************************************************************/
-int main()
+int main(int argc, char *pArgv[])
 {
+    uint8_t ScaleType = 0;
+    uint32_t X = 0, Y = 0;
+
+    if (argc < 2)
+    {
+        printf("Enter Scale type!\"");
+        return 0;
+    }
+
+    // Converting string type to integer type
+    // using function "atoi( argument)"
+
+    if (2 == argc)
+    {
+        ScaleType = atoi(pArgv[1]);
+    }
+    else if (4 == argc)
+    {
+        ScaleType = atoi(pArgv[1]);
+        X         = atoi(pArgv[2]);
+        Y         = atoi(pArgv[3]);
+    }
+
     ctl_result_t Result                   = CTL_RESULT_SUCCESS;
     ctl_device_adapter_handle_t *hDevices = NULL;
     // Get a handle to the DLL module.
@@ -231,7 +302,7 @@ int main()
 
     for (uint32_t i = 0; i < AdapterCount; i++)
     {
-        Result = ScalingTest(hDevices[i]);
+        Result = ScalingTest(hDevices[i], ScaleType, X, Y);
 
         if (CTL_RESULT_SUCCESS != Result)
         {

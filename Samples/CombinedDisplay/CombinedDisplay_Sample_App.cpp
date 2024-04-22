@@ -338,7 +338,7 @@ ctl_result_t ParseDisplayOrderArguments(uint8_t NumOutputs, const char *pCDArgFi
                     break;
                 }
             }
-            Order                   = Value;
+            Order                   = move(Value);
             SelectedDisplays[Index] = stoi(Order);
             break;
         }

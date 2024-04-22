@@ -394,12 +394,11 @@ typedef enum _ctl_result_t
     CTL_RESULT_ERROR_CORE_OVERCLOCK_VOLTAGE_OUTSIDE_RANGE = 0x44000002, ///< The Voltage exceeds the acceptable min/max.
     CTL_RESULT_ERROR_CORE_OVERCLOCK_FREQUENCY_OUTSIDE_RANGE = 0x44000003,   ///< The Frequency exceeds the acceptable min/max.
     CTL_RESULT_ERROR_CORE_OVERCLOCK_POWER_OUTSIDE_RANGE = 0x44000004,   ///< The Power exceeds the acceptable min/max.
-    CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE = 0x44000005, ///< The Temperature exceeds the acceptable min/max.
+    CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE = 0x44000005, ///< The Power exceeds the acceptable min/max.
     CTL_RESULT_ERROR_CORE_OVERCLOCK_IN_VOLTAGE_LOCKED_MODE = 0x44000006,///< The Overclock is in voltage locked mode.
     CTL_RESULT_ERROR_CORE_OVERCLOCK_RESET_REQUIRED = 0x44000007,///< It indicates that the requested change will not be applied until the
                                                     ///< device is reset.
     CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SET = 0x44000008,///< The $OverclockWaiverSet function has not been called.
-    CTL_RESULT_ERROR_CORE_OVERCLOCK_DEPRECATED_API = 0x44000009,///< The error indicates to switch to newer API version if applicable.
     CTL_RESULT_ERROR_CORE_END = 0x0440FFFF,         ///< "Core error code end value, not to be used
                                                     ///< "
     CTL_RESULT_ERROR_3D_START = 0x60000000,         ///< 3D error code starting value, not to be used
@@ -3422,21 +3421,14 @@ typedef struct _ctl_scaling_settings_t
     uint32_t Size;                                  ///< [in] size of this structure
     uint8_t Version;                                ///< [in] version of this structure
     bool Enable;                                    ///< [in,out] State of the scaler
-    ctl_scaling_type_flags_t ScalingType;           ///< [in,out] Requested scaling type. In Get call this field indicates
-                                                    ///< 'currunt' scaling set. Refer ::ctl_scaling_type_flag_t
-    uint32_t CustomScalingX;                        ///< [in,out] Custom Scaling X in percentage. This is percentage of current
-                                                    ///< OS resolution. Valid values are 0 to 100. Up to 11% of native
-                                                    ///< resolution can be downscaled
-    uint32_t CustomScalingY;                        ///< [in,out] Custom Scaling Y in percentage. This is percentage of current
-                                                    ///< OS resolution. Valid values are 0 to 100. Up to 11% of native
-                                                    ///< resolution can be downscaled
+    ctl_scaling_type_flags_t ScalingType;           ///< [in,out] Requested scaling types. Refer ::ctl_scaling_type_flag_t
+    uint32_t CustomScalingX;                        ///< [in,out] Custom Scaling X resolution
+    uint32_t CustomScalingY;                        ///< [in,out] Custom Scaling Y resolution
     bool HardwareModeSet;                           ///< [in] Flag to indicate hardware modeset should be done to apply the
                                                     ///< scaling.Setting this to true would result in a flash on the screen. If
                                                     ///< this flag is set to false , API will request the OS to do a virtual
                                                     ///< modeset , but the OS can ignore this request and do a hardware modeset
                                                     ///< in some instances
-    ctl_scaling_type_flags_t PreferredScalingType;  ///< [out] Indicates OS persisted scaling type. This field is only valid
-                                                    ///< when version > 0. Refer ::ctl_scaling_type_flag_t
 
 } ctl_scaling_settings_t;
 

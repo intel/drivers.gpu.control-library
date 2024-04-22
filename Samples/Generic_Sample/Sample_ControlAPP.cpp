@@ -319,6 +319,11 @@ ctl_result_t CtlGet3DGlobalTest(ctl_device_adapter_handle_t hDevices)
     {
         printf("ctlGetSupported3DCapabilities returned success. No of gaming features = %d\n", FeatureCaps3D.NumSupportedFeatures);
         FeatureCaps3D.pFeatureDetails = (ctl_3d_feature_details_t *)malloc(sizeof(ctl_3d_feature_details_t) * FeatureCaps3D.NumSupportedFeatures);
+        if (FeatureCaps3D.pFeatureDetails == NULL)
+        {
+            return CTL_RESULT_ERROR_INVALID_NULL_POINTER;
+        }
+
         memset(FeatureCaps3D.pFeatureDetails, 0x0, sizeof(ctl_3d_feature_details_t) * FeatureCaps3D.NumSupportedFeatures);
         Result = ctlGetSupported3DCapabilities(hDevices, &FeatureCaps3D);
         if (Result == CTL_RESULT_SUCCESS)
@@ -656,39 +661,39 @@ ctl_result_t CtlTestEvents(ctl_device_adapter_handle_t hAdapter)
  * @param
  * @return
  ***************************************************************/
-void PrintAdapterProperties(ctl_device_adapter_properties_t StDeviceAdapterProperties)
+void PrintAdapterProperties(ctl_device_adapter_properties_t *pStDeviceAdapterProperties)
 {
     char DriverVersion[25] = "";
     LARGE_INTEGER LIDriverVersion;
-    LIDriverVersion.QuadPart = StDeviceAdapterProperties.driver_version;
+    LIDriverVersion.QuadPart = pStDeviceAdapterProperties->driver_version;
     sprintf(DriverVersion, "%d.%d.%d.%d", HIWORD(LIDriverVersion.HighPart), LOWORD(LIDriverVersion.HighPart), HIWORD(LIDriverVersion.LowPart), LOWORD(LIDriverVersion.LowPart));
 
     printf("Intel Graphics Driver Version : %s\n", DriverVersion);
-    printf("GOP Version : %lld.%lld.%lld\n", StDeviceAdapterProperties.firmware_version.major_version, StDeviceAdapterProperties.firmware_version.minor_version,
-           StDeviceAdapterProperties.firmware_version.build_number);
+    printf("GOP Version : %lld.%lld.%lld\n", pStDeviceAdapterProperties->firmware_version.major_version, pStDeviceAdapterProperties->firmware_version.minor_version,
+           pStDeviceAdapterProperties->firmware_version.build_number);
 
-    printf("Intel Adapter Name: %s\n", StDeviceAdapterProperties.name);
-    printf("Vendor ID: 0x%X\n", StDeviceAdapterProperties.pci_vendor_id);
-    printf("Device ID: 0x%X\n", StDeviceAdapterProperties.pci_device_id);
-    printf("SubSys id 0x%X\n", StDeviceAdapterProperties.pci_subsys_id);
-    printf("SubSys Vendor id 0x%X\n", StDeviceAdapterProperties.pci_subsys_vendor_id);
-    printf("Rev ID: 0x%X\n", StDeviceAdapterProperties.rev_id);
-    printf("Graphics Frequency: %dMHz\n", StDeviceAdapterProperties.Frequency);
-    printf("num_eus_per_sub_slice: %d\n", StDeviceAdapterProperties.num_eus_per_sub_slice);
-    printf("num_slices: %d\n", StDeviceAdapterProperties.num_slices);
-    printf("num_sub_slices_per_slice: %d\n", StDeviceAdapterProperties.num_sub_slices_per_slice);
-    printf("Graphics HW type: %s\n", StDeviceAdapterProperties.graphics_adapter_properties & CTL_ADAPTER_PROPERTIES_FLAG_INTEGRATED ? "Integrated" : "External GFX");
+    printf("Intel Adapter Name: %s\n", pStDeviceAdapterProperties->name);
+    printf("Vendor ID: 0x%X\n", pStDeviceAdapterProperties->pci_vendor_id);
+    printf("Device ID: 0x%X\n", pStDeviceAdapterProperties->pci_device_id);
+    printf("SubSys id 0x%X\n", pStDeviceAdapterProperties->pci_subsys_id);
+    printf("SubSys Vendor id 0x%X\n", pStDeviceAdapterProperties->pci_subsys_vendor_id);
+    printf("Rev ID: 0x%X\n", pStDeviceAdapterProperties->rev_id);
+    printf("Graphics Frequency: %dMHz\n", pStDeviceAdapterProperties->Frequency);
+    printf("num_eus_per_sub_slice: %d\n", pStDeviceAdapterProperties->num_eus_per_sub_slice);
+    printf("num_slices: %d\n", pStDeviceAdapterProperties->num_slices);
+    printf("num_sub_slices_per_slice: %d\n", pStDeviceAdapterProperties->num_sub_slices_per_slice);
+    printf("Graphics HW type: %s\n", pStDeviceAdapterProperties->graphics_adapter_properties & CTL_ADAPTER_PROPERTIES_FLAG_INTEGRATED ? "Integrated" : "External GFX");
 
-    if ((INVALID_ADAPTER_BDF == StDeviceAdapterProperties.adapter_bdf.bus) && (INVALID_ADAPTER_BDF == StDeviceAdapterProperties.adapter_bdf.device) &&
-        (INVALID_ADAPTER_BDF == StDeviceAdapterProperties.adapter_bdf.function))
+    if ((INVALID_ADAPTER_BDF == pStDeviceAdapterProperties->adapter_bdf.bus) && (INVALID_ADAPTER_BDF == pStDeviceAdapterProperties->adapter_bdf.device) &&
+        (INVALID_ADAPTER_BDF == pStDeviceAdapterProperties->adapter_bdf.function))
     {
         printf("ctlGetDeviceProperties returned invalid adapter BDF.\n");
     }
     else
     {
-        printf("adapter_bdf.bus:%d\n", StDeviceAdapterProperties.adapter_bdf.bus);
-        printf("adapter_bdf.device:%d\n", StDeviceAdapterProperties.adapter_bdf.device);
-        printf("adapter_bdf.function:%d\n", StDeviceAdapterProperties.adapter_bdf.function);
+        printf("adapter_bdf.bus:%d\n", pStDeviceAdapterProperties->adapter_bdf.bus);
+        printf("adapter_bdf.device:%d\n", pStDeviceAdapterProperties->adapter_bdf.device);
+        printf("adapter_bdf.function:%d\n", pStDeviceAdapterProperties->adapter_bdf.function);
     }
 }
 
@@ -839,7 +844,7 @@ ctl_result_t CtlAdapterTesting(void)
             if (0x8086 != StDeviceAdapterProperties.pci_vendor_id)
                 continue;
 
-            PrintAdapterProperties(StDeviceAdapterProperties);
+            PrintAdapterProperties(&StDeviceAdapterProperties);
 
             // get max/P0 from L0 & print the same here
             try
