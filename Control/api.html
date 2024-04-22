@@ -785,7 +785,7 @@
 <dl class="cpp enumerator">
 <dt class="sig sig-object cpp" id="_CPPv4N12ctl_result_t57CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGEE">
 <span id="_CPPv3N12ctl_result_t57CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGEE"></span><span id="_CPPv2N12ctl_result_t57CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGEE"></span><span class="target" id="igcl__api_8h_1a07cb11ab61a2ceeb0410dbb21228b59fa90afae1727b9df1d1506632b124cb651"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE</span></span></span><a class="headerlink" href="#_CPPv4N12ctl_result_t57CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGEE" title="Permalink to this definition"></a><br /></dt>
-<dd><p>The Power exceeds the acceptable min/max. </p>
+<dd><p>The Temperature exceeds the acceptable min/max. </p>
 </dd></dl>
 
 <dl class="cpp enumerator">
@@ -804,6 +804,12 @@
 <dt class="sig sig-object cpp" id="_CPPv4N12ctl_result_t46CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SETE">
 <span id="_CPPv3N12ctl_result_t46CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SETE"></span><span id="_CPPv2N12ctl_result_t46CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SETE"></span><span class="target" id="igcl__api_8h_1a07cb11ab61a2ceeb0410dbb21228b59fa5cd64237758a62110d7f5c12d4f76110"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SET</span></span></span><a class="headerlink" href="#_CPPv4N12ctl_result_t46CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SETE" title="Permalink to this definition"></a><br /></dt>
 <dd><p>The $OverclockWaiverSet function has not been called. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N12ctl_result_t46CTL_RESULT_ERROR_CORE_OVERCLOCK_DEPRECATED_APIE">
+<span id="_CPPv3N12ctl_result_t46CTL_RESULT_ERROR_CORE_OVERCLOCK_DEPRECATED_APIE"></span><span id="_CPPv2N12ctl_result_t46CTL_RESULT_ERROR_CORE_OVERCLOCK_DEPRECATED_APIE"></span><span class="target" id="igcl__api_8h_1a07cb11ab61a2ceeb0410dbb21228b59fafe4ca3aeef501847b37adfbd7eebd98c"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_RESULT_ERROR_CORE_OVERCLOCK_DEPRECATED_API</span></span></span><a class="headerlink" href="#_CPPv4N12ctl_result_t46CTL_RESULT_ERROR_CORE_OVERCLOCK_DEPRECATED_APIE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The error indicates to switch to newer API version if applicable. </p>
 </dd></dl>
 
 <dl class="cpp enumerator">
@@ -9521,25 +9527,31 @@
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N22ctl_scaling_settings_t11ScalingTypeE">
 <span id="_CPPv3N22ctl_scaling_settings_t11ScalingTypeE"></span><span id="_CPPv2N22ctl_scaling_settings_t11ScalingTypeE"></span><span id="ctl_scaling_settings_t::ScalingType__ctl_scaling_type_flags_t"></span><span class="target" id="structctl__scaling__settings__t_1a22cd92344a536c822b906baeb13bee90"></span><span class="n"><span class="pre">ctl_scaling_type_flags_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ScalingType</span></span></span><a class="headerlink" href="#_CPPv4N22ctl_scaling_settings_t11ScalingTypeE" title="Permalink to this definition"></a><br /></dt>
-<dd><p>[in,out] Requested scaling types. Refer <a class="reference internal" href="#igcl__api_8h_1a6e17f76f47d33433c0f3ea7f4846444c"><span class="std std-ref">ctl_scaling_type_flag_t</span></a></p>
+<dd><p>[in,out] Requested scaling type. In Get call this field indicates ‘currunt’ scaling set. Refer <a class="reference internal" href="#igcl__api_8h_1a6e17f76f47d33433c0f3ea7f4846444c"><span class="std std-ref">ctl_scaling_type_flag_t</span></a></p>
 </dd></dl>
 
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N22ctl_scaling_settings_t14CustomScalingXE">
 <span id="_CPPv3N22ctl_scaling_settings_t14CustomScalingXE"></span><span id="_CPPv2N22ctl_scaling_settings_t14CustomScalingXE"></span><span id="ctl_scaling_settings_t::CustomScalingX__uint32_t"></span><span class="target" id="structctl__scaling__settings__t_1acd35cb172d6cabb6795eba766600d539"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CustomScalingX</span></span></span><a class="headerlink" href="#_CPPv4N22ctl_scaling_settings_t14CustomScalingXE" title="Permalink to this definition"></a><br /></dt>
-<dd><p>[in,out] Custom Scaling X resolution </p>
+<dd><p>[in,out] Custom Scaling X in percentage. This is percentage of current OS resolution. Valid values are 0 to 100. Up to 11% of native resolution can be downscaled </p>
 </dd></dl>
 
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N22ctl_scaling_settings_t14CustomScalingYE">
 <span id="_CPPv3N22ctl_scaling_settings_t14CustomScalingYE"></span><span id="_CPPv2N22ctl_scaling_settings_t14CustomScalingYE"></span><span id="ctl_scaling_settings_t::CustomScalingY__uint32_t"></span><span class="target" id="structctl__scaling__settings__t_1aec6f77cb448757109ce2ff8eab3327a1"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CustomScalingY</span></span></span><a class="headerlink" href="#_CPPv4N22ctl_scaling_settings_t14CustomScalingYE" title="Permalink to this definition"></a><br /></dt>
-<dd><p>[in,out] Custom Scaling Y resolution </p>
+<dd><p>[in,out] Custom Scaling Y in percentage. This is percentage of current OS resolution. Valid values are 0 to 100. Up to 11% of native resolution can be downscaled </p>
 </dd></dl>
 
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N22ctl_scaling_settings_t15HardwareModeSetE">
 <span id="_CPPv3N22ctl_scaling_settings_t15HardwareModeSetE"></span><span id="_CPPv2N22ctl_scaling_settings_t15HardwareModeSetE"></span><span id="ctl_scaling_settings_t::HardwareModeSet__b"></span><span class="target" id="structctl__scaling__settings__t_1a84b98460ab6342dc293377a6198f6da8"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">HardwareModeSet</span></span></span><a class="headerlink" href="#_CPPv4N22ctl_scaling_settings_t15HardwareModeSetE" title="Permalink to this definition"></a><br /></dt>
 <dd><p>[in] Flag to indicate hardware modeset should be done to apply the scaling.Setting this to true would result in a flash on the screen. If this flag is set to false , API will request the OS to do a virtual modeset , but the OS can ignore this request and do a hardware modeset in some instances </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N22ctl_scaling_settings_t20PreferredScalingTypeE">
+<span id="_CPPv3N22ctl_scaling_settings_t20PreferredScalingTypeE"></span><span id="_CPPv2N22ctl_scaling_settings_t20PreferredScalingTypeE"></span><span id="ctl_scaling_settings_t::PreferredScalingType__ctl_scaling_type_flags_t"></span><span class="target" id="structctl__scaling__settings__t_1a204f586346198b00b21f9069b2104566"></span><span class="n"><span class="pre">ctl_scaling_type_flags_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PreferredScalingType</span></span></span><a class="headerlink" href="#_CPPv4N22ctl_scaling_settings_t20PreferredScalingTypeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[out] Indicates OS persisted scaling type. This field is only valid when version &gt; 0. Refer <a class="reference internal" href="#igcl__api_8h_1a6e17f76f47d33433c0f3ea7f4846444c"><span class="std std-ref">ctl_scaling_type_flag_t</span></a></p>
 </dd></dl>
 
 </div>
