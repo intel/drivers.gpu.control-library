@@ -376,10 +376,12 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
             clocks = new double[numClocks];
 
             res = ctlFrequencyGetAvailableClocks(pFrequencyHandle[i], &numClocks, clocks);
-
-            for (uint32_t i = 0; i < numClocks; i++)
+            if (CTL_RESULT_SUCCESS == res)
             {
-                PRINT_LOGS("\n[Frequency] Clock [%u]  Freq[%f] MHz", i, clocks[i]);
+                for (uint32_t i = 0; i < numClocks; i++)
+                {
+                    PRINT_LOGS("\n[Frequency] Clock [%u]  Freq[%f] MHz", i, clocks[i]);
+                }
             }
 
             delete[] clocks;
@@ -625,6 +627,111 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
             }
 
             Sleep(100);
+        }
+
+        ctl_fan_speed_table_t FanTable = {};
+        FanTable.Size                  = sizeof(ctl_fan_speed_table_t);
+        FanTable.numPoints             = 10;
+        FanTable.Version               = 0;
+
+        for (uint32_t index = 0; index < 10; index++)
+        {
+            FanTable.table[index]               = { 0 };
+            FanTable.table[index].Version       = 0;
+            FanTable.table[index].Size          = sizeof(ctl_fan_temp_speed_t);
+            FanTable.table[index].temperature   = (index + 1) * 10;
+            FanTable.table[index].speed.Size    = sizeof(ctl_fan_speed_t);
+            FanTable.table[index].speed.Version = 0;
+            FanTable.table[index].speed.units   = CTL_FAN_SPEED_UNITS_PERCENT;
+            FanTable.table[index].speed.speed   = index * 10;
+        }
+
+        res = ctlFanSetSpeedTableMode(pFanHandle[i], &FanTable);
+        if (res != CTL_RESULT_SUCCESS)
+        {
+            PRINT_LOGS("\n %s   from Fan Set Speed Table Mode.", DecodeRetCode(res).c_str());
+        }
+        else
+        {
+            PRINT_LOGS("\n[Fan] Set Speed Table Mode Success");
+        }
+
+        PRINT_LOGS("\n[Fan] Fan get Config:");
+
+        FanConfig      = {};
+        FanConfig.Size = sizeof(ctl_fan_config_t);
+        res            = ctlFanGetConfig(pFanHandle[i], &FanConfig);
+
+        if (res != CTL_RESULT_SUCCESS)
+        {
+            PRINT_LOGS("\n %s from Fan get Config.", DecodeRetCode(res).c_str());
+        }
+        else
+        {
+            PRINT_LOGS("\n[Fan] Fan Config Mode [%u]", FanConfig.mode);
+            if (CTL_FAN_SPEED_MODE_DEFAULT == FanConfig.mode)
+            {
+                PRINT_LOGS("\n[Fan] Fan Config Mode: Default/Stock");
+            }
+            else if (CTL_FAN_SPEED_MODE_FIXED == FanConfig.mode)
+            {
+                PRINT_LOGS("\n[Fan] Fan Config Fixed Speed [%u]", FanConfig.speedFixed.speed);
+                PRINT_LOGS("\n[Fan] Fan Config Fixed Speed Unit [%u]", FanConfig.speedFixed.units);
+            }
+            else if (CTL_FAN_SPEED_MODE_TABLE == FanConfig.mode)
+            {
+                PRINT_LOGS("\n[Fan] Fan Config Fan Table NumPoints [%u]", FanConfig.speedTable.numPoints);
+                for (int32_t numPoints = 0; numPoints < FanConfig.speedTable.numPoints; numPoints++)
+                {
+                    PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Speed Unit [%u]", FanConfig.speedTable.table[numPoints].speed.units);
+                    PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Speed [%u]", FanConfig.speedTable.table[numPoints].speed.speed);
+                    PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Temperature [%u]", FanConfig.speedTable.table[numPoints].temperature);
+                }
+            }
+        }
+
+        res = ctlFanSetDefaultMode(pFanHandle[i]);
+        if (res != CTL_RESULT_SUCCESS)
+        {
+            PRINT_LOGS("\n %s   from Fan Set DEFAULT Speed Table Mode.", DecodeRetCode(res).c_str());
+        }
+        else
+        {
+            PRINT_LOGS("\n[Fan] Set DEFAULT Speed Table Mode Success");
+        }
+
+        PRINT_LOGS("\n[Fan] Fan get Config:");
+
+        FanConfig      = {};
+        FanConfig.Size = sizeof(ctl_fan_config_t);
+        res            = ctlFanGetConfig(pFanHandle[i], &FanConfig);
+
+        if (res != CTL_RESULT_SUCCESS)
+        {
+            PRINT_LOGS("\n %s from Fan get Config.", DecodeRetCode(res).c_str());
+        }
+        else
+        {
+            PRINT_LOGS("\n[Fan] Fan Config Mode [%u]", FanConfig.mode);
+            if (CTL_FAN_SPEED_MODE_DEFAULT == FanConfig.mode)
+            {
+                PRINT_LOGS("\n[Fan] Fan Config Mode: Default/Stock");
+            }
+            else if (CTL_FAN_SPEED_MODE_FIXED == FanConfig.mode)
+            {
+                PRINT_LOGS("\n[Fan] Fan Config Fixed Speed [%u]", FanConfig.speedFixed.speed);
+                PRINT_LOGS("\n[Fan] Fan Config Fixed Speed Unit [%u]", FanConfig.speedFixed.units);
+            }
+            else if (CTL_FAN_SPEED_MODE_TABLE == FanConfig.mode)
+            {
+                PRINT_LOGS("\n[Fan] Fan Config Fan Table NumPoints [%u]", FanConfig.speedTable.numPoints);
+                for (int32_t numPoints = 0; numPoints < FanConfig.speedTable.numPoints; numPoints++)
+                {
+                    PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Speed Unit [%u]", FanConfig.speedTable.table[numPoints].speed.units);
+                    PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Speed [%u]", FanConfig.speedTable.table[numPoints].speed.speed);
+                    PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Temperature [%u]", FanConfig.speedTable.table[numPoints].temperature);
+                }
+            }
         }
     }
 
@@ -1459,11 +1566,18 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramCurrentTemperature.type));
         PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramCurrentTemperature.value.datadouble);
 
-        PRINT_LOGS("\nFan Speed:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.fanSpeed[0].bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.fanSpeed[0].units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.fanSpeed[0].type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.fanSpeed[0].value.datadouble);
+        PRINT_LOGS("\nFan Speeds:");
+        for (uint32_t i = 0; i < CTL_FAN_COUNT; i++)
+        {
+            if (pPowerTelemetry.fanSpeed[i].bSupported)
+            {
+                PRINT_LOGS("\nFan %d:", i);
+                PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.fanSpeed[i].bSupported) ? "true" : "false"));
+                PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.fanSpeed[i].units));
+                PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.fanSpeed[i].type));
+                PRINT_LOGS("\nValue: %f", pPowerTelemetry.fanSpeed[i].value.datadouble);
+            }
+        }
     }
     else
     {

@@ -406,8 +406,8 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
                         printf("  pEGCaps->EGControlCaps.DefaultType = %d\n", pEGCaps->EGControlCaps.DefaultType);
                         printf("  pEGCaps->EGModeCaps.DefaultType = %d\n", pEGCaps->EGModeCaps.DefaultType);
 
-                        Print3DFeatureSupportedSettings(pEGCaps->EGControlCaps.SupportedTypes, EGControls, ENDURANCE_GAMING_CONTROLS);
-                        Print3DFeatureSupportedSettings(pEGCaps->EGModeCaps.SupportedTypes, EGModes, ENDURANCE_GAMING_MODES);
+                        Print3DFeatureSupportedSettings(pEGCaps->EGControlCaps.SupportedTypes, move(EGControls), ENDURANCE_GAMING_CONTROLS);
+                        Print3DFeatureSupportedSettings(pEGCaps->EGModeCaps.SupportedTypes, move(EGModes), ENDURANCE_GAMING_MODES);
                     }
                     break;
 

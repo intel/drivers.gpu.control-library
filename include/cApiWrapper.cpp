@@ -19,7 +19,6 @@
 
 #include <windows.h>
 #include <strsafe.h>
-#include <vector>
 
 //#define CTL_APIEXPORT
 
@@ -107,27 +106,18 @@ ctlInit(
     // special code - only for ctlInit()
     if (NULL == hinstLib)
     {
-        std::vector<wchar_t> strDLLPath;
-        try
-        {
-            strDLLPath.resize(CTL_DLL_PATH_LEN);
-        }
-        catch (std::bad_alloc&)
-        {
-            return CTL_RESULT_ERROR_OUT_OF_DEVICE_MEMORY;
-        }
-
-        result = GetControlAPIDLLPath(pInitDesc, strDLLPath.data());
+        wchar_t strDLLPath[CTL_DLL_PATH_LEN];
+        result = GetControlAPIDLLPath(pInitDesc, strDLLPath);
         if (result == CTL_RESULT_SUCCESS)
         {
 #ifdef WINDOWS_UWP
-            hinstLib = LoadPackagedLibrary(strDLLPath.data(), 0);
+            hinstLib = LoadPackagedLibrary(strDLLPath, 0);
 #else
             DWORD dwFlags = LOAD_LIBRARY_SEARCH_SYSTEM32;
 #ifdef _DEBUG
             dwFlags = dwFlags | LOAD_LIBRARY_SEARCH_APPLICATION_DIR;
 #endif
-            hinstLib = LoadLibraryExW(strDLLPath.data(), NULL, dwFlags);
+            hinstLib = LoadLibraryExW(strDLLPath, NULL, dwFlags);
 #endif
             if (NULL == hinstLib)
             {

@@ -80,7 +80,7 @@ ctl_result_t GetCustomModes(ctl_display_output_handle_t hDisplayOutput)
 
     EXIT_ON_MEM_ALLOC_FAILURE(pCustomSourceModes, "pCustomSourceModes");
 
-    memset(pCustomSourceModes, 0, sizeof(pCustomSourceModes));
+    memset(pCustomSourceModes, 0, pCustomModeSourceSize);
 
     GetCustomModes.NumOfModes         = NumOfCustomModes;
     GetCustomModes.CustomModeOpType   = CTL_CUSTOM_MODE_OPERATION_TYPES_GET_CUSTOM_SOURCE_MODES;
@@ -124,7 +124,7 @@ ctl_result_t AddCustomModes(ctl_display_output_handle_t hDisplayOutput, uint32_t
 
     EXIT_ON_MEM_ALLOC_FAILURE(pCustomSourceMode, "pCustomSourceMode");
 
-    memset(pCustomSourceMode, 0, sizeof(pCustomSourceMode));
+    memset(pCustomSourceMode, 0, sizeof(ctl_custom_src_mode_t));
 
     AddCustomMode.NumOfModes         = 1;
     AddCustomMode.CustomModeOpType   = CTL_CUSTOM_MODE_OPERATION_TYPES_ADD_CUSTOM_SOURCE_MODE;
@@ -172,7 +172,7 @@ ctl_result_t RemoveCustomModes(ctl_display_output_handle_t hDisplayOutput)
 
     EXIT_ON_MEM_ALLOC_FAILURE(pCustomSourceModes, "pCustomSourceModes");
 
-    memset(pCustomSourceModes, 0, sizeof(pCustomSourceModes));
+    memset(pCustomSourceModes, 0, pCustomModeSourceSize);
 
     RemoveCustomModes.NumOfModes         = NumOfModesToRemove;
     RemoveCustomModes.CustomModeOpType   = CTL_CUSTOM_MODE_OPERATION_TYPES_REMOVE_CUSTOM_SOURCE_MODES;

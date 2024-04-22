@@ -777,12 +777,15 @@ ctl_result_t GenlockEnable(ctl_device_adapter_handle_t *hDevices, uint32_t Adapt
         LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockEnable - Primary");
 
         // Enabling secondary adapters
-        GenlockSampleArgs.IsGenlockPrimary = false;
-        Result                             = InitGenlockArgs(hSecondaryAdapters, SecondaryAdapterCount, GenlockSampleArgs, pGenlockArgs);
-        LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs for secondary adapters");
+        if (SecondaryAdapterCount > 0)
+        {
+            GenlockSampleArgs.IsGenlockPrimary = false;
+            Result                             = InitGenlockArgs(hSecondaryAdapters, SecondaryAdapterCount, GenlockSampleArgs, pGenlockArgs);
+            LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs for secondary adapters");
 
-        Result = TestGenlockEnable(hSecondaryAdapters, pGenlockArgs, SecondaryAdapterCount);
-        LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockEnable - Secondary");
+            Result = TestGenlockEnable(hSecondaryAdapters, pGenlockArgs, SecondaryAdapterCount);
+            LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockEnable - Secondary");
+        }
     }
     else
     {

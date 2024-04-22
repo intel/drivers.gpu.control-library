@@ -1084,7 +1084,6 @@ int main()
                 if (NULL != StDeviceAdapterProperties.pDeviceID)
                 {
                     free(StDeviceAdapterProperties.pDeviceID);
-                    StDeviceAdapterProperties.pDeviceID = NULL;
                 }
             }
         }
