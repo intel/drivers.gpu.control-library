@@ -900,7 +900,14 @@ int main()
                 // Polling during 1 second at 100 ms
                 for (uint32_t i = 0; i < 10; i++)
                 {
-                    OverclockPowerTelemetry(hDevices[Index]);
+                    try
+                    {
+                        OverclockPowerTelemetry(hDevices[Index]);
+                    }
+                    catch (const std::bad_array_new_length &e)
+                    {
+                        printf("%s \n", e.what());
+                    }
                     Sleep(100);
                 }
 

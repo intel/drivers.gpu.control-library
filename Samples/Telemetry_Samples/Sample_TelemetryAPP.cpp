@@ -1802,7 +1802,14 @@ int main()
                 // Polling during 1 second at 20 ms
                 for (uint32_t i = 0; i < 50; i++)
                 {
-                    CtlPowerTelemetryTest(hDevices[Index]);
+                    try
+                    {
+                        CtlPowerTelemetryTest(hDevices[Index]);
+                    }
+                    catch (const std::bad_array_new_length &e)
+                    {
+                        printf("%s \n", e.what());
+                    }
                     Sleep(20);
                 }
 

@@ -790,14 +790,12 @@ void PrintDetailsFromSysman(ctl_device_adapter_handle_t hDevice)
     return;
 }
 
-ctl_result_t CtlAdapterTesting(void)
+ctl_result_t CtlAdapterTesting(ctl_device_adapter_handle_t *hDevices, uint32_t Adapter_count)
 {
     ctl_result_t Result                                       = CTL_RESULT_SUCCESS;
-    ctl_device_adapter_handle_t *hDevices                     = nullptr;
     ctl_display_output_handle_t *hDisplayOutput               = nullptr;
     ctl_device_adapter_properties_t StDeviceAdapterProperties = { 0 };
 
-    uint32_t Adapter_count = 0;
     uint32_t Display_count = 0;
     uint32_t Index         = 0;
     uint32_t Display_index = 0;
@@ -1031,7 +1029,7 @@ int main()
 
         try
         {
-            CtlAdapterTesting();
+            CtlAdapterTesting(hDevices, Adapter_count);
         }
         catch (const std::ios_base::failure &e)
         {
