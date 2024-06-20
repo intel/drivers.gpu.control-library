@@ -58,10 +58,14 @@ ctl_result_t GetPanelDescriptor(ctl_display_output_handle_t hDisplayOutput, ctl_
     Result = ctlPanelDescriptorAccess(hDisplayOutput, pPanelDescArgs);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlPanelDescriptorAccess");
 
-    printf("Panel Descriptor Data: \n");
-    for (uint32_t j = 0; j < pPanelDescArgs->DescriptorDataSize; j++)
+    printf("Panel Descriptor Data on block %d: \n", pPanelDescArgs->BlockNumber);
+    for (uint32_t i = 0; i < pPanelDescArgs->DescriptorDataSize; i += 16)
     {
-        printf("[%d] = : 0x%X\n", j, pPanelDescArgs->pDescriptorData[j]);
+        for (uint32_t j = i; j < (i + 16); j++)
+        {
+            printf("0x%02X ", pPanelDescArgs->pDescriptorData[j]);
+        }
+        printf("\n");
     }
 
     // EXTENSION BLOCKS READ : For EDID, Need to get the number of extensions blocks from 127th byte of base block
@@ -97,7 +101,7 @@ ctl_result_t GetPanelDescriptor(ctl_display_output_handle_t hDisplayOutput, ctl_
         ExtBlockPanelDescArgs                    = { 0 };
         ExtBlockPanelDescArgs.Size               = sizeof(ctl_panel_descriptor_access_args_t);
         ExtBlockPanelDescArgs.OpType             = CTL_OPERATION_TYPE_READ; // Currently only Read operation is supported. Write operationnot supported.
-        ExtBlockPanelDescArgs.BlockNumber        = BlockIndex;              // Block number
+        ExtBlockPanelDescArgs.BlockNumber        = BlockIndex + 1;          // Block number
         ExtBlockPanelDescArgs.DescriptorDataSize = ExtBlockDescriptorDataSize;
         ExtBlockPanelDescArgs.pDescriptorData    = (uint8_t *)malloc(ExtBlockDescriptorDataSize * sizeof(uint8_t)); // Allocate memory for the descriptor data
 
@@ -112,10 +116,14 @@ ctl_result_t GetPanelDescriptor(ctl_display_output_handle_t hDisplayOutput, ctl_
             goto Exit;
         }
 
-        printf("Panel Descriptor Data: \n");
-        for (uint32_t j = 0; j < pPanelDescArgs->DescriptorDataSize; j++)
+        printf("Panel Descriptor Data on block %d: \n", ExtBlockPanelDescArgs.BlockNumber);
+        for (uint32_t i = 0; i < pPanelDescArgs->DescriptorDataSize; i += 16)
         {
-            printf("[%d] = : 0x%X\n", j, ExtBlockPanelDescArgs.pDescriptorData[j]);
+            for (uint32_t j = i; j < (i + 16); j++)
+            {
+                printf("0x%02X ", ExtBlockPanelDescArgs.pDescriptorData[j]);
+            }
+            printf("\n");
         }
 
         CTL_FREE_MEM(ExtBlockPanelDescArgs.pDescriptorData);
