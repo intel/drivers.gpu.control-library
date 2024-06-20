@@ -1566,6 +1566,12 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramCurrentTemperature.type));
         PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramCurrentTemperature.value.datadouble);
 
+        PRINT_LOGS("\nTotal Card Energy Counter:");
+        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.totalCardEnergyCounter.bSupported) ? "true" : "false"));
+        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.totalCardEnergyCounter.units));
+        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.totalCardEnergyCounter.type));
+        PRINT_LOGS("\nValue: %f", pPowerTelemetry.totalCardEnergyCounter.value.datadouble);
+
         PRINT_LOGS("\nFan Speeds:");
         for (uint32_t i = 0; i < CTL_FAN_COUNT; i++)
         {
