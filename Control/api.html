@@ -11947,13 +11947,13 @@
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N16ctl_freq_range_t3minE">
 <span id="_CPPv3N16ctl_freq_range_t3minE"></span><span id="_CPPv2N16ctl_freq_range_t3minE"></span><span id="ctl_freq_range_t::min__double"></span><span class="target" id="structctl__freq__range__t_1a63dd027a337599a79d0cdd397244d379"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">min</span></span></span><a class="headerlink" href="#_CPPv4N16ctl_freq_range_t3minE" title="Permalink to this definition"></a><br /></dt>
-<dd><p>[in,out] The min frequency in MHz below which hardware frequency management will not request frequencies. On input, setting to 0 will permit the frequency to go down to the hardware minimum. On output, a negative value indicates that no external minimum frequency limit is in effect. </p>
+<dd><p>[in,out] The min frequency in MHz below which hardware frequency management will not request frequencies. On input, setting to 0 will permit the frequency to go down to the hardware minimum while setting to -1 will return the min frequency limit to the factory value (can be larger than the hardware min). On output, a negative value indicates that no external minimum frequency limit is in effect. </p>
 </dd></dl>
 
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N16ctl_freq_range_t3maxE">
 <span id="_CPPv3N16ctl_freq_range_t3maxE"></span><span id="_CPPv2N16ctl_freq_range_t3maxE"></span><span id="ctl_freq_range_t::max__double"></span><span class="target" id="structctl__freq__range__t_1a0b345622c077c56a648c907a2f161a6a"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">max</span></span></span><a class="headerlink" href="#_CPPv4N16ctl_freq_range_t3maxE" title="Permalink to this definition"></a><br /></dt>
-<dd><p>[in,out] The max frequency in MHz above which hardware frequency management will not request frequencies. On input, setting to 0 or a very big number will permit the frequency to go all the way up to the hardware maximum. On output, a negative number indicates that no external maximum frequency limit is in effect. </p>
+<dd><p>[in,out] The max frequency in MHz above which hardware frequency management will not request frequencies. On input, setting to 0 or a very big number will permit the frequency to go all the way up to the hardware maximum while setting to -1 will return the max frequency to the factory value (which can be less than the hardware max). On output, a negative number indicates that no external maximum frequency limit is in effect. </p>
 </dd></dl>
 
 </div>
