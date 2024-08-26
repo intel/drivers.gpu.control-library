@@ -5101,14 +5101,17 @@ typedef struct _ctl_freq_range_t
     uint8_t Version;                                ///< [in] version of this structure
     double min;                                     ///< [in,out] The min frequency in MHz below which hardware frequency
                                                     ///< management will not request frequencies. On input, setting to 0 will
-                                                    ///< permit the frequency to go down to the hardware minimum. On output, a
-                                                    ///< negative value indicates that no external minimum frequency limit is
-                                                    ///< in effect.
+                                                    ///< permit the frequency to go down to the hardware minimum while setting
+                                                    ///< to -1 will return the min frequency limit to the factory value (can be
+                                                    ///< larger than the hardware min). On output, a negative value indicates
+                                                    ///< that no external minimum frequency limit is in effect.
     double max;                                     ///< [in,out] The max frequency in MHz above which hardware frequency
                                                     ///< management will not request frequencies. On input, setting to 0 or a
                                                     ///< very big number will permit the frequency to go all the way up to the
-                                                    ///< hardware maximum. On output, a negative number indicates that no
-                                                    ///< external maximum frequency limit is in effect.
+                                                    ///< hardware maximum while setting to -1 will return the max frequency to
+                                                    ///< the factory value (which can be less than the hardware max). On
+                                                    ///< output, a negative number indicates that no external maximum frequency
+                                                    ///< limit is in effect.
 
 } ctl_freq_range_t;
 
