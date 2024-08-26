@@ -359,7 +359,7 @@ ctl_result_t CtlGet3DGlobalTest(ctl_device_adapter_handle_t hDevices)
                 {
                     if (false == Get3DCustomStruct(&Feature3D))
                     {
-                        assert(0);
+                        printf("A new custom feature was added which is not known to the driver\n");
                         continue; // some error, continue with next value
                     }
                 }
