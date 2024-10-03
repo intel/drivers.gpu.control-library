@@ -553,6 +553,7 @@ _3d
     * :ref:`ctl-3d-frame-pacing-types-t`
     * :ref:`ctl-3d-endurance-gaming-control-t`
     * :ref:`ctl-3d-endurance-gaming-mode-t`
+    * :ref:`ctl-3d-low-latency-types-t`
     * :ref:`ctl-3d-cmaa-types-t`
     * :ref:`ctl-3d-adaptive-tessellation-types-t`
     * :ref:`ctl-3d-sharpening-filter-types-t`
@@ -669,6 +670,15 @@ ctl_3d_endurance_gaming_mode_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_3d_endurance_gaming_mode_t
+    :project: ControlApi
+
+
+.. _ctl-3d-low-latency-types-t:
+
+ctl_3d_low_latency_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_low_latency_types_t
     :project: ControlApi
 
 
