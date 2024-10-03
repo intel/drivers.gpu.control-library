@@ -1458,6 +1458,7 @@ typedef enum _ctl_3d_feature_t
     CTL_3D_FEATURE_EMULATED_TYPED_64BIT_ATOMICS = 13,   ///< Emulated Typed 64bit Atomics support in DG2
     CTL_3D_FEATURE_VRR_WINDOWED_BLT = 14,           ///< VRR windowed blt. Control VRR for windowed mode game
     CTL_3D_FEATURE_GLOBAL_OR_PER_APP = 15,          ///< Set global settings or per application settings
+    CTL_3D_FEATURE_LOW_LATENCY = 16,                ///< Low latency mode. Contains generic enum type fields
     CTL_3D_FEATURE_MAX
 
 } ctl_3d_feature_t;
@@ -1532,6 +1533,17 @@ typedef enum _ctl_3d_endurance_gaming_mode_t
     CTL_3D_ENDURANCE_GAMING_MODE_MAX
 
 } ctl_3d_endurance_gaming_mode_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Low latency mode values possible
+typedef enum _ctl_3d_low_latency_types_t
+{
+    CTL_3D_LOW_LATENCY_TYPES_TURN_OFF = 0,          ///< Low latency mode disable
+    CTL_3D_LOW_LATENCY_TYPES_TURN_ON = 1,           ///< Low latency mode enable
+    CTL_3D_LOW_LATENCY_TYPES_TURN_ON_BOOST_MODE_ON = 2, ///< Low latency mode enable with boost
+    CTL_3D_LOW_LATENCY_TYPES_MAX
+
+} ctl_3d_low_latency_types_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Cmaa values possible
@@ -5071,6 +5083,7 @@ typedef enum _ctl_freq_domain_t
 {
     CTL_FREQ_DOMAIN_GPU = 0,                        ///< GPU Core Domain.
     CTL_FREQ_DOMAIN_MEMORY = 1,                     ///< Local Memory Domain.
+    CTL_FREQ_DOMAIN_MEDIA = 2,                      ///< Media Domain
     CTL_FREQ_DOMAIN_MAX
 
 } ctl_freq_domain_t;
