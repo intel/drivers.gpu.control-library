@@ -109,6 +109,8 @@ inline char *Get3DFeatureName(ctl_3d_feature_t FeatureType)
             return "VRR windowed blt";
         case CTL_3D_FEATURE_GLOBAL_OR_PER_APP:
             return "global or per app settings";
+        case CTL_3D_FEATURE_LOW_LATENCY:
+            return "Low Latency";
         default:
             return "No Name";
     }

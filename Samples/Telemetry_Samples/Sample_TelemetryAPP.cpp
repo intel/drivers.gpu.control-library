@@ -322,7 +322,10 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
             PRINT_LOGS("\n[Frequency] Min [%f]] MHz", freqProperties.min);
             PRINT_LOGS("\n[Frequency] Max [%f]] MHz", freqProperties.max);
             PRINT_LOGS("\n[Frequency] Can Control Frequency? [%u]]", (uint32_t)freqProperties.canControl);
-            PRINT_LOGS("\n[Frequency] Frequency Domain [%s]]", ((freqProperties.type == CTL_FREQ_DOMAIN_GPU) ? "GPU" : "MEMORY"));
+            PRINT_LOGS("\n[Frequency] Frequency Domain [%s]]", ((freqProperties.type == CTL_FREQ_DOMAIN_GPU)    ? "GPU" :
+                                                                (freqProperties.type == CTL_FREQ_DOMAIN_MEMORY) ? "MEMORY" :
+                                                                (freqProperties.type == CTL_FREQ_DOMAIN_MEDIA)  ? "MEDIA" :
+                                                                                                                  "Unknown"));
         }
 
         PRINT_LOGS("\n\n[Frequency] State:");
@@ -465,6 +468,7 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
         else
         {
             PRINT_LOGS("\n[Power] Can Control [%u]", (uint32_t)properties.canControl);
+            PRINT_LOGS("\n[Power] Default Power Limit [%u]", (uint32_t)properties.defaultLimit);
             PRINT_LOGS("\n[Power] Max Power Limit [%i] mW", properties.maxLimit);
             PRINT_LOGS("\n[Power] Min Power Limit [%i] mW", properties.minLimit);
         }
@@ -1571,6 +1575,12 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.totalCardEnergyCounter.units));
         PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.totalCardEnergyCounter.type));
         PRINT_LOGS("\nValue: %f", pPowerTelemetry.totalCardEnergyCounter.value.datadouble);
+
+        PRINT_LOGS("\ngpuPowerLimited: %s", ((pPowerTelemetry.gpuPowerLimited) ? "true" : "false"));
+        PRINT_LOGS("\ngpuTemperatureLimited: %s", ((pPowerTelemetry.gpuTemperatureLimited) ? "true" : "false"));
+        PRINT_LOGS("\ngpuCurrentLimited: %s", ((pPowerTelemetry.gpuCurrentLimited) ? "true" : "false"));
+        PRINT_LOGS("\ngpuVoltageLimited: %s", ((pPowerTelemetry.gpuVoltageLimited) ? "true" : "false"));
+        PRINT_LOGS("\ngpuUtilizationLimited: %s", ((pPowerTelemetry.gpuUtilizationLimited) ? "true" : "false"));
 
         PRINT_LOGS("\nFan Speeds:");
         for (uint32_t i = 0; i < CTL_FAN_COUNT; i++)
