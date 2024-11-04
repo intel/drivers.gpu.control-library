@@ -3262,6 +3262,187 @@ ctlFrequencyGetThrottleTime(
 
 
 /**
+* @brief Get handle of Leds
+* 
+* @details
+*     - The application may call this function from simultaneous threads.
+*     - The implementation of this function should be lock-free.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDAhandle`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pCount`
+*/
+ctl_result_t CTL_APICALL
+ctlEnumLeds(
+    ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
+    uint32_t* pCount,                               ///< [in,out] pointer to the number of components of this type.
+                                                    ///< If count is zero, then the driver shall update the value with the
+                                                    ///< total number of components of this type that are available.
+                                                    ///< If count is greater than the number of components of this type that
+                                                    ///< are available, then the driver shall update the value with the correct
+                                                    ///< number of components.
+    ctl_led_handle_t* phLed                         ///< [in,out][optional][range(0, *pCount)] array of handle of components of
+                                                    ///< this type.
+                                                    ///< If count is less than the number of components of this type that are
+                                                    ///< available, then the driver shall only retrieve that number of
+                                                    ///< component handles.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    HINSTANCE hinstLibPtr = GetLoaderHandle();
+
+    if (NULL != hinstLibPtr)
+    {
+        ctl_pfnEnumLeds_t pfnEnumLeds = (ctl_pfnEnumLeds_t)GetProcAddress(hinstLibPtr, "ctlEnumLeds");
+        if (pfnEnumLeds)
+        {
+            result = pfnEnumLeds(hDAhandle, pCount, phLed);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get Led properties
+* 
+* @details
+*     - The application may call this function from simultaneous threads.
+*     - The implementation of this function should be lock-free.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hLed`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pProperties`
+*/
+ctl_result_t CTL_APICALL
+ctlLedGetProperties(
+    ctl_led_handle_t hLed,                          ///< [in] Handle for the component.
+    ctl_led_properties_t* pProperties               ///< [in,out] Will contain Led properties.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    HINSTANCE hinstLibPtr = GetLoaderHandle();
+
+    if (NULL != hinstLibPtr)
+    {
+        ctl_pfnLedGetProperties_t pfnLedGetProperties = (ctl_pfnLedGetProperties_t)GetProcAddress(hinstLibPtr, "ctlLedGetProperties");
+        if (pfnLedGetProperties)
+        {
+            result = pfnLedGetProperties(hLed, pProperties);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get Led state
+* 
+* @details
+*     - The application may call this function from simultaneous threads.
+*     - The implementation of this function should be lock-free.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hLed`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pState`
+*/
+ctl_result_t CTL_APICALL
+ctlLedGetState(
+    ctl_led_handle_t hLed,                          ///< [in] Handle for the component.
+    ctl_led_state_t* pState                         ///< [in,out] Will contain the current Led state.
+                                                    ///< Returns Led state if canControl is true and isI2C is false.
+                                                    ///< pwm and color structure members of ::ctl_led_state_t will be returned
+                                                    ///< only if supported by Led, else they will be returned as 0.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    HINSTANCE hinstLibPtr = GetLoaderHandle();
+
+    if (NULL != hinstLibPtr)
+    {
+        ctl_pfnLedGetState_t pfnLedGetState = (ctl_pfnLedGetState_t)GetProcAddress(hinstLibPtr, "ctlLedGetState");
+        if (pfnLedGetState)
+        {
+            result = pfnLedGetState(hLed, pState);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Set Led state
+* 
+* @details
+*     - The application may call this function from simultaneous threads.
+*     - The implementation of this function should be lock-free.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hLed`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pBuffer`
+*/
+ctl_result_t CTL_APICALL
+ctlLedSetState(
+    ctl_led_handle_t hLed,                          ///< [in] Handle for the component.
+    void* pBuffer,                                  ///< [in] Led State buffer.
+                                                    ///< If isI2C is true, the pBuffer and bufferSize will be passed to the I2C
+                                                    ///< Interface. pBuffer format in this case is OEM defined.
+                                                    ///< If isI2C is false, the pBuffer will be typecasted to
+                                                    ///< ::ctl_led_state_t* and bufferSize needs to be sizeof
+                                                    ///< ::ctl_led_state_t. pwm and color structure members of
+                                                    ///< ::ctl_led_state_t will be set only if supported by Led, else they will
+                                                    ///< be ignored.
+    uint32_t bufferSize                             ///< [in] Led State buffer size.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    HINSTANCE hinstLibPtr = GetLoaderHandle();
+
+    if (NULL != hinstLibPtr)
+    {
+        ctl_pfnLedSetState_t pfnLedSetState = (ctl_pfnLedSetState_t)GetProcAddress(hinstLibPtr, "ctlLedSetState");
+        if (pfnLedSetState)
+        {
+            result = pfnLedSetState(hLed, pBuffer, bufferSize);
+        }
+    }
+
+    return result;
+}
+
+
+/**
 * @brief Get Video Processing capabilities
 * 
 * @details

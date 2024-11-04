@@ -145,6 +145,10 @@ typedef struct _ctl_temp_handle_t *ctl_temp_handle_t;
 typedef struct _ctl_freq_handle_t *ctl_freq_handle_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Handle for a device led
+typedef struct _ctl_led_handle_t *ctl_led_handle_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Handle of a power device.
 typedef struct _ctl_pwr_handle_t *ctl_pwr_handle_t;
 
@@ -1285,6 +1289,18 @@ typedef struct _ctl_freq_state_t ctl_freq_state_t;
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_freq_throttle_time_t
 typedef struct _ctl_freq_throttle_time_t ctl_freq_throttle_time_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_led_properties_t
+typedef struct _ctl_led_properties_t ctl_led_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_led_color_t
+typedef struct _ctl_led_color_t ctl_led_color_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_led_state_t
+typedef struct _ctl_led_state_t ctl_led_state_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_video_processing_super_resolution_info_t
@@ -5369,6 +5385,164 @@ ctlFrequencyGetThrottleTime(
 #if !defined(__GNUC__)
 #pragma endregion // frequency
 #endif
+// Intel 'ctlApi' for Device Adapter - Led Control
+#if !defined(__GNUC__)
+#pragma region led
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Led properties
+typedef struct _ctl_led_properties_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    bool canControl;                                ///< [out] Indicates if software can control the Led assuming the user has
+                                                    ///< permissions.
+    bool isI2C;                                     ///< [out] Indicates support for control via I2C interface.
+    bool isPWM;                                     ///< [out] Returns a valid value if canControl is true and isI2C is false.
+                                                    ///< Indicates if the Led is PWM capable. If isPWM is false, only turn Led
+                                                    ///< on/off is supported.
+    bool haveRGB;                                   ///< [out] Returns a valid value if canControl is true and isI2C is false.
+                                                    ///< Indicates if the Led is RGB capable.
+
+} ctl_led_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Led color
+typedef struct _ctl_led_color_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    double red;                                     ///< [in,out][range(0.0, 1.0)] The Led red value. On output, a value less
+                                                    ///< than 0.0 indicates that the color is not known.
+    double green;                                   ///< [in,out][range(0.0, 1.0)] The Led green value. On output, a value less
+                                                    ///< than 0.0 indicates that the color is not known.
+    double blue;                                    ///< [in,out][range(0.0, 1.0)] The Led blue value. On output, a value less
+                                                    ///< than 0.0 indicates that the color is not known.
+
+} ctl_led_color_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Led state
+typedef struct _ctl_led_state_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    bool isOn;                                      ///< [in,out] Indicates if the Led is on or off.
+    double pwm;                                     ///< [in,out] Led On/Off Ratio, PWM range(0.0, 1.0). A value greater than
+                                                    ///< 1.0 is capped at 1.0.
+    ctl_led_color_t color;                          ///< [in,out] Color of the Led.
+
+} ctl_led_state_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get handle of Leds
+/// 
+/// @details
+///     - The application may call this function from simultaneous threads.
+///     - The implementation of this function should be lock-free.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDAhandle`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pCount`
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlEnumLeds(
+    ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
+    uint32_t* pCount,                               ///< [in,out] pointer to the number of components of this type.
+                                                    ///< If count is zero, then the driver shall update the value with the
+                                                    ///< total number of components of this type that are available.
+                                                    ///< If count is greater than the number of components of this type that
+                                                    ///< are available, then the driver shall update the value with the correct
+                                                    ///< number of components.
+    ctl_led_handle_t* phLed                         ///< [in,out][optional][range(0, *pCount)] array of handle of components of
+                                                    ///< this type.
+                                                    ///< If count is less than the number of components of this type that are
+                                                    ///< available, then the driver shall only retrieve that number of
+                                                    ///< component handles.
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Led properties
+/// 
+/// @details
+///     - The application may call this function from simultaneous threads.
+///     - The implementation of this function should be lock-free.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hLed`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pProperties`
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlLedGetProperties(
+    ctl_led_handle_t hLed,                          ///< [in] Handle for the component.
+    ctl_led_properties_t* pProperties               ///< [in,out] Will contain Led properties.
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Led state
+/// 
+/// @details
+///     - The application may call this function from simultaneous threads.
+///     - The implementation of this function should be lock-free.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hLed`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pState`
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlLedGetState(
+    ctl_led_handle_t hLed,                          ///< [in] Handle for the component.
+    ctl_led_state_t* pState                         ///< [in,out] Will contain the current Led state.
+                                                    ///< Returns Led state if canControl is true and isI2C is false.
+                                                    ///< pwm and color structure members of ::ctl_led_state_t will be returned
+                                                    ///< only if supported by Led, else they will be returned as 0.
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Set Led state
+/// 
+/// @details
+///     - The application may call this function from simultaneous threads.
+///     - The implementation of this function should be lock-free.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hLed`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pBuffer`
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlLedSetState(
+    ctl_led_handle_t hLed,                          ///< [in] Handle for the component.
+    void* pBuffer,                                  ///< [in] Led State buffer.
+                                                    ///< If isI2C is true, the pBuffer and bufferSize will be passed to the I2C
+                                                    ///< Interface. pBuffer format in this case is OEM defined.
+                                                    ///< If isI2C is false, the pBuffer will be typecasted to
+                                                    ///< ::ctl_led_state_t* and bufferSize needs to be sizeof
+                                                    ///< ::ctl_led_state_t. pwm and color structure members of
+                                                    ///< ::ctl_led_state_t will be set only if supported by Led, else they will
+                                                    ///< be ignored.
+    uint32_t bufferSize                             ///< [in] Led State buffer size.
+    );
+
+
+#if !defined(__GNUC__)
+#pragma endregion // led
+#endif
 // Intel 'ctlApi' for Device Adapter
 #if !defined(__GNUC__)
 #pragma region media
@@ -7647,6 +7821,40 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnFrequencyGetState_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnFrequencyGetThrottleTime_t)(
     ctl_freq_handle_t,
     ctl_freq_throttle_time_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlEnumLeds 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnEnumLeds_t)(
+    ctl_device_adapter_handle_t,
+    uint32_t*,
+    ctl_led_handle_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlLedGetProperties 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnLedGetProperties_t)(
+    ctl_led_handle_t,
+    ctl_led_properties_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlLedGetState 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnLedGetState_t)(
+    ctl_led_handle_t,
+    ctl_led_state_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlLedSetState 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnLedSetState_t)(
+    ctl_led_handle_t,
+    void*,
+    uint32_t
     );
 
 
