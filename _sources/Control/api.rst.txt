@@ -2926,6 +2926,105 @@ ctl_freq_throttle_time_t
 
  
 
+Led
+============================================================
+* Functions
+
+
+    * :ref:`ctlEnumLeds`
+    * :ref:`ctlLedGetProperties`
+    * :ref:`ctlLedGetState`
+    * :ref:`ctlLedSetState`
+
+ 
+
+ 
+* Structures
+
+
+    * :ref:`ctl-led-properties-t`
+    * :ref:`ctl-led-color-t`
+    * :ref:`ctl-led-state-t`
+
+
+Led Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlEnumLeds:
+
+ctlEnumLeds
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumLeds
+    :project: ControlApi
+
+
+.. _ctlLedGetProperties:
+
+ctlLedGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlLedGetProperties
+    :project: ControlApi
+
+
+.. _ctlLedGetState:
+
+ctlLedGetState
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlLedGetState
+    :project: ControlApi
+
+
+.. _ctlLedSetState:
+
+ctlLedSetState
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlLedSetState
+    :project: ControlApi
+
+
+
+ 
+Led Structures
+------------------------------------------------------------------------------
+
+.. _ctl-led-properties-t:
+
+ctl_led_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_led_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-led-color-t:
+
+ctl_led_color_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_led_color_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-led-state-t:
+
+ctl_led_state_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_led_state_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
 Media
 ============================================================
 * Functions

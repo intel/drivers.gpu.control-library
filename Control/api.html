@@ -88,6 +88,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#frequency-structures">Frequency Structures</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#led">Led</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#led-functions">Led Functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#led-structures">Led Structures</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#media">Media</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#media-functions">Media Functions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#media-enums">Media Enums</a></li>
@@ -12108,6 +12113,322 @@
 </section>
 </section>
 </section>
+<section id="led">
+<h2>Led<a class="headerlink" href="#led" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>Functions</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#ctlenumleds"><span class="std std-ref">ctlEnumLeds</span></a></p></li>
+<li><p><a class="reference internal" href="#ctlledgetproperties"><span class="std std-ref">ctlLedGetProperties</span></a></p></li>
+<li><p><a class="reference internal" href="#ctlledgetstate"><span class="std std-ref">ctlLedGetState</span></a></p></li>
+<li><p><a class="reference internal" href="#ctlledsetstate"><span class="std std-ref">ctlLedSetState</span></a></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Structures</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#ctl-led-properties-t"><span class="std std-ref">ctl_led_properties_t</span></a></p></li>
+<li><p><a class="reference internal" href="#ctl-led-color-t"><span class="std std-ref">ctl_led_color_t</span></a></p></li>
+<li><p><a class="reference internal" href="#ctl-led-state-t"><span class="std std-ref">ctl_led_state_t</span></a></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<section id="led-functions">
+<h3>Led Functions<a class="headerlink" href="#led-functions" title="Permalink to this heading"></a></h3>
+<section id="ctlenumleds">
+<span id="id264"></span><h4>ctlEnumLeds<a class="headerlink" href="#ctlenumleds" title="Permalink to this heading"></a></h4>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv411ctlEnumLeds27ctl_device_adapter_handle_tP8uint32_tP16ctl_led_handle_t">
+<span id="_CPPv311ctlEnumLeds27ctl_device_adapter_handle_tP8uint32_tP16ctl_led_handle_t"></span><span id="_CPPv211ctlEnumLeds27ctl_device_adapter_handle_tP8uint32_tP16ctl_led_handle_t"></span><span id="ctlEnumLeds__ctl_device_adapter_handle_t.uint32_tP.ctl_led_handle_tP"></span><span class="target" id="igcl__api_8h_1a85b062fad97da4671b5d5756975e3c0e"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlEnumLeds</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pCount</span></span>, <span class="n"><span class="pre">ctl_led_handle_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">phLed</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411ctlEnumLeds27ctl_device_adapter_handle_tP8uint32_tP16ctl_led_handle_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get handle of Leds. </p>
+<p><ul class="simple">
+<li><p>The application may call this function from simultaneous threads.</p></li>
+<li><p>The implementation of this function should be lock-free.</p></li>
+</ul>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hDAhandle</strong> – [in][release] Handle to display adapter </p></li>
+<li><p><strong>pCount</strong> – [in,out] pointer to the number of components of this type. If count is zero, then the driver shall update the value with the total number of components of this type that are available. If count is greater than the number of components of this type that are available, then the driver shall update the value with the correct number of components. </p></li>
+<li><p><strong>phLed</strong> – [in,out][optional][range(0, *pCount)] array of handle of components of this type. If count is less than the number of components of this type that are available, then the driver shall only retrieve that number of component handles. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>CTL_RESULT_SUCCESS</p></li>
+<li><p>CTL_RESULT_ERROR_UNINITIALIZED</p></li>
+<li><p>CTL_RESULT_ERROR_DEVICE_LOST</p></li>
+<li><p>CTL_RESULT_ERROR_INVALID_NULL_HANDLE<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">hDAhandle</span></code></p></li>
+</ul>
+</p></li>
+<li><p>CTL_RESULT_ERROR_INVALID_NULL_POINTER<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">pCount</span></code></p></li>
+</ul>
+</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="ctlledgetproperties">
+<span id="id265"></span><h4>ctlLedGetProperties<a class="headerlink" href="#ctlledgetproperties" title="Permalink to this heading"></a></h4>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419ctlLedGetProperties16ctl_led_handle_tP20ctl_led_properties_t">
+<span id="_CPPv319ctlLedGetProperties16ctl_led_handle_tP20ctl_led_properties_t"></span><span id="_CPPv219ctlLedGetProperties16ctl_led_handle_tP20ctl_led_properties_t"></span><span id="ctlLedGetProperties__ctl_led_handle_t.ctl_led_properties_tP"></span><span class="target" id="igcl__api_8h_1a6df2c562b060f9356a66ec060fa9e6f8"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlLedGetProperties</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_led_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hLed</span></span>, <a class="reference internal" href="#_CPPv420ctl_led_properties_t" title="ctl_led_properties_t"><span class="n"><span class="pre">ctl_led_properties_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pProperties</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419ctlLedGetProperties16ctl_led_handle_tP20ctl_led_properties_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get Led properties. </p>
+<p><ul class="simple">
+<li><p>The application may call this function from simultaneous threads.</p></li>
+<li><p>The implementation of this function should be lock-free.</p></li>
+</ul>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hLed</strong> – [in] Handle for the component. </p></li>
+<li><p><strong>pProperties</strong> – [in,out] Will contain Led properties. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>CTL_RESULT_SUCCESS</p></li>
+<li><p>CTL_RESULT_ERROR_UNINITIALIZED</p></li>
+<li><p>CTL_RESULT_ERROR_DEVICE_LOST</p></li>
+<li><p>CTL_RESULT_ERROR_INVALID_NULL_HANDLE<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">hLed</span></code></p></li>
+</ul>
+</p></li>
+<li><p>CTL_RESULT_ERROR_INVALID_NULL_POINTER<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">pProperties</span></code></p></li>
+</ul>
+</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="ctlledgetstate">
+<span id="id266"></span><h4>ctlLedGetState<a class="headerlink" href="#ctlledgetstate" title="Permalink to this heading"></a></h4>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414ctlLedGetState16ctl_led_handle_tP15ctl_led_state_t">
+<span id="_CPPv314ctlLedGetState16ctl_led_handle_tP15ctl_led_state_t"></span><span id="_CPPv214ctlLedGetState16ctl_led_handle_tP15ctl_led_state_t"></span><span id="ctlLedGetState__ctl_led_handle_t.ctl_led_state_tP"></span><span class="target" id="igcl__api_8h_1a1892b731afb2ac13de9505e416397e29"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlLedGetState</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_led_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hLed</span></span>, <a class="reference internal" href="#_CPPv415ctl_led_state_t" title="ctl_led_state_t"><span class="n"><span class="pre">ctl_led_state_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pState</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414ctlLedGetState16ctl_led_handle_tP15ctl_led_state_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get Led state. </p>
+<p><ul class="simple">
+<li><p>The application may call this function from simultaneous threads.</p></li>
+<li><p>The implementation of this function should be lock-free.</p></li>
+</ul>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hLed</strong> – [in] Handle for the component. </p></li>
+<li><p><strong>pState</strong> – [in,out] Will contain the current Led state. Returns Led state if canControl is true and isI2C is false. pwm and color structure members of <a class="reference internal" href="#structctl__led__state__t"><span class="std std-ref">ctl_led_state_t</span></a> will be returned only if supported by Led, else they will be returned as 0. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>CTL_RESULT_SUCCESS</p></li>
+<li><p>CTL_RESULT_ERROR_UNINITIALIZED</p></li>
+<li><p>CTL_RESULT_ERROR_DEVICE_LOST</p></li>
+<li><p>CTL_RESULT_ERROR_INVALID_NULL_HANDLE<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">hLed</span></code></p></li>
+</ul>
+</p></li>
+<li><p>CTL_RESULT_ERROR_INVALID_NULL_POINTER<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">pState</span></code></p></li>
+</ul>
+</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="ctlledsetstate">
+<span id="id267"></span><h4>ctlLedSetState<a class="headerlink" href="#ctlledsetstate" title="Permalink to this heading"></a></h4>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414ctlLedSetState16ctl_led_handle_tPv8uint32_t">
+<span id="_CPPv314ctlLedSetState16ctl_led_handle_tPv8uint32_t"></span><span id="_CPPv214ctlLedSetState16ctl_led_handle_tPv8uint32_t"></span><span id="ctlLedSetState__ctl_led_handle_t.voidP.uint32_t"></span><span class="target" id="igcl__api_8h_1a2a2d28097930e8b9da6a73f8a2069113"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlLedSetState</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_led_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hLed</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pBuffer</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bufferSize</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414ctlLedSetState16ctl_led_handle_tPv8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Set Led state. </p>
+<p><ul class="simple">
+<li><p>The application may call this function from simultaneous threads.</p></li>
+<li><p>The implementation of this function should be lock-free.</p></li>
+</ul>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hLed</strong> – [in] Handle for the component. </p></li>
+<li><p><strong>pBuffer</strong> – [in] Led State buffer. If isI2C is true, the pBuffer and bufferSize will be passed to the I2C Interface. pBuffer format in this case is OEM defined. If isI2C is false, the pBuffer will be typecasted to <a class="reference internal" href="#structctl__led__state__t"><span class="std std-ref">ctl_led_state_t</span></a>* and bufferSize needs to be sizeof <a class="reference internal" href="#structctl__led__state__t"><span class="std std-ref">ctl_led_state_t</span></a>. pwm and color structure members of <a class="reference internal" href="#structctl__led__state__t"><span class="std std-ref">ctl_led_state_t</span></a> will be set only if supported by Led, else they will be ignored. </p></li>
+<li><p><strong>bufferSize</strong> – [in] Led State buffer size. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>CTL_RESULT_SUCCESS</p></li>
+<li><p>CTL_RESULT_ERROR_UNINITIALIZED</p></li>
+<li><p>CTL_RESULT_ERROR_DEVICE_LOST</p></li>
+<li><p>CTL_RESULT_ERROR_INVALID_NULL_HANDLE<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">hLed</span></code></p></li>
+</ul>
+</p></li>
+<li><p>CTL_RESULT_ERROR_INVALID_NULL_POINTER<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">pBuffer</span></code></p></li>
+</ul>
+</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+<section id="led-structures">
+<h3>Led Structures<a class="headerlink" href="#led-structures" title="Permalink to this heading"></a></h3>
+<section id="ctl-led-properties-t">
+<span id="id268"></span><h4>ctl_led_properties_t<a class="headerlink" href="#ctl-led-properties-t" title="Permalink to this heading"></a></h4>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv420ctl_led_properties_t">
+<span id="_CPPv320ctl_led_properties_t"></span><span id="_CPPv220ctl_led_properties_t"></span><span id="ctl_led_properties_t"></span><span class="target" id="structctl__led__properties__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_led_properties_t</span></span></span><a class="headerlink" href="#_CPPv420ctl_led_properties_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Led properties. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20ctl_led_properties_t4SizeE">
+<span id="_CPPv3N20ctl_led_properties_t4SizeE"></span><span id="_CPPv2N20ctl_led_properties_t4SizeE"></span><span id="ctl_led_properties_t::Size__uint32_t"></span><span class="target" id="structctl__led__properties__t_1a44aff98361037c7b522f27d615b371a1"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Size</span></span></span><a class="headerlink" href="#_CPPv4N20ctl_led_properties_t4SizeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in] size of this structure </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20ctl_led_properties_t7VersionE">
+<span id="_CPPv3N20ctl_led_properties_t7VersionE"></span><span id="_CPPv2N20ctl_led_properties_t7VersionE"></span><span id="ctl_led_properties_t::Version__uint8_t"></span><span class="target" id="structctl__led__properties__t_1affbeec53ec64061b952fcab8439ad6d4"></span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Version</span></span></span><a class="headerlink" href="#_CPPv4N20ctl_led_properties_t7VersionE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in] version of this structure </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20ctl_led_properties_t10canControlE">
+<span id="_CPPv3N20ctl_led_properties_t10canControlE"></span><span id="_CPPv2N20ctl_led_properties_t10canControlE"></span><span id="ctl_led_properties_t::canControl__b"></span><span class="target" id="structctl__led__properties__t_1acb96d1b4c565c790007829a05ebf92f5"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">canControl</span></span></span><a class="headerlink" href="#_CPPv4N20ctl_led_properties_t10canControlE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[out] Indicates if software can control the Led assuming the user has permissions. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20ctl_led_properties_t5isI2CE">
+<span id="_CPPv3N20ctl_led_properties_t5isI2CE"></span><span id="_CPPv2N20ctl_led_properties_t5isI2CE"></span><span id="ctl_led_properties_t::isI2C__b"></span><span class="target" id="structctl__led__properties__t_1a9991eac92c255bb5ed8bba06f21269cf"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isI2C</span></span></span><a class="headerlink" href="#_CPPv4N20ctl_led_properties_t5isI2CE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[out] Indicates support for control via I2C interface. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20ctl_led_properties_t5isPWME">
+<span id="_CPPv3N20ctl_led_properties_t5isPWME"></span><span id="_CPPv2N20ctl_led_properties_t5isPWME"></span><span id="ctl_led_properties_t::isPWM__b"></span><span class="target" id="structctl__led__properties__t_1a9c00abd1457ca51adbfe3ab36fbff8cf"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isPWM</span></span></span><a class="headerlink" href="#_CPPv4N20ctl_led_properties_t5isPWME" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[out] Returns a valid value if canControl is true and isI2C is false. Indicates if the Led is PWM capable. If isPWM is false, only turn Led on/off is supported. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20ctl_led_properties_t7haveRGBE">
+<span id="_CPPv3N20ctl_led_properties_t7haveRGBE"></span><span id="_CPPv2N20ctl_led_properties_t7haveRGBE"></span><span id="ctl_led_properties_t::haveRGB__b"></span><span class="target" id="structctl__led__properties__t_1a40eb5c458941955eb89b825aba4d05ee"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">haveRGB</span></span></span><a class="headerlink" href="#_CPPv4N20ctl_led_properties_t7haveRGBE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[out] Returns a valid value if canControl is true and isI2C is false. Indicates if the Led is RGB capable. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+<section id="ctl-led-color-t">
+<span id="id269"></span><h4>ctl_led_color_t<a class="headerlink" href="#ctl-led-color-t" title="Permalink to this heading"></a></h4>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv415ctl_led_color_t">
+<span id="_CPPv315ctl_led_color_t"></span><span id="_CPPv215ctl_led_color_t"></span><span id="ctl_led_color_t"></span><span class="target" id="structctl__led__color__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_led_color_t</span></span></span><a class="headerlink" href="#_CPPv415ctl_led_color_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Led color. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_color_t4SizeE">
+<span id="_CPPv3N15ctl_led_color_t4SizeE"></span><span id="_CPPv2N15ctl_led_color_t4SizeE"></span><span id="ctl_led_color_t::Size__uint32_t"></span><span class="target" id="structctl__led__color__t_1a7cf3c39118e2b27c7cda41076cf55f2c"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Size</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_color_t4SizeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in] size of this structure </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_color_t7VersionE">
+<span id="_CPPv3N15ctl_led_color_t7VersionE"></span><span id="_CPPv2N15ctl_led_color_t7VersionE"></span><span id="ctl_led_color_t::Version__uint8_t"></span><span class="target" id="structctl__led__color__t_1a8c781e3305e2e967e5d5d74c4df326b4"></span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Version</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_color_t7VersionE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in] version of this structure </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_color_t3redE">
+<span id="_CPPv3N15ctl_led_color_t3redE"></span><span id="_CPPv2N15ctl_led_color_t3redE"></span><span id="ctl_led_color_t::red__double"></span><span class="target" id="structctl__led__color__t_1af2b0c468fa40d4bc80398c9920f03fbe"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">red</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_color_t3redE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in,out][range(0.0, 1.0)] The Led red value. On output, a value less than 0.0 indicates that the color is not known. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_color_t5greenE">
+<span id="_CPPv3N15ctl_led_color_t5greenE"></span><span id="_CPPv2N15ctl_led_color_t5greenE"></span><span id="ctl_led_color_t::green__double"></span><span class="target" id="structctl__led__color__t_1a21c4559917c4c4b01e9c49950c976171"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">green</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_color_t5greenE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in,out][range(0.0, 1.0)] The Led green value. On output, a value less than 0.0 indicates that the color is not known. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_color_t4blueE">
+<span id="_CPPv3N15ctl_led_color_t4blueE"></span><span id="_CPPv2N15ctl_led_color_t4blueE"></span><span id="ctl_led_color_t::blue__double"></span><span class="target" id="structctl__led__color__t_1a05cb1c11b937891dfb162c40a21a94b2"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">blue</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_color_t4blueE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in,out][range(0.0, 1.0)] The Led blue value. On output, a value less than 0.0 indicates that the color is not known. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+<section id="ctl-led-state-t">
+<span id="id270"></span><h4>ctl_led_state_t<a class="headerlink" href="#ctl-led-state-t" title="Permalink to this heading"></a></h4>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv415ctl_led_state_t">
+<span id="_CPPv315ctl_led_state_t"></span><span id="_CPPv215ctl_led_state_t"></span><span id="ctl_led_state_t"></span><span class="target" id="structctl__led__state__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_led_state_t</span></span></span><a class="headerlink" href="#_CPPv415ctl_led_state_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Led state. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_state_t4SizeE">
+<span id="_CPPv3N15ctl_led_state_t4SizeE"></span><span id="_CPPv2N15ctl_led_state_t4SizeE"></span><span id="ctl_led_state_t::Size__uint32_t"></span><span class="target" id="structctl__led__state__t_1a5d73f30348ea24f6aeeeeac36773c124"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Size</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_state_t4SizeE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in] size of this structure </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_state_t7VersionE">
+<span id="_CPPv3N15ctl_led_state_t7VersionE"></span><span id="_CPPv2N15ctl_led_state_t7VersionE"></span><span id="ctl_led_state_t::Version__uint8_t"></span><span class="target" id="structctl__led__state__t_1a4f00bba71119e057adfa44830e233cb3"></span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Version</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_state_t7VersionE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in] version of this structure </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_state_t4isOnE">
+<span id="_CPPv3N15ctl_led_state_t4isOnE"></span><span id="_CPPv2N15ctl_led_state_t4isOnE"></span><span id="ctl_led_state_t::isOn__b"></span><span class="target" id="structctl__led__state__t_1adfb464ee787d13bc370220da729cf769"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isOn</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_state_t4isOnE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in,out] Indicates if the Led is on or off. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_state_t3pwmE">
+<span id="_CPPv3N15ctl_led_state_t3pwmE"></span><span id="_CPPv2N15ctl_led_state_t3pwmE"></span><span id="ctl_led_state_t::pwm__double"></span><span class="target" id="structctl__led__state__t_1aae386ab39e53fdd4b39a3a0e6cb70415"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pwm</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_state_t3pwmE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in,out] Led On/Off Ratio, PWM range(0.0, 1.0). A value greater than 1.0 is capped at 1.0. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15ctl_led_state_t5colorE">
+<span id="_CPPv3N15ctl_led_state_t5colorE"></span><span id="_CPPv2N15ctl_led_state_t5colorE"></span><span id="ctl_led_state_t::color__ctl_led_color_t"></span><span class="target" id="structctl__led__state__t_1a91dd26d1bfcf29a621594a78a53a29ca"></span><a class="reference internal" href="#_CPPv415ctl_led_color_t" title="ctl_led_color_t"><span class="n"><span class="pre">ctl_led_color_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">color</span></span></span><a class="headerlink" href="#_CPPv4N15ctl_led_state_t5colorE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>[in,out] Color of the Led. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+</section>
+</section>
 <section id="media">
 <h2>Media<a class="headerlink" href="#media" title="Permalink to this heading"></a></h2>
 <ul>
@@ -12150,7 +12471,7 @@
 <section id="media-functions">
 <h3>Media Functions<a class="headerlink" href="#media-functions" title="Permalink to this heading"></a></h3>
 <section id="ctlgetsupportedvideoprocessingcapabilities">
-<span id="id264"></span><h4>ctlGetSupportedVideoProcessingCapabilities<a class="headerlink" href="#ctlgetsupportedvideoprocessingcapabilities" title="Permalink to this heading"></a></h4>
+<span id="id271"></span><h4>ctlGetSupportedVideoProcessingCapabilities<a class="headerlink" href="#ctlgetsupportedvideoprocessingcapabilities" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv442ctlGetSupportedVideoProcessingCapabilities27ctl_device_adapter_handle_tP35ctl_video_processing_feature_caps_t">
 <span id="_CPPv342ctlGetSupportedVideoProcessingCapabilities27ctl_device_adapter_handle_tP35ctl_video_processing_feature_caps_t"></span><span id="_CPPv242ctlGetSupportedVideoProcessingCapabilities27ctl_device_adapter_handle_tP35ctl_video_processing_feature_caps_t"></span><span id="ctlGetSupportedVideoProcessingCapabilities__ctl_device_adapter_handle_t.ctl_video_processing_feature_caps_tP"></span><span class="target" id="igcl__api_8h_1a6f8931ec958c32a46dfb25ea21b9a8e8"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlGetSupportedVideoProcessingCapabilities</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <a class="reference internal" href="#_CPPv435ctl_video_processing_feature_caps_t" title="ctl_video_processing_feature_caps_t"><span class="n"><span class="pre">ctl_video_processing_feature_caps_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pFeatureCaps</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv442ctlGetSupportedVideoProcessingCapabilities27ctl_device_adapter_handle_tP35ctl_video_processing_feature_caps_t" title="Permalink to this definition"></a><br /></dt>
@@ -12188,7 +12509,7 @@
 
 </section>
 <section id="ctlgetsetvideoprocessingfeature">
-<span id="id265"></span><h4>ctlGetSetVideoProcessingFeature<a class="headerlink" href="#ctlgetsetvideoprocessingfeature" title="Permalink to this heading"></a></h4>
+<span id="id272"></span><h4>ctlGetSetVideoProcessingFeature<a class="headerlink" href="#ctlgetsetvideoprocessingfeature" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv431ctlGetSetVideoProcessingFeature27ctl_device_adapter_handle_tP37ctl_video_processing_feature_getset_t">
 <span id="_CPPv331ctlGetSetVideoProcessingFeature27ctl_device_adapter_handle_tP37ctl_video_processing_feature_getset_t"></span><span id="_CPPv231ctlGetSetVideoProcessingFeature27ctl_device_adapter_handle_tP37ctl_video_processing_feature_getset_t"></span><span id="ctlGetSetVideoProcessingFeature__ctl_device_adapter_handle_t.ctl_video_processing_feature_getset_tP"></span><span class="target" id="igcl__api_8h_1a17dc73d6e8832fa35989cc84d9a13b9f"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlGetSetVideoProcessingFeature</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <a class="reference internal" href="#_CPPv437ctl_video_processing_feature_getset_t" title="ctl_video_processing_feature_getset_t"><span class="n"><span class="pre">ctl_video_processing_feature_getset_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pFeature</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431ctlGetSetVideoProcessingFeature27ctl_device_adapter_handle_tP37ctl_video_processing_feature_getset_t" title="Permalink to this definition"></a><br /></dt>
@@ -12229,7 +12550,7 @@
 <section id="media-enums">
 <h3>Media Enums<a class="headerlink" href="#media-enums" title="Permalink to this heading"></a></h3>
 <section id="ctl-video-processing-feature-t">
-<span id="id266"></span><h4>ctl_video_processing_feature_t<a class="headerlink" href="#ctl-video-processing-feature-t" title="Permalink to this heading"></a></h4>
+<span id="id273"></span><h4>ctl_video_processing_feature_t<a class="headerlink" href="#ctl-video-processing-feature-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp enum">
 <dt class="sig sig-object cpp" id="_CPPv430ctl_video_processing_feature_t">
 <span id="_CPPv330ctl_video_processing_feature_t"></span><span id="_CPPv230ctl_video_processing_feature_t"></span><span class="target" id="igcl__api_8h_1acdc5c634e094c153866712844124035c"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_feature_t</span></span></span><a class="headerlink" href="#_CPPv430ctl_video_processing_feature_t" title="Permalink to this definition"></a><br /></dt>
@@ -12292,7 +12613,7 @@
 
 </section>
 <section id="ctl-video-processing-super-resolution-flags-t">
-<span id="id267"></span><h4>ctl_video_processing_super_resolution_flags_t<a class="headerlink" href="#ctl-video-processing-super-resolution-flags-t" title="Permalink to this heading"></a></h4>
+<span id="id274"></span><h4>ctl_video_processing_super_resolution_flags_t<a class="headerlink" href="#ctl-video-processing-super-resolution-flags-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp enum">
 <dt class="sig sig-object cpp" id="_CPPv444ctl_video_processing_super_resolution_flag_t">
 <span id="_CPPv344ctl_video_processing_super_resolution_flag_t"></span><span id="_CPPv244ctl_video_processing_super_resolution_flag_t"></span><span class="target" id="igcl__api_8h_1a15dfbe679101e633d45e6dedabe2fb15"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_super_resolution_flag_t</span></span></span><a class="headerlink" href="#_CPPv444ctl_video_processing_super_resolution_flag_t" title="Permalink to this definition"></a><br /></dt>
@@ -12333,7 +12654,7 @@
 <section id="media-structures">
 <h3>Media Structures<a class="headerlink" href="#media-structures" title="Permalink to this heading"></a></h3>
 <section id="ctl-video-processing-super-resolution-info-t">
-<span id="id268"></span><h4>ctl_video_processing_super_resolution_info_t<a class="headerlink" href="#ctl-video-processing-super-resolution-info-t" title="Permalink to this heading"></a></h4>
+<span id="id275"></span><h4>ctl_video_processing_super_resolution_info_t<a class="headerlink" href="#ctl-video-processing-super-resolution-info-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv444ctl_video_processing_super_resolution_info_t">
 <span id="_CPPv344ctl_video_processing_super_resolution_info_t"></span><span id="_CPPv244ctl_video_processing_super_resolution_info_t"></span><span id="ctl_video_processing_super_resolution_info_t"></span><span class="target" id="structctl__video__processing__super__resolution__info__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_super_resolution_info_t</span></span></span><a class="headerlink" href="#_CPPv444ctl_video_processing_super_resolution_info_t" title="Permalink to this definition"></a><br /></dt>
@@ -12381,7 +12702,7 @@
 
 </section>
 <section id="ctl-video-processing-super-resolution-t">
-<span id="id269"></span><h4>ctl_video_processing_super_resolution_t<a class="headerlink" href="#ctl-video-processing-super-resolution-t" title="Permalink to this heading"></a></h4>
+<span id="id276"></span><h4>ctl_video_processing_super_resolution_t<a class="headerlink" href="#ctl-video-processing-super-resolution-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv439ctl_video_processing_super_resolution_t">
 <span id="_CPPv339ctl_video_processing_super_resolution_t"></span><span id="_CPPv239ctl_video_processing_super_resolution_t"></span><span id="ctl_video_processing_super_resolution_t"></span><span class="target" id="structctl__video__processing__super__resolution__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_super_resolution_t</span></span></span><a class="headerlink" href="#_CPPv439ctl_video_processing_super_resolution_t" title="Permalink to this definition"></a><br /></dt>
@@ -12447,7 +12768,7 @@
 
 </section>
 <section id="ctl-video-processing-noise-reduction-info-t">
-<span id="id270"></span><h4>ctl_video_processing_noise_reduction_info_t<a class="headerlink" href="#ctl-video-processing-noise-reduction-info-t" title="Permalink to this heading"></a></h4>
+<span id="id277"></span><h4>ctl_video_processing_noise_reduction_info_t<a class="headerlink" href="#ctl-video-processing-noise-reduction-info-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv443ctl_video_processing_noise_reduction_info_t">
 <span id="_CPPv343ctl_video_processing_noise_reduction_info_t"></span><span id="_CPPv243ctl_video_processing_noise_reduction_info_t"></span><span id="ctl_video_processing_noise_reduction_info_t"></span><span class="target" id="structctl__video__processing__noise__reduction__info__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_noise_reduction_info_t</span></span></span><a class="headerlink" href="#_CPPv443ctl_video_processing_noise_reduction_info_t" title="Permalink to this definition"></a><br /></dt>
@@ -12495,7 +12816,7 @@
 
 </section>
 <section id="ctl-video-processing-noise-reduction-t">
-<span id="id271"></span><h4>ctl_video_processing_noise_reduction_t<a class="headerlink" href="#ctl-video-processing-noise-reduction-t" title="Permalink to this heading"></a></h4>
+<span id="id278"></span><h4>ctl_video_processing_noise_reduction_t<a class="headerlink" href="#ctl-video-processing-noise-reduction-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv438ctl_video_processing_noise_reduction_t">
 <span id="_CPPv338ctl_video_processing_noise_reduction_t"></span><span id="_CPPv238ctl_video_processing_noise_reduction_t"></span><span id="ctl_video_processing_noise_reduction_t"></span><span class="target" id="structctl__video__processing__noise__reduction__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_noise_reduction_t</span></span></span><a class="headerlink" href="#_CPPv438ctl_video_processing_noise_reduction_t" title="Permalink to this definition"></a><br /></dt>
@@ -12537,7 +12858,7 @@
 
 </section>
 <section id="ctl-video-processing-adaptive-contrast-enhancement-info-t">
-<span id="id272"></span><h4>ctl_video_processing_adaptive_contrast_enhancement_info_t<a class="headerlink" href="#ctl-video-processing-adaptive-contrast-enhancement-info-t" title="Permalink to this heading"></a></h4>
+<span id="id279"></span><h4>ctl_video_processing_adaptive_contrast_enhancement_info_t<a class="headerlink" href="#ctl-video-processing-adaptive-contrast-enhancement-info-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv457ctl_video_processing_adaptive_contrast_enhancement_info_t">
 <span id="_CPPv357ctl_video_processing_adaptive_contrast_enhancement_info_t"></span><span id="_CPPv257ctl_video_processing_adaptive_contrast_enhancement_info_t"></span><span id="ctl_video_processing_adaptive_contrast_enhancement_info_t"></span><span class="target" id="structctl__video__processing__adaptive__contrast__enhancement__info__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_adaptive_contrast_enhancement_info_t</span></span></span><a class="headerlink" href="#_CPPv457ctl_video_processing_adaptive_contrast_enhancement_info_t" title="Permalink to this definition"></a><br /></dt>
@@ -12585,7 +12906,7 @@
 
 </section>
 <section id="ctl-video-processing-adaptive-contrast-enhancement-t">
-<span id="id273"></span><h4>ctl_video_processing_adaptive_contrast_enhancement_t<a class="headerlink" href="#ctl-video-processing-adaptive-contrast-enhancement-t" title="Permalink to this heading"></a></h4>
+<span id="id280"></span><h4>ctl_video_processing_adaptive_contrast_enhancement_t<a class="headerlink" href="#ctl-video-processing-adaptive-contrast-enhancement-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv452ctl_video_processing_adaptive_contrast_enhancement_t">
 <span id="_CPPv352ctl_video_processing_adaptive_contrast_enhancement_t"></span><span id="_CPPv252ctl_video_processing_adaptive_contrast_enhancement_t"></span><span id="ctl_video_processing_adaptive_contrast_enhancement_t"></span><span class="target" id="structctl__video__processing__adaptive__contrast__enhancement__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_adaptive_contrast_enhancement_t</span></span></span><a class="headerlink" href="#_CPPv452ctl_video_processing_adaptive_contrast_enhancement_t" title="Permalink to this definition"></a><br /></dt>
@@ -12627,7 +12948,7 @@
 
 </section>
 <section id="ctl-video-processing-standard-color-correction-info-t">
-<span id="id274"></span><h4>ctl_video_processing_standard_color_correction_info_t<a class="headerlink" href="#ctl-video-processing-standard-color-correction-info-t" title="Permalink to this heading"></a></h4>
+<span id="id281"></span><h4>ctl_video_processing_standard_color_correction_info_t<a class="headerlink" href="#ctl-video-processing-standard-color-correction-info-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv453ctl_video_processing_standard_color_correction_info_t">
 <span id="_CPPv353ctl_video_processing_standard_color_correction_info_t"></span><span id="_CPPv253ctl_video_processing_standard_color_correction_info_t"></span><span id="ctl_video_processing_standard_color_correction_info_t"></span><span class="target" id="structctl__video__processing__standard__color__correction__info__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_standard_color_correction_info_t</span></span></span><a class="headerlink" href="#_CPPv453ctl_video_processing_standard_color_correction_info_t" title="Permalink to this definition"></a><br /></dt>
@@ -12687,7 +13008,7 @@
 
 </section>
 <section id="ctl-video-processing-standard-color-correction-t">
-<span id="id275"></span><h4>ctl_video_processing_standard_color_correction_t<a class="headerlink" href="#ctl-video-processing-standard-color-correction-t" title="Permalink to this heading"></a></h4>
+<span id="id282"></span><h4>ctl_video_processing_standard_color_correction_t<a class="headerlink" href="#ctl-video-processing-standard-color-correction-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv448ctl_video_processing_standard_color_correction_t">
 <span id="_CPPv348ctl_video_processing_standard_color_correction_t"></span><span id="_CPPv248ctl_video_processing_standard_color_correction_t"></span><span id="ctl_video_processing_standard_color_correction_t"></span><span class="target" id="structctl__video__processing__standard__color__correction__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_standard_color_correction_t</span></span></span><a class="headerlink" href="#_CPPv448ctl_video_processing_standard_color_correction_t" title="Permalink to this definition"></a><br /></dt>
@@ -12747,7 +13068,7 @@
 
 </section>
 <section id="ctl-video-processing-total-color-correction-info-t">
-<span id="id276"></span><h4>ctl_video_processing_total_color_correction_info_t<a class="headerlink" href="#ctl-video-processing-total-color-correction-info-t" title="Permalink to this heading"></a></h4>
+<span id="id283"></span><h4>ctl_video_processing_total_color_correction_info_t<a class="headerlink" href="#ctl-video-processing-total-color-correction-info-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv450ctl_video_processing_total_color_correction_info_t">
 <span id="_CPPv350ctl_video_processing_total_color_correction_info_t"></span><span id="_CPPv250ctl_video_processing_total_color_correction_info_t"></span><span id="ctl_video_processing_total_color_correction_info_t"></span><span class="target" id="structctl__video__processing__total__color__correction__info__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_total_color_correction_info_t</span></span></span><a class="headerlink" href="#_CPPv450ctl_video_processing_total_color_correction_info_t" title="Permalink to this definition"></a><br /></dt>
@@ -12819,7 +13140,7 @@
 
 </section>
 <section id="ctl-video-processing-total-color-correction-t">
-<span id="id277"></span><h4>ctl_video_processing_total_color_correction_t<a class="headerlink" href="#ctl-video-processing-total-color-correction-t" title="Permalink to this heading"></a></h4>
+<span id="id284"></span><h4>ctl_video_processing_total_color_correction_t<a class="headerlink" href="#ctl-video-processing-total-color-correction-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv445ctl_video_processing_total_color_correction_t">
 <span id="_CPPv345ctl_video_processing_total_color_correction_t"></span><span id="_CPPv245ctl_video_processing_total_color_correction_t"></span><span id="ctl_video_processing_total_color_correction_t"></span><span class="target" id="structctl__video__processing__total__color__correction__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_total_color_correction_t</span></span></span><a class="headerlink" href="#_CPPv445ctl_video_processing_total_color_correction_t" title="Permalink to this definition"></a><br /></dt>
@@ -12891,7 +13212,7 @@
 
 </section>
 <section id="ctl-video-processing-feature-details-t">
-<span id="id278"></span><h4>ctl_video_processing_feature_details_t<a class="headerlink" href="#ctl-video-processing-feature-details-t" title="Permalink to this heading"></a></h4>
+<span id="id285"></span><h4>ctl_video_processing_feature_details_t<a class="headerlink" href="#ctl-video-processing-feature-details-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv438ctl_video_processing_feature_details_t">
 <span id="_CPPv338ctl_video_processing_feature_details_t"></span><span id="_CPPv238ctl_video_processing_feature_details_t"></span><span id="ctl_video_processing_feature_details_t"></span><span class="target" id="structctl__video__processing__feature__details__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_feature_details_t</span></span></span><a class="headerlink" href="#_CPPv438ctl_video_processing_feature_details_t" title="Permalink to this definition"></a><br /></dt>
@@ -12951,7 +13272,7 @@
 
 </section>
 <section id="ctl-video-processing-feature-caps-t">
-<span id="id279"></span><h4>ctl_video_processing_feature_caps_t<a class="headerlink" href="#ctl-video-processing-feature-caps-t" title="Permalink to this heading"></a></h4>
+<span id="id286"></span><h4>ctl_video_processing_feature_caps_t<a class="headerlink" href="#ctl-video-processing-feature-caps-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv435ctl_video_processing_feature_caps_t">
 <span id="_CPPv335ctl_video_processing_feature_caps_t"></span><span id="_CPPv235ctl_video_processing_feature_caps_t"></span><span id="ctl_video_processing_feature_caps_t"></span><span class="target" id="structctl__video__processing__feature__caps__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_feature_caps_t</span></span></span><a class="headerlink" href="#_CPPv435ctl_video_processing_feature_caps_t" title="Permalink to this definition"></a><br /></dt>
@@ -12993,7 +13314,7 @@
 
 </section>
 <section id="ctl-video-processing-feature-getset-t">
-<span id="id280"></span><h4>ctl_video_processing_feature_getset_t<a class="headerlink" href="#ctl-video-processing-feature-getset-t" title="Permalink to this heading"></a></h4>
+<span id="id287"></span><h4>ctl_video_processing_feature_getset_t<a class="headerlink" href="#ctl-video-processing-feature-getset-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv437ctl_video_processing_feature_getset_t">
 <span id="_CPPv337ctl_video_processing_feature_getset_t"></span><span id="_CPPv237ctl_video_processing_feature_getset_t"></span><span id="ctl_video_processing_feature_getset_t"></span><span class="target" id="structctl__video__processing__feature__getset__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_video_processing_feature_getset_t</span></span></span><a class="headerlink" href="#_CPPv437ctl_video_processing_feature_getset_t" title="Permalink to this definition"></a><br /></dt>
@@ -13106,7 +13427,7 @@
 <section id="memory-functions">
 <h3>Memory Functions<a class="headerlink" href="#memory-functions" title="Permalink to this heading"></a></h3>
 <section id="ctlenummemorymodules">
-<span id="id281"></span><h4>ctlEnumMemoryModules<a class="headerlink" href="#ctlenummemorymodules" title="Permalink to this heading"></a></h4>
+<span id="id288"></span><h4>ctlEnumMemoryModules<a class="headerlink" href="#ctlenummemorymodules" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420ctlEnumMemoryModules27ctl_device_adapter_handle_tP8uint32_tP16ctl_mem_handle_t">
 <span id="_CPPv320ctlEnumMemoryModules27ctl_device_adapter_handle_tP8uint32_tP16ctl_mem_handle_t"></span><span id="_CPPv220ctlEnumMemoryModules27ctl_device_adapter_handle_tP8uint32_tP16ctl_mem_handle_t"></span><span id="ctlEnumMemoryModules__ctl_device_adapter_handle_t.uint32_tP.ctl_mem_handle_tP"></span><span class="target" id="igcl__api_8h_1a40a0ef9a3ae505eb92c3e4e4c81822a0"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlEnumMemoryModules</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pCount</span></span>, <span class="n"><span class="pre">ctl_mem_handle_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">phMemory</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420ctlEnumMemoryModules27ctl_device_adapter_handle_tP8uint32_tP16ctl_mem_handle_t" title="Permalink to this definition"></a><br /></dt>
@@ -13145,7 +13466,7 @@
 
 </section>
 <section id="ctlmemorygetproperties">
-<span id="id282"></span><h4>ctlMemoryGetProperties<a class="headerlink" href="#ctlmemorygetproperties" title="Permalink to this heading"></a></h4>
+<span id="id289"></span><h4>ctlMemoryGetProperties<a class="headerlink" href="#ctlmemorygetproperties" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv422ctlMemoryGetProperties16ctl_mem_handle_tP20ctl_mem_properties_t">
 <span id="_CPPv322ctlMemoryGetProperties16ctl_mem_handle_tP20ctl_mem_properties_t"></span><span id="_CPPv222ctlMemoryGetProperties16ctl_mem_handle_tP20ctl_mem_properties_t"></span><span id="ctlMemoryGetProperties__ctl_mem_handle_t.ctl_mem_properties_tP"></span><span class="target" id="igcl__api_8h_1a61ada42653a42585445b5e5e012aafe1"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlMemoryGetProperties</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_mem_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hMemory</span></span>, <a class="reference internal" href="#_CPPv420ctl_mem_properties_t" title="ctl_mem_properties_t"><span class="n"><span class="pre">ctl_mem_properties_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pProperties</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422ctlMemoryGetProperties16ctl_mem_handle_tP20ctl_mem_properties_t" title="Permalink to this definition"></a><br /></dt>
@@ -13183,7 +13504,7 @@
 
 </section>
 <section id="ctlmemorygetstate">
-<span id="id283"></span><h4>ctlMemoryGetState<a class="headerlink" href="#ctlmemorygetstate" title="Permalink to this heading"></a></h4>
+<span id="id290"></span><h4>ctlMemoryGetState<a class="headerlink" href="#ctlmemorygetstate" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417ctlMemoryGetState16ctl_mem_handle_tP15ctl_mem_state_t">
 <span id="_CPPv317ctlMemoryGetState16ctl_mem_handle_tP15ctl_mem_state_t"></span><span id="_CPPv217ctlMemoryGetState16ctl_mem_handle_tP15ctl_mem_state_t"></span><span id="ctlMemoryGetState__ctl_mem_handle_t.ctl_mem_state_tP"></span><span class="target" id="igcl__api_8h_1a3fd8b2ecaa8e556badbf9e25648682ae"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlMemoryGetState</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_mem_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hMemory</span></span>, <a class="reference internal" href="#_CPPv415ctl_mem_state_t" title="ctl_mem_state_t"><span class="n"><span class="pre">ctl_mem_state_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pState</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417ctlMemoryGetState16ctl_mem_handle_tP15ctl_mem_state_t" title="Permalink to this definition"></a><br /></dt>
@@ -13221,7 +13542,7 @@
 
 </section>
 <section id="ctlmemorygetbandwidth">
-<span id="id284"></span><h4>ctlMemoryGetBandwidth<a class="headerlink" href="#ctlmemorygetbandwidth" title="Permalink to this heading"></a></h4>
+<span id="id291"></span><h4>ctlMemoryGetBandwidth<a class="headerlink" href="#ctlmemorygetbandwidth" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv421ctlMemoryGetBandwidth16ctl_mem_handle_tP19ctl_mem_bandwidth_t">
 <span id="_CPPv321ctlMemoryGetBandwidth16ctl_mem_handle_tP19ctl_mem_bandwidth_t"></span><span id="_CPPv221ctlMemoryGetBandwidth16ctl_mem_handle_tP19ctl_mem_bandwidth_t"></span><span id="ctlMemoryGetBandwidth__ctl_mem_handle_t.ctl_mem_bandwidth_tP"></span><span class="target" id="igcl__api_8h_1a8c9847cdd54c1eff78746409a4fe82a2"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlMemoryGetBandwidth</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_mem_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hMemory</span></span>, <a class="reference internal" href="#_CPPv419ctl_mem_bandwidth_t" title="ctl_mem_bandwidth_t"><span class="n"><span class="pre">ctl_mem_bandwidth_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pBandwidth</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421ctlMemoryGetBandwidth16ctl_mem_handle_tP19ctl_mem_bandwidth_t" title="Permalink to this definition"></a><br /></dt>
@@ -13266,7 +13587,7 @@
 <section id="memory-enums">
 <h3>Memory Enums<a class="headerlink" href="#memory-enums" title="Permalink to this heading"></a></h3>
 <section id="ctl-mem-type-t">
-<span id="id285"></span><h4>ctl_mem_type_t<a class="headerlink" href="#ctl-mem-type-t" title="Permalink to this heading"></a></h4>
+<span id="id292"></span><h4>ctl_mem_type_t<a class="headerlink" href="#ctl-mem-type-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp enum">
 <dt class="sig sig-object cpp" id="_CPPv414ctl_mem_type_t">
 <span id="_CPPv314ctl_mem_type_t"></span><span id="_CPPv214ctl_mem_type_t"></span><span class="target" id="igcl__api_8h_1a3d4445c2a5d075f7199054602f597328"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_mem_type_t</span></span></span><a class="headerlink" href="#_CPPv414ctl_mem_type_t" title="Permalink to this definition"></a><br /></dt>
@@ -13377,7 +13698,7 @@
 
 </section>
 <section id="ctl-mem-loc-t">
-<span id="id286"></span><h4>ctl_mem_loc_t<a class="headerlink" href="#ctl-mem-loc-t" title="Permalink to this heading"></a></h4>
+<span id="id293"></span><h4>ctl_mem_loc_t<a class="headerlink" href="#ctl-mem-loc-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp enum">
 <dt class="sig sig-object cpp" id="_CPPv413ctl_mem_loc_t">
 <span id="_CPPv313ctl_mem_loc_t"></span><span id="_CPPv213ctl_mem_loc_t"></span><span class="target" id="igcl__api_8h_1a06065f8670068c12bbf112e11babd851"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_mem_loc_t</span></span></span><a class="headerlink" href="#_CPPv413ctl_mem_loc_t" title="Permalink to this definition"></a><br /></dt>
@@ -13407,7 +13728,7 @@
 <section id="memory-structures">
 <h3>Memory Structures<a class="headerlink" href="#memory-structures" title="Permalink to this heading"></a></h3>
 <section id="ctl-mem-properties-t">
-<span id="id287"></span><h4>ctl_mem_properties_t<a class="headerlink" href="#ctl-mem-properties-t" title="Permalink to this heading"></a></h4>
+<span id="id294"></span><h4>ctl_mem_properties_t<a class="headerlink" href="#ctl-mem-properties-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv420ctl_mem_properties_t">
 <span id="_CPPv320ctl_mem_properties_t"></span><span id="_CPPv220ctl_mem_properties_t"></span><span id="ctl_mem_properties_t"></span><span class="target" id="structctl__mem__properties__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_mem_properties_t</span></span></span><a class="headerlink" href="#_CPPv420ctl_mem_properties_t" title="Permalink to this definition"></a><br /></dt>
@@ -13461,7 +13782,7 @@
 
 </section>
 <section id="ctl-mem-state-t">
-<span id="id288"></span><h4>ctl_mem_state_t<a class="headerlink" href="#ctl-mem-state-t" title="Permalink to this heading"></a></h4>
+<span id="id295"></span><h4>ctl_mem_state_t<a class="headerlink" href="#ctl-mem-state-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv415ctl_mem_state_t">
 <span id="_CPPv315ctl_mem_state_t"></span><span id="_CPPv215ctl_mem_state_t"></span><span id="ctl_mem_state_t"></span><span class="target" id="structctl__mem__state__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_mem_state_t</span></span></span><a class="headerlink" href="#_CPPv415ctl_mem_state_t" title="Permalink to this definition"></a><br /></dt>
@@ -13502,7 +13823,7 @@
 
 </section>
 <section id="ctl-mem-bandwidth-t">
-<span id="id289"></span><h4>ctl_mem_bandwidth_t<a class="headerlink" href="#ctl-mem-bandwidth-t" title="Permalink to this heading"></a></h4>
+<span id="id296"></span><h4>ctl_mem_bandwidth_t<a class="headerlink" href="#ctl-mem-bandwidth-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv419ctl_mem_bandwidth_t">
 <span id="_CPPv319ctl_mem_bandwidth_t"></span><span id="_CPPv219ctl_mem_bandwidth_t"></span><span id="ctl_mem_bandwidth_t"></span><span class="target" id="structctl__mem__bandwidth__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_mem_bandwidth_t</span></span></span><a class="headerlink" href="#_CPPv419ctl_mem_bandwidth_t" title="Permalink to this definition"></a><br /></dt>
@@ -13605,7 +13926,7 @@
 <section id="overclock-functions">
 <h3>Overclock Functions<a class="headerlink" href="#overclock-functions" title="Permalink to this heading"></a></h3>
 <section id="ctloverclockgetproperties">
-<span id="id290"></span><h4>ctlOverclockGetProperties<a class="headerlink" href="#ctloverclockgetproperties" title="Permalink to this heading"></a></h4>
+<span id="id297"></span><h4>ctlOverclockGetProperties<a class="headerlink" href="#ctloverclockgetproperties" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv425ctlOverclockGetProperties27ctl_device_adapter_handle_tP19ctl_oc_properties_t">
 <span id="_CPPv325ctlOverclockGetProperties27ctl_device_adapter_handle_tP19ctl_oc_properties_t"></span><span id="_CPPv225ctlOverclockGetProperties27ctl_device_adapter_handle_tP19ctl_oc_properties_t"></span><span id="ctlOverclockGetProperties__ctl_device_adapter_handle_t.ctl_oc_properties_tP"></span><span class="target" id="igcl__api_8h_1a93f4fa199287a4b0ba6ef49b2d2aa0d0"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockGetProperties</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <a class="reference internal" href="#_CPPv419ctl_oc_properties_t" title="ctl_oc_properties_t"><span class="n"><span class="pre">ctl_oc_properties_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pOcProperties</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425ctlOverclockGetProperties27ctl_device_adapter_handle_tP19ctl_oc_properties_t" title="Permalink to this definition"></a><br /></dt>
@@ -13638,7 +13959,7 @@
 
 </section>
 <section id="ctloverclockwaiverset">
-<span id="id291"></span><h4>ctlOverclockWaiverSet<a class="headerlink" href="#ctloverclockwaiverset" title="Permalink to this heading"></a></h4>
+<span id="id298"></span><h4>ctlOverclockWaiverSet<a class="headerlink" href="#ctloverclockwaiverset" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv421ctlOverclockWaiverSet27ctl_device_adapter_handle_t">
 <span id="_CPPv321ctlOverclockWaiverSet27ctl_device_adapter_handle_t"></span><span id="_CPPv221ctlOverclockWaiverSet27ctl_device_adapter_handle_t"></span><span id="ctlOverclockWaiverSet__ctl_device_adapter_handle_t"></span><span class="target" id="igcl__api_8h_1a3ed5e5686dfc404d8a57d70f97aa29dc"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockWaiverSet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421ctlOverclockWaiverSet27ctl_device_adapter_handle_t" title="Permalink to this definition"></a><br /></dt>
@@ -13672,7 +13993,7 @@
 
 </section>
 <section id="ctloverclockgpufrequencyoffsetget">
-<span id="id292"></span><h4>ctlOverclockGpuFrequencyOffsetGet<a class="headerlink" href="#ctloverclockgpufrequencyoffsetget" title="Permalink to this heading"></a></h4>
+<span id="id299"></span><h4>ctlOverclockGpuFrequencyOffsetGet<a class="headerlink" href="#ctloverclockgpufrequencyoffsetget" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv433ctlOverclockGpuFrequencyOffsetGet27ctl_device_adapter_handle_tPd">
 <span id="_CPPv333ctlOverclockGpuFrequencyOffsetGet27ctl_device_adapter_handle_tPd"></span><span id="_CPPv233ctlOverclockGpuFrequencyOffsetGet27ctl_device_adapter_handle_tPd"></span><span id="ctlOverclockGpuFrequencyOffsetGet__ctl_device_adapter_handle_t.doubleP"></span><span class="target" id="igcl__api_8h_1a2c1d6d03e861bbe2bb0d4087c9cebc82"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockGpuFrequencyOffsetGet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pOcFrequencyOffset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv433ctlOverclockGpuFrequencyOffsetGet27ctl_device_adapter_handle_tPd" title="Permalink to this definition"></a><br /></dt>
@@ -13710,7 +14031,7 @@
 
 </section>
 <section id="ctloverclockgpufrequencyoffsetset">
-<span id="id293"></span><h4>ctlOverclockGpuFrequencyOffsetSet<a class="headerlink" href="#ctloverclockgpufrequencyoffsetset" title="Permalink to this heading"></a></h4>
+<span id="id300"></span><h4>ctlOverclockGpuFrequencyOffsetSet<a class="headerlink" href="#ctloverclockgpufrequencyoffsetset" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv433ctlOverclockGpuFrequencyOffsetSet27ctl_device_adapter_handle_td">
 <span id="_CPPv333ctlOverclockGpuFrequencyOffsetSet27ctl_device_adapter_handle_td"></span><span id="_CPPv233ctlOverclockGpuFrequencyOffsetSet27ctl_device_adapter_handle_td"></span><span id="ctlOverclockGpuFrequencyOffsetSet__ctl_device_adapter_handle_t.double"></span><span class="target" id="igcl__api_8h_1ae8abf86fa3f86aa3221a90cbd3516dfb"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockGpuFrequencyOffsetSet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ocFrequencyOffset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv433ctlOverclockGpuFrequencyOffsetSet27ctl_device_adapter_handle_td" title="Permalink to this definition"></a><br /></dt>
@@ -13750,7 +14071,7 @@
 
 </section>
 <section id="ctloverclockgpuvoltageoffsetget">
-<span id="id294"></span><h4>ctlOverclockGpuVoltageOffsetGet<a class="headerlink" href="#ctloverclockgpuvoltageoffsetget" title="Permalink to this heading"></a></h4>
+<span id="id301"></span><h4>ctlOverclockGpuVoltageOffsetGet<a class="headerlink" href="#ctloverclockgpuvoltageoffsetget" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv431ctlOverclockGpuVoltageOffsetGet27ctl_device_adapter_handle_tPd">
 <span id="_CPPv331ctlOverclockGpuVoltageOffsetGet27ctl_device_adapter_handle_tPd"></span><span id="_CPPv231ctlOverclockGpuVoltageOffsetGet27ctl_device_adapter_handle_tPd"></span><span id="ctlOverclockGpuVoltageOffsetGet__ctl_device_adapter_handle_t.doubleP"></span><span class="target" id="igcl__api_8h_1a6e03cd545eac552644298d4dd1d386d8"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockGpuVoltageOffsetGet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pOcVoltageOffset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431ctlOverclockGpuVoltageOffsetGet27ctl_device_adapter_handle_tPd" title="Permalink to this definition"></a><br /></dt>
@@ -13788,7 +14109,7 @@
 
 </section>
 <section id="ctloverclockgpuvoltageoffsetset">
-<span id="id295"></span><h4>ctlOverclockGpuVoltageOffsetSet<a class="headerlink" href="#ctloverclockgpuvoltageoffsetset" title="Permalink to this heading"></a></h4>
+<span id="id302"></span><h4>ctlOverclockGpuVoltageOffsetSet<a class="headerlink" href="#ctloverclockgpuvoltageoffsetset" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv431ctlOverclockGpuVoltageOffsetSet27ctl_device_adapter_handle_td">
 <span id="_CPPv331ctlOverclockGpuVoltageOffsetSet27ctl_device_adapter_handle_td"></span><span id="_CPPv231ctlOverclockGpuVoltageOffsetSet27ctl_device_adapter_handle_td"></span><span id="ctlOverclockGpuVoltageOffsetSet__ctl_device_adapter_handle_t.double"></span><span class="target" id="igcl__api_8h_1a631bc95879d89e0cebb58acea4309083"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockGpuVoltageOffsetSet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ocVoltageOffset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431ctlOverclockGpuVoltageOffsetSet27ctl_device_adapter_handle_td" title="Permalink to this definition"></a><br /></dt>
@@ -13824,7 +14145,7 @@
 
 </section>
 <section id="ctloverclockgpulockget">
-<span id="id296"></span><h4>ctlOverclockGpuLockGet<a class="headerlink" href="#ctloverclockgpulockget" title="Permalink to this heading"></a></h4>
+<span id="id303"></span><h4>ctlOverclockGpuLockGet<a class="headerlink" href="#ctloverclockgpulockget" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv422ctlOverclockGpuLockGet27ctl_device_adapter_handle_tP16ctl_oc_vf_pair_t">
 <span id="_CPPv322ctlOverclockGpuLockGet27ctl_device_adapter_handle_tP16ctl_oc_vf_pair_t"></span><span id="_CPPv222ctlOverclockGpuLockGet27ctl_device_adapter_handle_tP16ctl_oc_vf_pair_t"></span><span id="ctlOverclockGpuLockGet__ctl_device_adapter_handle_t.ctl_oc_vf_pair_tP"></span><span class="target" id="igcl__api_8h_1a4090e2779cdb17780c2c9009bab003e7"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockGpuLockGet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <a class="reference internal" href="#_CPPv416ctl_oc_vf_pair_t" title="ctl_oc_vf_pair_t"><span class="n"><span class="pre">ctl_oc_vf_pair_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pVfPair</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422ctlOverclockGpuLockGet27ctl_device_adapter_handle_tP16ctl_oc_vf_pair_t" title="Permalink to this definition"></a><br /></dt>
@@ -13863,7 +14184,7 @@
 
 </section>
 <section id="ctloverclockgpulockset">
-<span id="id297"></span><h4>ctlOverclockGpuLockSet<a class="headerlink" href="#ctloverclockgpulockset" title="Permalink to this heading"></a></h4>
+<span id="id304"></span><h4>ctlOverclockGpuLockSet<a class="headerlink" href="#ctloverclockgpulockset" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv422ctlOverclockGpuLockSet27ctl_device_adapter_handle_t16ctl_oc_vf_pair_t">
 <span id="_CPPv322ctlOverclockGpuLockSet27ctl_device_adapter_handle_t16ctl_oc_vf_pair_t"></span><span id="_CPPv222ctlOverclockGpuLockSet27ctl_device_adapter_handle_t16ctl_oc_vf_pair_t"></span><span id="ctlOverclockGpuLockSet__ctl_device_adapter_handle_t.ctl_oc_vf_pair_t"></span><span class="target" id="igcl__api_8h_1a3f088be5d02971e3956f17bb00e9b9f9"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockGpuLockSet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <a class="reference internal" href="#_CPPv416ctl_oc_vf_pair_t" title="ctl_oc_vf_pair_t"><span class="n"><span class="pre">ctl_oc_vf_pair_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">vFPair</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422ctlOverclockGpuLockSet27ctl_device_adapter_handle_t16ctl_oc_vf_pair_t" title="Permalink to this definition"></a><br /></dt>
@@ -13901,7 +14222,7 @@
 
 </section>
 <section id="ctloverclockvramfrequencyoffsetget">
-<span id="id298"></span><h4>ctlOverclockVramFrequencyOffsetGet<a class="headerlink" href="#ctloverclockvramfrequencyoffsetget" title="Permalink to this heading"></a></h4>
+<span id="id305"></span><h4>ctlOverclockVramFrequencyOffsetGet<a class="headerlink" href="#ctloverclockvramfrequencyoffsetget" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv434ctlOverclockVramFrequencyOffsetGet27ctl_device_adapter_handle_tPd">
 <span id="_CPPv334ctlOverclockVramFrequencyOffsetGet27ctl_device_adapter_handle_tPd"></span><span id="_CPPv234ctlOverclockVramFrequencyOffsetGet27ctl_device_adapter_handle_tPd"></span><span id="ctlOverclockVramFrequencyOffsetGet__ctl_device_adapter_handle_t.doubleP"></span><span class="target" id="igcl__api_8h_1ab62a6d443130c6b26870f557aae04979"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockVramFrequencyOffsetGet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pOcFrequencyOffset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv434ctlOverclockVramFrequencyOffsetGet27ctl_device_adapter_handle_tPd" title="Permalink to this definition"></a><br /></dt>
@@ -13938,7 +14259,7 @@
 
 </section>
 <section id="ctloverclockvramfrequencyoffsetset">
-<span id="id299"></span><h4>ctlOverclockVramFrequencyOffsetSet<a class="headerlink" href="#ctloverclockvramfrequencyoffsetset" title="Permalink to this heading"></a></h4>
+<span id="id306"></span><h4>ctlOverclockVramFrequencyOffsetSet<a class="headerlink" href="#ctloverclockvramfrequencyoffsetset" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv434ctlOverclockVramFrequencyOffsetSet27ctl_device_adapter_handle_td">
 <span id="_CPPv334ctlOverclockVramFrequencyOffsetSet27ctl_device_adapter_handle_td"></span><span id="_CPPv234ctlOverclockVramFrequencyOffsetSet27ctl_device_adapter_handle_td"></span><span id="ctlOverclockVramFrequencyOffsetSet__ctl_device_adapter_handle_t.double"></span><span class="target" id="igcl__api_8h_1a41515985c6110ed05e7adfc898168c7b"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockVramFrequencyOffsetSet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ocFrequencyOffset</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv434ctlOverclockVramFrequencyOffsetSet27ctl_device_adapter_handle_td" title="Permalink to this definition"></a><br /></dt>
@@ -13979,7 +14300,7 @@
 
 </section>
 <section id="ctloverclockvramvoltageoffsetget">
-<span id="id300"></span><h4>ctlOverclockVramVoltageOffsetGet<a class="headerlink" href="#ctloverclockvramvoltageoffsetget" title="Permalink to this heading"></a></h4>
+<span id="id307"></span><h4>ctlOverclockVramVoltageOffsetGet<a class="headerlink" href="#ctloverclockvramvoltageoffsetget" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv432ctlOverclockVramVoltageOffsetGet27ctl_device_adapter_handle_tPd">
 <span id="_CPPv332ctlOverclockVramVoltageOffsetGet27ctl_device_adapter_handle_tPd"></span><span id="_CPPv232ctlOverclockVramVoltageOffsetGet27ctl_device_adapter_handle_tPd"></span><span id="ctlOverclockVramVoltageOffsetGet__ctl_device_adapter_handle_t.doubleP"></span><span class="target" id="igcl__api_8h_1a3f70ad6cf1d200e2c79a0b5ed1dfee1a"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockVramVoltageOffsetGet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pVoltage</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv432ctlOverclockVramVoltageOffsetGet27ctl_device_adapter_handle_tPd" title="Permalink to this definition"></a><br /></dt>
@@ -14023,7 +14344,7 @@
 
 </section>
 <section id="ctloverclockvramvoltageoffsetset">
-<span id="id301"></span><h4>ctlOverclockVramVoltageOffsetSet<a class="headerlink" href="#ctloverclockvramvoltageoffsetset" title="Permalink to this heading"></a></h4>
+<span id="id308"></span><h4>ctlOverclockVramVoltageOffsetSet<a class="headerlink" href="#ctloverclockvramvoltageoffsetset" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv432ctlOverclockVramVoltageOffsetSet27ctl_device_adapter_handle_td">
 <span id="_CPPv332ctlOverclockVramVoltageOffsetSet27ctl_device_adapter_handle_td"></span><span id="_CPPv232ctlOverclockVramVoltageOffsetSet27ctl_device_adapter_handle_td"></span><span id="ctlOverclockVramVoltageOffsetSet__ctl_device_adapter_handle_t.double"></span><span class="target" id="igcl__api_8h_1a4bc0bfbe8aa3dea91600a80829446187"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockVramVoltageOffsetSet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">voltage</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv432ctlOverclockVramVoltageOffsetSet27ctl_device_adapter_handle_td" title="Permalink to this definition"></a><br /></dt>
@@ -14057,7 +14378,7 @@
 
 </section>
 <section id="ctloverclockpowerlimitget">
-<span id="id302"></span><h4>ctlOverclockPowerLimitGet<a class="headerlink" href="#ctloverclockpowerlimitget" title="Permalink to this heading"></a></h4>
+<span id="id309"></span><h4>ctlOverclockPowerLimitGet<a class="headerlink" href="#ctloverclockpowerlimitget" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv425ctlOverclockPowerLimitGet27ctl_device_adapter_handle_tPd">
 <span id="_CPPv325ctlOverclockPowerLimitGet27ctl_device_adapter_handle_tPd"></span><span id="_CPPv225ctlOverclockPowerLimitGet27ctl_device_adapter_handle_tPd"></span><span id="ctlOverclockPowerLimitGet__ctl_device_adapter_handle_t.doubleP"></span><span class="target" id="igcl__api_8h_1a890a9455e7f4c4bc750ae452049666b2"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockPowerLimitGet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pSustainedPowerLimit</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425ctlOverclockPowerLimitGet27ctl_device_adapter_handle_tPd" title="Permalink to this definition"></a><br /></dt>
@@ -14095,7 +14416,7 @@
 
 </section>
 <section id="ctloverclockpowerlimitset">
-<span id="id303"></span><h4>ctlOverclockPowerLimitSet<a class="headerlink" href="#ctloverclockpowerlimitset" title="Permalink to this heading"></a></h4>
+<span id="id310"></span><h4>ctlOverclockPowerLimitSet<a class="headerlink" href="#ctloverclockpowerlimitset" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv425ctlOverclockPowerLimitSet27ctl_device_adapter_handle_td">
 <span id="_CPPv325ctlOverclockPowerLimitSet27ctl_device_adapter_handle_td"></span><span id="_CPPv225ctlOverclockPowerLimitSet27ctl_device_adapter_handle_td"></span><span id="ctlOverclockPowerLimitSet__ctl_device_adapter_handle_t.double"></span><span class="target" id="igcl__api_8h_1a6e66e4d4c44a6783ac0909bec2b53a66"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockPowerLimitSet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sustainedPowerLimit</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425ctlOverclockPowerLimitSet27ctl_device_adapter_handle_td" title="Permalink to this definition"></a><br /></dt>
@@ -14129,7 +14450,7 @@
 
 </section>
 <section id="ctloverclocktemperaturelimitget">
-<span id="id304"></span><h4>ctlOverclockTemperatureLimitGet<a class="headerlink" href="#ctloverclocktemperaturelimitget" title="Permalink to this heading"></a></h4>
+<span id="id311"></span><h4>ctlOverclockTemperatureLimitGet<a class="headerlink" href="#ctloverclocktemperaturelimitget" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv431ctlOverclockTemperatureLimitGet27ctl_device_adapter_handle_tPd">
 <span id="_CPPv331ctlOverclockTemperatureLimitGet27ctl_device_adapter_handle_tPd"></span><span id="_CPPv231ctlOverclockTemperatureLimitGet27ctl_device_adapter_handle_tPd"></span><span id="ctlOverclockTemperatureLimitGet__ctl_device_adapter_handle_t.doubleP"></span><span class="target" id="igcl__api_8h_1a038e87e44120fce6a712f462e0478a42"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockTemperatureLimitGet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pTemperatureLimit</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431ctlOverclockTemperatureLimitGet27ctl_device_adapter_handle_tPd" title="Permalink to this definition"></a><br /></dt>
@@ -14166,7 +14487,7 @@
 
 </section>
 <section id="ctloverclocktemperaturelimitset">
-<span id="id305"></span><h4>ctlOverclockTemperatureLimitSet<a class="headerlink" href="#ctloverclocktemperaturelimitset" title="Permalink to this heading"></a></h4>
+<span id="id312"></span><h4>ctlOverclockTemperatureLimitSet<a class="headerlink" href="#ctloverclocktemperaturelimitset" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv431ctlOverclockTemperatureLimitSet27ctl_device_adapter_handle_td">
 <span id="_CPPv331ctlOverclockTemperatureLimitSet27ctl_device_adapter_handle_td"></span><span id="_CPPv231ctlOverclockTemperatureLimitSet27ctl_device_adapter_handle_td"></span><span id="ctlOverclockTemperatureLimitSet__ctl_device_adapter_handle_t.double"></span><span class="target" id="igcl__api_8h_1addec9cafef09f67765434588b57f837f"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockTemperatureLimitSet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">temperatureLimit</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431ctlOverclockTemperatureLimitSet27ctl_device_adapter_handle_td" title="Permalink to this definition"></a><br /></dt>
@@ -14199,7 +14520,7 @@
 
 </section>
 <section id="ctlpowertelemetryget">
-<span id="id306"></span><h4>ctlPowerTelemetryGet<a class="headerlink" href="#ctlpowertelemetryget" title="Permalink to this heading"></a></h4>
+<span id="id313"></span><h4>ctlPowerTelemetryGet<a class="headerlink" href="#ctlpowertelemetryget" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420ctlPowerTelemetryGet27ctl_device_adapter_handle_tP21ctl_power_telemetry_t">
 <span id="_CPPv320ctlPowerTelemetryGet27ctl_device_adapter_handle_tP21ctl_power_telemetry_t"></span><span id="_CPPv220ctlPowerTelemetryGet27ctl_device_adapter_handle_tP21ctl_power_telemetry_t"></span><span id="ctlPowerTelemetryGet__ctl_device_adapter_handle_t.ctl_power_telemetry_tP"></span><span class="target" id="igcl__api_8h_1aa6c28bf61b766ac6ae2403147d37de97"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlPowerTelemetryGet</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span>, <a class="reference internal" href="#_CPPv421ctl_power_telemetry_t" title="ctl_power_telemetry_t"><span class="n"><span class="pre">ctl_power_telemetry_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pTelemetryInfo</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420ctlPowerTelemetryGet27ctl_device_adapter_handle_tP21ctl_power_telemetry_t" title="Permalink to this definition"></a><br /></dt>
@@ -14236,7 +14557,7 @@
 
 </section>
 <section id="ctloverclockresettodefault">
-<span id="id307"></span><h4>ctlOverclockResetToDefault<a class="headerlink" href="#ctloverclockresettodefault" title="Permalink to this heading"></a></h4>
+<span id="id314"></span><h4>ctlOverclockResetToDefault<a class="headerlink" href="#ctloverclockresettodefault" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv426ctlOverclockResetToDefault27ctl_device_adapter_handle_t">
 <span id="_CPPv326ctlOverclockResetToDefault27ctl_device_adapter_handle_t"></span><span id="_CPPv226ctlOverclockResetToDefault27ctl_device_adapter_handle_t"></span><span id="ctlOverclockResetToDefault__ctl_device_adapter_handle_t"></span><span class="target" id="igcl__api_8h_1a8dc20583def68127bac15b2c5f68842b"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlOverclockResetToDefault</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDeviceHandle</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv426ctlOverclockResetToDefault27ctl_device_adapter_handle_t" title="Permalink to this definition"></a><br /></dt>
@@ -14271,7 +14592,7 @@
 <section id="overclock-enums">
 <h3>Overclock Enums<a class="headerlink" href="#overclock-enums" title="Permalink to this heading"></a></h3>
 <section id="ctl-psu-type-t">
-<span id="id308"></span><h4>ctl_psu_type_t<a class="headerlink" href="#ctl-psu-type-t" title="Permalink to this heading"></a></h4>
+<span id="id315"></span><h4>ctl_psu_type_t<a class="headerlink" href="#ctl-psu-type-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp enum">
 <dt class="sig sig-object cpp" id="_CPPv414ctl_psu_type_t">
 <span id="_CPPv314ctl_psu_type_t"></span><span id="_CPPv214ctl_psu_type_t"></span><span class="target" id="igcl__api_8h_1a59c4ec0a163da94d8129915a9487217d"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_psu_type_t</span></span></span><a class="headerlink" href="#_CPPv414ctl_psu_type_t" title="Permalink to this definition"></a><br /></dt>
@@ -14313,7 +14634,7 @@
 <section id="overclock-structures">
 <h3>Overclock Structures<a class="headerlink" href="#overclock-structures" title="Permalink to this heading"></a></h3>
 <section id="ctl-oc-telemetry-item-t">
-<span id="id309"></span><h4>ctl_oc_telemetry_item_t<a class="headerlink" href="#ctl-oc-telemetry-item-t" title="Permalink to this heading"></a></h4>
+<span id="id316"></span><h4>ctl_oc_telemetry_item_t<a class="headerlink" href="#ctl-oc-telemetry-item-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv423ctl_oc_telemetry_item_t">
 <span id="_CPPv323ctl_oc_telemetry_item_t"></span><span id="_CPPv223ctl_oc_telemetry_item_t"></span><span id="ctl_oc_telemetry_item_t"></span><span class="target" id="structctl__oc__telemetry__item__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_oc_telemetry_item_t</span></span></span><a class="headerlink" href="#_CPPv423ctl_oc_telemetry_item_t" title="Permalink to this definition"></a><br /></dt>
@@ -14354,7 +14675,7 @@
 
 </section>
 <section id="ctl-oc-control-info-t">
-<span id="id310"></span><h4>ctl_oc_control_info_t<a class="headerlink" href="#ctl-oc-control-info-t" title="Permalink to this heading"></a></h4>
+<span id="id317"></span><h4>ctl_oc_control_info_t<a class="headerlink" href="#ctl-oc-control-info-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv421ctl_oc_control_info_t">
 <span id="_CPPv321ctl_oc_control_info_t"></span><span id="_CPPv221ctl_oc_control_info_t"></span><span id="ctl_oc_control_info_t"></span><span class="target" id="structctl__oc__control__info__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_oc_control_info_t</span></span></span><a class="headerlink" href="#_CPPv421ctl_oc_control_info_t" title="Permalink to this definition"></a><br /></dt>
@@ -14431,7 +14752,7 @@
 
 </section>
 <section id="ctl-oc-properties-t">
-<span id="id311"></span><h4>ctl_oc_properties_t<a class="headerlink" href="#ctl-oc-properties-t" title="Permalink to this heading"></a></h4>
+<span id="id318"></span><h4>ctl_oc_properties_t<a class="headerlink" href="#ctl-oc-properties-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv419ctl_oc_properties_t">
 <span id="_CPPv319ctl_oc_properties_t"></span><span id="_CPPv219ctl_oc_properties_t"></span><span id="ctl_oc_properties_t"></span><span class="target" id="structctl__oc__properties__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_oc_properties_t</span></span></span><a class="headerlink" href="#_CPPv419ctl_oc_properties_t" title="Permalink to this definition"></a><br /></dt>
@@ -14497,7 +14818,7 @@
 
 </section>
 <section id="ctl-oc-vf-pair-t">
-<span id="id312"></span><h4>ctl_oc_vf_pair_t<a class="headerlink" href="#ctl-oc-vf-pair-t" title="Permalink to this heading"></a></h4>
+<span id="id319"></span><h4>ctl_oc_vf_pair_t<a class="headerlink" href="#ctl-oc-vf-pair-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv416ctl_oc_vf_pair_t">
 <span id="_CPPv316ctl_oc_vf_pair_t"></span><span id="_CPPv216ctl_oc_vf_pair_t"></span><span id="ctl_oc_vf_pair_t"></span><span class="target" id="structctl__oc__vf__pair__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_oc_vf_pair_t</span></span></span><a class="headerlink" href="#_CPPv416ctl_oc_vf_pair_t" title="Permalink to this definition"></a><br /></dt>
@@ -14533,7 +14854,7 @@
 
 </section>
 <section id="ctl-psu-info-t">
-<span id="id313"></span><h4>ctl_psu_info_t<a class="headerlink" href="#ctl-psu-info-t" title="Permalink to this heading"></a></h4>
+<span id="id320"></span><h4>ctl_psu_info_t<a class="headerlink" href="#ctl-psu-info-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv414ctl_psu_info_t">
 <span id="_CPPv314ctl_psu_info_t"></span><span id="_CPPv214ctl_psu_info_t"></span><span id="ctl_psu_info_t"></span><span class="target" id="structctl__psu__info__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_psu_info_t</span></span></span><a class="headerlink" href="#_CPPv414ctl_psu_info_t" title="Permalink to this definition"></a><br /></dt>
@@ -14569,7 +14890,7 @@
 
 </section>
 <section id="ctl-power-telemetry-t">
-<span id="id314"></span><h4>ctl_power_telemetry_t<a class="headerlink" href="#ctl-power-telemetry-t" title="Permalink to this heading"></a></h4>
+<span id="id321"></span><h4>ctl_power_telemetry_t<a class="headerlink" href="#ctl-power-telemetry-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv421ctl_power_telemetry_t">
 <span id="_CPPv321ctl_power_telemetry_t"></span><span id="_CPPv221ctl_power_telemetry_t"></span><span id="ctl_power_telemetry_t"></span><span class="target" id="structctl__power__telemetry__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_power_telemetry_t</span></span></span><a class="headerlink" href="#_CPPv421ctl_power_telemetry_t" title="Permalink to this definition"></a><br /></dt>
@@ -14787,7 +15108,7 @@
 <section id="pci-functions">
 <h3>Pci Functions<a class="headerlink" href="#pci-functions" title="Permalink to this heading"></a></h3>
 <section id="ctlpcigetproperties">
-<span id="id315"></span><h4>ctlPciGetProperties<a class="headerlink" href="#ctlpcigetproperties" title="Permalink to this heading"></a></h4>
+<span id="id322"></span><h4>ctlPciGetProperties<a class="headerlink" href="#ctlpcigetproperties" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419ctlPciGetProperties27ctl_device_adapter_handle_tP20ctl_pci_properties_t">
 <span id="_CPPv319ctlPciGetProperties27ctl_device_adapter_handle_tP20ctl_pci_properties_t"></span><span id="_CPPv219ctlPciGetProperties27ctl_device_adapter_handle_tP20ctl_pci_properties_t"></span><span id="ctlPciGetProperties__ctl_device_adapter_handle_t.ctl_pci_properties_tP"></span><span class="target" id="igcl__api_8h_1aafff62bea242ac4370a21804b0cef3f7"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlPciGetProperties</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <a class="reference internal" href="#_CPPv420ctl_pci_properties_t" title="ctl_pci_properties_t"><span class="n"><span class="pre">ctl_pci_properties_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pProperties</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419ctlPciGetProperties27ctl_device_adapter_handle_tP20ctl_pci_properties_t" title="Permalink to this definition"></a><br /></dt>
@@ -14825,7 +15146,7 @@
 
 </section>
 <section id="ctlpcigetstate">
-<span id="id316"></span><h4>ctlPciGetState<a class="headerlink" href="#ctlpcigetstate" title="Permalink to this heading"></a></h4>
+<span id="id323"></span><h4>ctlPciGetState<a class="headerlink" href="#ctlpcigetstate" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv414ctlPciGetState27ctl_device_adapter_handle_tP15ctl_pci_state_t">
 <span id="_CPPv314ctlPciGetState27ctl_device_adapter_handle_tP15ctl_pci_state_t"></span><span id="_CPPv214ctlPciGetState27ctl_device_adapter_handle_tP15ctl_pci_state_t"></span><span id="ctlPciGetState__ctl_device_adapter_handle_t.ctl_pci_state_tP"></span><span class="target" id="igcl__api_8h_1af67b150f678d7128905fa81b4e4a6b59"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlPciGetState</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <a class="reference internal" href="#_CPPv415ctl_pci_state_t" title="ctl_pci_state_t"><span class="n"><span class="pre">ctl_pci_state_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pState</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414ctlPciGetState27ctl_device_adapter_handle_tP15ctl_pci_state_t" title="Permalink to this definition"></a><br /></dt>
@@ -14866,7 +15187,7 @@
 <section id="pci-structures">
 <h3>Pci Structures<a class="headerlink" href="#pci-structures" title="Permalink to this heading"></a></h3>
 <section id="ctl-pci-address-t">
-<span id="id317"></span><h4>ctl_pci_address_t<a class="headerlink" href="#ctl-pci-address-t" title="Permalink to this heading"></a></h4>
+<span id="id324"></span><h4>ctl_pci_address_t<a class="headerlink" href="#ctl-pci-address-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv417ctl_pci_address_t">
 <span id="_CPPv317ctl_pci_address_t"></span><span id="_CPPv217ctl_pci_address_t"></span><span id="ctl_pci_address_t"></span><span class="target" id="structctl__pci__address__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_pci_address_t</span></span></span><a class="headerlink" href="#_CPPv417ctl_pci_address_t" title="Permalink to this definition"></a><br /></dt>
@@ -14914,7 +15235,7 @@
 
 </section>
 <section id="ctl-pci-speed-t">
-<span id="id318"></span><h4>ctl_pci_speed_t<a class="headerlink" href="#ctl-pci-speed-t" title="Permalink to this heading"></a></h4>
+<span id="id325"></span><h4>ctl_pci_speed_t<a class="headerlink" href="#ctl-pci-speed-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv415ctl_pci_speed_t">
 <span id="_CPPv315ctl_pci_speed_t"></span><span id="_CPPv215ctl_pci_speed_t"></span><span id="ctl_pci_speed_t"></span><span class="target" id="structctl__pci__speed__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_pci_speed_t</span></span></span><a class="headerlink" href="#_CPPv415ctl_pci_speed_t" title="Permalink to this definition"></a><br /></dt>
@@ -14956,7 +15277,7 @@
 
 </section>
 <section id="ctl-pci-properties-t">
-<span id="id319"></span><h4>ctl_pci_properties_t<a class="headerlink" href="#ctl-pci-properties-t" title="Permalink to this heading"></a></h4>
+<span id="id326"></span><h4>ctl_pci_properties_t<a class="headerlink" href="#ctl-pci-properties-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv420ctl_pci_properties_t">
 <span id="_CPPv320ctl_pci_properties_t"></span><span id="_CPPv220ctl_pci_properties_t"></span><span id="ctl_pci_properties_t"></span><span class="target" id="structctl__pci__properties__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_pci_properties_t</span></span></span><a class="headerlink" href="#_CPPv420ctl_pci_properties_t" title="Permalink to this definition"></a><br /></dt>
@@ -15004,7 +15325,7 @@
 
 </section>
 <section id="ctl-pci-state-t">
-<span id="id320"></span><h4>ctl_pci_state_t<a class="headerlink" href="#ctl-pci-state-t" title="Permalink to this heading"></a></h4>
+<span id="id327"></span><h4>ctl_pci_state_t<a class="headerlink" href="#ctl-pci-state-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv415ctl_pci_state_t">
 <span id="_CPPv315ctl_pci_state_t"></span><span id="_CPPv215ctl_pci_state_t"></span><span id="ctl_pci_state_t"></span><span class="target" id="structctl__pci__state__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_pci_state_t</span></span></span><a class="headerlink" href="#_CPPv415ctl_pci_state_t" title="Permalink to this definition"></a><br /></dt>
@@ -15066,7 +15387,7 @@
 <section id="power-functions">
 <h3>Power Functions<a class="headerlink" href="#power-functions" title="Permalink to this heading"></a></h3>
 <section id="ctlenumpowerdomains">
-<span id="id321"></span><h4>ctlEnumPowerDomains<a class="headerlink" href="#ctlenumpowerdomains" title="Permalink to this heading"></a></h4>
+<span id="id328"></span><h4>ctlEnumPowerDomains<a class="headerlink" href="#ctlenumpowerdomains" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419ctlEnumPowerDomains27ctl_device_adapter_handle_tP8uint32_tP16ctl_pwr_handle_t">
 <span id="_CPPv319ctlEnumPowerDomains27ctl_device_adapter_handle_tP8uint32_tP16ctl_pwr_handle_t"></span><span id="_CPPv219ctlEnumPowerDomains27ctl_device_adapter_handle_tP8uint32_tP16ctl_pwr_handle_t"></span><span id="ctlEnumPowerDomains__ctl_device_adapter_handle_t.uint32_tP.ctl_pwr_handle_tP"></span><span class="target" id="igcl__api_8h_1abf1810a4c71fe1eba29079af0a31f80f"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlEnumPowerDomains</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pCount</span></span>, <span class="n"><span class="pre">ctl_pwr_handle_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">phPower</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419ctlEnumPowerDomains27ctl_device_adapter_handle_tP8uint32_tP16ctl_pwr_handle_t" title="Permalink to this definition"></a><br /></dt>
@@ -15105,7 +15426,7 @@
 
 </section>
 <section id="ctlpowergetproperties">
-<span id="id322"></span><h4>ctlPowerGetProperties<a class="headerlink" href="#ctlpowergetproperties" title="Permalink to this heading"></a></h4>
+<span id="id329"></span><h4>ctlPowerGetProperties<a class="headerlink" href="#ctlpowergetproperties" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv421ctlPowerGetProperties16ctl_pwr_handle_tP22ctl_power_properties_t">
 <span id="_CPPv321ctlPowerGetProperties16ctl_pwr_handle_tP22ctl_power_properties_t"></span><span id="_CPPv221ctlPowerGetProperties16ctl_pwr_handle_tP22ctl_power_properties_t"></span><span id="ctlPowerGetProperties__ctl_pwr_handle_t.ctl_power_properties_tP"></span><span class="target" id="igcl__api_8h_1af82b7b3b82cdc61eea1f76a8790a0df0"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlPowerGetProperties</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_pwr_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hPower</span></span>, <a class="reference internal" href="#_CPPv422ctl_power_properties_t" title="ctl_power_properties_t"><span class="n"><span class="pre">ctl_power_properties_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pProperties</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421ctlPowerGetProperties16ctl_pwr_handle_tP22ctl_power_properties_t" title="Permalink to this definition"></a><br /></dt>
@@ -15143,7 +15464,7 @@
 
 </section>
 <section id="ctlpowergetenergycounter">
-<span id="id323"></span><h4>ctlPowerGetEnergyCounter<a class="headerlink" href="#ctlpowergetenergycounter" title="Permalink to this heading"></a></h4>
+<span id="id330"></span><h4>ctlPowerGetEnergyCounter<a class="headerlink" href="#ctlpowergetenergycounter" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv424ctlPowerGetEnergyCounter16ctl_pwr_handle_tP26ctl_power_energy_counter_t">
 <span id="_CPPv324ctlPowerGetEnergyCounter16ctl_pwr_handle_tP26ctl_power_energy_counter_t"></span><span id="_CPPv224ctlPowerGetEnergyCounter16ctl_pwr_handle_tP26ctl_power_energy_counter_t"></span><span id="ctlPowerGetEnergyCounter__ctl_pwr_handle_t.ctl_power_energy_counter_tP"></span><span class="target" id="igcl__api_8h_1a9ee628b888f7dbb963b5ffae79931042"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlPowerGetEnergyCounter</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_pwr_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hPower</span></span>, <a class="reference internal" href="#_CPPv426ctl_power_energy_counter_t" title="ctl_power_energy_counter_t"><span class="n"><span class="pre">ctl_power_energy_counter_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pEnergy</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv424ctlPowerGetEnergyCounter16ctl_pwr_handle_tP26ctl_power_energy_counter_t" title="Permalink to this definition"></a><br /></dt>
@@ -15181,7 +15502,7 @@
 
 </section>
 <section id="ctlpowergetlimits">
-<span id="id324"></span><h4>ctlPowerGetLimits<a class="headerlink" href="#ctlpowergetlimits" title="Permalink to this heading"></a></h4>
+<span id="id331"></span><h4>ctlPowerGetLimits<a class="headerlink" href="#ctlpowergetlimits" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417ctlPowerGetLimits16ctl_pwr_handle_tP18ctl_power_limits_t">
 <span id="_CPPv317ctlPowerGetLimits16ctl_pwr_handle_tP18ctl_power_limits_t"></span><span id="_CPPv217ctlPowerGetLimits16ctl_pwr_handle_tP18ctl_power_limits_t"></span><span id="ctlPowerGetLimits__ctl_pwr_handle_t.ctl_power_limits_tP"></span><span class="target" id="igcl__api_8h_1a24c11f101185eba4d4e5c47e71dea706"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlPowerGetLimits</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_pwr_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hPower</span></span>, <a class="reference internal" href="#_CPPv418ctl_power_limits_t" title="ctl_power_limits_t"><span class="n"><span class="pre">ctl_power_limits_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pPowerLimits</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417ctlPowerGetLimits16ctl_pwr_handle_tP18ctl_power_limits_t" title="Permalink to this definition"></a><br /></dt>
@@ -15215,7 +15536,7 @@
 
 </section>
 <section id="ctlpowersetlimits">
-<span id="id325"></span><h4>ctlPowerSetLimits<a class="headerlink" href="#ctlpowersetlimits" title="Permalink to this heading"></a></h4>
+<span id="id332"></span><h4>ctlPowerSetLimits<a class="headerlink" href="#ctlpowersetlimits" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417ctlPowerSetLimits16ctl_pwr_handle_tPK18ctl_power_limits_t">
 <span id="_CPPv317ctlPowerSetLimits16ctl_pwr_handle_tPK18ctl_power_limits_t"></span><span id="_CPPv217ctlPowerSetLimits16ctl_pwr_handle_tPK18ctl_power_limits_t"></span><span id="ctlPowerSetLimits__ctl_pwr_handle_t.ctl_power_limits_tCP"></span><span class="target" id="igcl__api_8h_1a1538d569f0ed13b5faca1b3536a97bc4"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlPowerSetLimits</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_pwr_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hPower</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv418ctl_power_limits_t" title="ctl_power_limits_t"><span class="n"><span class="pre">ctl_power_limits_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pPowerLimits</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417ctlPowerSetLimits16ctl_pwr_handle_tPK18ctl_power_limits_t" title="Permalink to this definition"></a><br /></dt>
@@ -15260,7 +15581,7 @@
 <section id="power-structures">
 <h3>Power Structures<a class="headerlink" href="#power-structures" title="Permalink to this heading"></a></h3>
 <section id="ctl-power-properties-t">
-<span id="id326"></span><h4>ctl_power_properties_t<a class="headerlink" href="#ctl-power-properties-t" title="Permalink to this heading"></a></h4>
+<span id="id333"></span><h4>ctl_power_properties_t<a class="headerlink" href="#ctl-power-properties-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv422ctl_power_properties_t">
 <span id="_CPPv322ctl_power_properties_t"></span><span id="_CPPv222ctl_power_properties_t"></span><span id="ctl_power_properties_t"></span><span class="target" id="structctl__power__properties__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_power_properties_t</span></span></span><a class="headerlink" href="#_CPPv422ctl_power_properties_t" title="Permalink to this definition"></a><br /></dt>
@@ -15308,7 +15629,7 @@
 
 </section>
 <section id="ctl-power-energy-counter-t">
-<span id="id327"></span><h4>ctl_power_energy_counter_t<a class="headerlink" href="#ctl-power-energy-counter-t" title="Permalink to this heading"></a></h4>
+<span id="id334"></span><h4>ctl_power_energy_counter_t<a class="headerlink" href="#ctl-power-energy-counter-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv426ctl_power_energy_counter_t">
 <span id="_CPPv326ctl_power_energy_counter_t"></span><span id="_CPPv226ctl_power_energy_counter_t"></span><span id="ctl_power_energy_counter_t"></span><span class="target" id="structctl__power__energy__counter__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_power_energy_counter_t</span></span></span><a class="headerlink" href="#_CPPv426ctl_power_energy_counter_t" title="Permalink to this definition"></a><br /></dt>
@@ -15348,7 +15669,7 @@
 
 </section>
 <section id="ctl-power-sustained-limit-t">
-<span id="id328"></span><h4>ctl_power_sustained_limit_t<a class="headerlink" href="#ctl-power-sustained-limit-t" title="Permalink to this heading"></a></h4>
+<span id="id335"></span><h4>ctl_power_sustained_limit_t<a class="headerlink" href="#ctl-power-sustained-limit-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv427ctl_power_sustained_limit_t">
 <span id="_CPPv327ctl_power_sustained_limit_t"></span><span id="_CPPv227ctl_power_sustained_limit_t"></span><span id="ctl_power_sustained_limit_t"></span><span class="target" id="structctl__power__sustained__limit__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_power_sustained_limit_t</span></span></span><a class="headerlink" href="#_CPPv427ctl_power_sustained_limit_t" title="Permalink to this definition"></a><br /></dt>
@@ -15382,7 +15703,7 @@
 
 </section>
 <section id="ctl-power-burst-limit-t">
-<span id="id329"></span><h4>ctl_power_burst_limit_t<a class="headerlink" href="#ctl-power-burst-limit-t" title="Permalink to this heading"></a></h4>
+<span id="id336"></span><h4>ctl_power_burst_limit_t<a class="headerlink" href="#ctl-power-burst-limit-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv423ctl_power_burst_limit_t">
 <span id="_CPPv323ctl_power_burst_limit_t"></span><span id="_CPPv223ctl_power_burst_limit_t"></span><span id="ctl_power_burst_limit_t"></span><span class="target" id="structctl__power__burst__limit__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_power_burst_limit_t</span></span></span><a class="headerlink" href="#_CPPv423ctl_power_burst_limit_t" title="Permalink to this definition"></a><br /></dt>
@@ -15410,7 +15731,7 @@
 
 </section>
 <section id="ctl-power-peak-limit-t">
-<span id="id330"></span><h4>ctl_power_peak_limit_t<a class="headerlink" href="#ctl-power-peak-limit-t" title="Permalink to this heading"></a></h4>
+<span id="id337"></span><h4>ctl_power_peak_limit_t<a class="headerlink" href="#ctl-power-peak-limit-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv422ctl_power_peak_limit_t">
 <span id="_CPPv322ctl_power_peak_limit_t"></span><span id="_CPPv222ctl_power_peak_limit_t"></span><span id="ctl_power_peak_limit_t"></span><span class="target" id="structctl__power__peak__limit__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_power_peak_limit_t</span></span></span><a class="headerlink" href="#_CPPv422ctl_power_peak_limit_t" title="Permalink to this definition"></a><br /></dt>
@@ -15439,7 +15760,7 @@
 
 </section>
 <section id="ctl-power-limits-t">
-<span id="id331"></span><h4>ctl_power_limits_t<a class="headerlink" href="#ctl-power-limits-t" title="Permalink to this heading"></a></h4>
+<span id="id338"></span><h4>ctl_power_limits_t<a class="headerlink" href="#ctl-power-limits-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv418ctl_power_limits_t">
 <span id="_CPPv318ctl_power_limits_t"></span><span id="_CPPv218ctl_power_limits_t"></span><span id="ctl_power_limits_t"></span><span class="target" id="structctl__power__limits__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_power_limits_t</span></span></span><a class="headerlink" href="#_CPPv418ctl_power_limits_t" title="Permalink to this definition"></a><br /></dt>
@@ -15481,7 +15802,7 @@
 
 </section>
 <section id="ctl-energy-threshold-t">
-<span id="id332"></span><h4>ctl_energy_threshold_t<a class="headerlink" href="#ctl-energy-threshold-t" title="Permalink to this heading"></a></h4>
+<span id="id339"></span><h4>ctl_energy_threshold_t<a class="headerlink" href="#ctl-energy-threshold-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv422ctl_energy_threshold_t">
 <span id="_CPPv322ctl_energy_threshold_t"></span><span id="_CPPv222ctl_energy_threshold_t"></span><span id="ctl_energy_threshold_t"></span><span class="target" id="structctl__energy__threshold__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_energy_threshold_t</span></span></span><a class="headerlink" href="#_CPPv422ctl_energy_threshold_t" title="Permalink to this definition"></a><br /></dt>
@@ -15558,7 +15879,7 @@
 <section id="temperature-functions">
 <h3>Temperature Functions<a class="headerlink" href="#temperature-functions" title="Permalink to this heading"></a></h3>
 <section id="ctlenumtemperaturesensors">
-<span id="id333"></span><h4>ctlEnumTemperatureSensors<a class="headerlink" href="#ctlenumtemperaturesensors" title="Permalink to this heading"></a></h4>
+<span id="id340"></span><h4>ctlEnumTemperatureSensors<a class="headerlink" href="#ctlenumtemperaturesensors" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv425ctlEnumTemperatureSensors27ctl_device_adapter_handle_tP8uint32_tP17ctl_temp_handle_t">
 <span id="_CPPv325ctlEnumTemperatureSensors27ctl_device_adapter_handle_tP8uint32_tP17ctl_temp_handle_t"></span><span id="_CPPv225ctlEnumTemperatureSensors27ctl_device_adapter_handle_tP8uint32_tP17ctl_temp_handle_t"></span><span id="ctlEnumTemperatureSensors__ctl_device_adapter_handle_t.uint32_tP.ctl_temp_handle_tP"></span><span class="target" id="igcl__api_8h_1aed123f68a57d0c8d32bfcc73f9eb996f"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlEnumTemperatureSensors</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pCount</span></span>, <span class="n"><span class="pre">ctl_temp_handle_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">phTemperature</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425ctlEnumTemperatureSensors27ctl_device_adapter_handle_tP8uint32_tP17ctl_temp_handle_t" title="Permalink to this definition"></a><br /></dt>
@@ -15597,7 +15918,7 @@
 
 </section>
 <section id="ctltemperaturegetproperties">
-<span id="id334"></span><h4>ctlTemperatureGetProperties<a class="headerlink" href="#ctltemperaturegetproperties" title="Permalink to this heading"></a></h4>
+<span id="id341"></span><h4>ctlTemperatureGetProperties<a class="headerlink" href="#ctltemperaturegetproperties" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv427ctlTemperatureGetProperties17ctl_temp_handle_tP21ctl_temp_properties_t">
 <span id="_CPPv327ctlTemperatureGetProperties17ctl_temp_handle_tP21ctl_temp_properties_t"></span><span id="_CPPv227ctlTemperatureGetProperties17ctl_temp_handle_tP21ctl_temp_properties_t"></span><span id="ctlTemperatureGetProperties__ctl_temp_handle_t.ctl_temp_properties_tP"></span><span class="target" id="igcl__api_8h_1a57979a2d0ffaf1462add636a000c2b71"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlTemperatureGetProperties</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_temp_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hTemperature</span></span>, <a class="reference internal" href="#_CPPv421ctl_temp_properties_t" title="ctl_temp_properties_t"><span class="n"><span class="pre">ctl_temp_properties_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pProperties</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv427ctlTemperatureGetProperties17ctl_temp_handle_tP21ctl_temp_properties_t" title="Permalink to this definition"></a><br /></dt>
@@ -15635,7 +15956,7 @@
 
 </section>
 <section id="ctltemperaturegetstate">
-<span id="id335"></span><h4>ctlTemperatureGetState<a class="headerlink" href="#ctltemperaturegetstate" title="Permalink to this heading"></a></h4>
+<span id="id342"></span><h4>ctlTemperatureGetState<a class="headerlink" href="#ctltemperaturegetstate" title="Permalink to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv422ctlTemperatureGetState17ctl_temp_handle_tPd">
 <span id="_CPPv322ctlTemperatureGetState17ctl_temp_handle_tPd"></span><span id="_CPPv222ctlTemperatureGetState17ctl_temp_handle_tPd"></span><span id="ctlTemperatureGetState__ctl_temp_handle_t.doubleP"></span><span class="target" id="igcl__api_8h_1affb454f43415c749e2ae67c655de992e"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlTemperatureGetState</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_temp_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hTemperature</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pTemperature</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422ctlTemperatureGetState17ctl_temp_handle_tPd" title="Permalink to this definition"></a><br /></dt>
@@ -15676,7 +15997,7 @@
 <section id="temperature-enums">
 <h3>Temperature Enums<a class="headerlink" href="#temperature-enums" title="Permalink to this heading"></a></h3>
 <section id="ctl-temp-sensors-t">
-<span id="id336"></span><h4>ctl_temp_sensors_t<a class="headerlink" href="#ctl-temp-sensors-t" title="Permalink to this heading"></a></h4>
+<span id="id343"></span><h4>ctl_temp_sensors_t<a class="headerlink" href="#ctl-temp-sensors-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp enum">
 <dt class="sig sig-object cpp" id="_CPPv418ctl_temp_sensors_t">
 <span id="_CPPv318ctl_temp_sensors_t"></span><span id="_CPPv218ctl_temp_sensors_t"></span><span class="target" id="igcl__api_8h_1a86ca0dd24511cc4438a322bf884fb48c"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_temp_sensors_t</span></span></span><a class="headerlink" href="#_CPPv418ctl_temp_sensors_t" title="Permalink to this definition"></a><br /></dt>
@@ -15730,7 +16051,7 @@
 <section id="temperature-structures">
 <h3>Temperature Structures<a class="headerlink" href="#temperature-structures" title="Permalink to this heading"></a></h3>
 <section id="ctl-temp-properties-t">
-<span id="id337"></span><h4>ctl_temp_properties_t<a class="headerlink" href="#ctl-temp-properties-t" title="Permalink to this heading"></a></h4>
+<span id="id344"></span><h4>ctl_temp_properties_t<a class="headerlink" href="#ctl-temp-properties-t" title="Permalink to this heading"></a></h4>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv421ctl_temp_properties_t">
 <span id="_CPPv321ctl_temp_properties_t"></span><span id="_CPPv221ctl_temp_properties_t"></span><span id="ctl_temp_properties_t"></span><span class="target" id="structctl__temp__properties__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctl_temp_properties_t</span></span></span><a class="headerlink" href="#_CPPv421ctl_temp_properties_t" title="Permalink to this definition"></a><br /></dt>
