@@ -480,8 +480,9 @@ typedef enum _ctl_units_t
     CTL_UNITS_ANGULAR_SPEED_RPM = 9,                ///< Type is Angular Speed with units in Revolutions per Minute.
     CTL_UNITS_POWER_MILLIWATTS = 10,                ///< Type is Power with units in MilliWatts.
     CTL_UNITS_PERCENT = 11,                         ///< Type is Percentage.
-    CTL_UNITS_MEM_SPEED_GBPS = 12,                  ///< Type is Memory Speed in Gigabyte per Seconds (Gbps)
+    CTL_UNITS_MEM_SPEED_GBPS = 12,                  ///< Type is Memory Speed in Gigabytes per second (GBps).
     CTL_UNITS_VOLTAGE_MILLIVOLTS = 13,              ///< Type is Voltage with units in milliVolts.
+    CTL_UNITS_BANDWIDTH_MBPS = 14,                  ///< Type is Bandwidth in Megabytes per second (MBps).
     CTL_UNITS_UNKNOWN = 0x4800FFFF,                 ///< Type of units unknown.
     CTL_UNITS_MAX
 
@@ -1484,10 +1485,11 @@ typedef enum _ctl_3d_feature_t
 typedef uint32_t ctl_3d_feature_misc_flags_t;
 typedef enum _ctl_3d_feature_misc_flag_t
 {
-    CTL_3D_FEATURE_MISC_FLAG_DX11 = CTL_BIT(0),     ///< Feature supported on DX11
-    CTL_3D_FEATURE_MISC_FLAG_DX12 = CTL_BIT(1),     ///< Feature supported on DX12
-    CTL_3D_FEATURE_MISC_FLAG_VULKAN = CTL_BIT(2),   ///< Feature supported on VULKAN
-    CTL_3D_FEATURE_MISC_FLAG_LIVE_CHANGE = CTL_BIT(3),  ///< User can change feature live without restarting the game
+    CTL_3D_FEATURE_MISC_FLAG_DX9 = CTL_BIT(0),      ///< Feature supported on DX9
+    CTL_3D_FEATURE_MISC_FLAG_DX11 = CTL_BIT(1),     ///< Feature supported on DX11
+    CTL_3D_FEATURE_MISC_FLAG_DX12 = CTL_BIT(2),     ///< Feature supported on DX12
+    CTL_3D_FEATURE_MISC_FLAG_VULKAN = CTL_BIT(3),   ///< Feature supported on VULKAN
+    CTL_3D_FEATURE_MISC_FLAG_LIVE_CHANGE = CTL_BIT(4),  ///< User can change feature live without restarting the game
     CTL_3D_FEATURE_MISC_FLAG_MAX = 0x80000000
 
 } ctl_3d_feature_misc_flag_t;

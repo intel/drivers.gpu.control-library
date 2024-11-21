@@ -188,6 +188,10 @@ const char *printUnits(ctl_units_t Units)
         {
             return "Voltage in MilliVolts";
         }
+        case ctl_units_t::CTL_UNITS_BANDWIDTH_MBPS:
+        {
+            return "Bandwidth in MegaBytes Per Second";
+        }
         break;
         default:
             return "Unknown units";
@@ -739,17 +743,17 @@ void OverclockPowerTelemetry(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramCurrentEffectiveFrequency.type));
         PRINT_LOGS("\nValue: %f \n", pPowerTelemetry.vramCurrentEffectiveFrequency.value.datadouble);
 
-        PRINT_LOGS("\nVRAM Read Bandwidth:");
+        PRINT_LOGS("\nVRAM Read Bandwidth Counter:");
         PRINT_LOGS("\nGpu Frequency Offset Have Reference? %s", (pPowerTelemetry.vramReadBandwidthCounter.bSupported) ? "true" : "false");
         PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramReadBandwidthCounter.units));
         PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramReadBandwidthCounter.type));
-        PRINT_LOGS("\nValue: %f\n", pPowerTelemetry.vramReadBandwidthCounter.value.datadouble);
+        PRINT_LOGS("\nValue: %llu\n", pPowerTelemetry.vramReadBandwidthCounter.value.datau64);
 
-        PRINT_LOGS("\nVRAM Write Bandwidth:");
+        PRINT_LOGS("\nVRAM Write Bandwidth Counter:");
         PRINT_LOGS("\nGpu Frequency Offset Have Reference? %s", (pPowerTelemetry.vramWriteBandwidthCounter.bSupported) ? "true" : "false");
         PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramWriteBandwidthCounter.units));
         PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramWriteBandwidthCounter.type));
-        PRINT_LOGS("\nValue: %f\n", pPowerTelemetry.vramWriteBandwidthCounter.value.datadouble);
+        PRINT_LOGS("\nValue: %llu\n", pPowerTelemetry.vramWriteBandwidthCounter.value.datau64);
 
         PRINT_LOGS("\nVRAM Temperature:");
         PRINT_LOGS("\nGpu Frequency Offset Have Reference? %s", (pPowerTelemetry.vramCurrentTemperature.bSupported) ? "true" : "false");

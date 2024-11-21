@@ -539,8 +539,9 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
                 pHCombinedDisplayOutputs[CombinedDisplayCount++] = pHDisplayOutput[i];
             }
 
-            uint32_t CombinedAllowedEncoderTypes = CTL_ENCODER_CONFIG_FLAG_TYPEC_CAPABLE | CTL_ENCODER_CONFIG_FLAG_TBT_CAPABLE | CTL_ENCODER_CONFIG_FLAG_DITHERING_SUPPORTED;
-            bool IsCombinedAvailable             = false;
+            uint32_t CombinedAllowedEncoderTypes =
+            CTL_ENCODER_CONFIG_FLAG_TYPEC_CAPABLE | CTL_ENCODER_CONFIG_FLAG_TBT_CAPABLE | CTL_ENCODER_CONFIG_FLAG_DITHERING_SUPPORTED | CTL_ENCODER_CONFIG_FLAG_INTERNAL_DISPLAY;
+            bool IsCombinedAvailable = false;
 
             IsCombinedAvailable = (0 == stDisplayEncoderProperties.EncoderConfigFlags) || (stDisplayEncoderProperties.EncoderConfigFlags & CombinedAllowedEncoderTypes);
             IsDisplayActive     = stDisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ACTIVE;
