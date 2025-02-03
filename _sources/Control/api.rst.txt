@@ -2760,6 +2760,110 @@ ctl_fan_config_t
 
  
 
+Firmware
+============================================================
+* Functions
+
+
+    * :ref:`ctlGetFirmwareProperties`
+    * :ref:`ctlEnumerateFirmwareComponents`
+    * :ref:`ctlGetFirmwareComponentProperties`
+    * :ref:`ctlAllowPCIeLinkSpeedUpdate`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-firmware-config-flags-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-firmware-properties-t`
+    * :ref:`ctl-firmware-component-properties-t`
+
+
+Firmware Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlGetFirmwareProperties:
+
+ctlGetFirmwareProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetFirmwareProperties
+    :project: ControlApi
+
+
+.. _ctlEnumerateFirmwareComponents:
+
+ctlEnumerateFirmwareComponents
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEnumerateFirmwareComponents
+    :project: ControlApi
+
+
+.. _ctlGetFirmwareComponentProperties:
+
+ctlGetFirmwareComponentProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlGetFirmwareComponentProperties
+    :project: ControlApi
+
+
+.. _ctlAllowPCIeLinkSpeedUpdate:
+
+ctlAllowPCIeLinkSpeedUpdate
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlAllowPCIeLinkSpeedUpdate
+    :project: ControlApi
+
+
+
+Firmware Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-firmware-config-flags-t:
+
+ctl_firmware_config_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_firmware_config_flag_t
+    :project: ControlApi
+
+ 
+Firmware Structures
+------------------------------------------------------------------------------
+
+.. _ctl-firmware-properties-t:
+
+ctl_firmware_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_firmware_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-firmware-component-properties-t:
+
+ctl_firmware_component_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_firmware_component_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
 Frequency
 ============================================================
 * Functions
