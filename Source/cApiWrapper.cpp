@@ -190,8 +190,8 @@ ctlClose(
     }
 
     // special code - only for ctlClose()
-	// might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
-	// if its open by another caller do not free the instance handle 
+    // might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
+    // if its open by another caller do not free the instance handle 
     if( result == CTL_RESULT_SUCCESS)
     {
         if (NULL != hinstLib)
@@ -245,12 +245,12 @@ ctlSetRuntimePath(
     }
 
     // special code - only for ctlSetRuntimePath()
-	// might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
-	// if its open by another caller do not free the instance handle 
+    // might get CTL_RESULT_SUCCESS_STILL_OPEN_BY_ANOTHER_CALLER
+    // if its open by another caller do not free the instance handle 
     else if (pArgs->pRuntimePath)
     {
         // this is a case where the caller app is interested in loading a RT directly
-	// IMPORTANT NOTE: Free pArgs and pArgs->pRuntimePath only after ctlInit() call
+    // IMPORTANT NOTE: Free pArgs and pArgs->pRuntimePath only after ctlInit() call
         pRuntimeArgs = pArgs;
         result = CTL_RESULT_SUCCESS;
     }
@@ -2947,6 +2947,192 @@ ctlFanGetState(
         if (pfnFanGetState)
         {
             result = pfnFanGetState(hFan, units, pSpeed);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get base firmware properties
+* 
+* @details
+*     - The application gets properties of base firmware
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceAdapter`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pProperties`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*/
+ctl_result_t CTL_APICALL
+ctlGetFirmwareProperties(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to control device adapter
+    ctl_firmware_properties_t* pProperties          ///< [in,out] Pointer to an array that will hold properties of the base
+                                                    ///< firmware.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    HINSTANCE hinstLibPtr = GetLoaderHandle();
+
+    if (NULL != hinstLibPtr)
+    {
+        ctl_pfnGetFirmwareProperties_t pfnGetFirmwareProperties = (ctl_pfnGetFirmwareProperties_t)GetProcAddress(hinstLibPtr, "ctlGetFirmwareProperties");
+        if (pfnGetFirmwareProperties)
+        {
+            result = pfnGetFirmwareProperties(hDeviceAdapter, pProperties);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get handle of various firmware components
+* 
+* @details
+*     - The application enumerates all firmware components on an Intel
+*       Discrete Graphics device.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceAdapter`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pCount`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "KMD call failed"
+*/
+ctl_result_t CTL_APICALL
+ctlEnumerateFirmwareComponents(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to control device adapter
+    uint32_t* pCount,                               ///< [in,out] pointer to the number of components of this type.
+                                                    ///< if count is zero, then the driver shall update the value with the
+                                                    ///< total number of components of this type that are available.
+                                                    ///< if count is greater than the number of components of this type that
+                                                    ///< are available, then the driver shall update the value with the correct
+                                                    ///< number of components.
+    ctl_firmware_component_handle_t* phFirmware     ///< [in,out][optional][release][range(0, *pCount)] array of handle of
+                                                    ///< firmware components.
+                                                    ///< If count is less than the number of firmware components that are
+                                                    ///< available, then the driver shall only retrieve that number of firmware
+                                                    ///< component handles.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    HINSTANCE hinstLibPtr = GetLoaderHandle();
+
+    if (NULL != hinstLibPtr)
+    {
+        ctl_pfnEnumerateFirmwareComponents_t pfnEnumerateFirmwareComponents = (ctl_pfnEnumerateFirmwareComponents_t)GetProcAddress(hinstLibPtr, "ctlEnumerateFirmwareComponents");
+        if (pfnEnumerateFirmwareComponents)
+        {
+            result = pfnEnumerateFirmwareComponents(hDeviceAdapter, pCount, phFirmware);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Get firmware component properties
+* 
+* @details
+*     - The application gets properties of individual firmware components
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hFirmware`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pProperties`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "KMD call failed"
+*/
+ctl_result_t CTL_APICALL
+ctlGetFirmwareComponentProperties(
+    ctl_firmware_component_handle_t hFirmware,      ///< [in] Handle for the firmware component.
+    ctl_firmware_component_properties_t* pProperties///< [in,out] Pointer to an array that will hold properties of the firmware
+                                                    ///< component.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    HINSTANCE hinstLibPtr = GetLoaderHandle();
+
+    if (NULL != hinstLibPtr)
+    {
+        ctl_pfnGetFirmwareComponentProperties_t pfnGetFirmwareComponentProperties = (ctl_pfnGetFirmwareComponentProperties_t)GetProcAddress(hinstLibPtr, "ctlGetFirmwareComponentProperties");
+        if (pfnGetFirmwareComponentProperties)
+        {
+            result = pfnGetFirmwareComponentProperties(hFirmware, pProperties);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* @brief Allows/Blocks discrete graphics device firmware's capability to train
+*        PCI-E link at higher speeds on compatible compatible hosts
+* 
+* @details
+*     - This API allows caller to allow/block a compatible discrete graphics
+*       card's firmware train PCIE links at higher speeds on compatible hosts.
+*     - This is a reserved capability. By default, this capability will not be
+*       enabled, need application to activate it, please contact Intel for
+*       activation.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDeviceAdapter`
+*     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+*     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid handle"
+*     - ::CTL_RESULT_ERROR_KMD_CALL - "KMD call failed"
+*/
+ctl_result_t CTL_APICALL
+ctlAllowPCIeLinkSpeedUpdate(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to control device adapter
+    bool AllowPCIeLinkSpeedUpdate                   ///< [in] When set configures the device firmware to train PCI-E link at
+                                                    ///< higher speeds, else this will block the device firmware from training
+                                                    ///< at higher PCI-E link speeds on compatible hosts.
+                                                    ///< This API modifies a flash persistant setting of the device firmware to
+                                                    ///< allow/block training PCI-E link at higher speeds.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    HINSTANCE hinstLibPtr = GetLoaderHandle();
+
+    if (NULL != hinstLibPtr)
+    {
+        ctl_pfnAllowPCIeLinkSpeedUpdate_t pfnAllowPCIeLinkSpeedUpdate = (ctl_pfnAllowPCIeLinkSpeedUpdate_t)GetProcAddress(hinstLibPtr, "ctlAllowPCIeLinkSpeedUpdate");
+        if (pfnAllowPCIeLinkSpeedUpdate)
+        {
+            result = pfnAllowPCIeLinkSpeedUpdate(hDeviceAdapter, AllowPCIeLinkSpeedUpdate);
         }
     }
 

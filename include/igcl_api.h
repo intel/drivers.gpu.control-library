@@ -391,6 +391,7 @@ typedef enum _ctl_result_t
     CTL_RESULT_ERROR_LOAD = 0x40000026,             ///< Library load failure
     CTL_RESULT_ERROR_UNKNOWN = 0x4000FFFF,          ///< Unknown or internal error
     CTL_RESULT_ERROR_RETRY_OPERATION = 0x40010000,  ///< Operation failed, retry previous operation again
+    CTL_RESULT_ERROR_IGSC_LOADER = 0x40010001,      ///< IGSC library loader not found
     CTL_RESULT_ERROR_GENERIC_END = 0x4000FFFF,      ///< "Generic error code end value, not to be used
                                                     ///< "
     CTL_RESULT_ERROR_CORE_START = 0x44000000,       ///< Core error code starting value, not to be used
@@ -735,7 +736,7 @@ typedef struct _ctl_device_adapter_properties_t
     ctl_device_type_t device_type;                  ///< [out] Device Type
     ctl_supported_functions_flags_t supported_subfunction_flags;///< [out] Supported functions
     uint64_t driver_version;                        ///< [out] Driver version
-    ctl_firmware_version_t firmware_version;        ///< [out] Firmware version
+    ctl_firmware_version_t firmware_version;        ///< [out] Global Firmware version for discrete adapters. Not implemented
     uint32_t pci_vendor_id;                         ///< [out] PCI Vendor ID
     uint32_t pci_device_id;                         ///< [out] PCI Device ID
     uint32_t rev_id;                                ///< [out] PCI Revision ID
@@ -744,7 +745,9 @@ typedef struct _ctl_device_adapter_properties_t
     uint32_t num_slices;                            ///< [out] Number of slices
     char name[CTL_MAX_DEVICE_NAME_LEN];             ///< [out] Device name
     ctl_adapter_properties_flags_t graphics_adapter_properties; ///< [out] Graphics Adapter Properties
-    uint32_t Frequency;                             ///< [out] Clock frequency for this device. Supported only for Version > 0
+    uint32_t Frequency;                             ///< [out] This represents the average frequency an end user may see in the
+                                                    ///< typical gaming workload. Also referred as Graphics Clock. Supported
+                                                    ///< only for Version > 0
     uint16_t pci_subsys_id;                         ///< [out] PCI SubSys ID, Supported only for Version > 1
     uint16_t pci_subsys_vendor_id;                  ///< [out] PCI SubSys Vendor ID, Supported only for Version > 1
     ctl_adapter_bdf_t adapter_bdf;                  ///< [out] Pci Bus, Device, Function. Supported only for Version > 1
@@ -1274,6 +1277,14 @@ typedef struct _ctl_fan_properties_t ctl_fan_properties_t;
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_fan_config_t
 typedef struct _ctl_fan_config_t ctl_fan_config_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_firmware_properties_t
+typedef struct _ctl_firmware_properties_t ctl_firmware_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_firmware_component_properties_t
+typedef struct _ctl_firmware_component_properties_t ctl_firmware_component_properties_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_freq_properties_t
@@ -5091,6 +5102,196 @@ ctlFanGetState(
 #if !defined(__GNUC__)
 #pragma endregion // fan
 #endif
+// Intel 'ctlApi' for Device Adapter - Firmware management
+#if !defined(__GNUC__)
+#pragma region firmware
+#endif
+///////////////////////////////////////////////////////////////////////////////
+#ifndef CTL_FIRMWARE_PROPERTY_STR_SIZE
+/// @brief Maximum number of characters in firmware name/version string
+#define CTL_FIRMWARE_PROPERTY_STR_SIZE  64
+#endif // CTL_FIRMWARE_PROPERTY_STR_SIZE
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Handle for a device firmware component
+typedef struct _ctl_firmware_component_handle_t *ctl_firmware_component_handle_t;
+
+///////////////////////////////////////////////////////////////////////////////
+#ifndef CTL_MAX_FIRMWARE_PROPERTIES_RESERVED_SIZE
+/// @brief Maximum reserved size for future firmware component property members.
+#define CTL_MAX_FIRMWARE_PROPERTIES_RESERVED_SIZE  16
+#endif // CTL_MAX_FIRMWARE_PROPERTIES_RESERVED_SIZE
+
+///////////////////////////////////////////////////////////////////////////////
+#ifndef CTL_MAX_FIRMWARE_COMPONENT_PROPERTIES_RESERVED_SIZE
+/// @brief Maximum reserved size for future firmware component property members.
+#define CTL_MAX_FIRMWARE_COMPONENT_PROPERTIES_RESERVED_SIZE  20
+#endif // CTL_MAX_FIRMWARE_COMPONENT_PROPERTIES_RESERVED_SIZE
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief [out] Firmware configuration flags 
+typedef uint32_t ctl_firmware_config_flags_t;
+typedef enum _ctl_firmware_config_flag_t
+{
+    CTL_FIRMWARE_CONFIG_FLAG_IS_DEVICE_LINK_SPEED_DOWNGRADE_CAPABLE = CTL_BIT(0),   ///< [out] Is the device firmware capable of downgrading to lower PCIE link
+                                                    ///< speed from higher PCIE link speeds automatically on incompatible hosts.
+    CTL_FIRMWARE_CONFIG_FLAG_IS_DEVICE_LINK_SPEED_DOWNGRADE_ACTIVE = CTL_BIT(1),///< [out] This bit indicates if the discrete GPU host was capable of
+                                                    ///< running at higher PCIE link speeds but the card firmware failed to
+                                                    ///< train PCIE link at higher speeds
+                                                    ///< due to non-compliant hosts. So device firmware did a fall back to
+                                                    ///< lower link speeds.
+    CTL_FIRMWARE_CONFIG_FLAG_MAX = 0x80000000
+
+} ctl_firmware_config_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Base firmware properties
+typedef struct _ctl_firmware_properties_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    char name[CTL_FIRMWARE_PROPERTY_STR_SIZE];      ///< [out] NULL terminated string value for the name of the firmware
+                                                    ///< component. 'unknown' will be returned if this property cannot be
+                                                    ///< determined.
+    char version[CTL_FIRMWARE_PROPERTY_STR_SIZE];   ///< [out] NULL terminated string value for the device version of the
+                                                    ///< firmware component. 'unknown' will be returned if this property cannot
+                                                    ///< be determined.
+    ctl_firmware_config_flags_t FirmwareConfig;     ///< [out] This bit indicates various firmware supported configurations and
+                                                    ///< capabilities.
+    char reserved[CTL_MAX_FIRMWARE_PROPERTIES_RESERVED_SIZE];   ///< [out] Reserved
+
+} ctl_firmware_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Individual firmware component properties
+typedef struct _ctl_firmware_component_properties_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    char name[CTL_FIRMWARE_PROPERTY_STR_SIZE];      ///< [out] NULL terminated string value for the name of the firmware
+                                                    ///< component. 'unknown' will be returned if this property cannot be
+                                                    ///< determined.
+    char version[CTL_FIRMWARE_PROPERTY_STR_SIZE];   ///< [out] NULL terminated string value for the device version of the
+                                                    ///< firmware component. 'unknown' will be returned if this property cannot
+                                                    ///< be determined.
+    char reserved[CTL_MAX_FIRMWARE_COMPONENT_PROPERTIES_RESERVED_SIZE]; ///< [out] Reserved
+
+} ctl_firmware_component_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get base firmware properties
+/// 
+/// @details
+///     - The application gets properties of base firmware
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDeviceAdapter`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pProperties`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetFirmwareProperties(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to control device adapter
+    ctl_firmware_properties_t* pProperties          ///< [in,out] Pointer to an array that will hold properties of the base
+                                                    ///< firmware.
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get handle of various firmware components
+/// 
+/// @details
+///     - The application enumerates all firmware components on an Intel
+///       Discrete Graphics device.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDeviceAdapter`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pCount`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "KMD call failed"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlEnumerateFirmwareComponents(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to control device adapter
+    uint32_t* pCount,                               ///< [in,out] pointer to the number of components of this type.
+                                                    ///< if count is zero, then the driver shall update the value with the
+                                                    ///< total number of components of this type that are available.
+                                                    ///< if count is greater than the number of components of this type that
+                                                    ///< are available, then the driver shall update the value with the correct
+                                                    ///< number of components.
+    ctl_firmware_component_handle_t* phFirmware     ///< [in,out][optional][release][range(0, *pCount)] array of handle of
+                                                    ///< firmware components.
+                                                    ///< If count is less than the number of firmware components that are
+                                                    ///< available, then the driver shall only retrieve that number of firmware
+                                                    ///< component handles.
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get firmware component properties
+/// 
+/// @details
+///     - The application gets properties of individual firmware components
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hFirmware`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pProperties`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "KMD call failed"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetFirmwareComponentProperties(
+    ctl_firmware_component_handle_t hFirmware,      ///< [in] Handle for the firmware component.
+    ctl_firmware_component_properties_t* pProperties///< [in,out] Pointer to an array that will hold properties of the firmware
+                                                    ///< component.
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Allows/Blocks discrete graphics device firmware's capability to train
+///        PCI-E link at higher speeds on compatible compatible hosts
+/// 
+/// @details
+///     - This API allows caller to allow/block a compatible discrete graphics
+///       card's firmware train PCIE links at higher speeds on compatible hosts.
+///     - This is a reserved capability. By default, this capability will not be
+///       enabled, need application to activate it, please contact Intel for
+///       activation.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDeviceAdapter`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "KMD call failed"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlAllowPCIeLinkSpeedUpdate(
+    ctl_device_adapter_handle_t hDeviceAdapter,     ///< [in][release] handle to control device adapter
+    bool AllowPCIeLinkSpeedUpdate                   ///< [in] When set configures the device firmware to train PCI-E link at
+                                                    ///< higher speeds, else this will block the device firmware from training
+                                                    ///< at higher PCI-E link speeds on compatible hosts.
+                                                    ///< This API modifies a flash persistant setting of the device firmware to
+                                                    ///< allow/block training PCI-E link at higher speeds.
+    );
+
+
+#if !defined(__GNUC__)
+#pragma endregion // firmware
+#endif
 // Intel 'ctlApi' for Device Adapter - Frequency domains
 #if !defined(__GNUC__)
 #pragma region frequency
@@ -7765,6 +7966,39 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnFanGetState_t)(
     ctl_fan_handle_t,
     ctl_fan_speed_units_t,
     int32_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetFirmwareProperties 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetFirmwareProperties_t)(
+    ctl_device_adapter_handle_t,
+    ctl_firmware_properties_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlEnumerateFirmwareComponents 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnEnumerateFirmwareComponents_t)(
+    ctl_device_adapter_handle_t,
+    uint32_t*,
+    ctl_firmware_component_handle_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetFirmwareComponentProperties 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetFirmwareComponentProperties_t)(
+    ctl_firmware_component_handle_t,
+    ctl_firmware_component_properties_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlAllowPCIeLinkSpeedUpdate 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnAllowPCIeLinkSpeedUpdate_t)(
+    ctl_device_adapter_handle_t,
+    bool
     );
 
 
