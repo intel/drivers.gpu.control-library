@@ -53,25 +53,25 @@ ctl_result_t GResult = CTL_RESULT_SUCCESS;
  ***************************************************************/
 void PrintTopology(ctl_genlock_args_t *pGenlockArgs, uint32_t AdapterCount)
 {
-    printf("========= Genlock Topology =========\n");
+    PRINT_LOGS("========= Genlock Topology =========");
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
-        printf("Adapter %u:\n", AdapterIndex);
-        printf("\tIsGenlockEnabled : %s\n", pGenlockArgs[AdapterIndex].IsGenlockEnabled ? "true" : "false");
-        printf("\tIsGenlockPossible : %s\n", pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
+        APP_LOG_INFO("Adapter %u:", AdapterIndex);
+        APP_LOG_INFO("\tIsGenlockEnabled : %s", pGenlockArgs[AdapterIndex].IsGenlockEnabled ? "true" : "false");
+        APP_LOG_INFO("\tIsGenlockPossible : %s", pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
         if (true == pGenlockArgs[AdapterIndex].IsGenlockEnabled)
         {
-            printf("\tIsPrimaryGenlockSystem : %s\n", pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem ? "true" : "false");
-            printf("\tNumber of Genlock displays : %d\n", pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays);
+            APP_LOG_INFO("\tIsPrimaryGenlockSystem : %s", pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem ? "true" : "false");
+            APP_LOG_INFO("\tNumber of Genlock displays : %d", pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays);
             for (int8_t DisplayIndex = 0; DisplayIndex < pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays; DisplayIndex++)
             {
-                printf("\tDisplay %u:\n", DisplayIndex);
-                printf("\t\tDisplay output handle : %p\n", pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo[DisplayIndex].hDisplayOutput);
-                printf("\t\tPrimary pipe : %s\n", pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo[DisplayIndex].IsPrimary ? "true" : "false");
+                APP_LOG_INFO("\tDisplay %u:", DisplayIndex);
+                APP_LOG_INFO("\t\tDisplay output handle : %p", pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo[DisplayIndex].hDisplayOutput);
+                APP_LOG_INFO("\t\tPrimary pipe : %s", pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo[DisplayIndex].IsPrimary ? "true" : "false");
             }
         }
     }
-    printf("====================================\n");
+    PRINT_LOGS("====================================");
 }
 
 /***************************************************************
@@ -82,24 +82,24 @@ void PrintTopology(ctl_genlock_args_t *pGenlockArgs, uint32_t AdapterCount)
  ***************************************************************/
 void PrintUsage(char *pArgv[])
 {
-    printf("Genlock Sample Test Application.\n");
-    printf("\nUsage: %s [Operation] <-g Genlock_Mode> <-d Display_Type> <-n Number_Of_Primary_Adapters>\n", pArgv[0]);
-    printf("Operation\n");
-    printf("\t-timing : Get target mode timing details supported by each display\n");
-    printf("\t-validate : Validate Genlock configuration\n");
-    printf("\t-enable : Enable Genlock\n");
-    printf("\t-topology : Get current Genlock topology\n");
-    printf("\t-disable : Disable Genlock\n");
-    printf("\t-vblankts : Get VBlank Timestamp\n");
-    printf("\t-help : Display usage\n");
-    printf("-g [Genlock mode]\n");
-    printf("\tprimary : primary system providing ref clock and ref sync (default)\n");
-    printf("\tsecondary : secondary system referring ref clock and ref sync from primary\n");
-    printf("-d [Display type]\n");
-    printf("\tdp : Display Port (default)\n");
-    printf("\thdmi : HDMI\n");
-    printf("-p [PCIe BUS ID of Primary Adapter]\n");
-    printf("\tDesignate PCIe BUS ID of adapter you want to set as a primary (default : 0)\n");
+    APP_LOG_INFO("Genlock Sample Test Application.");
+    APP_LOG_INFO("Usage: %s [Operation] <-g Genlock_Mode> <-d Display_Type> <-n Number_Of_Primary_Adapters>", pArgv[0]);
+    APP_LOG_INFO("Operation");
+    APP_LOG_INFO("\t-timing : Get target mode timing details supported by each display");
+    APP_LOG_INFO("\t-validate : Validate Genlock configuration");
+    APP_LOG_INFO("\t-enable : Enable Genlock");
+    APP_LOG_INFO("\t-topology : Get current Genlock topology");
+    APP_LOG_INFO("\t-disable : Disable Genlock");
+    APP_LOG_INFO("\t-vblankts : Get VBlank Timestamp");
+    APP_LOG_INFO("\t-help : Display usage");
+    APP_LOG_INFO("-g [Genlock mode]");
+    APP_LOG_INFO("\tprimary : primary system providing ref clock and ref sync (default)");
+    APP_LOG_INFO("\tsecondary : secondary system referring ref clock and ref sync from primary");
+    APP_LOG_INFO("-d [Display type]");
+    APP_LOG_INFO("\tdp : Display Port (default)");
+    APP_LOG_INFO("\thdmi : HDMI");
+    APP_LOG_INFO("-p [PCIe BUS ID of Primary Adapter]");
+    APP_LOG_INFO("\tDesignate PCIe BUS ID of adapter you want to set as a primary (default : 0)");
 }
 
 /***************************************************************
@@ -185,7 +185,7 @@ ctl_result_t GetCmdlineArgs(int Argc, char *pArgv[], genlock_sample_args *pGenlo
             pGenlockSampleArgs->IsGenlockPrimary = false;
         }
     }
-    printf("[in] Genlock Mode: %s\n", pGenlockSampleArgs->IsGenlockPrimary == true ? "primary" : "secondary");
+    APP_LOG_INFO("[in] Genlock Mode: %s", pGenlockSampleArgs->IsGenlockPrimary == true ? "primary" : "secondary");
     // Display Type option
     if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-d", OptionArg))
     {
@@ -194,7 +194,7 @@ ctl_result_t GetCmdlineArgs(int Argc, char *pArgv[], genlock_sample_args *pGenlo
             pGenlockSampleArgs->PortType = CTL_DISPLAY_OUTPUT_TYPES_HDMI;
         }
     }
-    printf("[in] Display Type: %s\n", pGenlockSampleArgs->PortType == CTL_DISPLAY_OUTPUT_TYPES_HDMI ? "hdmi" : "dp");
+    APP_LOG_INFO("[in] Display Type: %s", pGenlockSampleArgs->PortType == CTL_DISPLAY_OUTPUT_TYPES_HDMI ? "hdmi" : "dp");
     // Primary BUS ID option
     if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-p", OptionArg))
     {
@@ -204,7 +204,7 @@ ctl_result_t GetCmdlineArgs(int Argc, char *pArgv[], genlock_sample_args *pGenlo
             {
                 if (!isdigit(OptionArg[Index]))
                 {
-                    printf("Invalid PCIe BUS ID.\n");
+                    APP_LOG_ERROR("Invalid PCIe BUS ID.");
                     Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
                     EXIT_ON_ERROR(Result);
                 }
@@ -212,7 +212,7 @@ ctl_result_t GetCmdlineArgs(int Argc, char *pArgv[], genlock_sample_args *pGenlo
             pGenlockSampleArgs->PrimaryBusId = stoul(OptionArg, 0, 10);
         }
     }
-    printf("[in] BUS ID of primary adapter: %u\n", pGenlockSampleArgs->PrimaryBusId);
+    APP_LOG_INFO("[in] BUS ID of primary adapter: %u", pGenlockSampleArgs->PrimaryBusId);
 
 Exit:
     return Result;
@@ -253,7 +253,7 @@ ctl_result_t GetVblankTimestamp(ctl_device_adapter_handle_t *hDevices, uint32_t 
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid Display Count. Skipping display enumeration for adapter: %d\n", AdapterIndex);
+            APP_LOG_WARN("Invalid Display Count. Skipping display enumeration for adapter: %d", AdapterIndex);
             continue;
         }
 
@@ -263,7 +263,7 @@ ctl_result_t GetVblankTimestamp(ctl_device_adapter_handle_t *hDevices, uint32_t 
         Result = ctlEnumerateDisplayOutputs(hDevices[AdapterIndex], &DisplayCount, hDisplayOutput);
         LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
 
-        printf("Adapter %u:\n", AdapterIndex);
+        APP_LOG_INFO("Adapter %u:", AdapterIndex);
         for (uint8_t DisplayIndex = 0; DisplayIndex < DisplayCount; DisplayIndex++)
         {
             ctl_display_properties_t stDisplayProperties = {};
@@ -271,7 +271,7 @@ ctl_result_t GetVblankTimestamp(ctl_device_adapter_handle_t *hDevices, uint32_t 
 
             if (NULL == hDisplayOutput[DisplayIndex])
             {
-                printf("\thDisplayOutput[%d] is NULL.\n", DisplayIndex);
+                APP_LOG_ERROR("\thDisplayOutput[%d] is NULL.", DisplayIndex);
                 Result = CTL_RESULT_ERROR_INVALID_NULL_HANDLE;
                 EXIT_ON_ERROR(Result);
             }
@@ -300,7 +300,7 @@ ctl_result_t GetVblankTimestamp(ctl_device_adapter_handle_t *hDevices, uint32_t 
 
             for (uint8_t i = 0; i < VblankTsArgs.NumOfTargets; i++)
             {
-                printf("\tTarget ID: %d Child[%d] vblank timestamp: %I64d\n", stDisplayProperties.Os_display_encoder_handle.WindowsDisplayEncoderID, i, VblankTsArgs.VblankTS[i]);
+                APP_LOG_INFO("\tTarget ID: %d Child[%d] vblank timestamp: %I64d", stDisplayProperties.Os_display_encoder_handle.WindowsDisplayEncoderID, i, VblankTsArgs.VblankTS[i]);
             }
         }
 
@@ -485,10 +485,10 @@ ctl_result_t TestGenlockValidate(ctl_device_adapter_handle_t *hDevices, ctl_genl
     Result = ctlGetSetDisplayGenlock(hDevices, pGenlockArgs, AdapterCount, &hFailureDeviceAdapter);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplayGenlock");
 
-    printf("========= Genlock Validate =========\n");
+    PRINT_LOGS("========= Genlock Validate =========");
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
-        printf("Adapter[%u]: IsGenlockPossible : %s\n", AdapterIndex, pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
+        APP_LOG_INFO("Adapter[%u]: IsGenlockPossible : %s", AdapterIndex, pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
     }
 
 Exit:
@@ -626,7 +626,7 @@ ctl_result_t InitGenlockArgs(ctl_device_adapter_handle_t *hDevices, uint32_t Ada
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid display count for adapter: %d\n", AdapterIndex);
+            APP_LOG_ERROR("Invalid display count for adapter: %d", AdapterIndex);
             LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
         }
 
@@ -647,7 +647,7 @@ ctl_result_t InitGenlockArgs(ctl_device_adapter_handle_t *hDevices, uint32_t Ada
 
             if (NULL == hDisplayOutput[DisplayIndex])
             {
-                printf("hDisplayOutput[%d] is NULL.\n", DisplayIndex);
+                APP_LOG_ERROR("hDisplayOutput[%d] is NULL.", DisplayIndex);
                 Result = CTL_RESULT_ERROR_INVALID_NULL_HANDLE;
                 EXIT_ON_ERROR(Result);
             }
@@ -673,7 +673,7 @@ ctl_result_t InitGenlockArgs(ctl_device_adapter_handle_t *hDevices, uint32_t Ada
 
         if ((CTL_GENLOCK_OPERATION_GET_TOPOLOGY != GenlockSampleArgs.Operation) && (0 == ActiveDisplayCount))
         {
-            printf("Adatper[%d] does not have any active displays for the selected display type. ActiveDisplayCount is %d.\n", AdapterIndex, ActiveDisplayCount);
+            APP_LOG_ERROR("Adatper[%d] does not have any active displays for the selected display type. ActiveDisplayCount is %d.", AdapterIndex, ActiveDisplayCount);
             Result = CTL_RESULT_ERROR_DISPLAY_NOT_ATTACHED;
             EXIT_ON_ERROR(Result);
         }
@@ -846,7 +846,7 @@ ctl_result_t GenlockDisable(ctl_device_adapter_handle_t *hDevices, uint32_t Adap
 
         if (0 == GenlockedAdapterCount)
         {
-            printf("There is no Genlocked adapter.\n");
+            APP_LOG_ERROR("There is no Genlocked adapter.");
             Result = CTL_RESULT_ERROR_NOT_INITIALIZED;
             EXIT_ON_ERROR(Result);
         }
@@ -1017,7 +1017,7 @@ int main(int Argc, char *pArgv[])
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     // Initialization successful
@@ -1029,7 +1029,7 @@ int main(int Argc, char *pArgv[])
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
@@ -1042,7 +1042,7 @@ int main(int Argc, char *pArgv[])
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     if (true == IsGetVBlankTs)
@@ -1060,6 +1060,6 @@ Exit:
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDevices);
 
-    printf("Overall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overall test result is 0x%X", GResult);
     return GResult;
 }

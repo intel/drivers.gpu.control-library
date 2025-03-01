@@ -682,6 +682,7 @@ void PrintAdapterProperties(ctl_device_adapter_properties_t *pStDeviceAdapterPro
     printf("num_eus_per_sub_slice: %d\n", pStDeviceAdapterProperties->num_eus_per_sub_slice);
     printf("num_slices: %d\n", pStDeviceAdapterProperties->num_slices);
     printf("num_sub_slices_per_slice: %d\n", pStDeviceAdapterProperties->num_sub_slices_per_slice);
+    printf("num_xe_cores: %d\n", pStDeviceAdapterProperties->num_xe_cores);
     printf("Graphics HW type: %s\n", pStDeviceAdapterProperties->graphics_adapter_properties & CTL_ADAPTER_PROPERTIES_FLAG_INTEGRATED ? "Integrated" : "External GFX");
 
     if ((INVALID_ADAPTER_BDF == pStDeviceAdapterProperties->adapter_bdf.bus) && (INVALID_ADAPTER_BDF == pStDeviceAdapterProperties->adapter_bdf.device) &&
@@ -804,7 +805,7 @@ ctl_result_t CtlAdapterTesting(ctl_device_adapter_handle_t *hDevices, uint32_t A
     StDeviceAdapterProperties.Size           = sizeof(ctl_device_adapter_properties_t);
     StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
     StDeviceAdapterProperties.device_id_size = sizeof(LUID);
-    StDeviceAdapterProperties.Version        = 2;
+    StDeviceAdapterProperties.Version        = 3;
 
     for (Index = 0; Index < Adapter_count; Index++)
     {

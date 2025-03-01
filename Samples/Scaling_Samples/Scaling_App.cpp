@@ -53,7 +53,7 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices, uint8_t ScaleType
     Result = ctlGetSupportedRetroScalingCapability(hDevices, &RetroScalingCaps);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSupportedRetroScalingCapability");
 
-    printf("ctlGetSupportedRetroScalingCapability returned Caps: 0x%X\n", RetroScalingCaps.SupportedRetroScaling);
+    APP_LOG_INFO("ctlGetSupportedRetroScalingCapability returned Caps: 0x%X", RetroScalingCaps.SupportedRetroScaling);
 
     // Test Integer Scaling
     RetroScalingSettings.Enable           = true;
@@ -72,7 +72,7 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices, uint8_t ScaleType
     Result = ctlGetSetRetroScaling(hDevices, &RetroScalingSettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetRetroScaling");
 
-    printf("ctlGetSetRetroScaling returned Enable: 0x%X type:0x%x\n", RetroScalingSettings.Enable, RetroScalingSettings.RetroScalingType);
+    APP_LOG_INFO("ctlGetSetRetroScaling returned Enable: 0x%X type:0x%x", RetroScalingSettings.Enable, RetroScalingSettings.RetroScalingType);
 
     // Enumerate all the possible target display's for the adapters
     Result = ctlEnumerateDisplayOutputs(hDevices, &DisplayCount, hDisplayOutput);
@@ -80,7 +80,7 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices, uint8_t ScaleType
 
     if (DisplayCount <= 0)
     {
-        printf("Invalid Display Count\n");
+        APP_LOG_ERROR("Invalid Display Count");
         goto Exit;
     }
 
@@ -104,34 +104,34 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices, uint8_t ScaleType
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlGetSupportedScalingCapability returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlGetSupportedScalingCapability returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
 
-        printf("ctlGetSupportedScalingCapability returned caps: 0x%X\n", ScalingCaps.SupportedScaling);
+        APP_LOG_INFO("ctlGetSupportedScalingCapability returned caps: 0x%X", ScalingCaps.SupportedScaling);
 
-        printf("\n******* Supported Scaling types ********\n");
+        PRINT_LOGS("******* Supported Scaling types ********");
 
         if (CTL_SCALING_TYPE_FLAG_IDENTITY & ScalingCaps.SupportedScaling)
         {
-            printf("CTL_SCALING_TYPE_FLAG_IDENTITY(1) is supported\n");
+            APP_LOG_INFO("CTL_SCALING_TYPE_FLAG_IDENTITY(1) is supported");
         }
         if (CTL_SCALING_TYPE_FLAG_CENTERED & ScalingCaps.SupportedScaling)
         {
-            printf("CTL_SCALING_TYPE_FLAG_CENTERED(2) is supported\n");
+            APP_LOG_INFO("CTL_SCALING_TYPE_FLAG_CENTERED(2) is supported");
         }
         if (CTL_SCALING_TYPE_FLAG_STRETCHED & ScalingCaps.SupportedScaling)
         {
-            printf("CTL_SCALING_TYPE_FLAG_STRETCHED(4) is supported\n");
+            APP_LOG_INFO("CTL_SCALING_TYPE_FLAG_STRETCHED(4) is supported");
         }
         if (CTL_SCALING_TYPE_FLAG_ASPECT_RATIO_CENTERED_MAX & ScalingCaps.SupportedScaling)
         {
-            printf("CTL_SCALING_TYPE_FLAG_ASPECT_RATIO_CENTERED_MAX(8) is supported\n");
+            APP_LOG_INFO("CTL_SCALING_TYPE_FLAG_ASPECT_RATIO_CENTERED_MAX(8) is supported");
         }
         if (CTL_SCALING_TYPE_FLAG_CUSTOM & ScalingCaps.SupportedScaling)
         {
-            printf("CTL_SCALING_TYPE_FLAG_CUSTOM(16) is supported\n");
+            APP_LOG_INFO("CTL_SCALING_TYPE_FLAG_CUSTOM(16) is supported");
         }
 
         if (0 != ScalingCaps.SupportedScaling)
@@ -142,11 +142,12 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices, uint8_t ScaleType
 
             if (CTL_RESULT_SUCCESS != Result)
             {
-                printf("ctlGetCurrentScaling returned failure code: 0x%X\n", Result);
+                APP_LOG_WARN("ctlGetCurrentScaling returned failure code: 0x%X", Result);
                 STORE_AND_RESET_ERROR(Result);
                 continue;
             }
-            printf("ctlGetCurrentScaling returned Enable: 0x%X ScalingType:0x%x PreferredScalingType:0x%x\n", ScalingSetting.Enable, ScalingSetting.ScalingType, ScalingSetting.PreferredScalingType);
+            APP_LOG_INFO("ctlGetCurrentScaling returned Enable: 0x%X ScalingType:0x%x PreferredScalingType:0x%x", ScalingSetting.Enable, ScalingSetting.ScalingType,
+                         ScalingSetting.PreferredScalingType);
         }
 
         // fill custom scaling details only if it is supported
@@ -162,7 +163,7 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices, uint8_t ScaleType
             ScalingSetting.HardwareModeSet = (TRUE == ModeSet) ? TRUE : FALSE;
             ScalingSetting.Version         = 1;
 
-            printf("*** PerX:%d PerY:%d ***\n", PerX, PerY);
+            APP_LOG_INFO("*** PerX:%d PerY:%d ***", PerX, PerY);
 
             ScalingSetting.CustomScalingX = PerX;
             ScalingSetting.CustomScalingY = PerY;
@@ -177,13 +178,13 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices, uint8_t ScaleType
             ScalingSetting.Version     = 1;
         }
 
-        printf("ScalingSetting.ScalingType:%d\n", ScalingSetting.ScalingType);
+        APP_LOG_INFO("ScalingSetting.ScalingType:%d", ScalingSetting.ScalingType);
 
         Result = ctlSetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlSetCurrentScaling returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlSetCurrentScaling returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
@@ -194,17 +195,17 @@ ctl_result_t ScalingTest(ctl_device_adapter_handle_t hDevices, uint8_t ScaleType
         Result                 = ctlGetCurrentScaling(hDisplayOutput[i], &ScalingSetting);
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlGetCurrentScaling returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlGetCurrentScaling returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
 
-        printf("ctlGetCurrentScaling returned Enable: 0x%X ScalingType:0x%x PreferredScalingType:0x%x\n", ScalingSetting.Enable, ScalingSetting.ScalingType, ScalingSetting.PreferredScalingType);
+        APP_LOG_INFO("ctlGetCurrentScaling returned Enable: 0x%X ScalingType:0x%x PreferredScalingType:0x%x", ScalingSetting.Enable, ScalingSetting.ScalingType, ScalingSetting.PreferredScalingType);
 
         if (CTL_SCALING_TYPE_FLAG_CUSTOM == ScalingSetting.ScalingType)
         {
-            printf("ScalingSetting.CustomScalingX:%d\n", ScalingSetting.CustomScalingX);
-            printf("ScalingSetting.CustomScalingY:%d\n", ScalingSetting.CustomScalingY);
+            APP_LOG_INFO("ScalingSetting.CustomScalingX:%d", ScalingSetting.CustomScalingX);
+            APP_LOG_INFO("ScalingSetting.CustomScalingY:%d", ScalingSetting.CustomScalingY);
         }
     }
 
@@ -226,7 +227,7 @@ int main(int argc, char *pArgv[])
 
     if (argc < 2)
     {
-        printf("Enter Scale type!\"");
+        APP_LOG_ERROR("Enter Scale type!\"");
         return 0;
     }
 
@@ -272,7 +273,7 @@ int main(int argc, char *pArgv[])
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     // Initialization successful
@@ -284,7 +285,7 @@ int main(int argc, char *pArgv[])
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
@@ -297,7 +298,7 @@ int main(int argc, char *pArgv[])
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     for (uint32_t i = 0; i < AdapterCount; i++)
@@ -306,7 +307,7 @@ int main(int argc, char *pArgv[])
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlGetCurrentScaling returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlGetCurrentScaling returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
@@ -316,6 +317,6 @@ Exit:
 
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDevices);
-    printf("Overrall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overrall test result is 0x%X", GResult);
     return GResult;
 }
