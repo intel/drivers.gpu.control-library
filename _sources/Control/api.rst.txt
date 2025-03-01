@@ -3492,12 +3492,26 @@ Overclock
     * :ref:`ctlOverclockTemperatureLimitSet`
     * :ref:`ctlPowerTelemetryGet`
     * :ref:`ctlOverclockResetToDefault`
+    * :ref:`ctlOverclockGpuFrequencyOffsetGetV2`
+    * :ref:`ctlOverclockGpuFrequencyOffsetSetV2`
+    * :ref:`ctlOverclockGpuMaxVoltageOffsetGetV2`
+    * :ref:`ctlOverclockGpuMaxVoltageOffsetSetV2`
+    * :ref:`ctlOverclockVramMemSpeedLimitGetV2`
+    * :ref:`ctlOverclockVramMemSpeedLimitSetV2`
+    * :ref:`ctlOverclockPowerLimitGetV2`
+    * :ref:`ctlOverclockPowerLimitSetV2`
+    * :ref:`ctlOverclockTemperatureLimitGetV2`
+    * :ref:`ctlOverclockTemperatureLimitSetV2`
+    * :ref:`ctlOverclockReadVFCurve`
+    * :ref:`ctlOverclockWriteCustomVFCurve`
 
  
 * Enumerations
 
 
     * :ref:`ctl-psu-type-t`
+    * :ref:`ctl-vf-curve-details-t`
+    * :ref:`ctl-vf-curve-type-t`
 
  
 * Structures
@@ -3509,6 +3523,7 @@ Overclock
     * :ref:`ctl-oc-vf-pair-t`
     * :ref:`ctl-psu-info-t`
     * :ref:`ctl-power-telemetry-t`
+    * :ref:`ctl-voltage-frequency-point-t`
 
 
 Overclock Functions
@@ -3677,6 +3692,114 @@ ctlOverclockResetToDefault
     :project: ControlApi
 
 
+.. _ctlOverclockGpuFrequencyOffsetGetV2:
+
+ctlOverclockGpuFrequencyOffsetGetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuFrequencyOffsetGetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockGpuFrequencyOffsetSetV2:
+
+ctlOverclockGpuFrequencyOffsetSetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuFrequencyOffsetSetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockGpuMaxVoltageOffsetGetV2:
+
+ctlOverclockGpuMaxVoltageOffsetGetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuMaxVoltageOffsetGetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockGpuMaxVoltageOffsetSetV2:
+
+ctlOverclockGpuMaxVoltageOffsetSetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockGpuMaxVoltageOffsetSetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockVramMemSpeedLimitGetV2:
+
+ctlOverclockVramMemSpeedLimitGetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockVramMemSpeedLimitGetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockVramMemSpeedLimitSetV2:
+
+ctlOverclockVramMemSpeedLimitSetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockVramMemSpeedLimitSetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockPowerLimitGetV2:
+
+ctlOverclockPowerLimitGetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockPowerLimitGetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockPowerLimitSetV2:
+
+ctlOverclockPowerLimitSetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockPowerLimitSetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockTemperatureLimitGetV2:
+
+ctlOverclockTemperatureLimitGetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockTemperatureLimitGetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockTemperatureLimitSetV2:
+
+ctlOverclockTemperatureLimitSetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockTemperatureLimitSetV2
+    :project: ControlApi
+
+
+.. _ctlOverclockReadVFCurve:
+
+ctlOverclockReadVFCurve
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockReadVFCurve
+    :project: ControlApi
+
+
+.. _ctlOverclockWriteCustomVFCurve:
+
+ctlOverclockWriteCustomVFCurve
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlOverclockWriteCustomVFCurve
+    :project: ControlApi
+
+
 
 Overclock Enums
 ------------------------------------------------------------------------------
@@ -3688,6 +3811,24 @@ ctl_psu_type_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_psu_type_t
+    :project: ControlApi
+
+
+.. _ctl-vf-curve-details-t:
+
+ctl_vf_curve_details_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_vf_curve_details_t
+    :project: ControlApi
+
+
+.. _ctl-vf-curve-type-t:
+
+ctl_vf_curve_type_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_vf_curve_type_t
     :project: ControlApi
 
  
@@ -3750,6 +3891,16 @@ ctl_power_telemetry_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_power_telemetry_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-voltage-frequency-point-t:
+
+ctl_voltage_frequency_point_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_voltage_frequency_point_t
     :project: ControlApi
     :members:
     :undoc-members:
