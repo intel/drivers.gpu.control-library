@@ -22,16 +22,11 @@
 #include <windows.h>
 #include <conio.h>
 #include <vector>
-
-#include <iostream>
 #include <string>
-
-#include <windows.h>
-#include <stdio.h>
 #include "igcl_api.h"
 #include "GenericIGCLApp.h"
+#include <map>
 
-std::string DecodeRetCode(ctl_result_t Res);
 void CtlTemperatureTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle);
@@ -40,169 +35,102 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlPciTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle);
-void CtlOverclockPropertiesTest(ctl_device_adapter_handle_t hDAhandle);
-void CtlOverclockFrequencyOffsetTest(ctl_device_adapter_handle_t hDAhandle, double FreqOffset);
-void CtlOverclockFrequencyAndVoltageOffsetTest(ctl_device_adapter_handle_t hDAhandle);
-void CtlOverclockPowerTest(ctl_device_adapter_handle_t hDAhandle);
-void CtlOverclockTemperatureTest(ctl_device_adapter_handle_t hDAhandle);
+void CtlLedTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle);
 
-const char *printType(ctl_data_type_t Type)
+std::string printType(ctl_data_type_t Type)
 {
-    switch (Type)
+    static const std::map<ctl_data_type_t, std::string> dataTypeStringMap = { { CTL_DATA_TYPE_INT8, "INT8" },
+                                                                              { CTL_DATA_TYPE_UINT8, "UINT8" },
+                                                                              { CTL_DATA_TYPE_INT16, "INT16" },
+                                                                              { CTL_DATA_TYPE_UINT16, "UINT16" },
+                                                                              { CTL_DATA_TYPE_INT32, "INT32" },
+                                                                              { CTL_DATA_TYPE_UINT32, "UINT32" },
+                                                                              { CTL_DATA_TYPE_INT64, "INT64" },
+                                                                              { CTL_DATA_TYPE_UINT64, "UINT64" },
+                                                                              { CTL_DATA_TYPE_FLOAT, "FLOAT" },
+                                                                              { CTL_DATA_TYPE_DOUBLE, "DOUBLE" },
+                                                                              { CTL_DATA_TYPE_STRING_ASCII, "STRING_ASCII" },
+                                                                              { CTL_DATA_TYPE_STRING_UTF16, "STRING_UTF16" },
+                                                                              { CTL_DATA_TYPE_STRING_UTF132, "STRING_UTF132" } };
+
+    auto it = dataTypeStringMap.find(Type);
+    if (it != dataTypeStringMap.end())
     {
-        case ctl_data_type_t::CTL_DATA_TYPE_INT8:
-        {
-            return "CTL_DATA_TYPE_INT8";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_UINT8:
-        {
-            return "CTL_DATA_TYPE_UINT8";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_INT16:
-        {
-            return "CTL_DATA_TYPE_INT16";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_UINT16:
-        {
-            return "CTL_DATA_TYPE_UINT16";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_INT32:
-        {
-            return "CTL_DATA_TYPE_INT32";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_UINT32:
-        {
-            return "CTL_DATA_TYPE_UINT32";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_INT64:
-        {
-            return "CTL_DATA_TYPE_INT64";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_UINT64:
-        {
-            return "CTL_DATA_TYPE_UINT64";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_FLOAT:
-        {
-            return "CTL_DATA_TYPE_FLOAT";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_DOUBLE:
-        {
-            return "CTL_DATA_TYPE_DOUBLE";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_STRING_ASCII:
-        {
-            return "CTL_DATA_TYPE_STRING_ASCII";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_STRING_UTF16:
-        {
-            return "CTL_DATA_TYPE_STRING_UTF16";
-        }
-        break;
-        case ctl_data_type_t::CTL_DATA_TYPE_STRING_UTF132:
-        {
-            return "CTL_DATA_TYPE_STRING_UTF132";
-        }
-        break;
-        default:
-            return "Unknown units";
+        return it->second;
     }
+    return "Unknown datatype";
 }
 
-const char *printUnits(ctl_units_t Units)
+std::string printUnits(ctl_units_t Units)
 {
-    switch (Units)
+    static const std::map<ctl_units_t, std::string> unitsStringMap = { { CTL_UNITS_FREQUENCY_MHZ, "Frequency in MHz" },
+                                                                       { CTL_UNITS_OPERATIONS_GTS, "GigaOperations per Second" },
+                                                                       { CTL_UNITS_OPERATIONS_MTS, "MegaOperations per Second" },
+                                                                       { CTL_UNITS_VOLTAGE_VOLTS, "Voltage in Volts" },
+                                                                       { CTL_UNITS_POWER_WATTS, "Power in Watts" },
+                                                                       { CTL_UNITS_TEMPERATURE_CELSIUS, "Temperature in Celsius" },
+                                                                       { CTL_UNITS_ENERGY_JOULES, "Energy in Joules" },
+                                                                       { CTL_UNITS_TIME_SECONDS, "Time in Seconds" },
+                                                                       { CTL_UNITS_MEMORY_BYTES, "Memory in Bytes" },
+                                                                       { CTL_UNITS_ANGULAR_SPEED_RPM, "Angular Speed in RPM" },
+                                                                       { CTL_UNITS_POWER_MILLIWATTS, "Power in Milli Watts" },
+                                                                       { CTL_UNITS_PERCENT, "Units in Percentage" },
+                                                                       { CTL_UNITS_MEM_SPEED_GBPS, "Units in Gigabyte Per Second" },
+                                                                       { CTL_UNITS_VOLTAGE_MILLIVOLTS, "Voltage in MilliVolts" },
+                                                                       { CTL_UNITS_BANDWIDTH_MBPS, "Bandwidth in MegaBytes Per Second" } };
+
+    auto it = unitsStringMap.find(Units);
+    if (it != unitsStringMap.end())
     {
-        case ctl_units_t::CTL_UNITS_FREQUENCY_MHZ:
-        {
-            return "Frequency in MHz";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_OPERATIONS_GTS:
-        {
-            return "GigaOperations per Second";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_OPERATIONS_MTS:
-        {
-            return "MegaOperations per Second";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_VOLTAGE_VOLTS:
-        {
-            return "Voltage in Volts";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_POWER_WATTS:
-        {
-            return "Power in Watts";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_TEMPERATURE_CELSIUS:
-        {
-            return "Temperature in Celsius";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_ENERGY_JOULES:
-        {
-            return "Energy in Joules";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_TIME_SECONDS:
-        {
-            return "Time in Seconds";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_MEMORY_BYTES:
-        {
-            return "Memory in Bytes";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_ANGULAR_SPEED_RPM:
-        {
-            return "Angular Speed in RPM";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_POWER_MILLIWATTS:
-        {
-            return "Power in Milli Watts";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_PERCENT:
-        {
-            return "Units in Percentage";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_MEM_SPEED_GBPS:
-        {
-            return "Units in Gigabyte Per Second";
-        }
-        break;
-        case ctl_units_t::CTL_UNITS_VOLTAGE_MILLIVOLTS:
-        {
-            return "Voltage in MilliVolts";
-        }
-        case ctl_units_t::CTL_UNITS_BANDWIDTH_MBPS:
-        {
-            return "Bandwidth in MegaBytes Per Second";
-        }
-        break;
-        default:
-            return "Unknown units";
+        return it->second;
     }
+    return "Unknown unit";
 }
+
+// Decoding the return code for the most common error codes.
+std::string DecodeRetCode(ctl_result_t Res)
+{
+    static const std::map<ctl_result_t, std::string> retCodeMap = { { CTL_RESULT_SUCCESS, "[CTL_RESULT_SUCCESS]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_NOT_SUPPORTED, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_NOT_SUPPORTED]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_VOLTAGE_OUTSIDE_RANGE, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_VOLTAGE_OUTSIDE_RANGE]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_FREQUENCY_OUTSIDE_RANGE, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_FREQUENCY_OUTSIDE_RANGE]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_POWER_OUTSIDE_RANGE, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_POWER_OUTSIDE_RANGE]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE]" },
+                                                                    { CTL_RESULT_ERROR_GENERIC_START, "[CTL_RESULT_ERROR_GENERIC_START]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_RESET_REQUIRED, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_RESET_REQUIRED]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_IN_VOLTAGE_LOCKED_MODE, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_IN_VOLTAGE_LOCKED_MODE]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SET, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SET]" },
+                                                                    { CTL_RESULT_ERROR_NOT_INITIALIZED, "[CTL_RESULT_ERROR_NOT_INITIALIZED]" },
+                                                                    { CTL_RESULT_ERROR_ALREADY_INITIALIZED, "[CTL_RESULT_ERROR_ALREADY_INITIALIZED]" },
+                                                                    { CTL_RESULT_ERROR_DEVICE_LOST, "[CTL_RESULT_ERROR_DEVICE_LOST]" },
+                                                                    { CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS, "[CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS]" },
+                                                                    { CTL_RESULT_ERROR_NOT_AVAILABLE, "[CTL_RESULT_ERROR_NOT_AVAILABLE]" },
+                                                                    { CTL_RESULT_ERROR_UNINITIALIZED, "[CTL_RESULT_ERROR_UNINITIALIZED]" },
+                                                                    { CTL_RESULT_ERROR_UNSUPPORTED_VERSION, "[CTL_RESULT_ERROR_UNSUPPORTED_VERSION]" },
+                                                                    { CTL_RESULT_ERROR_UNSUPPORTED_FEATURE, "[CTL_RESULT_ERROR_UNSUPPORTED_FEATURE]" },
+                                                                    { CTL_RESULT_ERROR_INVALID_ARGUMENT, "[CTL_RESULT_ERROR_INVALID_ARGUMENT]" },
+                                                                    { CTL_RESULT_ERROR_INVALID_NULL_HANDLE, "[CTL_RESULT_ERROR_INVALID_NULL_HANDLE]" },
+                                                                    { CTL_RESULT_ERROR_INVALID_NULL_POINTER, "[CTL_RESULT_ERROR_INVALID_NULL_POINTER]" },
+                                                                    { CTL_RESULT_ERROR_INVALID_SIZE, "[CTL_RESULT_ERROR_INVALID_SIZE]" },
+                                                                    { CTL_RESULT_ERROR_UNSUPPORTED_SIZE, "[CTL_RESULT_ERROR_UNSUPPORTED_SIZE]" },
+                                                                    { CTL_RESULT_ERROR_NOT_IMPLEMENTED, "[CTL_RESULT_ERROR_NOT_IMPLEMENTED]" },
+                                                                    { CTL_RESULT_ERROR_ZE_LOADER, "[CTL_RESULT_ERROR_ZE_LOADER]" },
+                                                                    { CTL_RESULT_ERROR_INVALID_OPERATION_TYPE, "[CTL_RESULT_ERROR_INVALID_OPERATION_TYPE]" },
+                                                                    { CTL_RESULT_ERROR_DATA_READ, "[CTL_RESULT_ERROR_DATA_READ]" },
+                                                                    { CTL_RESULT_ERROR_DATA_WRITE, "[CTL_RESULT_ERROR_DATA_WRITE]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_INVALID_CUSTOM_VF_CURVE, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_INVALID_CUSTOM_VF_CURVE]" },
+                                                                    { CTL_RESULT_ERROR_UNKNOWN, "[CTL_RESULT_ERROR_UNKNOWN]" },
+                                                                    { CTL_RESULT_ERROR_CORE_OVERCLOCK_DEPRECATED_API, "[CTL_RESULT_ERROR_CORE_OVERCLOCK_DEPRECATED_API]" } };
+
+    auto it = retCodeMap.find(Res);
+    if (it != retCodeMap.end())
+    {
+        return it->second;
+    }
+    return "[Unknown Error]";
+}
+
 /***************************************************************
  * @brief
  * place_holder_for_Detailed_desc
@@ -932,631 +860,297 @@ cleanUp:
 }
 
 /***************************************************************
- * @brief
- * place_holder_for_Detailed_desc
- * @param
- * @return
- ***************************************************************/
-void CtlOverclockPropertiesTest(ctl_device_adapter_handle_t hDAhandle)
-{
-
-    ctl_oc_properties_t OcProperties = {};
-    OcProperties.Size                = sizeof(ctl_oc_properties_t);
-    ctl_result_t status              = ctlOverclockGetProperties(hDAhandle, &OcProperties);
-
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-
-        PRINT_LOGS("\nOc Supported? %s", ((OcProperties.bSupported) ? "true" : "false"));
-
-        PRINT_LOGS("\nGpu Frequency Offset Supported? %s", ((OcProperties.gpuFrequencyOffset.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nGpu Frequency Offset Is Relative? %s", ((OcProperties.gpuFrequencyOffset.bRelative) ? "true" : "false"));
-        PRINT_LOGS("\nGpu Frequency Offset Have Reference? %s", ((OcProperties.gpuFrequencyOffset.bReference) ? "true" : "false"));
-        PRINT_LOGS("\nGpu Frequency Offset Default: %f", OcProperties.gpuFrequencyOffset.Default);
-        PRINT_LOGS("\nGpu Frequency Offset Min: %f", OcProperties.gpuFrequencyOffset.min);
-        PRINT_LOGS("\nGpu Frequency Offset Max: %f", OcProperties.gpuFrequencyOffset.max);
-        PRINT_LOGS("\nGpu Frequency Offset Reference: %f", OcProperties.gpuFrequencyOffset.reference);
-        PRINT_LOGS("\nGpu Frequency Offset Step: %f", OcProperties.gpuFrequencyOffset.step);
-        PRINT_LOGS("\nGpu Frequency Offset Units: %s", printUnits(OcProperties.gpuFrequencyOffset.units));
-
-        PRINT_LOGS("\nGpu Voltage Offset Supported? %s", ((OcProperties.gpuVoltageOffset.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nGpu Voltage Offset Is Relative? %s", ((OcProperties.gpuVoltageOffset.bRelative) ? "true" : "false"));
-        PRINT_LOGS("\nGpu Voltage Offset Have Reference? %s", ((OcProperties.gpuVoltageOffset.bReference) ? "true" : "false"));
-        PRINT_LOGS("\nGpu Voltage Offset Default: %f", OcProperties.gpuVoltageOffset.Default);
-        PRINT_LOGS("\nGpu Voltage Offset Min: %f", OcProperties.gpuVoltageOffset.min);
-        PRINT_LOGS("\nGpu Voltage Offset Max: %f", OcProperties.gpuVoltageOffset.max);
-        PRINT_LOGS("\nGpu Voltage Offset Reference: %f", OcProperties.gpuVoltageOffset.reference);
-        PRINT_LOGS("\nGpu Voltage Offset Step: %f", OcProperties.gpuVoltageOffset.step);
-        PRINT_LOGS("\nGpu Voltage Offset Units: %s", printUnits(OcProperties.gpuVoltageOffset.units));
-
-        PRINT_LOGS("\nPower Limit Supported? %s", ((OcProperties.powerLimit.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nPower Limit Is Relative? %s", ((OcProperties.powerLimit.bRelative) ? "true" : "false"));
-        PRINT_LOGS("\nPower Limit Have Reference? %s", ((OcProperties.powerLimit.bReference) ? "true" : "false"));
-        PRINT_LOGS("\nPower Limit Default: %f", OcProperties.powerLimit.Default);
-        PRINT_LOGS("\nPower Limit Min: %f", OcProperties.powerLimit.min);
-        PRINT_LOGS("\nPower Limit Max: %f", OcProperties.powerLimit.max);
-        PRINT_LOGS("\nPower Limit Reference: %f", OcProperties.powerLimit.reference);
-        PRINT_LOGS("\nPower Limit Step: %f", OcProperties.powerLimit.step);
-        PRINT_LOGS("\nPower Limit Units: %s", printUnits(OcProperties.powerLimit.units));
-
-        PRINT_LOGS("\nTemperature Limit Supported? %s", ((OcProperties.temperatureLimit.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nTemperature Limit Is Relative? %s", ((OcProperties.temperatureLimit.bRelative) ? "true" : "false"));
-        PRINT_LOGS("\nTemperature Limit Have Reference? %s", ((OcProperties.temperatureLimit.bReference) ? "true" : "false"));
-        PRINT_LOGS("\nTemperature Limit Default: %f", OcProperties.temperatureLimit.Default);
-        PRINT_LOGS("\nTemperature Limit Min: %f", OcProperties.temperatureLimit.min);
-        PRINT_LOGS("\nTemperature Limit Max: %f", OcProperties.temperatureLimit.max);
-        PRINT_LOGS("\nTemperature Limit Reference: %f", OcProperties.temperatureLimit.reference);
-        PRINT_LOGS("\nTemperature Limit Step: %f", OcProperties.temperatureLimit.step);
-        PRINT_LOGS("\nTemperature Limit Units: %s", printUnits(OcProperties.temperatureLimit.units));
-    }
-    else
-    {
-        PRINT_LOGS("\nError: %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\n \n");
-}
-
-/***************************************************************
- * @brief
- * place_holder_for_Detailed_desc
- * @param
- * @return
- ***************************************************************/
-void CtlOverclockFrequencyOffsetTest(ctl_device_adapter_handle_t hDAhandle, double FreqOffset)
-{
-    double GPUFrequencyOffset = 0.0;
-    double VrelOffset         = 0.0;
-    PRINT_LOGS("\n::::::::::::::Overclocking Tests::::::::::::::\n");
-    PRINT_LOGS("\n::::::::::::::1.0 Frequency Offset::::::::::::::\n");
-    PRINT_LOGS("\n::::::::::::::1.1 Get Frequency Offset::::::::::::::\n");
-    PRINT_LOGS("\n1.1.1 Get Frequency Offset:::::::::::::::\n");
-    ctl_result_t status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        if (GPUFrequencyOffset == 0.0)
-        {
-            PRINT_LOGS("\nResult: Overclocking disabled, Frequency Offset is 0");
-        }
-        else
-        {
-            PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is:%f", GPUFrequencyOffset);
-        }
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    GPUFrequencyOffset = FreqOffset; //  Setting Offset to FreqOffset MHz
-
-    PRINT_LOGS("\nSet Frequency Offset with: %f MHz", GPUFrequencyOffset);
-    status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SET)
-    {
-        PRINT_LOGS("\nResult: Correctly returned: %s", DecodeRetCode(status).c_str());
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Incorrectly returned: %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockWaiverSet(hDAhandle);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Waiver Called correctly");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\nSet Frequency Offset with: %f MHz", GPUFrequencyOffset);
-    status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Frequency Offset Set Correctly ");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Incorrectly returned: %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is:%f", GPUFrequencyOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockGpuVoltageOffsetGet(hDAhandle, &VrelOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking enabled, Voltage Offset is:%f", VrelOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    GPUFrequencyOffset = 0.0; //  Setting Offset to 0 MHz
-    VrelOffset         = 0.0;
-
-    status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Frequency Offset successfully Set to 0");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockGpuVoltageOffsetSet(hDAhandle, VrelOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Voltage Offset successfully Set to 0");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-    status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking disabled, Frequency Offset is:%f", GPUFrequencyOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockGpuVoltageOffsetGet(hDAhandle, &VrelOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking disabled, Voltage Offset is: %f", VrelOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    GPUFrequencyOffset = -FreqOffset; //  Setting Offset to -FreqOffset MHz
-    status             = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is:%f", GPUFrequencyOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is: %f", GPUFrequencyOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    GPUFrequencyOffset = 0.0; //  Setting Offset to 0 MHz
-
-    status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Offset successfully Set to 0");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking disabled, Frequency Offset is:%f", GPUFrequencyOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\n \n");
-}
-
-/***************************************************************
- * @brief
- * place_holder_for_Detailed_desc
- * @param
- * @return
- ***************************************************************/
-void CtlOverclockFrequencyAndVoltageOffsetTest(ctl_device_adapter_handle_t hDAhandle)
-{
-    double GPUFrequencyOffset = 0.0;
-    double VrelOffset         = 0.0;
-
-    GPUFrequencyOffset = 100.0;
-    VrelOffset         = 50; // in mV
-
-    PRINT_LOGS("\nSet Frequency Offset with: %f  MHz Vrel Offset: %f", GPUFrequencyOffset, VrelOffset);
-
-    ctl_result_t status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Frequency Offset Set Correctly ");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Incorrectly returned: %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockGpuVoltageOffsetSet(hDAhandle, VrelOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Vrel Offset Set Correctly ");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Incorrectly returned: %s", DecodeRetCode(status).c_str());
-    }
-    PRINT_LOGS("\n2.1.4 Get Modified Frequency and Vrel Offset:::::::::::::::\n");
-    if (ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset) == ctl_result_t::CTL_RESULT_SUCCESS &&
-        ctlOverclockGpuVoltageOffsetGet(hDAhandle, &VrelOffset) == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking enabled, Frequency Offset is: %f Vrel Offset is: %f", GPUFrequencyOffset, VrelOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\n2.1.5 Set Frequency Offset to 0 MHz and Vrel Offset to 0 v to disable OC:::::::::::::::\n");
-    GPUFrequencyOffset = 0.0; //  Setting Offset to 0 MHz
-    VrelOffset         = 0.0;
-
-    status = ctlOverclockGpuFrequencyOffsetSet(hDAhandle, GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Frequency Offset successfully Set to 0");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockGpuVoltageOffsetSet(hDAhandle, VrelOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Voltage Offset successfully Set to 0");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\n2.1.6 Reading Back Frequency Offset to confirm OC is disabled:::::::::::::::\n");
-    status = ctlOverclockGpuFrequencyOffsetGet(hDAhandle, &GPUFrequencyOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking disabled, Frequency Offset is:%f", GPUFrequencyOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    status = ctlOverclockGpuVoltageOffsetGet(hDAhandle, &VrelOffset);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nResult: Overclocking disabled, Voltage Offset is: %f", VrelOffset);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\n \n");
-}
-
-/***************************************************************
  * @brief Main Function
- *
  * place_holder_for_Detailed_desc
  * @param
  * @return
  ***************************************************************/
-void CtlOverclockPowerTest(ctl_device_adapter_handle_t hDAhandle)
+void CtlLedTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    PRINT_LOGS("\n::::::::::::::Print Power Limit::::::::::::::\n");
+    PRINT_LOGS("\n::::::::::::::Print Led Properties::::::::::::::\n");
 
-    ctl_oc_properties_t OcProperties = {};
-    OcProperties.Size                = sizeof(ctl_oc_properties_t);
-    ctl_result_t status              = ctlOverclockGetProperties(hDAhandle, &OcProperties);
+    ctl_result_t Result          = CTL_RESULT_SUCCESS;
+    uint32_t LedCount            = 0;
+    ctl_led_handle_t *pLedHandle = nullptr;
+    uint32_t Index               = 0;
 
-    if (status != ctl_result_t::CTL_RESULT_SUCCESS)
+    Result = ctlEnumLeds(hDAhandle, &LedCount, pLedHandle);
+    if ((Result != CTL_RESULT_SUCCESS) || LedCount == 0)
     {
-        PRINT_LOGS("\nError Getting Properties%s", DecodeRetCode(status).c_str());
+        PRINT_LOGS("\nLed component not supported. Result: %s, LedCount %d", DecodeRetCode(Result).c_str(), LedCount);
+        return;
+    }
+    else
+    {
+        PRINT_LOGS("\nNumber of Led Handles [%u]", LedCount);
+    }
+
+    pLedHandle = (ctl_led_handle_t *)malloc(sizeof(ctl_led_handle_t) * LedCount);
+    if (pLedHandle == nullptr)
+    {
+        PRINT_LOGS("\nNull pointer after malloc\n");
         return;
     }
 
-    PRINT_LOGS("\nGetting current Power Limit\n");
-    double CurrentPowerLimit = 0.0;
-
-    status = ctlOverclockPowerLimitGet(hDAhandle, &CurrentPowerLimit);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
+    Result = ctlEnumLeds(hDAhandle, &LedCount, pLedHandle);
+    if (Result != CTL_RESULT_SUCCESS)
     {
-        PRINT_LOGS("\nCurrent Sustained Power Limit: %f", CurrentPowerLimit);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
+        PRINT_LOGS("\nError: %s for Led handle.", DecodeRetCode(Result).c_str());
+        goto cleanUp;
     }
 
-    PRINT_LOGS("\n\nSetting current Power Limit outside limits:");
-
-    // Convert to mW and get min -1 W to be out of bounds
-    CurrentPowerLimit = OcProperties.powerLimit.min * 1000.0 - 1000.0;
-
-    status = ctlOverclockPowerLimitSet(hDAhandle, CurrentPowerLimit);
-    if (status == ctl_result_t::CTL_RESULT_ERROR_CORE_OVERCLOCK_POWER_OUTSIDE_RANGE)
+    for (Index = 0; Index < LedCount; Index++)
     {
-        PRINT_LOGS("\nCorrectly returned out of bounds.");
+        if (NULL != pLedHandle[Index])
+        {
+            PRINT_LOGS("\n\n[Led] For pLedHandle[%u] = 0x%p\n", Index, pLedHandle[Index]);
+
+            PRINT_LOGS("\n[Led] Get Led properties:");
+
+            ctl_led_properties_t LedProperties = { 0 };
+            LedProperties.Size                 = sizeof(ctl_led_properties_t);
+            Result                             = ctlLedGetProperties(pLedHandle[Index], &LedProperties);
+
+            if (Result != CTL_RESULT_SUCCESS)
+            {
+                PRINT_LOGS("\nError: %s from Led get properties.\n", DecodeRetCode(Result).c_str());
+            }
+            else
+            {
+                PRINT_LOGS("\n[Led] Can Control [%u]", (uint32_t)LedProperties.canControl);
+                PRINT_LOGS("\n[Led] Is I2C [%u]", (uint32_t)LedProperties.isI2C);
+                PRINT_LOGS("\n[Led] Is PWM [%u]", (uint32_t)LedProperties.isPWM);
+                PRINT_LOGS("\n[Led] Have RGB [%u]", (uint32_t)LedProperties.haveRGB);
+            }
+
+            PRINT_LOGS("\n\n[Led] Get Led state:");
+
+            ctl_led_state_t ledState = { 0 };
+            ledState.Size            = sizeof(ctl_led_state_t);
+            Result                   = ctlLedGetState(pLedHandle[Index], &ledState);
+
+            if (Result != CTL_RESULT_SUCCESS)
+            {
+                PRINT_LOGS("\nError: %s  from Led get state.\n", DecodeRetCode(Result).c_str());
+            }
+            else
+            {
+                PRINT_LOGS("\n[Led] Get Led State successful");
+                PRINT_LOGS("\n[Led] IsOn [%u]", (uint32_t)ledState.isOn);
+                PRINT_LOGS("\n[Led] PWM: Led On/Off Ratio [%f]", ledState.pwm);
+                PRINT_LOGS("\n[Led] Red color of Led [%f]", ledState.color.red);
+                PRINT_LOGS("\n[Led] Green color of Led [%f]", ledState.color.green);
+                PRINT_LOGS("\n[Led] Blue color of Led [%f]", ledState.color.blue);
+            }
+
+            PRINT_LOGS("\n\n[Led] Set Led state:");
+
+            void *pBuffer       = &ledState;
+            uint32_t bufferSize = sizeof(ctl_led_state_t);
+            Result              = ctlLedSetState(pLedHandle[Index], pBuffer, bufferSize);
+
+            if (Result != CTL_RESULT_SUCCESS)
+            {
+                PRINT_LOGS("\nError: %s from Led Set State\n", DecodeRetCode(Result).c_str());
+            }
+            else
+            {
+                PRINT_LOGS("\n[Led] Successfully Set Led State\n");
+            }
+        }
     }
 
-    PRINT_LOGS("\n\nSetting current Power Limit inside limits:\n");
-    // Convert to mW and get min + 1 W to be in bounds.
-    CurrentPowerLimit = OcProperties.powerLimit.min * 1000.0 + 1000.0;
-
-    status = ctlOverclockPowerLimitSet(hDAhandle, CurrentPowerLimit);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
+cleanUp:
+    if (pLedHandle != nullptr)
     {
-        PRINT_LOGS("\nPower Limit set correctly.");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
+        free(pLedHandle);
+        pLedHandle = nullptr;
     }
 
-    PRINT_LOGS("\n\nGetting the now current Power Limit:\n");
-
-    double NewCurrentPowerLimit = 0.0;
-
-    status = ctlOverclockPowerLimitGet(hDAhandle, &NewCurrentPowerLimit);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nCurrent Sustained Power Limit: %f", NewCurrentPowerLimit);
-        PRINT_LOGS("\nRequested Sustained Power Limit: %f", CurrentPowerLimit);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\n \n");
+    return;
 }
 
-/***************************************************************
- * @brief Main Function
- *
- * place_holder_for_Detailed_desc
- * @param
- * @return
- ***************************************************************/
-void CtlOverclockTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
-{
-    PRINT_LOGS("\n::::::::::::::Print Temperature Limit::::::::::::::\n");
-
-    ctl_oc_properties_t OcProperties = {};
-    OcProperties.Size                = sizeof(ctl_oc_properties_t);
-    ctl_result_t status              = ctlOverclockGetProperties(hDAhandle, &OcProperties);
-
-    if (status != ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nError Getting Properties %s", DecodeRetCode(status).c_str());
-        return;
-    }
-
-    PRINT_LOGS("\nGetting current Temperature Limit  \n");
-    double CurrentTemperatureLimit = 0.0;
-
-    status = ctlOverclockTemperatureLimitGet(hDAhandle, &CurrentTemperatureLimit);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nCurrent Temperature Limit: %f", CurrentTemperatureLimit);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\n\nSetting current Temperature Limit outside limits: \n");
-
-    CurrentTemperatureLimit = OcProperties.temperatureLimit.min - 1.0;
-
-    status = ctlOverclockTemperatureLimitSet(hDAhandle, CurrentTemperatureLimit);
-    if (status == ctl_result_t::CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE)
-    {
-        PRINT_LOGS("\nCorrectly returned out of bounds.");
-    }
-
-    PRINT_LOGS("\n\nSetting current Temperature Limit inside limits: \n");
-
-    CurrentTemperatureLimit = OcProperties.temperatureLimit.min + 1.0;
-
-    status = ctlOverclockTemperatureLimitSet(hDAhandle, CurrentTemperatureLimit);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nTemperature Limit set correctly.");
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\n\nGetting the now current Temperature Limit: \n");
-
-    double NewCurrentTemperatureLimit = 0.0;
-
-    status = ctlOverclockTemperatureLimitGet(hDAhandle, &NewCurrentTemperatureLimit);
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
-    {
-        PRINT_LOGS("\nCurrent Temperature Limit: %f", NewCurrentTemperatureLimit);
-        PRINT_LOGS("\nRequested Temperature Limit: %f", CurrentTemperatureLimit);
-    }
-    else
-    {
-        PRINT_LOGS("\nResult: Error %s", DecodeRetCode(status).c_str());
-    }
-
-    PRINT_LOGS("\n \n");
-}
-
-/***************************************************************
- * @brief Main Function
- *
- * place_holder_for_Detailed_desc
- * @param
- * @return
- ***************************************************************/
 void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
 {
-    PRINT_LOGS("\n:: :: :: :: :: :: ::Print Telemetry:: :: :: :: :: :: ::\n");
-
     ctl_power_telemetry_t pPowerTelemetry = {};
     pPowerTelemetry.Size                  = sizeof(ctl_power_telemetry_t);
-    ctl_result_t status                   = ctlPowerTelemetryGet(hDAhandle, &pPowerTelemetry);
+    pPowerTelemetry.Version               = 1;
 
-    if (status == ctl_result_t::CTL_RESULT_SUCCESS)
+    ctl_result_t Status = ctlPowerTelemetryGet(hDAhandle, &pPowerTelemetry);
+
+    if (Status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        PRINT_LOGS("\nTelemetry Success \n");
+        PRINT_LOGS("\nTelemetry Success\n \n");
 
-        PRINT_LOGS("\nTimeStamp:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.timeStamp.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.timeStamp.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.timeStamp.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.timeStamp.value.datadouble);
+        if (pPowerTelemetry.timeStamp.bSupported)
+        {
+            PRINT_LOGS("\nTimeStamp: %f (%s) Datatype:(%s)", pPowerTelemetry.timeStamp.value.datadouble, printUnits(pPowerTelemetry.timeStamp.units).c_str(),
+                       printType(pPowerTelemetry.timeStamp.type).c_str());
+        }
 
-        PRINT_LOGS("\nGpu Energy Counter:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.gpuEnergyCounter.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.gpuEnergyCounter.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.gpuEnergyCounter.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.gpuEnergyCounter.value.datadouble);
+        if (pPowerTelemetry.gpuEnergyCounter.bSupported)
+        {
+            PRINT_LOGS("\nGpu Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEnergyCounter.value.datadouble, printUnits(pPowerTelemetry.gpuEnergyCounter.units).c_str(),
+                       printType(pPowerTelemetry.gpuEnergyCounter.type).c_str());
+        }
 
-        PRINT_LOGS("\nGpu Voltage:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.gpuVoltage.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.gpuVoltage.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.gpuVoltage.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.gpuVoltage.value.datadouble);
+        if (pPowerTelemetry.vramEnergyCounter.bSupported)
+        {
+            PRINT_LOGS("\nVRAM Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.vramEnergyCounter.value.datadouble, printUnits(pPowerTelemetry.vramEnergyCounter.units).c_str(),
+                       printType(pPowerTelemetry.vramEnergyCounter.type).c_str());
+        }
 
-        PRINT_LOGS("\nGpu Current Frequency:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.gpuCurrentClockFrequency.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.gpuCurrentClockFrequency.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.gpuCurrentClockFrequency.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.gpuCurrentClockFrequency.value.datadouble);
+        if (pPowerTelemetry.totalCardEnergyCounter.bSupported)
+        {
+            PRINT_LOGS("\nCard Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.totalCardEnergyCounter.value.datadouble, printUnits(pPowerTelemetry.totalCardEnergyCounter.units).c_str(),
+                       printType(pPowerTelemetry.totalCardEnergyCounter.type).c_str());
+        }
 
-        PRINT_LOGS("\nGpu Current Temperature:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.gpuCurrentTemperature.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.gpuCurrentTemperature.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.gpuCurrentTemperature.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.gpuCurrentTemperature.value.datadouble);
+        if (pPowerTelemetry.gpuVoltage.bSupported)
+        {
+            PRINT_LOGS("\nGpu Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVoltage.value.datadouble, printUnits(pPowerTelemetry.gpuVoltage.units).c_str(),
+                       printType(pPowerTelemetry.gpuVoltage.type).c_str());
+        }
 
-        PRINT_LOGS("\nGpu Activity Counter:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.globalActivityCounter.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.globalActivityCounter.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.globalActivityCounter.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.globalActivityCounter.value.datadouble);
+        if (pPowerTelemetry.gpuCurrentClockFrequency.bSupported)
+        {
+            PRINT_LOGS("\nGpu Current Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentClockFrequency.value.datadouble, printUnits(pPowerTelemetry.gpuCurrentClockFrequency.units).c_str(),
+                       printType(pPowerTelemetry.gpuCurrentClockFrequency.type).c_str());
+        }
 
-        PRINT_LOGS("\nRender Activity Counter:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.renderComputeActivityCounter.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.renderComputeActivityCounter.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.renderComputeActivityCounter.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.renderComputeActivityCounter.value.datadouble);
+        if (pPowerTelemetry.gpuCurrentTemperature.bSupported)
+        {
+            PRINT_LOGS("\nGpu Current Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentTemperature.value.datadouble, printUnits(pPowerTelemetry.gpuCurrentTemperature.units).c_str(),
+                       printType(pPowerTelemetry.gpuCurrentTemperature.type).c_str());
+        }
 
-        PRINT_LOGS("\nMedia Activity Counter:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.mediaActivityCounter.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.mediaActivityCounter.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.mediaActivityCounter.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.mediaActivityCounter.value.datadouble);
+        if (pPowerTelemetry.globalActivityCounter.bSupported)
+        {
+            PRINT_LOGS("\nGpu Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.globalActivityCounter.value.datadouble, printUnits(pPowerTelemetry.globalActivityCounter.units).c_str(),
+                       printType(pPowerTelemetry.globalActivityCounter.type).c_str());
+        }
 
-        PRINT_LOGS("\nVRAM Energy Counter:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramEnergyCounter.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramEnergyCounter.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramEnergyCounter.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramEnergyCounter.value.datadouble);
+        if (pPowerTelemetry.renderComputeActivityCounter.bSupported)
+        {
+            PRINT_LOGS("\nRender Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.renderComputeActivityCounter.value.datadouble,
+                       printUnits(pPowerTelemetry.renderComputeActivityCounter.units).c_str(), printType(pPowerTelemetry.renderComputeActivityCounter.type).c_str());
+        }
 
-        PRINT_LOGS("\nVRAM Voltage:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramVoltage.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramVoltage.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramVoltage.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramVoltage.value.datadouble);
+        if (pPowerTelemetry.mediaActivityCounter.bSupported)
+        {
+            PRINT_LOGS("\nMedia Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.mediaActivityCounter.value.datadouble, printUnits(pPowerTelemetry.mediaActivityCounter.units).c_str(),
+                       printType(pPowerTelemetry.mediaActivityCounter.type).c_str());
+        }
 
-        PRINT_LOGS("\nVRAM Frequency:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramCurrentClockFrequency.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramCurrentClockFrequency.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramCurrentClockFrequency.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramCurrentClockFrequency.value.datadouble);
+        if (pPowerTelemetry.vramVoltage.bSupported)
+        {
+            PRINT_LOGS("\nVRAM Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVoltage.value.datadouble, printUnits(pPowerTelemetry.vramVoltage.units).c_str(),
+                       printType(pPowerTelemetry.vramVoltage.type).c_str());
+        }
 
-        PRINT_LOGS("\nVRAM Effective Frequency:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramCurrentEffectiveFrequency.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramCurrentEffectiveFrequency.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramCurrentEffectiveFrequency.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramCurrentEffectiveFrequency.value.datadouble);
+        if (pPowerTelemetry.vramCurrentClockFrequency.bSupported)
+        {
+            PRINT_LOGS("\nVRAM Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentClockFrequency.value.datadouble, printUnits(pPowerTelemetry.vramCurrentClockFrequency.units).c_str(),
+                       printType(pPowerTelemetry.vramCurrentClockFrequency.type).c_str());
+        }
 
-        PRINT_LOGS("\nVRAM Read Bandwidth Counter:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramReadBandwidthCounter.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramReadBandwidthCounter.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramReadBandwidthCounter.type));
-        PRINT_LOGS("\nValue: %llu", pPowerTelemetry.vramReadBandwidthCounter.value.datau64);
+        if (pPowerTelemetry.vramReadBandwidthCounter.bSupported)
+        {
+            PRINT_LOGS("\nVRAM Read Bandwidth Counter: %llu (%s) Datatype:(%s)", pPowerTelemetry.vramReadBandwidthCounter.value.datau64,
+                       printUnits(pPowerTelemetry.vramReadBandwidthCounter.units).c_str(), printType(pPowerTelemetry.vramReadBandwidthCounter.type).c_str());
+        }
 
-        PRINT_LOGS("\nVRAM Write Bandwidth Counter:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramWriteBandwidthCounter.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramWriteBandwidthCounter.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramWriteBandwidthCounter.type));
-        PRINT_LOGS("\nValue: %llu", pPowerTelemetry.vramWriteBandwidthCounter.value.datau64);
+        if (pPowerTelemetry.vramWriteBandwidthCounter.bSupported)
+        {
+            PRINT_LOGS("\nVRAM Write Bandwidth Counter: %llu (%s) Datatype:(%s)", pPowerTelemetry.vramWriteBandwidthCounter.value.datau64,
+                       printUnits(pPowerTelemetry.vramWriteBandwidthCounter.units).c_str(), printType(pPowerTelemetry.vramWriteBandwidthCounter.type).c_str());
+        }
 
-        PRINT_LOGS("\nVRAM Temperature:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.vramCurrentTemperature.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.vramCurrentTemperature.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.vramCurrentTemperature.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.vramCurrentTemperature.value.datadouble);
+        if (pPowerTelemetry.vramCurrentEffectiveFrequency.bSupported)
+        {
+            PRINT_LOGS("\nVRAM Effective Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentEffectiveFrequency.value.datadouble,
+                       printUnits(pPowerTelemetry.vramCurrentEffectiveFrequency.units).c_str(), printType(pPowerTelemetry.vramCurrentEffectiveFrequency.type).c_str());
+        }
 
-        PRINT_LOGS("\nTotal Card Energy Counter:");
-        PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.totalCardEnergyCounter.bSupported) ? "true" : "false"));
-        PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.totalCardEnergyCounter.units));
-        PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.totalCardEnergyCounter.type));
-        PRINT_LOGS("\nValue: %f", pPowerTelemetry.totalCardEnergyCounter.value.datadouble);
+        if (pPowerTelemetry.vramCurrentTemperature.bSupported)
+        {
+            PRINT_LOGS("\nVRAM Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentTemperature.value.datadouble, printUnits(pPowerTelemetry.vramCurrentTemperature.units).c_str(),
+                       printType(pPowerTelemetry.vramCurrentTemperature.type).c_str());
+        }
+
+        if (pPowerTelemetry.vramReadBandwidth.bSupported)
+        {
+            PRINT_LOGS("\nVRAM Read Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramReadBandwidth.value.datadouble, printUnits(pPowerTelemetry.vramReadBandwidth.units).c_str(),
+                       printType(pPowerTelemetry.vramReadBandwidth.type).c_str());
+        }
+
+        if (pPowerTelemetry.vramWriteBandwidth.bSupported)
+        {
+            PRINT_LOGS("\nVRAM Write Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramWriteBandwidth.value.datadouble, printUnits(pPowerTelemetry.vramWriteBandwidth.units).c_str(),
+                       printType(pPowerTelemetry.vramWriteBandwidth.type).c_str());
+        }
+
+        if (pPowerTelemetry.gpuVrTemp.bSupported)
+        {
+            PRINT_LOGS("\nGPU VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVrTemp.value.datadouble, printUnits(pPowerTelemetry.gpuVrTemp.units).c_str(),
+                       printType(pPowerTelemetry.gpuVrTemp.type).c_str());
+        }
+
+        if (pPowerTelemetry.vramVrTemp.bSupported)
+        {
+            PRINT_LOGS("\nVRAM VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVrTemp.value.datadouble, printUnits(pPowerTelemetry.vramVrTemp.units).c_str(),
+                       printType(pPowerTelemetry.vramVrTemp.type).c_str());
+        }
+
+        if (pPowerTelemetry.saVrTemp.bSupported)
+        {
+            PRINT_LOGS("\nSA VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.saVrTemp.value.datadouble, printUnits(pPowerTelemetry.saVrTemp.units).c_str(),
+                       printType(pPowerTelemetry.saVrTemp.type).c_str());
+        }
+
+        if (pPowerTelemetry.gpuEffectiveClock.bSupported)
+        {
+            PRINT_LOGS("\nEffective frequency of the GPU: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEffectiveClock.value.datadouble, printUnits(pPowerTelemetry.gpuEffectiveClock.units).c_str(),
+                       printType(pPowerTelemetry.gpuEffectiveClock.type).c_str());
+        }
+
+        if (pPowerTelemetry.gpuOverVoltagePercent.bSupported)
+        {
+            PRINT_LOGS("\nGPU Overvoltage Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuOverVoltagePercent.value.datadouble, printUnits(pPowerTelemetry.gpuOverVoltagePercent.units).c_str(),
+                       printType(pPowerTelemetry.gpuOverVoltagePercent.type).c_str());
+        }
+
+        if (pPowerTelemetry.gpuPowerPercent.bSupported)
+        {
+            PRINT_LOGS("\nGPU Power Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuPowerPercent.value.datadouble, printUnits(pPowerTelemetry.gpuPowerPercent.units).c_str(),
+                       printType(pPowerTelemetry.gpuPowerPercent.type).c_str());
+        }
+
+        if (pPowerTelemetry.gpuTemperaturePercent.bSupported)
+        {
+            PRINT_LOGS("\nGPU Temperature Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuTemperaturePercent.value.datadouble, printUnits(pPowerTelemetry.gpuTemperaturePercent.units).c_str(),
+                       printType(pPowerTelemetry.gpuTemperaturePercent.type).c_str());
+        }
+
+        for (int i = 0; i < CTL_FAN_COUNT; i++)
+        {
+            if (pPowerTelemetry.fanSpeed[i].bSupported)
+            {
+                PRINT_LOGS("\nFan[%d] Speed: %f (%s) Datatype:(%s)", i, pPowerTelemetry.fanSpeed[i].value.datadouble, printUnits(pPowerTelemetry.fanSpeed[i].units).c_str(),
+                           printType(pPowerTelemetry.fanSpeed[i].type).c_str());
+            }
+        }
 
         PRINT_LOGS("\ngpuPowerLimited: %s", ((pPowerTelemetry.gpuPowerLimited) ? "true" : "false"));
         PRINT_LOGS("\ngpuTemperatureLimited: %s", ((pPowerTelemetry.gpuTemperatureLimited) ? "true" : "false"));
         PRINT_LOGS("\ngpuCurrentLimited: %s", ((pPowerTelemetry.gpuCurrentLimited) ? "true" : "false"));
         PRINT_LOGS("\ngpuVoltageLimited: %s", ((pPowerTelemetry.gpuVoltageLimited) ? "true" : "false"));
         PRINT_LOGS("\ngpuUtilizationLimited: %s", ((pPowerTelemetry.gpuUtilizationLimited) ? "true" : "false"));
-
-        PRINT_LOGS("\nFan Speeds:");
-        for (uint32_t i = 0; i < CTL_FAN_COUNT; i++)
-        {
-            if (pPowerTelemetry.fanSpeed[i].bSupported)
-            {
-                PRINT_LOGS("\nFan %d:", i);
-                PRINT_LOGS("\nSupported: %s", ((pPowerTelemetry.fanSpeed[i].bSupported) ? "true" : "false"));
-                PRINT_LOGS("\nUnits: %s", printUnits(pPowerTelemetry.fanSpeed[i].units));
-                PRINT_LOGS("\nType: %s", printType(pPowerTelemetry.fanSpeed[i].type));
-                PRINT_LOGS("\nValue: %f", pPowerTelemetry.fanSpeed[i].value.datadouble);
-            }
-        }
     }
     else
     {
-        PRINT_LOGS("\nError: %s", DecodeRetCode(status).c_str());
+        PRINT_LOGS("\nCtlPowerTelemetryTest => ctlPowerTelemetryGet Result Error: %s, ErrorCode: 0x%x \n \n", DecodeRetCode(Status).c_str(), Status);
     }
-
-    PRINT_LOGS("\n \n");
 }
 
 void PerComponentTest(ctl_device_adapter_handle_t hDAhandle)
@@ -1612,6 +1206,14 @@ void PerComponentTest(ctl_device_adapter_handle_t hDAhandle)
     try
     {
         CtlFanTest(hDAhandle);
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+    try
+    {
+        CtlLedTest(hDAhandle);
     }
     catch (const std::bad_array_new_length &e)
     {
@@ -1720,11 +1322,7 @@ int main()
                 if (CTL_DEVICE_TYPE_GRAPHICS != StDeviceAdapterProperties.device_type)
                 {
                     printf("This is not a Graphics device \n");
-
-                    if (NULL != StDeviceAdapterProperties.pDeviceID)
-                    {
-                        free(StDeviceAdapterProperties.pDeviceID);
-                    }
+                    CTL_FREE_MEM(StDeviceAdapterProperties.pDeviceID);
                     continue;
                 }
 
@@ -1747,29 +1345,6 @@ int main()
                 // Per Component Tests
                 PerComponentTest(hDevices[Index]);
 
-                // Overclocking Test
-                CtlOverclockPropertiesTest(hDevices[Index]);
-
-                std::vector<double> vFrequencies;
-                vFrequencies.push_back(10.0);
-                vFrequencies.push_back(30.0);
-                vFrequencies.push_back(50.0);
-                vFrequencies.push_back(75.0);
-                vFrequencies.push_back(100.0);
-                vFrequencies.push_back(150.0);
-                vFrequencies.push_back(200.0);
-                vFrequencies.push_back(250.0);
-
-                for (uint32_t ci = 0; ci < vFrequencies.size(); ci++)
-                {
-                    CtlOverclockFrequencyOffsetTest(hDevices[Index], vFrequencies[ci]);
-                }
-
-                CtlOverclockFrequencyAndVoltageOffsetTest(hDevices[Index]);
-
-                CtlOverclockPowerTest(hDevices[Index]);
-                CtlOverclockTemperatureTest(hDevices[Index]);
-
                 // Telemetry Test
                 // Polling during 1 second at 20 ms
                 for (uint32_t i = 0; i < 50; i++)
@@ -1785,10 +1360,7 @@ int main()
                     Sleep(20);
                 }
 
-                if (NULL != StDeviceAdapterProperties.pDeviceID)
-                {
-                    free(StDeviceAdapterProperties.pDeviceID);
-                }
+                CTL_FREE_MEM(StDeviceAdapterProperties.pDeviceID);
             }
         }
     }
@@ -1796,130 +1368,7 @@ int main()
 Exit:
 
     ctlClose(hAPIHandle);
-
-    if (hDevices != nullptr)
-    {
-        free(hDevices);
-        hDevices = nullptr;
-    }
+    CTL_FREE_MEM(hDevices);
 
     return 0;
-}
-
-// Decoding the return code for the most common error codes.
-std::string DecodeRetCode(ctl_result_t Res)
-{
-    switch (Res)
-    {
-        case CTL_RESULT_SUCCESS:
-        {
-            return std::string("[CTL_RESULT_SUCCESS]");
-        }
-        case CTL_RESULT_ERROR_CORE_OVERCLOCK_NOT_SUPPORTED:
-        {
-            return std::string("[CTL_RESULT_ERROR_CORE_OVERCLOCK_NOT_SUPPORTED]");
-        }
-        case CTL_RESULT_ERROR_CORE_OVERCLOCK_VOLTAGE_OUTSIDE_RANGE:
-        {
-            return std::string("[CTL_RESULT_ERROR_CORE_OVERCLOCK_VOLTAGE_OUTSIDE_RANGE]");
-        }
-        case CTL_RESULT_ERROR_CORE_OVERCLOCK_FREQUENCY_OUTSIDE_RANGE:
-        {
-            return std::string("[CTL_RESULT_ERROR_CORE_OVERCLOCK_FREQUENCY_OUTSIDE_RANGE]");
-        }
-        case CTL_RESULT_ERROR_CORE_OVERCLOCK_POWER_OUTSIDE_RANGE:
-        {
-            return std::string("[CTL_RESULT_ERROR_CORE_OVERCLOCK_POWER_OUTSIDE_RANGE]");
-        }
-        case CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE:
-        {
-            return std::string("[CTL_RESULT_ERROR_CORE_OVERCLOCK_TEMPERATURE_OUTSIDE_RANGE]");
-        }
-        case CTL_RESULT_ERROR_GENERIC_START:
-        {
-            return std::string("[CTL_RESULT_ERROR_GENERIC_START]");
-        }
-        case CTL_RESULT_ERROR_CORE_OVERCLOCK_RESET_REQUIRED:
-        {
-            return std::string("[CTL_RESULT_ERROR_CORE_OVERCLOCK_RESET_REQUIRED]");
-        }
-        case CTL_RESULT_ERROR_CORE_OVERCLOCK_IN_VOLTAGE_LOCKED_MODE:
-        {
-            return std::string("[CTL_RESULT_ERROR_CORE_OVERCLOCK_IN_VOLTAGE_LOCKED_MODE");
-        }
-        case CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SET:
-        {
-            return std::string("[CTL_RESULT_ERROR_CORE_OVERCLOCK_WAIVER_NOT_SET]");
-        }
-        case CTL_RESULT_ERROR_NOT_INITIALIZED:
-        {
-            return std::string("[CTL_RESULT_ERROR_NOT_INITIALIZED]");
-        }
-        case CTL_RESULT_ERROR_ALREADY_INITIALIZED:
-        {
-            return std::string("[CTL_RESULT_ERROR_ALREADY_INITIALIZED]");
-        }
-        case CTL_RESULT_ERROR_DEVICE_LOST:
-        {
-            return std::string("[CTL_RESULT_ERROR_DEVICE_LOST]");
-        }
-        case CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS:
-        {
-            return std::string("[CTL_RESULT_ERROR_INSUFFICIENT_PERMISSIONS]");
-        }
-        case CTL_RESULT_ERROR_NOT_AVAILABLE:
-        {
-            return std::string("[CTL_RESULT_ERROR_NOT_AVAILABLE]");
-        }
-        case CTL_RESULT_ERROR_UNINITIALIZED:
-        {
-            return std::string("[CTL_RESULT_ERROR_UNINITIALIZED]");
-        }
-        case CTL_RESULT_ERROR_UNSUPPORTED_VERSION:
-        {
-            return std::string("[CTL_RESULT_ERROR_UNSUPPORTED_VERSION]");
-        }
-        case CTL_RESULT_ERROR_UNSUPPORTED_FEATURE:
-        {
-            return std::string("[CTL_RESULT_ERROR_UNSUPPORTED_FEATURE]");
-        }
-        case CTL_RESULT_ERROR_INVALID_ARGUMENT:
-        {
-            return std::string("[CTL_RESULT_ERROR_INVALID_ARGUMENT]");
-        }
-        case CTL_RESULT_ERROR_INVALID_NULL_HANDLE:
-        {
-            return std::string("[CTL_RESULT_ERROR_INVALID_NULL_HANDLE]");
-        }
-        case CTL_RESULT_ERROR_INVALID_NULL_POINTER:
-        {
-            return std::string("[CTL_RESULT_ERROR_INVALID_NULL_POINTER]");
-        }
-        case CTL_RESULT_ERROR_INVALID_SIZE:
-        {
-            return std::string("[CTL_RESULT_ERROR_INVALID_SIZE]");
-        }
-        case CTL_RESULT_ERROR_UNSUPPORTED_SIZE:
-        {
-            return std::string("[CTL_RESULT_ERROR_UNSUPPORTED_SIZE]");
-        }
-        case CTL_RESULT_ERROR_NOT_IMPLEMENTED:
-        {
-            return std::string("[CTL_RESULT_ERROR_NOT_IMPLEMENTED]");
-        }
-        case CTL_RESULT_ERROR_ZE_LOADER:
-        {
-            return std::string("[CTL_RESULT_ERROR_ZE_LOADER]");
-        }
-        case CTL_RESULT_ERROR_INVALID_OPERATION_TYPE:
-        {
-            return std::string("[CTL_RESULT_ERROR_INVALID_OPERATION_TYPE]");
-        }
-        case CTL_RESULT_ERROR_UNKNOWN:
-        {
-            return std::string("[CTL_RESULT_ERROR_UNKNOWN]");
-        }
-        default:
-            return std::string("[Unknown Error]");
-    }
 }

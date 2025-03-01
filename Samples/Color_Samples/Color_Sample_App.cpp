@@ -783,7 +783,7 @@ ctl_result_t GetPixTxCapability(ctl_display_output_handle_t hDisplayOutput, ctl_
     LOG_AND_EXIT_ON_ERROR(Result, "ctlPixelTransformationGetConfig for query type capability");
 
     // Number of blocks
-    printf("GetPixTxCapsArgs.NumBlocks = %d\n", pPixTxCaps->NumBlocks);
+    APP_LOG_INFO("GetPixTxCapsArgs.NumBlocks = %d", pPixTxCaps->NumBlocks);
 
     if (NULL == pPixTxCaps->pBlockConfigs)
     {
@@ -795,26 +795,26 @@ ctl_result_t GetPixTxCapability(ctl_display_output_handle_t hDisplayOutput, ctl_
         ctl_pixtx_1dlut_config_t *pOneDLutConfig = &pPixTxCaps->pBlockConfigs[i].Config.OneDLutConfig;
 
         // Block specific information
-        printf("pPixTxCaps->pBlockConfigs[%d].BlockId = %d\n", i, pPixTxCaps->pBlockConfigs[i].BlockId);
+        APP_LOG_INFO("pPixTxCaps->pBlockConfigs[%d].BlockId = %d", i, pPixTxCaps->pBlockConfigs[i].BlockId);
         if (CTL_PIXTX_BLOCK_TYPE_1D_LUT == pPixTxCaps->pBlockConfigs[i].BlockType)
         {
-            printf("Block type is CTL_PIXTX_BLOCK_TYPE_1D_LUT\n");
-            printf("pPixTxCaps->pBlockConfigs[%d].Config.OneDLutConfig.NumChannels = %d\n", i, pOneDLutConfig->NumChannels);
-            printf("pPixTxCaps->pBlockConfigs[%d].Config.OneDLutConfig.NumSamplesPerChannel = %d\n", i, pOneDLutConfig->NumSamplesPerChannel);
-            printf("pPixTxCaps->pBlockConfigs[%d].Config.OneDLutConfig.SamplingType = %d\n", i, pOneDLutConfig->SamplingType);
+            APP_LOG_INFO("Block type is CTL_PIXTX_BLOCK_TYPE_1D_LUT");
+            APP_LOG_INFO("pPixTxCaps->pBlockConfigs[%d].Config.OneDLutConfig.NumChannels = %d", i, pOneDLutConfig->NumChannels);
+            APP_LOG_INFO("pPixTxCaps->pBlockConfigs[%d].Config.OneDLutConfig.NumSamplesPerChannel = %d", i, pOneDLutConfig->NumSamplesPerChannel);
+            APP_LOG_INFO("pPixTxCaps->pBlockConfigs[%d].Config.OneDLutConfig.SamplingType = %d", i, pOneDLutConfig->SamplingType);
         }
         else if (CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX == pPixTxCaps->pBlockConfigs[i].BlockType)
         {
-            printf("Block type is CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX\n");
+            APP_LOG_INFO("Block type is CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX");
         }
         else if (CTL_PIXTX_BLOCK_TYPE_3D_LUT == pPixTxCaps->pBlockConfigs[i].BlockType)
         {
-            printf("Block type is CTL_PIXTX_BLOCK_TYPE_3D_LUT\n");
-            printf("pPixTxCaps->pBlockConfigs[%d].Config.ThreeDLutConfig.NumSamplesPerChannel = %d\n", i, pPixTxCaps->pBlockConfigs[i].Config.ThreeDLutConfig.NumSamplesPerChannel);
+            APP_LOG_INFO("Block type is CTL_PIXTX_BLOCK_TYPE_3D_LUT");
+            APP_LOG_INFO("pPixTxCaps->pBlockConfigs[%d].Config.ThreeDLutConfig.NumSamplesPerChannel = %d", i, pPixTxCaps->pBlockConfigs[i].Config.ThreeDLutConfig.NumSamplesPerChannel);
         }
         else if (CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX_AND_OFFSETS == pPixTxCaps->pBlockConfigs[i].BlockType)
         {
-            printf("Block type is CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX_AND_OFFSETS\n");
+            APP_LOG_INFO("Block type is CTL_PIXTX_BLOCK_TYPE_3X3_MATRIX_AND_OFFSETS");
         }
     }
 
@@ -867,7 +867,7 @@ ctl_result_t ApplyLinearCSC(ctl_display_output_handle_t hDisplayOutput, ctl_pixt
 
     if (DGLUTIndex < 0 || CscIndex < 0 || GLUTIndex < 0)
     {
-        printf("Invalid Index for DGLUT/CSC/GLUT\n");
+        APP_LOG_ERROR("Invalid Index for DGLUT/CSC/GLUT");
         return CTL_RESULT_ERROR_INVALID_ARGUMENT;
     }
 
@@ -1052,7 +1052,7 @@ ctl_result_t RotateAndScalePanelColorSpaceToContentColorSpace(ctl_display_output
 
     if (DGLUTIndex < 0 || CscIndex < 0 || GLUTIndex < 0)
     {
-        printf("Invalid Index for DGLUT/CSC/GLUT\n");
+        APP_LOG_ERROR("Invalid Index for DGLUT/CSC/GLUT");
         return CTL_RESULT_ERROR_INVALID_ARGUMENT;
     }
 
@@ -1247,16 +1247,16 @@ ctl_result_t GetDeGammaLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx
     Result = ctlPixelTransformationGetConfig(hDisplayOutput, &GetPixTxCurrentArgs);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlPixelTransformationGetConfig");
 
-    printf("DEGamma values : LutConfig.Config.OneDLutConfig.pSampleValues\n");
+    APP_LOG_INFO("DEGamma values : LutConfig.Config.OneDLutConfig.pSampleValues");
 
     uint32_t LutDataSize = LutConfig.Config.OneDLutConfig.NumSamplesPerChannel * LutConfig.Config.OneDLutConfig.NumChannels;
-    printf("LutDataSize = %d\n ", LutDataSize);
+    APP_LOG_INFO("LutDataSize = %d ", LutDataSize);
 
-    printf("DeGamma values : LutConfig.Config.OneDLutConfig.pSampleValues\n");
+    APP_LOG_INFO("DeGamma values : LutConfig.Config.OneDLutConfig.pSampleValues");
 
     for (uint32_t i = 0; i < LutDataSize; i++)
     {
-        printf("[%d] = %f\n", i, LutConfig.Config.OneDLutConfig.pSampleValues[i]);
+        APP_LOG_INFO("[%d] = %f", i, LutConfig.Config.OneDLutConfig.pSampleValues[i]);
     }
 
 Exit:
@@ -1359,13 +1359,13 @@ ctl_result_t GetGammaLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_p
     LOG_AND_EXIT_ON_ERROR(Result, "ctlPixelTransformationGetConfig");
 
     uint32_t LutDataSize = LutConfig.Config.OneDLutConfig.NumSamplesPerChannel * LutConfig.Config.OneDLutConfig.NumChannels;
-    printf("LutDataSize = %d\n ", LutDataSize);
+    APP_LOG_INFO("LutDataSize = %d ", LutDataSize);
 
-    printf("Gamma values : LutConfig.Config.OneDLutConfig.pSampleValues\n");
+    APP_LOG_INFO("Gamma values : LutConfig.Config.OneDLutConfig.pSampleValues");
 
     for (uint32_t i = 0; i < LutDataSize; i++)
     {
-        printf("[%d] = %f\n", i, LutConfig.Config.OneDLutConfig.pSampleValues[i]);
+        APP_LOG_INFO("[%d] = %f", i, LutConfig.Config.OneDLutConfig.pSampleValues[i]);
     }
 
 Exit:
@@ -1603,7 +1603,7 @@ void GetSetDeGamma(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_ge
 
     if (DGLUTIndex < 0)
     {
-        printf("Invalid DGLut Index\n");
+        APP_LOG_ERROR("Invalid DGLut Index");
         goto Exit;
     }
 
@@ -1611,7 +1611,7 @@ void GetSetDeGamma(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_ge
     Result = SetDeGammaLut(hDisplayOutput, pPixTxCaps, DGLUTIndex);
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("SetDeGammaLut call failed\n");
+        APP_LOG_ERROR("SetDeGammaLut call failed");
         STORE_AND_RESET_ERROR(Result);
     }
     else
@@ -1620,7 +1620,7 @@ void GetSetDeGamma(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_ge
         Result = GetDeGammaLut(hDisplayOutput, pPixTxCaps, DGLUTIndex);
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("GetDeGamma call failed\n");
+            APP_LOG_ERROR("GetDeGamma call failed");
             LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "GetDeGammaLut");
         }
     }
@@ -1656,7 +1656,7 @@ void GetSetGamma(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_
 
     if (OneDLUTIndex < 0)
     {
-        printf("Invalid OneDLut Index\n");
+        APP_LOG_ERROR("Invalid OneDLut Index");
         goto Exit;
     }
 
@@ -1665,7 +1665,7 @@ void GetSetGamma(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("SetGammaLut call failed\n");
+        APP_LOG_ERROR("SetGammaLut call failed");
         STORE_AND_RESET_ERROR(Result);
     }
     else
@@ -1703,7 +1703,7 @@ void GetSet3DLUT(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_
 
     if (ThreeDLutBlockIndex < 0)
     {
-        printf("Invalid ThreeDLut Index\n");
+        APP_LOG_ERROR("Invalid ThreeDLut Index");
         goto Exit;
     }
 
@@ -1711,7 +1711,7 @@ void GetSet3DLUT(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_get_
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("Set3DLut call failed\n");
+        APP_LOG_ERROR("Set3DLut call failed");
         STORE_AND_RESET_ERROR(Result);
     }
     else
@@ -1750,7 +1750,7 @@ ctl_result_t TestBrightnessContrastGamma(ctl_display_output_handle_t hDisplayOut
 
     if (DesktopGammaBlockIndex < 0)
     {
-        printf("ctlPixelTransformationGetConfig did not report 1DLUT capability\n");
+        APP_LOG_ERROR("ctlPixelTransformationGetConfig did not report 1DLUT capability");
         STORE_AND_RESET_ERROR(Result);
     }
     else
@@ -1806,7 +1806,7 @@ ctl_result_t TestPartialSaturation(ctl_display_output_handle_t hDisplayOutput, c
 
     if (PartialSatBlockIndex < 0)
     {
-        printf("ctlPixelTransformationGetConfig did not report 3DLUT capability for partial saturation\n");
+        APP_LOG_ERROR("ctlPixelTransformationGetConfig did not report 3DLUT capability for partial saturation");
         STORE_AND_RESET_ERROR(Result);
     }
 
@@ -1854,10 +1854,10 @@ ctl_result_t TestPixTxGetSetConfig(ctl_display_output_handle_t hDisplayOutput)
     }
 
     // Logical Pipeline details in current mode
-    printf("Logical Pipeline Input Color Model : %d , Color Space %d, Encoding Type: %d \n", PixTxCaps.InputPixelFormat.ColorModel, PixTxCaps.InputPixelFormat.ColorSpace,
-           PixTxCaps.InputPixelFormat.EncodingType);
-    printf("Logical Pipeline Output Color Model : %d , Color Space %d, Encoding Type: %d , BPC: %d \n", PixTxCaps.InputPixelFormat.ColorModel, PixTxCaps.InputPixelFormat.ColorSpace,
-           PixTxCaps.InputPixelFormat.EncodingType, PixTxCaps.OutputPixelFormat.BitsPerColor);
+    APP_LOG_INFO("Logical Pipeline Input Color Model : %d , Color Space %d, Encoding Type: %d ", PixTxCaps.InputPixelFormat.ColorModel, PixTxCaps.InputPixelFormat.ColorSpace,
+                 PixTxCaps.InputPixelFormat.EncodingType);
+    APP_LOG_INFO("Logical Pipeline Output Color Model : %d , Color Space %d, Encoding Type: %d , BPC: %d ", PixTxCaps.InputPixelFormat.ColorModel, PixTxCaps.InputPixelFormat.ColorSpace,
+                 PixTxCaps.InputPixelFormat.EncodingType, PixTxCaps.OutputPixelFormat.BitsPerColor);
 
     const uint8_t NumBlocksToQuery = PixTxCaps.NumBlocks; // Query about the blocks in the pipeline
 
@@ -1898,7 +1898,7 @@ ctl_result_t TestPixTxGetSetConfig(ctl_display_output_handle_t hDisplayOutput)
 
     if (CscBlockIndex < 0)
     {
-        printf("ctlPixelTransformationGetConfig did not report CSC capability\n");
+        APP_LOG_ERROR("ctlPixelTransformationGetConfig did not report CSC capability");
         STORE_AND_RESET_ERROR(Result);
     }
     else
@@ -1957,7 +1957,7 @@ ctl_result_t TestLaceGetSetConfigForFixedAgressiveness(ctl_display_output_handle
 
     if (CTL_POWER_OPTIMIZATION_FLAG_LACE != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_LACE))
     {
-        printf("LACE is not supported\n");
+        APP_LOG_WARN("LACE is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
@@ -2008,7 +2008,7 @@ ctl_result_t TestLaceGetSetConfigForALS(ctl_display_output_handle_t hDisplayOutp
 
     if (CTL_POWER_OPTIMIZATION_FLAG_LACE != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_LACE))
     {
-        printf("LACE is not supported\n");
+        APP_LOG_WARN("LACE is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
@@ -2076,13 +2076,13 @@ ctl_result_t TestToOverrideColorModelAndColorDepth(ctl_display_output_handle_t h
     Result                             = ctlGetSetWireFormat(hDisplayOutput, &CurrentWireFormatSetting);
     LOG_AND_EXIT_ON_ERROR(Result, "GET Call using ctlGetSetWireFormat");
 
-    printf("Current ColorModel %d", CurrentWireFormatSetting.WireFormat.ColorModel);
-    printf("Current ColorDepth %d", CurrentWireFormatSetting.WireFormat.ColorDepth);
+    APP_LOG_INFO("Current ColorModel %d", CurrentWireFormatSetting.WireFormat.ColorModel);
+    APP_LOG_INFO("Current ColorDepth %d", CurrentWireFormatSetting.WireFormat.ColorDepth);
 
     for (uint32_t Index = 0; Index < CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED; Index++)
     {
-        printf("Supported ColorModel %d", CurrentWireFormatSetting.SupportedWireFormat[Index].ColorModel);
-        printf("Supported ColorDepth %d", CurrentWireFormatSetting.SupportedWireFormat[Index].ColorDepth);
+        APP_LOG_INFO("Supported ColorModel %d", CurrentWireFormatSetting.SupportedWireFormat[Index].ColorModel);
+        APP_LOG_INFO("Supported ColorDepth %d", CurrentWireFormatSetting.SupportedWireFormat[Index].ColorDepth);
     }
 
     // SET call
@@ -2128,7 +2128,7 @@ ctl_result_t TestColorForEnumDisplayHandles(ctl_display_output_handle_t *hDispla
 
         if (FALSE == IsDisplayActive || FALSE == IsDisplayAttached)
         {
-            printf("Display %d is not attached/Active, skipping the call for this display\n", DisplayIndex);
+            APP_LOG_WARN("Display %d is not attached/Active, skipping the call for this display", DisplayIndex);
             continue;
         }
 
@@ -2171,13 +2171,13 @@ ctl_result_t TestDisplays(uint32_t AdapterCount, ctl_device_adapter_handle_t *hD
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid Display Count. skipping display enumration for adapter:%d\n", AdapterIndex);
+            APP_LOG_WARN("Invalid Display Count. skipping display enumration for adapter:%d", AdapterIndex);
             continue;
         }
 
@@ -2193,7 +2193,7 @@ ctl_result_t TestDisplays(uint32_t AdapterCount, ctl_device_adapter_handle_t *hD
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("TestColorForEnumDisplayHandles returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("TestColorForEnumDisplayHandles returned failure code: 0x%X", Result);
         }
 
         CTL_FREE_MEM(hDisplayOutput);
@@ -2235,7 +2235,7 @@ int main()
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     // Initialization successful
@@ -2247,7 +2247,7 @@ int main()
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
@@ -2260,7 +2260,7 @@ int main()
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     Result = TestDisplays(AdapterCount, hDevices);
@@ -2270,6 +2270,6 @@ Exit:
 
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDevices);
-    printf("Overrall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overrall test result is 0x%X", GResult);
     return GResult;
 }

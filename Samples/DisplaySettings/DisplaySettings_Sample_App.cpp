@@ -56,12 +56,12 @@ ctl_result_t TestToGetSetQuantizationRange(ctl_display_output_handle_t hDisplayO
 
     if ((FALSE == IsControllable) || (FALSE == IsSupported))
     {
-        printf("Get/Set Quantization Range is not supported\n");
+        APP_LOG_WARN("Get/Set Quantization Range is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("\n Current Applied Quantization Range is %d \n", AppliedDisplaySettings.QuantizationRange);
+    APP_LOG_INFO(" Current Applied Quantization Range is %d ", AppliedDisplaySettings.QuantizationRange);
 
     // SET CALL
     NewDisplaySettings.Version = API_VERSION;
@@ -82,7 +82,7 @@ ctl_result_t TestToGetSetQuantizationRange(ctl_display_output_handle_t hDisplayO
 
     Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (Quantization Range GET CALL)");
-    printf("\n Current Quantization Range is %d \n", AppliedDisplaySettings.QuantizationRange);
+    APP_LOG_INFO(" Current Quantization Range is %d ", AppliedDisplaySettings.QuantizationRange);
 
 Exit:
     return Result;
@@ -114,13 +114,13 @@ ctl_result_t TestToGetSetPictureAspectRatio(ctl_display_output_handle_t hDisplay
 
     if ((FALSE == IsControllable) || (FALSE == IsSupported))
     {
-        printf("Get/Set PictureAspectRatio is not supported\n");
+        APP_LOG_WARN("Get/Set PictureAspectRatio is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("\n Supported Picture Aspect Ratio is %d \n", AppliedDisplaySettings.SupportedPictureAR);
-    printf("\n Current Applied Picture Aspect Ratio is %d \n", AppliedDisplaySettings.PictureAR);
+    APP_LOG_INFO(" Supported Picture Aspect Ratio is %d ", AppliedDisplaySettings.SupportedPictureAR);
+    APP_LOG_INFO(" Current Applied Picture Aspect Ratio is %d ", AppliedDisplaySettings.PictureAR);
 
     // CALL TO SET 16_9
     if (CTL_DISPLAY_SETTING_PICTURE_AR_FLAG_AR_16_9 & AppliedDisplaySettings.SupportedPictureAR)
@@ -145,7 +145,7 @@ ctl_result_t TestToGetSetPictureAspectRatio(ctl_display_output_handle_t hDisplay
 
     Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (Picture Aspect Ratio GET CALL)");
-    printf("\n Current Picture Aspect Ratio is %d \n", AppliedDisplaySettings.PictureAR);
+    APP_LOG_INFO(" Current Picture Aspect Ratio is %d ", AppliedDisplaySettings.PictureAR);
 
 Exit:
     return Result;
@@ -177,12 +177,12 @@ ctl_result_t TestToGetSetContentType(ctl_display_output_handle_t hDisplayOutput)
 
     if ((FALSE == IsControllable) || (FALSE == IsSupported))
     {
-        printf("Get/Set ContentType is not supported\n");
+        APP_LOG_WARN("Get/Set ContentType is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("\n Current Applied ContentType is %d \n", AppliedDisplaySettings.ContentType);
+    APP_LOG_INFO(" Current Applied ContentType is %d ", AppliedDisplaySettings.ContentType);
 
     // CALL TO SET GAMING CONTENT TYPE
     NewDisplaySettings.Version = API_VERSION;
@@ -203,7 +203,7 @@ ctl_result_t TestToGetSetContentType(ctl_display_output_handle_t hDisplayOutput)
 
     Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (ContentType GET CALL)");
-    printf("\n Current ContentType is %d \n", AppliedDisplaySettings.ContentType);
+    APP_LOG_INFO(" Current ContentType is %d ", AppliedDisplaySettings.ContentType);
 
 Exit:
     return Result;
@@ -235,12 +235,12 @@ ctl_result_t TestToGetSetLowLatency(ctl_display_output_handle_t hDisplayOutput)
 
     if ((FALSE == IsControllable) || (FALSE == IsSupported))
     {
-        printf("Get/Set LowLatency is not supported\n");
+        APP_LOG_WARN("Get/Set LowLatency is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("\n Current Applied LowLatency is %d \n", AppliedDisplaySettings.LowLatency);
+    APP_LOG_INFO(" Current Applied LowLatency is %d ", AppliedDisplaySettings.LowLatency);
 
     // CALL TO ENABLE HDR10+ LOW_LATENCY
     NewDisplaySettings.Version = API_VERSION;
@@ -261,7 +261,7 @@ ctl_result_t TestToGetSetLowLatency(ctl_display_output_handle_t hDisplayOutput)
 
     Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (LowLatency GET CALL)");
-    printf("\n Current LowLatency is %d \n", AppliedDisplaySettings.LowLatency);
+    APP_LOG_INFO(" Current LowLatency is %d ", AppliedDisplaySettings.LowLatency);
 
 Exit:
     return Result;
@@ -293,12 +293,12 @@ ctl_result_t TestToGetSetSourceTonemapping(ctl_display_output_handle_t hDisplayO
 
     if ((FALSE == IsControllable) || (FALSE == IsSupported))
     {
-        printf("Get/Set SourceTM is not supported\n");
+        APP_LOG_WARN("Get/Set SourceTM is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("\n Current Applied SourceTM is %d \n", AppliedDisplaySettings.SourceTM);
+    APP_LOG_INFO(" Current Applied SourceTM is %d ", AppliedDisplaySettings.SourceTM);
 
     // CALL TO ENABLE HDR10+ SOURCETM
     NewDisplaySettings.Version = API_VERSION;
@@ -319,7 +319,7 @@ ctl_result_t TestToGetSetSourceTonemapping(ctl_display_output_handle_t hDisplayO
 
     Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (SourceTM GET CALL)");
-    printf("\n Current SourceTM is %d \n", AppliedDisplaySettings.SourceTM);
+    APP_LOG_INFO(" Current SourceTM is %d ", AppliedDisplaySettings.SourceTM);
 
 Exit:
     return Result;
@@ -354,7 +354,7 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
             continue;
         }
 
-        printf("Attached Display Count: %d\n", DisplayIndex);
+        APP_LOG_INFO("Attached Display Count: %d", DisplayIndex);
 
         // Get/Set Quantization Range
         Result = TestToGetSetQuantizationRange(hDisplayOutput[DisplayIndex]);
@@ -402,13 +402,13 @@ ctl_result_t EnumerateTargetDisplays(ctl_display_output_handle_t *hDisplayOutput
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid Display Count. skipping display enumration for adapter:%d\n", AdapterIndex);
+            APP_LOG_WARN("Invalid Display Count. skipping display enumration for adapter:%d", AdapterIndex);
             continue;
         }
 
@@ -420,7 +420,7 @@ ctl_result_t EnumerateTargetDisplays(ctl_display_output_handle_t *hDisplayOutput
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
         }
 
@@ -430,7 +430,7 @@ ctl_result_t EnumerateTargetDisplays(ctl_display_output_handle_t *hDisplayOutput
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("EnumerateDisplayHandles returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("EnumerateDisplayHandles returned failure code: 0x%X", Result);
         }
 
         CTL_FREE_MEM(hDisplayOutput);
@@ -473,7 +473,7 @@ int main()
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     // Initialization successful
@@ -485,7 +485,7 @@ int main()
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
@@ -498,14 +498,14 @@ int main()
     }
     catch (const std::bad_array_new_length &e)
     {
-        printf("%s \n", e.what());
+        APP_LOG_ERROR("%s ", e.what());
     }
 
     Result = EnumerateTargetDisplays(hDisplayOutput, AdapterCount, hDevices);
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("EnumerateTargetDisplays returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("EnumerateTargetDisplays returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
 
@@ -514,6 +514,6 @@ Exit:
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDisplayOutput);
     CTL_FREE_MEM(hDevices);
-    printf("Overrall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overrall test result is 0x%X", GResult);
     return GResult;
 }
