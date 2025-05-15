@@ -180,6 +180,10 @@ int main()
             {
                 if (BaseFwProperties.FirmwareConfig & CTL_FIRMWARE_CONFIG_FLAG_IS_DEVICE_LINK_SPEED_DOWNGRADE_CAPABLE)
                 {
+                    printf("FW supports Gen5 to Gen4 downgrade capability\n");
+                }
+                else
+                {
                     printf("FW does not support Gen5 to Gen4 downgrade capability\n");
                     continue;
                 }
@@ -189,8 +193,6 @@ int main()
                     printf("We already attempted to go to Gen5 and it probably failed, nothing else to do now");
                     continue;
                 }
-
-                printf("FW supports Gen5 to Gen4 downgrade capability\n");
             }
             else
             {
