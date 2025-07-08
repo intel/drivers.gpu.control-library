@@ -190,7 +190,7 @@ int main()
 
                 if (BaseFwProperties.FirmwareConfig & CTL_FIRMWARE_CONFIG_FLAG_IS_DEVICE_LINK_SPEED_DOWNGRADE_ACTIVE)
                 {
-                    printf("We already attempted to go to Gen5 and it probably failed, nothing else to do now");
+                    printf("We downgraded from Gen5 to Gen4 successfully or we already attempted to go from Gen4 to Gen5 and it probably failed\n");
                     continue;
                 }
             }

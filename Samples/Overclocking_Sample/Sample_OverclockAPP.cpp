@@ -37,7 +37,7 @@ void OverclockVramMemSpeedLimit(ctl_device_adapter_handle_t hDAhandle);
 void OverclockVFCurveReadWrite(ctl_device_adapter_handle_t hDAhandle);
 void OverclockPowerTelemetry(ctl_device_adapter_handle_t hDAhandle);
 
-std::string printType(ctl_data_type_t Type)
+std::string DecodeCtlDataType(ctl_data_type_t Type)
 {
     static const std::map<ctl_data_type_t, std::string> dataTypeStringMap = { { CTL_DATA_TYPE_INT8, "INT8" },
                                                                               { CTL_DATA_TYPE_UINT8, "UINT8" },
@@ -61,7 +61,7 @@ std::string printType(ctl_data_type_t Type)
     return "Unknown datatype";
 }
 
-std::string printUnits(ctl_units_t Units)
+std::string DecodeCtlUnits(ctl_units_t Units)
 {
     static const std::map<ctl_units_t, std::string> unitsStringMap = { { CTL_UNITS_FREQUENCY_MHZ, "Frequency in MHz" },
                                                                        { CTL_UNITS_OPERATIONS_GTS, "GigaOperations per Second" },
@@ -87,7 +87,7 @@ std::string printUnits(ctl_units_t Units)
     return "Unknown unit";
 }
 
-std::string printVFCurveDetails(ctl_vf_curve_details_t VFCurveDetails)
+std::string DecodeVFCurveDetails(ctl_vf_curve_details_t VFCurveDetails)
 {
     static const std::map<ctl_vf_curve_details_t, std::string> vfCurveDetailsMap = { { CTL_VF_CURVE_DETAILS_SIMPLIFIED, "[CTL_VF_CURVE_DETAILS_SIMPLIFIED]" },
                                                                                      { CTL_VF_CURVE_DETAILS_MEDIUM, "[CTL_VF_CURVE_DETAILS_MEDIUM]" },
@@ -99,6 +99,11 @@ std::string printVFCurveDetails(ctl_vf_curve_details_t VFCurveDetails)
         return it->second;
     }
     return "Unknown vfcurvedetails";
+}
+
+std::string DecodeBoolean(bool Value)
+{
+    return Value ? "true" : "false";
 }
 
 // Decoding the return code for the most common error codes.
@@ -175,75 +180,75 @@ void OverclockProperties(ctl_device_adapter_handle_t hDAhandle)
     }
 
     // Is Overclocking supported by this adapter?
-    PRINT_LOGS("\nOc Supported? %s", OcProperties.bSupported ? "true" : "false");
+    PRINT_LOGS("\nOc Supported? %s", DecodeBoolean(OcProperties.bSupported).c_str());
 
     // Slider for frequency offset
-    PRINT_LOGS("\nGpu Frequency Offset Supported? %s ", OcProperties.gpuFrequencyOffset.bSupported ? "true" : "false");
-    PRINT_LOGS("\nGpu Frequency Offset Is Relative? %s", OcProperties.gpuFrequencyOffset.bRelative ? "true" : "false");
-    PRINT_LOGS("\nGpu Frequency Offset Have Reference? %s", OcProperties.gpuFrequencyOffset.bReference ? "true" : "false");
+    PRINT_LOGS("\nGpu Frequency Offset Supported? %s ", DecodeBoolean(OcProperties.gpuFrequencyOffset.bSupported).c_str());
+    PRINT_LOGS("\nGpu Frequency Offset Is Relative? %s", DecodeBoolean(OcProperties.gpuFrequencyOffset.bRelative).c_str());
+    PRINT_LOGS("\nGpu Frequency Offset Have Reference? %s", DecodeBoolean(OcProperties.gpuFrequencyOffset.bReference).c_str());
     PRINT_LOGS("\nGpu Frequency Offset Default: %lf", OcProperties.gpuFrequencyOffset.Default);
     PRINT_LOGS("\nGpu Frequency Offset Min: %lf", OcProperties.gpuFrequencyOffset.min);
     PRINT_LOGS("\nGpu Frequency Offset Max: %lf", OcProperties.gpuFrequencyOffset.max);
     PRINT_LOGS("\nGpu Frequency Offset Reference: %lf", OcProperties.gpuFrequencyOffset.reference);
     PRINT_LOGS("\nGpu Frequency Offset Step: %lf", OcProperties.gpuFrequencyOffset.step);
-    PRINT_LOGS("\nGpu Frequency Offset Units:: %s\n", printUnits(OcProperties.gpuFrequencyOffset.units).c_str());
+    PRINT_LOGS("\nGpu Frequency Offset Units:: %s\n", DecodeCtlUnits(OcProperties.gpuFrequencyOffset.units).c_str());
 
     // Slider for voltage offset
-    PRINT_LOGS("\nGpu Voltage Offset Supported? %s ", OcProperties.gpuVoltageOffset.bSupported ? "true" : "false");
-    PRINT_LOGS("\nGpu Voltage Offset Is Relative? %s", OcProperties.gpuVoltageOffset.bRelative ? "true" : "false");
-    PRINT_LOGS("\nGpu Voltage Offset Have Reference? %s", OcProperties.gpuVoltageOffset.bReference ? "true" : "false");
+    PRINT_LOGS("\nGpu Voltage Offset Supported? %s ", DecodeBoolean(OcProperties.gpuVoltageOffset.bSupported).c_str());
+    PRINT_LOGS("\nGpu Voltage Offset Is Relative? %s", DecodeBoolean(OcProperties.gpuVoltageOffset.bRelative).c_str());
+    PRINT_LOGS("\nGpu Voltage Offset Have Reference? %s", DecodeBoolean(OcProperties.gpuVoltageOffset.bReference).c_str());
     PRINT_LOGS("\nGpu Voltage Offset Default: %lf", OcProperties.gpuVoltageOffset.Default);
     PRINT_LOGS("\nGpu Voltage Offset Min : %lf", OcProperties.gpuVoltageOffset.min);
     PRINT_LOGS("\nGpu Voltage Offset Max: %lf", OcProperties.gpuVoltageOffset.max);
     PRINT_LOGS("\nGpu Voltage Offset Reference: %lf", OcProperties.gpuVoltageOffset.reference);
     PRINT_LOGS("\nGpu Voltage Offset Step: %lf", OcProperties.gpuVoltageOffset.step);
-    PRINT_LOGS("\nGpu Voltage Offset Units: %s\n", printUnits(OcProperties.gpuVoltageOffset.units).c_str());
+    PRINT_LOGS("\nGpu Voltage Offset Units: %s\n", DecodeCtlUnits(OcProperties.gpuVoltageOffset.units).c_str());
 
     // Slider for VRAM Mem Speed Limit
-    PRINT_LOGS("\nVram Memory Speed Limit Supported? %s ", OcProperties.vramMemSpeedLimit.bSupported ? "true" : "false");
-    PRINT_LOGS("\nVram Memory Speed Limit Is Relative? %s", OcProperties.vramMemSpeedLimit.bRelative ? "true" : "false");
-    PRINT_LOGS("\nVram Memory Speed Limit Have Reference? %s", OcProperties.vramMemSpeedLimit.bReference ? "true" : "false");
+    PRINT_LOGS("\nVram Memory Speed Limit Supported? %s ", DecodeBoolean(OcProperties.vramMemSpeedLimit.bSupported).c_str());
+    PRINT_LOGS("\nVram Memory Speed Limit Is Relative? %s", DecodeBoolean(OcProperties.vramMemSpeedLimit.bRelative).c_str());
+    PRINT_LOGS("\nVram Memory Speed Limit Have Reference? %s", DecodeBoolean(OcProperties.vramMemSpeedLimit.bReference).c_str());
     PRINT_LOGS("\nVram Memory Speed Limit Default: %lf", OcProperties.vramMemSpeedLimit.Default);
     PRINT_LOGS("\nVram Memory Speed Limit Min : %lf", OcProperties.vramMemSpeedLimit.min);
     PRINT_LOGS("\nVram Memory Speed Limit Max: %lf", OcProperties.vramMemSpeedLimit.max);
     PRINT_LOGS("\nVram Memory Speed Limit Reference: %lf", OcProperties.vramMemSpeedLimit.reference);
     PRINT_LOGS("\nVram Memory Speed Limit Step: %lf", OcProperties.vramMemSpeedLimit.step);
-    PRINT_LOGS("\nVram Memory Speed Limit Units: %s\n", printUnits(OcProperties.vramMemSpeedLimit.units).c_str());
+    PRINT_LOGS("\nVram Memory Speed Limit Units: %s\n", DecodeCtlUnits(OcProperties.vramMemSpeedLimit.units).c_str());
 
     // Slider for Power Limit
-    PRINT_LOGS("\nPower Limit Supported? %s ", OcProperties.powerLimit.bSupported ? "true" : "false");
-    PRINT_LOGS("\nPower Limit Is Relative? %s", OcProperties.powerLimit.bRelative ? "true" : "false");
-    PRINT_LOGS("\nPower Limit Have Reference? %s", OcProperties.powerLimit.bReference ? "true" : "false");
+    PRINT_LOGS("\nPower Limit Supported? %s ", DecodeBoolean(OcProperties.powerLimit.bSupported).c_str());
+    PRINT_LOGS("\nPower Limit Is Relative? %s", DecodeBoolean(OcProperties.powerLimit.bRelative).c_str());
+    PRINT_LOGS("\nPower Limit Have Reference? %s", DecodeBoolean(OcProperties.powerLimit.bReference).c_str());
     PRINT_LOGS("\nPower Limit Default: %lf", OcProperties.powerLimit.Default);
     PRINT_LOGS("\nPower Limit Min: %lf", OcProperties.powerLimit.min);
     PRINT_LOGS("\nPower Limit Max: %lf", OcProperties.powerLimit.max);
     PRINT_LOGS("\nPower Limit Reference: %lf", OcProperties.powerLimit.reference);
     PRINT_LOGS("\nPower Limit Step: %lf", OcProperties.powerLimit.step);
-    PRINT_LOGS("\nPower Limit Units: %s\n", printUnits(OcProperties.powerLimit.units).c_str());
+    PRINT_LOGS("\nPower Limit Units: %s\n", DecodeCtlUnits(OcProperties.powerLimit.units).c_str());
 
     // Slider for Temperature Limit
-    PRINT_LOGS("\nTemperature Limit Supported? %s ", OcProperties.temperatureLimit.bSupported ? "true" : "false");
-    PRINT_LOGS("\nTemperature Limit Is Relative? %s", OcProperties.temperatureLimit.bRelative ? "true" : "false");
-    PRINT_LOGS("\nTemperature Limit Have Reference? %s", OcProperties.temperatureLimit.bReference ? "true" : "false");
+    PRINT_LOGS("\nTemperature Limit Supported? %s ", DecodeBoolean(OcProperties.temperatureLimit.bSupported).c_str());
+    PRINT_LOGS("\nTemperature Limit Is Relative? %s", DecodeBoolean(OcProperties.temperatureLimit.bRelative).c_str());
+    PRINT_LOGS("\nTemperature Limit Have Reference? %s", DecodeBoolean(OcProperties.temperatureLimit.bReference).c_str());
     PRINT_LOGS("\nTemperature Limit Default: %lf", OcProperties.temperatureLimit.Default);
     PRINT_LOGS("\nTemperature Limit Min: %lf", OcProperties.temperatureLimit.min);
     PRINT_LOGS("\nTemperature Limit Max: %lf", OcProperties.temperatureLimit.max);
     PRINT_LOGS("\nTemperature Limit Reference: %lf", OcProperties.temperatureLimit.reference);
     PRINT_LOGS("\nTemperature Limit Step: %lf", OcProperties.temperatureLimit.step);
-    PRINT_LOGS("\nTemperature Limit Units: %s\n", printUnits(OcProperties.temperatureLimit.units).c_str());
+    PRINT_LOGS("\nTemperature Limit Units: %s\n", DecodeCtlUnits(OcProperties.temperatureLimit.units).c_str());
 
     // Voltage Frequency Curve Property
-    PRINT_LOGS("\nVF Curve R/W Supported? %s ", OcProperties.gpuVFCurveVoltageLimit.bSupported ? "true" : "false");
+    PRINT_LOGS("\nVF Curve R/W Supported? %s ", DecodeBoolean(OcProperties.gpuVFCurveVoltageLimit.bSupported).c_str());
     PRINT_LOGS("\nVF Curve Voltage Axis Min: %lf", OcProperties.gpuVFCurveVoltageLimit.min);
     PRINT_LOGS("\nVF Curve Voltage Axis Max: %lf", OcProperties.gpuVFCurveVoltageLimit.max);
     PRINT_LOGS("\nVF Curve Voltage Axis Step: %lf", OcProperties.gpuVFCurveVoltageLimit.step);
-    PRINT_LOGS("\nVF Curve Voltage Axis Units: %s\n", printUnits(OcProperties.gpuVFCurveVoltageLimit.units).c_str());
+    PRINT_LOGS("\nVF Curve Voltage Axis Units: %s\n", DecodeCtlUnits(OcProperties.gpuVFCurveVoltageLimit.units).c_str());
 
-    PRINT_LOGS("\nVF Curve R/W Supported? %s ", OcProperties.gpuVFCurveFrequencyLimit.bSupported ? "true" : "false");
+    PRINT_LOGS("\nVF Curve R/W Supported? %s ", DecodeBoolean(OcProperties.gpuVFCurveFrequencyLimit.bSupported).c_str());
     PRINT_LOGS("\nVF Curve Freq Axis Min: %lf", OcProperties.gpuVFCurveFrequencyLimit.min);
     PRINT_LOGS("\nVF Curve Freq Axis Max: %lf", OcProperties.gpuVFCurveFrequencyLimit.max);
     PRINT_LOGS("\nVF Curve Freq Axis Step: %lf", OcProperties.gpuVFCurveFrequencyLimit.step);
-    PRINT_LOGS("\nVF Curve Freq Axis Units: %s", printUnits(OcProperties.gpuVFCurveFrequencyLimit.units).c_str());
+    PRINT_LOGS("\nVF Curve Freq Axis Units: %s", DecodeCtlUnits(OcProperties.gpuVFCurveFrequencyLimit.units).c_str());
 }
 
 /***************************************************************
@@ -277,7 +282,7 @@ void OverclockFrequencyOffset(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockFrequencyOffset => ctlOverclockGpuFrequencyOffsetGetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\n\nCurrent Frequency Offset: %lf, %s", GPUFrequencyOffset, printUnits(OcProperties.gpuFrequencyOffset.units).c_str());
+    PRINT_LOGS("\n\nCurrent Frequency Offset: %lf, %s", GPUFrequencyOffset, DecodeCtlUnits(OcProperties.gpuFrequencyOffset.units).c_str());
 
     // Step 3: Writing New Frequency Offset by increasing it by (Step * 5.0) MHz from min value
     // Input Frequency Offset units are given in ctl_oc_properties_t::gpuFrequencyOffset::units returned from ctlOverclockGetProperties()
@@ -289,7 +294,7 @@ void OverclockFrequencyOffset(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockFrequencyOffset => ctlOverclockGpuFrequencyOffsetSetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nSetting New Frequency Offset: %lf, %s", GPUFrequencyOffset, printUnits(OcProperties.gpuFrequencyOffset.units).c_str());
+    PRINT_LOGS("\nSetting New Frequency Offset: %lf, %s", GPUFrequencyOffset, DecodeCtlUnits(OcProperties.gpuFrequencyOffset.units).c_str());
 
     // Step 4: Reading back New Frequency Offset
     // Output Frequency Offset units are returned in ctl_oc_properties_t::gpuFrequencyOffset::units returned from ctlOverclockGetProperties()
@@ -300,7 +305,7 @@ void OverclockFrequencyOffset(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockFrequencyOffset => ctlOverclockGpuFrequencyOffsetGetV2 after setting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nReading New Frequency Offset: %lf, %s", GPUFrequencyOffset, printUnits(OcProperties.gpuFrequencyOffset.units).c_str());
+    PRINT_LOGS("\nReading New Frequency Offset: %lf, %s", GPUFrequencyOffset, DecodeCtlUnits(OcProperties.gpuFrequencyOffset.units).c_str());
 
     // Step 5: Resetting Frequency Offset
     // Input Frequency Offset units are given in ctl_oc_properties_t::gpuFrequencyOffset::units returned from ctlOverclockGetProperties()
@@ -312,7 +317,7 @@ void OverclockFrequencyOffset(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockFrequencyOffset => ctlOverclockGpuFrequencyOffsetSetV2 after resetting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nResetting Frequency Offset to Default Value: %lf, %s", GPUFrequencyOffset, printUnits(OcProperties.gpuFrequencyOffset.units).c_str());
+    PRINT_LOGS("\nResetting Frequency Offset to Default Value: %lf, %s", GPUFrequencyOffset, DecodeCtlUnits(OcProperties.gpuFrequencyOffset.units).c_str());
 }
 
 /***************************************************************
@@ -346,7 +351,7 @@ void OverclockVoltageOffset(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockVoltageOffset => ctlOverclockGpuMaxVoltageOffsetGetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\n\nCurrent Voltage Offset: %lf, %s", VoltageOffset, printUnits(OcProperties.gpuVoltageOffset.units).c_str());
+    PRINT_LOGS("\n\nCurrent Voltage Offset: %lf, %s", VoltageOffset, DecodeCtlUnits(OcProperties.gpuVoltageOffset.units).c_str());
 
     // Step 3: Calling Waiver Set first before writing the Voltage Offset
     Status = ctlOverclockWaiverSet(hDAhandle);
@@ -367,7 +372,7 @@ void OverclockVoltageOffset(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockVoltageOffset => ctlOverclockGpuMaxVoltageOffsetSetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nSetting New Voltage Offset: %lf, %s", VoltageOffset, printUnits(OcProperties.gpuVoltageOffset.units).c_str());
+    PRINT_LOGS("\nSetting New Voltage Offset: %lf, %s", VoltageOffset, DecodeCtlUnits(OcProperties.gpuVoltageOffset.units).c_str());
 
     // Step 5: Reading back New Voltage Offset
     // Output Voltage Offset units are returned in ctl_oc_properties_t::gpuVoltageOffset::units returned from ctlOverclockGetProperties()
@@ -378,7 +383,7 @@ void OverclockVoltageOffset(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockVoltageOffset => ctlOverclockGpuMaxVoltageOffsetGetV2 after setting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nReading New Voltage Offset: %lf %s", VoltageOffset, printUnits(OcProperties.gpuVoltageOffset.units).c_str());
+    PRINT_LOGS("\nReading New Voltage Offset: %lf %s", VoltageOffset, DecodeCtlUnits(OcProperties.gpuVoltageOffset.units).c_str());
 
     // Step 6: Resetting Voltage Offset
     // Input Voltage Offset units are given in ctl_oc_properties_t::gpuVoltageOffset::units returned from ctlOverclockGetProperties()
@@ -390,7 +395,7 @@ void OverclockVoltageOffset(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockVoltageOffset => ctlOverclockGpuMaxVoltageOffsetSetV2 after resetting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nResetting Voltage Offset to Default Value: %lf, %s", VoltageOffset, printUnits(OcProperties.gpuVoltageOffset.units).c_str());
+    PRINT_LOGS("\nResetting Voltage Offset to Default Value: %lf, %s", VoltageOffset, DecodeCtlUnits(OcProperties.gpuVoltageOffset.units).c_str());
 }
 
 /***************************************************************
@@ -502,7 +507,7 @@ void OverclockPowerLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockPowerLimit => ctlOverclockPowerLimitGetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\n\nCurrent Sustained Power Limit: %lf, %s", CurrentPowerLimit, printUnits(OcProperties.powerLimit.units).c_str());
+    PRINT_LOGS("\n\nCurrent Sustained Power Limit: %lf, %s", CurrentPowerLimit, DecodeCtlUnits(OcProperties.powerLimit.units).c_str());
 
     // Step 3: Writing New Sustained Power Limit by increasing it by (Step * 5.0) from min value
     // Input Sustained Power Limit units are given in ctl_oc_properties_t::powerLimit::units returned from ctlOverclockGetProperties()
@@ -514,7 +519,7 @@ void OverclockPowerLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockPowerLimit => ctlOverclockPowerLimitSetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nSetting New Sustained Power Limit: %lf, %s", CurrentPowerLimit, printUnits(OcProperties.powerLimit.units).c_str());
+    PRINT_LOGS("\nSetting New Sustained Power Limit: %lf, %s", CurrentPowerLimit, DecodeCtlUnits(OcProperties.powerLimit.units).c_str());
 
     // Step 4: Reading back New Sustained Power Limit
     // Output Sustained Power Limit units are returned in ctl_oc_properties_t::powerLimit::units returned from ctlOverclockGetProperties()
@@ -525,7 +530,7 @@ void OverclockPowerLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockPowerLimit => ctlOverclockPowerLimitGetV2 after setting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nReading New Sustained Power Limit: %lf, %s", CurrentPowerLimit, printUnits(OcProperties.powerLimit.units).c_str());
+    PRINT_LOGS("\nReading New Sustained Power Limit: %lf, %s", CurrentPowerLimit, DecodeCtlUnits(OcProperties.powerLimit.units).c_str());
 
     // Step 5: Resetting Sustained Power Limit
     // Input Sustained Power Limit units are given in ctl_oc_properties_t::powerLimit::units returned from ctlOverclockGetProperties()
@@ -537,7 +542,7 @@ void OverclockPowerLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockPowerLimit => ctlOverclockPowerLimitSetV2 after resetting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nResetting Sustained Power Limit to Default Value: %lf %s", CurrentPowerLimit, printUnits(OcProperties.powerLimit.units).c_str());
+    PRINT_LOGS("\nResetting Sustained Power Limit to Default Value: %lf %s", CurrentPowerLimit, DecodeCtlUnits(OcProperties.powerLimit.units).c_str());
 }
 
 /***************************************************************
@@ -573,7 +578,7 @@ void OverclockTemperatureLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockTemperatureLimit => ctlOverclockTemperatureLimitGetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\n\nCurrent Temperature Limit: %lf, %s", CurrentTemperatureLimit, printUnits(OcProperties.temperatureLimit.units).c_str());
+    PRINT_LOGS("\n\nCurrent Temperature Limit: %lf, %s", CurrentTemperatureLimit, DecodeCtlUnits(OcProperties.temperatureLimit.units).c_str());
 
     // Step 3: Writing New Temperature Limit by increasing it by (Step * 5.0) from min value
     // Input Temperature Limit units are given in ctl_oc_properties_t::temperatureLimit::units returned from ctlOverclockGetProperties()
@@ -585,7 +590,7 @@ void OverclockTemperatureLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockTemperatureLimit => ctlOverclockTemperatureLimitSetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nSetting New Temperature Limit: %lf, %s", CurrentTemperatureLimit, printUnits(OcProperties.temperatureLimit.units).c_str());
+    PRINT_LOGS("\nSetting New Temperature Limit: %lf, %s", CurrentTemperatureLimit, DecodeCtlUnits(OcProperties.temperatureLimit.units).c_str());
 
     // Step 4: Reading back New Temperature Limit
     // Output Temperature Limit units are returned in ctl_oc_properties_t::temperatureLimit::units returned from ctlOverclockGetProperties()
@@ -596,7 +601,7 @@ void OverclockTemperatureLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockTemperatureLimit => ctlOverclockTemperatureLimitGetV2 after setting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nReading New Temperature Limit: %lf, %s", CurrentTemperatureLimit, printUnits(OcProperties.temperatureLimit.units).c_str());
+    PRINT_LOGS("\nReading New Temperature Limit: %lf, %s", CurrentTemperatureLimit, DecodeCtlUnits(OcProperties.temperatureLimit.units).c_str());
 
     // Step 5: Resetting Temperature Limit
     // Input Temperature Limit units are given in ctl_oc_properties_t::temperatureLimit::units returned from ctlOverclockGetProperties()
@@ -608,7 +613,7 @@ void OverclockTemperatureLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockTemperatureLimit => ctlOverclockTemperatureLimitSetV2 after resetting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nResetting Temperature Limit to Default Value: %lf, %s", CurrentTemperatureLimit, printUnits(OcProperties.temperatureLimit.units).c_str());
+    PRINT_LOGS("\nResetting Temperature Limit to Default Value: %lf, %s", CurrentTemperatureLimit, DecodeCtlUnits(OcProperties.temperatureLimit.units).c_str());
 }
 
 /***************************************************************
@@ -643,7 +648,7 @@ void OverclockVramMemSpeedLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockVramMemSpeedLimit => ctlOverclockVramMemSpeedLimitGetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\n\nCurrent VramMemSpeed Limit: %lf, %s", CurrentVramMemSpeedLimit, printUnits(OcProperties.vramMemSpeedLimit.units).c_str());
+    PRINT_LOGS("\n\nCurrent VramMemSpeed Limit: %lf, %s", CurrentVramMemSpeedLimit, DecodeCtlUnits(OcProperties.vramMemSpeedLimit.units).c_str());
 
     // Step 3: Writing New VramMemSpeed Limit by increasing it by (Step * 5.0) Gbps from min value
     // Input VramMemSpeed Limit units are given in ctl_oc_properties_t::vramMemSpeedLimit::units returned from ctlOverclockGetProperties()
@@ -655,7 +660,7 @@ void OverclockVramMemSpeedLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockVramMemSpeedLimit => ctlOverclockVramMemSpeedLimitSetV2 Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nSetting New VramMemSpeed Limit: %lf, %s", CurrentVramMemSpeedLimit, printUnits(OcProperties.vramMemSpeedLimit.units).c_str());
+    PRINT_LOGS("\nSetting New VramMemSpeed Limit: %lf, %s", CurrentVramMemSpeedLimit, DecodeCtlUnits(OcProperties.vramMemSpeedLimit.units).c_str());
 
     // Step 4: Reading back New VramMemSpeed Limit
     // Output VramMemSpeed Limit units are returned in ctl_oc_properties_t::vramMemSpeedLimit::units returned from ctlOverclockGetProperties()
@@ -666,7 +671,7 @@ void OverclockVramMemSpeedLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockVramMemSpeedLimit => ctlOverclockVramMemSpeedLimitGetV2 after setting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nReading New VramMemSpeed Limit: %lf, %s", CurrentVramMemSpeedLimit, printUnits(OcProperties.vramMemSpeedLimit.units).c_str());
+    PRINT_LOGS("\nReading New VramMemSpeed Limit: %lf, %s", CurrentVramMemSpeedLimit, DecodeCtlUnits(OcProperties.vramMemSpeedLimit.units).c_str());
 
     // Step 5: Resetting VramMemSpeed Limit
     // Input VramMemSpeed Limit units are given in ctl_oc_properties_t::vramMemSpeedLimit::units returned from ctlOverclockGetProperties()
@@ -678,7 +683,7 @@ void OverclockVramMemSpeedLimit(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\nOverclockVramMemSpeedLimit => ctlOverclockVramMemSpeedLimitSetV2 after resetting, Result: Error %s, ErrorCode: 0x%x", DecodeRetCode(Status).c_str(), Status);
         return;
     }
-    PRINT_LOGS("\nResetting VramMemSpeed Limit to Default Value: %lf, %s", CurrentVramMemSpeedLimit, printUnits(OcProperties.vramMemSpeedLimit.units).c_str());
+    PRINT_LOGS("\nResetting VramMemSpeed Limit to Default Value: %lf, %s", CurrentVramMemSpeedLimit, DecodeCtlUnits(OcProperties.vramMemSpeedLimit.units).c_str());
 }
 
 /***************************************************************
@@ -709,13 +714,13 @@ void OverclockVFCurveReadWrite(ctl_device_adapter_handle_t hDAhandle)
         Status         = ctlOverclockReadVFCurve(hDAhandle, VFCurveType, VFCurveDetails, &NumVFPoints, nullptr);
         if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
         {
-            PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 1, Error: %s, ErrorCode: 0x%x", printVFCurveDetails(VFCurveDetails).c_str(),
+            PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 1, Error: %s, ErrorCode: 0x%x", DecodeVFCurveDetails(VFCurveDetails).c_str(),
                        DecodeRetCode(Status).c_str(), Status);
             return;
         }
         else
         {
-            PRINT_LOGS("\n\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 1, NumVFPoints: %lu", printVFCurveDetails(VFCurveDetails).c_str(), NumVFPoints);
+            PRINT_LOGS("\n\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 1, NumVFPoints: %lu", DecodeVFCurveDetails(VFCurveDetails).c_str(), NumVFPoints);
             pVFCurveTable = (ctl_voltage_frequency_point_t *)malloc(sizeof(ctl_voltage_frequency_point_t) * NumVFPoints);
 
             if (pVFCurveTable == NULL)
@@ -727,14 +732,14 @@ void OverclockVFCurveReadWrite(ctl_device_adapter_handle_t hDAhandle)
             Status = ctlOverclockReadVFCurve(hDAhandle, VFCurveType, VFCurveDetails, &NumVFPoints, pVFCurveTable);
             if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
             {
-                PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, Error: %s, ErrorCode: 0x%x", printVFCurveDetails(VFCurveDetails).c_str(),
+                PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, Error: %s, ErrorCode: 0x%x", DecodeVFCurveDetails(VFCurveDetails).c_str(),
                            DecodeRetCode(Status).c_str(), Status);
                 free(pVFCurveTable);
                 goto Exit;
             }
             for (uint32_t i = 0; i < NumVFPoints; i++)
             {
-                PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", printVFCurveDetails(VFCurveDetails).c_str(), i,
+                PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", DecodeVFCurveDetails(VFCurveDetails).c_str(), i,
                            pVFCurveTable[i].Frequency, pVFCurveTable[i].Voltage);
             }
             free(pVFCurveTable);
@@ -758,13 +763,13 @@ void OverclockVFCurveReadWrite(ctl_device_adapter_handle_t hDAhandle)
     Status         = ctlOverclockReadVFCurve(hDAhandle, VFCurveType, VFCurveDetails, &NumVFPoints, nullptr);
     if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
     {
-        PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 1, Error: %s, ErrorCode: 0x%x", printVFCurveDetails(VFCurveDetails).c_str(),
+        PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 1, Error: %s, ErrorCode: 0x%x", DecodeVFCurveDetails(VFCurveDetails).c_str(),
                    DecodeRetCode(Status).c_str(), Status);
         return;
     }
     else
     {
-        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 1, NumVFPoints: %lu", printVFCurveDetails(VFCurveDetails).c_str(), NumVFPoints);
+        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 1, NumVFPoints: %lu", DecodeVFCurveDetails(VFCurveDetails).c_str(), NumVFPoints);
         pVFCurveTable = (ctl_voltage_frequency_point_t *)malloc(sizeof(ctl_voltage_frequency_point_t) * NumVFPoints);
 
         if (pVFCurveTable == NULL)
@@ -776,29 +781,29 @@ void OverclockVFCurveReadWrite(ctl_device_adapter_handle_t hDAhandle)
         Status = ctlOverclockReadVFCurve(hDAhandle, VFCurveType, VFCurveDetails, &NumVFPoints, pVFCurveTable);
         if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
         {
-            PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, Error: %s, ErrorCode: 0x%x", printVFCurveDetails(VFCurveDetails).c_str(),
+            PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, Error: %s, ErrorCode: 0x%x", DecodeVFCurveDetails(VFCurveDetails).c_str(),
                        DecodeRetCode(Status).c_str(), Status);
             free(pVFCurveTable);
             goto Exit;
         }
-        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, Before modifying VFPoint 5, VFPoint 6", printVFCurveDetails(VFCurveDetails).c_str());
-        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", printVFCurveDetails(VFCurveDetails).c_str(), 5,
+        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, Before modifying VFPoint 5, VFPoint 6", DecodeVFCurveDetails(VFCurveDetails).c_str());
+        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", DecodeVFCurveDetails(VFCurveDetails).c_str(), 5,
                    pVFCurveTable[5].Frequency, pVFCurveTable[5].Voltage);
-        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", printVFCurveDetails(VFCurveDetails).c_str(), 6,
+        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", DecodeVFCurveDetails(VFCurveDetails).c_str(), 6,
                    pVFCurveTable[6].Frequency, pVFCurveTable[6].Voltage);
 
         pVFCurveTable[5].Frequency += 50;
         pVFCurveTable[6].Frequency += 100;
-        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, After modifying VFPoint 5, VFPoint 6", printVFCurveDetails(VFCurveDetails).c_str());
-        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", printVFCurveDetails(VFCurveDetails).c_str(), 5,
+        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, After modifying VFPoint 5, VFPoint 6", DecodeVFCurveDetails(VFCurveDetails).c_str());
+        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", DecodeVFCurveDetails(VFCurveDetails).c_str(), 5,
                    pVFCurveTable[5].Frequency, pVFCurveTable[5].Voltage);
-        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", printVFCurveDetails(VFCurveDetails).c_str(), 6,
+        PRINT_LOGS("\nCTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", DecodeVFCurveDetails(VFCurveDetails).c_str(), 6,
                    pVFCurveTable[6].Frequency, pVFCurveTable[6].Voltage);
 
         Status = ctlOverclockWriteCustomVFCurve(hDAhandle, NumVFPoints, pVFCurveTable);
         if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
         {
-            PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockWriteCustomVFCurve, Error: %s, ErrorCode: 0x%x", printVFCurveDetails(VFCurveDetails).c_str(),
+            PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_STOCK, %s, ctlOverclockWriteCustomVFCurve, Error: %s, ErrorCode: 0x%x", DecodeVFCurveDetails(VFCurveDetails).c_str(),
                        DecodeRetCode(Status).c_str(), Status);
             free(pVFCurveTable);
             goto Exit;
@@ -816,13 +821,13 @@ void OverclockVFCurveReadWrite(ctl_device_adapter_handle_t hDAhandle)
         Status         = ctlOverclockReadVFCurve(hDAhandle, VFCurveType, VFCurveDetails, &NumVFPoints, nullptr);
         if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
         {
-            PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_LIVE, %s, ctlOverclockReadVFCurve Pass 1, Error: %s, ErrorCode: 0x%x", printVFCurveDetails(VFCurveDetails).c_str(),
+            PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_LIVE, %s, ctlOverclockReadVFCurve Pass 1, Error: %s, ErrorCode: 0x%x", DecodeVFCurveDetails(VFCurveDetails).c_str(),
                        DecodeRetCode(Status).c_str(), Status);
             return;
         }
         else
         {
-            PRINT_LOGS("\n\nCTL_VF_CURVE_TYPE_LIVE, %s, ctlOverclockReadVFCurve Pass 1, NumVFPoints: %lu", printVFCurveDetails(VFCurveDetails).c_str(), NumVFPoints);
+            PRINT_LOGS("\n\nCTL_VF_CURVE_TYPE_LIVE, %s, ctlOverclockReadVFCurve Pass 1, NumVFPoints: %lu", DecodeVFCurveDetails(VFCurveDetails).c_str(), NumVFPoints);
             pVFCurveTable = (ctl_voltage_frequency_point_t *)malloc(sizeof(ctl_voltage_frequency_point_t) * NumVFPoints);
 
             if (pVFCurveTable == NULL)
@@ -834,14 +839,14 @@ void OverclockVFCurveReadWrite(ctl_device_adapter_handle_t hDAhandle)
             Status = ctlOverclockReadVFCurve(hDAhandle, VFCurveType, VFCurveDetails, &NumVFPoints, pVFCurveTable);
             if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
             {
-                PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_LIVE, %s, ctlOverclockReadVFCurve Pass 2, Error: %s, ErrorCode: 0x%x", printVFCurveDetails(VFCurveDetails).c_str(),
+                PRINT_LOGS("\nOverclockVFCurveReadWrite => CTL_VF_CURVE_TYPE_LIVE, %s, ctlOverclockReadVFCurve Pass 2, Error: %s, ErrorCode: 0x%x", DecodeVFCurveDetails(VFCurveDetails).c_str(),
                            DecodeRetCode(Status).c_str(), Status);
                 free(pVFCurveTable);
                 goto Exit;
             }
             for (uint32_t i = 0; i < NumVFPoints; i++)
             {
-                PRINT_LOGS("\nCTL_VF_CURVE_TYPE_LIVE, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", printVFCurveDetails(VFCurveDetails).c_str(), i,
+                PRINT_LOGS("\nCTL_VF_CURVE_TYPE_LIVE, %s, ctlOverclockReadVFCurve Pass 2, VFPoint: %lu, Frequency: %lu, Voltage: %lu", DecodeVFCurveDetails(VFCurveDetails).c_str(), i,
                            pVFCurveTable[i].Frequency, pVFCurveTable[i].Voltage);
             }
             free(pVFCurveTable);
@@ -885,168 +890,168 @@ void OverclockPowerTelemetry(ctl_device_adapter_handle_t hDAhandle)
 
         if (pPowerTelemetry.timeStamp.bSupported)
         {
-            PRINT_LOGS("\nTimeStamp: %f (%s) Datatype:(%s)", pPowerTelemetry.timeStamp.value.datadouble, printUnits(pPowerTelemetry.timeStamp.units).c_str(),
-                       printType(pPowerTelemetry.timeStamp.type).c_str());
+            PRINT_LOGS("\nTimeStamp: %f (%s) Datatype:(%s)", pPowerTelemetry.timeStamp.value.datadouble, DecodeCtlUnits(pPowerTelemetry.timeStamp.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.timeStamp.type).c_str());
         }
 
         if (pPowerTelemetry.gpuEnergyCounter.bSupported)
         {
-            PRINT_LOGS("\nGpu Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEnergyCounter.value.datadouble, printUnits(pPowerTelemetry.gpuEnergyCounter.units).c_str(),
-                       printType(pPowerTelemetry.gpuEnergyCounter.type).c_str());
+            PRINT_LOGS("\nGpu Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEnergyCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuEnergyCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuEnergyCounter.type).c_str());
         }
 
         if (pPowerTelemetry.vramEnergyCounter.bSupported)
         {
-            PRINT_LOGS("\nVRAM Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.vramEnergyCounter.value.datadouble, printUnits(pPowerTelemetry.vramEnergyCounter.units).c_str(),
-                       printType(pPowerTelemetry.vramEnergyCounter.type).c_str());
+            PRINT_LOGS("\nVRAM Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.vramEnergyCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramEnergyCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramEnergyCounter.type).c_str());
         }
 
         if (pPowerTelemetry.totalCardEnergyCounter.bSupported)
         {
-            PRINT_LOGS("\nCard Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.totalCardEnergyCounter.value.datadouble, printUnits(pPowerTelemetry.totalCardEnergyCounter.units).c_str(),
-                       printType(pPowerTelemetry.totalCardEnergyCounter.type).c_str());
+            PRINT_LOGS("\nCard Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.totalCardEnergyCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.totalCardEnergyCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.totalCardEnergyCounter.type).c_str());
         }
 
         if (pPowerTelemetry.gpuVoltage.bSupported)
         {
-            PRINT_LOGS("\nGpu Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVoltage.value.datadouble, printUnits(pPowerTelemetry.gpuVoltage.units).c_str(),
-                       printType(pPowerTelemetry.gpuVoltage.type).c_str());
+            PRINT_LOGS("\nGpu Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVoltage.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuVoltage.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuVoltage.type).c_str());
         }
 
         if (pPowerTelemetry.gpuCurrentClockFrequency.bSupported)
         {
-            PRINT_LOGS("\nGpu Current Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentClockFrequency.value.datadouble, printUnits(pPowerTelemetry.gpuCurrentClockFrequency.units).c_str(),
-                       printType(pPowerTelemetry.gpuCurrentClockFrequency.type).c_str());
+            PRINT_LOGS("\nGpu Current Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentClockFrequency.value.datadouble,
+                       DecodeCtlUnits(pPowerTelemetry.gpuCurrentClockFrequency.units).c_str(), DecodeCtlDataType(pPowerTelemetry.gpuCurrentClockFrequency.type).c_str());
         }
 
         if (pPowerTelemetry.gpuCurrentTemperature.bSupported)
         {
-            PRINT_LOGS("\nGpu Current Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentTemperature.value.datadouble, printUnits(pPowerTelemetry.gpuCurrentTemperature.units).c_str(),
-                       printType(pPowerTelemetry.gpuCurrentTemperature.type).c_str());
+            PRINT_LOGS("\nGpu Current Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentTemperature.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuCurrentTemperature.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuCurrentTemperature.type).c_str());
         }
 
         if (pPowerTelemetry.globalActivityCounter.bSupported)
         {
-            PRINT_LOGS("\nGpu Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.globalActivityCounter.value.datadouble, printUnits(pPowerTelemetry.globalActivityCounter.units).c_str(),
-                       printType(pPowerTelemetry.globalActivityCounter.type).c_str());
+            PRINT_LOGS("\nGpu Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.globalActivityCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.globalActivityCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.globalActivityCounter.type).c_str());
         }
 
         if (pPowerTelemetry.renderComputeActivityCounter.bSupported)
         {
             PRINT_LOGS("\nRender Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.renderComputeActivityCounter.value.datadouble,
-                       printUnits(pPowerTelemetry.renderComputeActivityCounter.units).c_str(), printType(pPowerTelemetry.renderComputeActivityCounter.type).c_str());
+                       DecodeCtlUnits(pPowerTelemetry.renderComputeActivityCounter.units).c_str(), DecodeCtlDataType(pPowerTelemetry.renderComputeActivityCounter.type).c_str());
         }
 
         if (pPowerTelemetry.mediaActivityCounter.bSupported)
         {
-            PRINT_LOGS("\nMedia Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.mediaActivityCounter.value.datadouble, printUnits(pPowerTelemetry.mediaActivityCounter.units).c_str(),
-                       printType(pPowerTelemetry.mediaActivityCounter.type).c_str());
+            PRINT_LOGS("\nMedia Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.mediaActivityCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.mediaActivityCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.mediaActivityCounter.type).c_str());
         }
 
         if (pPowerTelemetry.vramVoltage.bSupported)
         {
-            PRINT_LOGS("\nVRAM Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVoltage.value.datadouble, printUnits(pPowerTelemetry.vramVoltage.units).c_str(),
-                       printType(pPowerTelemetry.vramVoltage.type).c_str());
+            PRINT_LOGS("\nVRAM Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVoltage.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramVoltage.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramVoltage.type).c_str());
         }
 
         if (pPowerTelemetry.vramCurrentClockFrequency.bSupported)
         {
-            PRINT_LOGS("\nVRAM Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentClockFrequency.value.datadouble, printUnits(pPowerTelemetry.vramCurrentClockFrequency.units).c_str(),
-                       printType(pPowerTelemetry.vramCurrentClockFrequency.type).c_str());
+            PRINT_LOGS("\nVRAM Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentClockFrequency.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramCurrentClockFrequency.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramCurrentClockFrequency.type).c_str());
         }
 
         if (pPowerTelemetry.vramReadBandwidthCounter.bSupported)
         {
             PRINT_LOGS("\nVRAM Read Bandwidth Counter: %llu (%s) Datatype:(%s)", pPowerTelemetry.vramReadBandwidthCounter.value.datau64,
-                       printUnits(pPowerTelemetry.vramReadBandwidthCounter.units).c_str(), printType(pPowerTelemetry.vramReadBandwidthCounter.type).c_str());
+                       DecodeCtlUnits(pPowerTelemetry.vramReadBandwidthCounter.units).c_str(), DecodeCtlDataType(pPowerTelemetry.vramReadBandwidthCounter.type).c_str());
         }
 
         if (pPowerTelemetry.vramWriteBandwidthCounter.bSupported)
         {
             PRINT_LOGS("\nVRAM Write Bandwidth Counter: %llu (%s) Datatype:(%s)", pPowerTelemetry.vramWriteBandwidthCounter.value.datau64,
-                       printUnits(pPowerTelemetry.vramWriteBandwidthCounter.units).c_str(), printType(pPowerTelemetry.vramWriteBandwidthCounter.type).c_str());
+                       DecodeCtlUnits(pPowerTelemetry.vramWriteBandwidthCounter.units).c_str(), DecodeCtlDataType(pPowerTelemetry.vramWriteBandwidthCounter.type).c_str());
         }
 
         if (pPowerTelemetry.vramCurrentEffectiveFrequency.bSupported)
         {
             PRINT_LOGS("\nVRAM Effective Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentEffectiveFrequency.value.datadouble,
-                       printUnits(pPowerTelemetry.vramCurrentEffectiveFrequency.units).c_str(), printType(pPowerTelemetry.vramCurrentEffectiveFrequency.type).c_str());
+                       DecodeCtlUnits(pPowerTelemetry.vramCurrentEffectiveFrequency.units).c_str(), DecodeCtlDataType(pPowerTelemetry.vramCurrentEffectiveFrequency.type).c_str());
         }
 
         if (pPowerTelemetry.vramCurrentTemperature.bSupported)
         {
-            PRINT_LOGS("\nVRAM Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentTemperature.value.datadouble, printUnits(pPowerTelemetry.vramCurrentTemperature.units).c_str(),
-                       printType(pPowerTelemetry.vramCurrentTemperature.type).c_str());
+            PRINT_LOGS("\nVRAM Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentTemperature.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramCurrentTemperature.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramCurrentTemperature.type).c_str());
         }
 
         if (pPowerTelemetry.vramReadBandwidth.bSupported)
         {
-            PRINT_LOGS("\nVRAM Read Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramReadBandwidth.value.datadouble, printUnits(pPowerTelemetry.vramReadBandwidth.units).c_str(),
-                       printType(pPowerTelemetry.vramReadBandwidth.type).c_str());
+            PRINT_LOGS("\nVRAM Read Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramReadBandwidth.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramReadBandwidth.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramReadBandwidth.type).c_str());
         }
 
         if (pPowerTelemetry.vramWriteBandwidth.bSupported)
         {
-            PRINT_LOGS("\nVRAM Write Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramWriteBandwidth.value.datadouble, printUnits(pPowerTelemetry.vramWriteBandwidth.units).c_str(),
-                       printType(pPowerTelemetry.vramWriteBandwidth.type).c_str());
+            PRINT_LOGS("\nVRAM Write Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramWriteBandwidth.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramWriteBandwidth.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramWriteBandwidth.type).c_str());
         }
 
         if (pPowerTelemetry.gpuVrTemp.bSupported)
         {
-            PRINT_LOGS("\nGPU VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVrTemp.value.datadouble, printUnits(pPowerTelemetry.gpuVrTemp.units).c_str(),
-                       printType(pPowerTelemetry.gpuVrTemp.type).c_str());
+            PRINT_LOGS("\nGPU VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVrTemp.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuVrTemp.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuVrTemp.type).c_str());
         }
 
         if (pPowerTelemetry.vramVrTemp.bSupported)
         {
-            PRINT_LOGS("\nVRAM VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVrTemp.value.datadouble, printUnits(pPowerTelemetry.vramVrTemp.units).c_str(),
-                       printType(pPowerTelemetry.vramVrTemp.type).c_str());
+            PRINT_LOGS("\nVRAM VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVrTemp.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramVrTemp.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramVrTemp.type).c_str());
         }
 
         if (pPowerTelemetry.saVrTemp.bSupported)
         {
-            PRINT_LOGS("\nSA VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.saVrTemp.value.datadouble, printUnits(pPowerTelemetry.saVrTemp.units).c_str(),
-                       printType(pPowerTelemetry.saVrTemp.type).c_str());
+            PRINT_LOGS("\nSA VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.saVrTemp.value.datadouble, DecodeCtlUnits(pPowerTelemetry.saVrTemp.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.saVrTemp.type).c_str());
         }
 
         if (pPowerTelemetry.gpuEffectiveClock.bSupported)
         {
-            PRINT_LOGS("\nEffective frequency of the GPU: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEffectiveClock.value.datadouble, printUnits(pPowerTelemetry.gpuEffectiveClock.units).c_str(),
-                       printType(pPowerTelemetry.gpuEffectiveClock.type).c_str());
+            PRINT_LOGS("\nEffective frequency of the GPU: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEffectiveClock.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuEffectiveClock.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuEffectiveClock.type).c_str());
         }
 
         if (pPowerTelemetry.gpuOverVoltagePercent.bSupported)
         {
-            PRINT_LOGS("\nGPU Overvoltage Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuOverVoltagePercent.value.datadouble, printUnits(pPowerTelemetry.gpuOverVoltagePercent.units).c_str(),
-                       printType(pPowerTelemetry.gpuOverVoltagePercent.type).c_str());
+            PRINT_LOGS("\nGPU Overvoltage Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuOverVoltagePercent.value.datadouble,
+                       DecodeCtlUnits(pPowerTelemetry.gpuOverVoltagePercent.units).c_str(), DecodeCtlDataType(pPowerTelemetry.gpuOverVoltagePercent.type).c_str());
         }
 
         if (pPowerTelemetry.gpuPowerPercent.bSupported)
         {
-            PRINT_LOGS("\nGPU Power Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuPowerPercent.value.datadouble, printUnits(pPowerTelemetry.gpuPowerPercent.units).c_str(),
-                       printType(pPowerTelemetry.gpuPowerPercent.type).c_str());
+            PRINT_LOGS("\nGPU Power Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuPowerPercent.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuPowerPercent.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuPowerPercent.type).c_str());
         }
 
         if (pPowerTelemetry.gpuTemperaturePercent.bSupported)
         {
-            PRINT_LOGS("\nGPU Temperature Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuTemperaturePercent.value.datadouble, printUnits(pPowerTelemetry.gpuTemperaturePercent.units).c_str(),
-                       printType(pPowerTelemetry.gpuTemperaturePercent.type).c_str());
+            PRINT_LOGS("\nGPU Temperature Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuTemperaturePercent.value.datadouble,
+                       DecodeCtlUnits(pPowerTelemetry.gpuTemperaturePercent.units).c_str(), DecodeCtlDataType(pPowerTelemetry.gpuTemperaturePercent.type).c_str());
         }
 
         for (int i = 0; i < CTL_FAN_COUNT; i++)
         {
             if (pPowerTelemetry.fanSpeed[i].bSupported)
             {
-                PRINT_LOGS("\nFan[%d] Speed: %f (%s) Datatype:(%s)", i, pPowerTelemetry.fanSpeed[i].value.datadouble, printUnits(pPowerTelemetry.fanSpeed[i].units).c_str(),
-                           printType(pPowerTelemetry.fanSpeed[i].type).c_str());
+                PRINT_LOGS("\nFan[%d] Speed: %f (%s) Datatype:(%s)", i, pPowerTelemetry.fanSpeed[i].value.datadouble, DecodeCtlUnits(pPowerTelemetry.fanSpeed[i].units).c_str(),
+                           DecodeCtlDataType(pPowerTelemetry.fanSpeed[i].type).c_str());
             }
         }
 
-        PRINT_LOGS("\ngpuPowerLimited: %s", ((pPowerTelemetry.gpuPowerLimited) ? "true" : "false"));
-        PRINT_LOGS("\ngpuTemperatureLimited: %s", ((pPowerTelemetry.gpuTemperatureLimited) ? "true" : "false"));
-        PRINT_LOGS("\ngpuCurrentLimited: %s", ((pPowerTelemetry.gpuCurrentLimited) ? "true" : "false"));
-        PRINT_LOGS("\ngpuVoltageLimited: %s", ((pPowerTelemetry.gpuVoltageLimited) ? "true" : "false"));
-        PRINT_LOGS("\ngpuUtilizationLimited: %s", ((pPowerTelemetry.gpuUtilizationLimited) ? "true" : "false"));
+        PRINT_LOGS("\ngpuPowerLimited: %s", DecodeBoolean(pPowerTelemetry.gpuPowerLimited).c_str());
+        PRINT_LOGS("\ngpuTemperatureLimited: %s", DecodeBoolean(pPowerTelemetry.gpuTemperatureLimited).c_str());
+        PRINT_LOGS("\ngpuCurrentLimited: %s", DecodeBoolean(pPowerTelemetry.gpuCurrentLimited).c_str());
+        PRINT_LOGS("\ngpuVoltageLimited: %s", DecodeBoolean(pPowerTelemetry.gpuVoltageLimited).c_str());
+        PRINT_LOGS("\ngpuUtilizationLimited: %s", DecodeBoolean(pPowerTelemetry.gpuUtilizationLimited).c_str());
     }
     else
     {
