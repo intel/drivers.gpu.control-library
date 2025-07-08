@@ -2489,6 +2489,100 @@ ctl_display_settings_t
 
  
 
+Ecc
+============================================================
+* Functions
+
+
+    * :ref:`ctlEccGetProperties`
+    * :ref:`ctlEccGetState`
+    * :ref:`ctlEccSetState`
+
+ 
+* Enumerations
+
+
+    * :ref:`ctl-ecc-state-t`
+
+ 
+* Structures
+
+
+    * :ref:`ctl-ecc-properties-t`
+    * :ref:`ctl-ecc-state-desc-t`
+
+
+Ecc Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlEccGetProperties:
+
+ctlEccGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEccGetProperties
+    :project: ControlApi
+
+
+.. _ctlEccGetState:
+
+ctlEccGetState
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEccGetState
+    :project: ControlApi
+
+
+.. _ctlEccSetState:
+
+ctlEccSetState
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlEccSetState
+    :project: ControlApi
+
+
+
+Ecc Enums
+------------------------------------------------------------------------------
+
+
+.. _ctl-ecc-state-t:
+
+ctl_ecc_state_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_ecc_state_t
+    :project: ControlApi
+
+ 
+Ecc Structures
+------------------------------------------------------------------------------
+
+.. _ctl-ecc-properties-t:
+
+ctl_ecc_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_ecc_properties_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-ecc-state-desc-t:
+
+ctl_ecc_state_desc_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_ecc_state_desc_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
 Engine
 ============================================================
 * Functions
