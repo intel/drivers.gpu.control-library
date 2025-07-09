@@ -1,1 +1,1 @@
-Sample Application for the Telemetry interface
+Sample Application for the Telemetry interface.

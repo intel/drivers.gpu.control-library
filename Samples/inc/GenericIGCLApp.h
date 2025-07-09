@@ -118,6 +118,8 @@ inline char *Get3DFeatureName(ctl_3d_feature_t FeatureType)
             return "global or per app settings";
         case CTL_3D_FEATURE_LOW_LATENCY:
             return "Low Latency";
+        case CTL_3D_FEATURE_FRAME_GENERATION:
+            return "XeSS Frame Generation";
         default:
             return "No Name";
     }

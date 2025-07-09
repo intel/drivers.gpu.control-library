@@ -36,9 +36,10 @@ void CtlPciTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlMemoryTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlLedTest(ctl_device_adapter_handle_t hDAhandle);
+void CtlEccTest(ctl_device_adapter_handle_t hDAhandle);
 void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle);
 
-std::string printType(ctl_data_type_t Type)
+std::string DecodeCtlDataType(ctl_data_type_t Type)
 {
     static const std::map<ctl_data_type_t, std::string> dataTypeStringMap = { { CTL_DATA_TYPE_INT8, "INT8" },
                                                                               { CTL_DATA_TYPE_UINT8, "UINT8" },
@@ -62,7 +63,7 @@ std::string printType(ctl_data_type_t Type)
     return "Unknown datatype";
 }
 
-std::string printUnits(ctl_units_t Units)
+std::string DecodeCtlUnits(ctl_units_t Units)
 {
     static const std::map<ctl_units_t, std::string> unitsStringMap = { { CTL_UNITS_FREQUENCY_MHZ, "Frequency in MHz" },
                                                                        { CTL_UNITS_OPERATIONS_GTS, "GigaOperations per Second" },
@@ -86,6 +87,87 @@ std::string printUnits(ctl_units_t Units)
         return it->second;
     }
     return "Unknown unit";
+}
+
+std::string DecodeTemperatureSensor(ctl_temp_sensors_t tempSensor)
+{
+    static const std::map<ctl_temp_sensors_t, std::string> tempSensorStringMap = { { CTL_TEMP_SENSORS_GLOBAL, "GLOBAL" }, { CTL_TEMP_SENSORS_GPU, "GPU" }, { CTL_TEMP_SENSORS_MEMORY, "MEMORY" } };
+
+    auto it = tempSensorStringMap.find(tempSensor);
+    if (it != tempSensorStringMap.end())
+    {
+        return it->second;
+    }
+    return "Unknown temperature sensor";
+}
+
+std::string DecodeFrequencyDomain(ctl_freq_domain_t freqDomain)
+{
+    static const std::map<ctl_freq_domain_t, std::string> freqDomainStringMap = { { CTL_FREQ_DOMAIN_GPU, "GPU" }, { CTL_FREQ_DOMAIN_MEMORY, "MEMORY" }, { CTL_FREQ_DOMAIN_MEDIA, "MEDIA" } };
+
+    auto it = freqDomainStringMap.find(freqDomain);
+    if (it != freqDomainStringMap.end())
+    {
+        return it->second;
+    }
+    return "Unknown frequency domain";
+}
+
+std::string DecodeFanSpeedUnits(ctl_fan_speed_units_t Units)
+{
+    static const std::map<ctl_fan_speed_units_t, std::string> unitsStringMap = { { CTL_FAN_SPEED_UNITS_RPM, "RPM" }, { CTL_FAN_SPEED_UNITS_PERCENT, "PERCENT" } };
+
+    auto it = unitsStringMap.find(Units);
+    if (it != unitsStringMap.end())
+    {
+        return it->second;
+    }
+    return "Unknown fan speed unit";
+}
+
+std::string DecodeFanSpeedMode(ctl_fan_speed_mode_t fanSpeedMode)
+{
+    static const std::map<ctl_fan_speed_mode_t, std::string> fanSpeedModeStringMap = { { CTL_FAN_SPEED_MODE_DEFAULT, "DEFAULT/STOCK FAN TABLE" },
+                                                                                       { CTL_FAN_SPEED_MODE_FIXED, "FIXED SPEED" },
+                                                                                       { CTL_FAN_SPEED_MODE_TABLE, "USER FAN TABLE" } };
+
+    auto it = fanSpeedModeStringMap.find(fanSpeedMode);
+    if (it != fanSpeedModeStringMap.end())
+    {
+        return it->second;
+    }
+    return "Unknown fan speed mode";
+}
+
+std::string DecodeEngineGroup(ctl_engine_group_t engineGroup)
+{
+    static const std::map<ctl_engine_group_t, std::string> engineGroupStringMap = { { CTL_ENGINE_GROUP_GT, "GT" }, { CTL_ENGINE_GROUP_RENDER, "RENDER" }, { CTL_ENGINE_GROUP_MEDIA, "MEDIA" } };
+
+    auto it = engineGroupStringMap.find(engineGroup);
+    if (it != engineGroupStringMap.end())
+    {
+        return it->second;
+    }
+    return "Unknown engine group";
+}
+
+std::string DecodeBoolean(bool Value)
+{
+    return Value ? "true" : "false";
+}
+
+std::string DecodeEccState(ctl_ecc_state_t eccState)
+{
+    static const std::map<ctl_ecc_state_t, std::string> eccStateStringMap = { { CTL_ECC_STATE_ECC_DEFAULT_STATE, "default" },
+                                                                              { CTL_ECC_STATE_ECC_ENABLED_STATE, "enabled" },
+                                                                              { CTL_ECC_STATE_ECC_DISABLED_STATE, "disabled" } };
+
+    auto it = eccStateStringMap.find(eccState);
+    if (it != eccStateStringMap.end())
+    {
+        return it->second;
+    }
+    return "Unknown Ecc state";
 }
 
 // Decoding the return code for the most common error codes.
@@ -180,10 +262,7 @@ void CtlTemperatureTest(ctl_device_adapter_handle_t hDAhandle)
         else
         {
             PRINT_LOGS("\n[Temperature] Max temp [%u]", (uint32_t)temperatureProperties.maxTemperature);
-            PRINT_LOGS("\n[Temperature] Sensor type [%s]", ((temperatureProperties.type == CTL_TEMP_SENSORS_GLOBAL) ? "Global" :
-                                                            (temperatureProperties.type == CTL_TEMP_SENSORS_GPU)    ? "Gpu" :
-                                                            (temperatureProperties.type == CTL_TEMP_SENSORS_MEMORY) ? "Memory" :
-                                                                                                                      "Unknown"));
+            PRINT_LOGS("\n[Temperature] Sensor type [%s]", DecodeTemperatureSensor(temperatureProperties.type).c_str());
         }
 
         PRINT_LOGS("\n[Temperature] Get Temperature state:");
@@ -255,10 +334,7 @@ void CtlFrequencyTest(ctl_device_adapter_handle_t hDAhandle)
             PRINT_LOGS("\n[Frequency] Min [%f]] MHz", freqProperties.min);
             PRINT_LOGS("\n[Frequency] Max [%f]] MHz", freqProperties.max);
             PRINT_LOGS("\n[Frequency] Can Control Frequency? [%u]]", (uint32_t)freqProperties.canControl);
-            PRINT_LOGS("\n[Frequency] Frequency Domain [%s]]", ((freqProperties.type == CTL_FREQ_DOMAIN_GPU)    ? "GPU" :
-                                                                (freqProperties.type == CTL_FREQ_DOMAIN_MEMORY) ? "MEMORY" :
-                                                                (freqProperties.type == CTL_FREQ_DOMAIN_MEDIA)  ? "MEDIA" :
-                                                                                                                  "Unknown"));
+            PRINT_LOGS("\n[Frequency] Frequency Domain [%s]]", DecodeFrequencyDomain(freqProperties.type).c_str());
         }
 
         PRINT_LOGS("\n\n[Frequency] State:");
@@ -400,7 +476,7 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Power] Can Control [%u]", (uint32_t)properties.canControl);
+            PRINT_LOGS("\n[Power] Can Control [%s]", DecodeBoolean(properties.canControl).c_str());
             PRINT_LOGS("\n[Power] Default Power Limit [%u]", (uint32_t)properties.defaultLimit);
             PRINT_LOGS("\n[Power] Max Power Limit [%i] mW", properties.maxLimit);
             PRINT_LOGS("\n[Power] Min Power Limit [%i] mW", properties.minLimit);
@@ -434,10 +510,10 @@ void CtlPowerTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Power] Sustained Power Limit Enabled [%u]", (uint32_t)powerLimits.sustainedPowerLimit.enabled);
+            PRINT_LOGS("\n[Power] Sustained Power Limit Enabled [%s]", DecodeBoolean(powerLimits.sustainedPowerLimit.enabled).c_str());
             PRINT_LOGS("\n[Power] Sustained Power (PL1) Value [%i] mW", powerLimits.sustainedPowerLimit.power);
             PRINT_LOGS("\n[Power] Sustained Power (PL1 Tau) Time Window [%i] ms", powerLimits.sustainedPowerLimit.interval);
-            PRINT_LOGS("\n[Power] Burst Power Limit Enabled [%u]", (uint32_t)powerLimits.burstPowerLimit.enabled);
+            PRINT_LOGS("\n[Power] Burst Power Limit Enabled [%s]", DecodeBoolean(powerLimits.burstPowerLimit.enabled).c_str());
             PRINT_LOGS("\n[Power] Burst Power (PL2) Value [%i] mW", powerLimits.burstPowerLimit.power);
             PRINT_LOGS("\n[Power] Peak Power (PL4) AC Value [%i] mW", powerLimits.peakPowerLimits.powerAC);
             PRINT_LOGS("\n[Power] Peak Power (PL4) DC Value [%i] mW", powerLimits.peakPowerLimits.powerDC);
@@ -482,7 +558,7 @@ void CtlFanTest_FanGetConfig(ctl_fan_handle_t hFanHandle)
     }
     else
     {
-        PRINT_LOGS("\n[Fan] Fan Config Mode [%u]", FanConfig.mode);
+        PRINT_LOGS("\n[Fan] Fan Config Mode [%s]", DecodeFanSpeedMode(FanConfig.mode).c_str());
         if (CTL_FAN_SPEED_MODE_DEFAULT == FanConfig.mode)
         {
             PRINT_LOGS("\n[Fan] Fan Config Mode: Default/Stock");
@@ -490,14 +566,14 @@ void CtlFanTest_FanGetConfig(ctl_fan_handle_t hFanHandle)
         else if (CTL_FAN_SPEED_MODE_FIXED == FanConfig.mode)
         {
             PRINT_LOGS("\n[Fan] Fan Config Fixed Speed [%u]", FanConfig.speedFixed.speed);
-            PRINT_LOGS("\n[Fan] Fan Config Fixed Speed Unit [%u]", FanConfig.speedFixed.units);
+            PRINT_LOGS("\n[Fan] Fan Config Fixed Speed Unit [%s]", DecodeFanSpeedUnits(FanConfig.speedFixed.units).c_str());
         }
         else if (CTL_FAN_SPEED_MODE_TABLE == FanConfig.mode)
         {
             PRINT_LOGS("\n[Fan] Fan Config Fan Table NumPoints [%u]", FanConfig.speedTable.numPoints);
             for (int32_t numPoints = 0; numPoints < FanConfig.speedTable.numPoints; numPoints++)
             {
-                PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Speed Unit [%u]", FanConfig.speedTable.table[numPoints].speed.units);
+                PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Speed Unit [%s]", DecodeFanSpeedUnits(FanConfig.speedTable.table[numPoints].speed.units).c_str());
                 PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Speed [%u]", FanConfig.speedTable.table[numPoints].speed.speed);
                 PRINT_LOGS("\n[Fan] Fan Config Fan Table Point Temperature [%u]", FanConfig.speedTable.table[numPoints].temperature);
             }
@@ -552,7 +628,7 @@ void CtlFanTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Fan] Can Control [%u]", (uint32_t)Fan_properties.canControl);
+            PRINT_LOGS("\n[Fan] Can Control [%s]", DecodeBoolean(Fan_properties.canControl).c_str());
             PRINT_LOGS("\n[Fan] Max Points [%i]", Fan_properties.maxPoints);
             PRINT_LOGS("\n[Fan] Max RPM [%i]", Fan_properties.maxRPM);
             PRINT_LOGS("\n[Fan] Supported Modes [%u]", Fan_properties.supportedModes);
@@ -815,10 +891,7 @@ void CtlEngineTest(ctl_device_adapter_handle_t hDAhandle)
         }
         else
         {
-            PRINT_LOGS("\n[Engine] Engine type [%s]", ((engineProperties.type == CTL_ENGINE_GROUP_GT)     ? "Gt" :
-                                                       (engineProperties.type == CTL_ENGINE_GROUP_RENDER) ? "Render" :
-                                                       (engineProperties.type == CTL_ENGINE_GROUP_MEDIA)  ? "Media" :
-                                                                                                            "Unknown"));
+            PRINT_LOGS("\n[Engine] Engine type [%s]", DecodeEngineGroup(engineProperties.type).c_str());
         }
 
         ctl_engine_stats_t engineStats = { 0 };
@@ -917,10 +990,10 @@ void CtlLedTest(ctl_device_adapter_handle_t hDAhandle)
             }
             else
             {
-                PRINT_LOGS("\n[Led] Can Control [%u]", (uint32_t)LedProperties.canControl);
-                PRINT_LOGS("\n[Led] Is I2C [%u]", (uint32_t)LedProperties.isI2C);
-                PRINT_LOGS("\n[Led] Is PWM [%u]", (uint32_t)LedProperties.isPWM);
-                PRINT_LOGS("\n[Led] Have RGB [%u]", (uint32_t)LedProperties.haveRGB);
+                PRINT_LOGS("\n[Led] Can Control [%s]", DecodeBoolean(LedProperties.canControl).c_str());
+                PRINT_LOGS("\n[Led] Is I2C [%s]", DecodeBoolean(LedProperties.isI2C).c_str());
+                PRINT_LOGS("\n[Led] Is PWM [%s]", DecodeBoolean(LedProperties.isPWM).c_str());
+                PRINT_LOGS("\n[Led] Have RGB [%s]", DecodeBoolean(LedProperties.haveRGB).c_str());
             }
 
             PRINT_LOGS("\n\n[Led] Get Led state:");
@@ -936,7 +1009,7 @@ void CtlLedTest(ctl_device_adapter_handle_t hDAhandle)
             else
             {
                 PRINT_LOGS("\n[Led] Get Led State successful");
-                PRINT_LOGS("\n[Led] IsOn [%u]", (uint32_t)ledState.isOn);
+                PRINT_LOGS("\n[Led] IsOn [%s]", DecodeBoolean(ledState.isOn).c_str());
                 PRINT_LOGS("\n[Led] PWM: Led On/Off Ratio [%f]", ledState.pwm);
                 PRINT_LOGS("\n[Led] Red color of Led [%f]", ledState.color.red);
                 PRINT_LOGS("\n[Led] Green color of Led [%f]", ledState.color.green);
@@ -970,6 +1043,134 @@ cleanUp:
     return;
 }
 
+/***************************************************************
+ * @brief Main Function
+ * place_holder_for_Detailed_desc
+ * @param
+ * @return
+ ***************************************************************/
+void CtlEccTest(ctl_device_adapter_handle_t hDAhandle)
+{
+    PRINT_LOGS("\n::::::::::::::Print Ecc Properties::::::::::::::\n");
+
+    // Get ECC Properites
+    ctl_result_t Result                = CTL_RESULT_SUCCESS;
+    ctl_ecc_properties_t EccProperties = { 0 };
+    EccProperties.Size                 = sizeof(ctl_ecc_properties_t);
+    Result                             = ctlEccGetProperties(hDAhandle, &EccProperties);
+
+    PRINT_LOGS("\n[Ecc] Get Ecc properties:");
+    if (Result != CTL_RESULT_SUCCESS)
+    {
+        PRINT_LOGS("\nEcc component not supported. Result: %s", DecodeRetCode(Result).c_str());
+        return;
+    }
+    else
+    {
+        PRINT_LOGS("\n[Ecc] Is Supported [%s]", DecodeBoolean(EccProperties.isSupported).c_str());
+        PRINT_LOGS("\n[Ecc] Can Control [%s]", DecodeBoolean(EccProperties.canControl).c_str());
+    }
+
+    if (EccProperties.isSupported)
+    {
+        // Get ECC State
+        ctl_ecc_state_desc_t eccState = { 0 };
+        eccState.Size                 = sizeof(ctl_ecc_state_t);
+        Result                        = ctlEccGetState(hDAhandle, &eccState);
+        PRINT_LOGS("\n\n[Ecc] Get Ecc state:");
+        if (Result != CTL_RESULT_SUCCESS)
+        {
+            PRINT_LOGS("\nError: %s  from Ecc Get state.\n", DecodeRetCode(Result).c_str());
+        }
+        else
+        {
+            PRINT_LOGS("\n[Ecc] Ecc Get State successful");
+            PRINT_LOGS("\n[Ecc] Current Ecc State [%s]", DecodeEccState(eccState.currentEccState).c_str());
+            PRINT_LOGS("\n[Ecc] Pending Ecc State [%s]", DecodeEccState(eccState.pendingEccState).c_str());
+        }
+
+        if (eccState.currentEccState != eccState.pendingEccState)
+        {
+            PRINT_LOGS("\n[Ecc] Pending Ecc State[%s] is not applied yet from previous Ecc Set Call. Please reboot the system for it to take affect.",
+                       DecodeEccState(eccState.pendingEccState).c_str());
+            return;
+        }
+        else
+        {
+            PRINT_LOGS("\n[Ecc] Pending Ecc State [%s] from previous Ecc Set Call applied and ECC state toggled successfully.", DecodeEccState(eccState.pendingEccState).c_str());
+        }
+
+        if (EccProperties.canControl)
+        {
+            // Disabling ECC State if current ECC State is enabled and there is nothing to apply (currentEccState == pendingEccState)
+            if (eccState.currentEccState == CTL_ECC_STATE_ECC_ENABLED_STATE && eccState.currentEccState == eccState.pendingEccState)
+            {
+                eccState.currentEccState = CTL_ECC_STATE_ECC_DISABLED_STATE;
+                Result                   = ctlEccSetState(hDAhandle, &eccState);
+                PRINT_LOGS("\n\n[Ecc] Set Ecc state:");
+                PRINT_LOGS("\n\n[Ecc] Disabling Ecc state [%s]", DecodeEccState(eccState.currentEccState).c_str());
+                if (Result != CTL_RESULT_SUCCESS)
+                {
+                    PRINT_LOGS("\nError: %s from Ecc Set State\n", DecodeRetCode(Result).c_str());
+                }
+                else
+                {
+                    PRINT_LOGS("\n[Ecc] Ecc Set State call successful\n");
+                    PRINT_LOGS("\n[Ecc] Pending Ecc State to be applied from Ecc Set State call [%s]", DecodeEccState(eccState.pendingEccState).c_str());
+                }
+            }
+            // Enabling ECC State if current ECC State if disabled and there is nothing to apply (currentEccState == pendingEccState)
+            else if (eccState.currentEccState == CTL_ECC_STATE_ECC_DISABLED_STATE && eccState.currentEccState == eccState.pendingEccState)
+            {
+                eccState.currentEccState = CTL_ECC_STATE_ECC_ENABLED_STATE;
+                Result                   = ctlEccSetState(hDAhandle, &eccState);
+                PRINT_LOGS("\n\n[Ecc] Set Ecc state:");
+                PRINT_LOGS("\n\n[Ecc] Enabling Ecc state [%s]", DecodeEccState(eccState.currentEccState).c_str());
+                if (Result != CTL_RESULT_SUCCESS)
+                {
+                    PRINT_LOGS("\nError: %s from Ecc Set State\n", DecodeRetCode(Result).c_str());
+                }
+                else
+                {
+                    PRINT_LOGS("\n[Ecc] Ecc Set State call successful\n");
+                    PRINT_LOGS("\n[Ecc] Pending Ecc State to be applied from Ecc Set State call [%s]", DecodeEccState(eccState.pendingEccState).c_str());
+                }
+            }
+
+            // Retrieving back ECC State after Ecc Set State call to determine if currentEccState == pendingEccState
+            Result = ctlEccGetState(hDAhandle, &eccState);
+            PRINT_LOGS("\n\n[Ecc] Get Ecc state again:");
+            if (Result != CTL_RESULT_SUCCESS)
+            {
+                PRINT_LOGS("\nError: %s  from Ecc Get state.\n", DecodeRetCode(Result).c_str());
+            }
+            else
+            {
+                PRINT_LOGS("\n[Ecc] Ecc Get State successful");
+                PRINT_LOGS("\n[Ecc] Current Ecc State [%s]", DecodeEccState(eccState.currentEccState).c_str());
+                PRINT_LOGS("\n[Ecc] Pending Ecc State [%s]", DecodeEccState(eccState.pendingEccState).c_str());
+            }
+
+            // System reboot is needed always if currentEccState != pendingEccState for the pendingEccState to be applied
+            if (eccState.currentEccState != eccState.pendingEccState)
+            {
+                PRINT_LOGS("\n[Ecc] Pending Ecc State [%s] is not applied yet after the Ecc Set State call. Please reboot the system for it to take affect.",
+                           DecodeEccState(eccState.pendingEccState).c_str());
+            }
+        }
+        else
+        {
+            PRINT_LOGS("\n[Ecc] Ecc state cannot be changed on this system.");
+        }
+    }
+    else
+    {
+        PRINT_LOGS("\n[Ecc] ECC is not supported on this system.");
+    }
+
+    return;
+}
+
 void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
 {
     ctl_power_telemetry_t pPowerTelemetry = {};
@@ -984,168 +1185,168 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
 
         if (pPowerTelemetry.timeStamp.bSupported)
         {
-            PRINT_LOGS("\nTimeStamp: %f (%s) Datatype:(%s)", pPowerTelemetry.timeStamp.value.datadouble, printUnits(pPowerTelemetry.timeStamp.units).c_str(),
-                       printType(pPowerTelemetry.timeStamp.type).c_str());
+            PRINT_LOGS("\nTimeStamp: %f (%s) Datatype:(%s)", pPowerTelemetry.timeStamp.value.datadouble, DecodeCtlUnits(pPowerTelemetry.timeStamp.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.timeStamp.type).c_str());
         }
 
         if (pPowerTelemetry.gpuEnergyCounter.bSupported)
         {
-            PRINT_LOGS("\nGpu Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEnergyCounter.value.datadouble, printUnits(pPowerTelemetry.gpuEnergyCounter.units).c_str(),
-                       printType(pPowerTelemetry.gpuEnergyCounter.type).c_str());
+            PRINT_LOGS("\nGpu Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEnergyCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuEnergyCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuEnergyCounter.type).c_str());
         }
 
         if (pPowerTelemetry.vramEnergyCounter.bSupported)
         {
-            PRINT_LOGS("\nVRAM Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.vramEnergyCounter.value.datadouble, printUnits(pPowerTelemetry.vramEnergyCounter.units).c_str(),
-                       printType(pPowerTelemetry.vramEnergyCounter.type).c_str());
+            PRINT_LOGS("\nVRAM Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.vramEnergyCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramEnergyCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramEnergyCounter.type).c_str());
         }
 
         if (pPowerTelemetry.totalCardEnergyCounter.bSupported)
         {
-            PRINT_LOGS("\nCard Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.totalCardEnergyCounter.value.datadouble, printUnits(pPowerTelemetry.totalCardEnergyCounter.units).c_str(),
-                       printType(pPowerTelemetry.totalCardEnergyCounter.type).c_str());
+            PRINT_LOGS("\nCard Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.totalCardEnergyCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.totalCardEnergyCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.totalCardEnergyCounter.type).c_str());
         }
 
         if (pPowerTelemetry.gpuVoltage.bSupported)
         {
-            PRINT_LOGS("\nGpu Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVoltage.value.datadouble, printUnits(pPowerTelemetry.gpuVoltage.units).c_str(),
-                       printType(pPowerTelemetry.gpuVoltage.type).c_str());
+            PRINT_LOGS("\nGpu Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVoltage.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuVoltage.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuVoltage.type).c_str());
         }
 
         if (pPowerTelemetry.gpuCurrentClockFrequency.bSupported)
         {
-            PRINT_LOGS("\nGpu Current Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentClockFrequency.value.datadouble, printUnits(pPowerTelemetry.gpuCurrentClockFrequency.units).c_str(),
-                       printType(pPowerTelemetry.gpuCurrentClockFrequency.type).c_str());
+            PRINT_LOGS("\nGpu Current Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentClockFrequency.value.datadouble,
+                       DecodeCtlUnits(pPowerTelemetry.gpuCurrentClockFrequency.units).c_str(), DecodeCtlDataType(pPowerTelemetry.gpuCurrentClockFrequency.type).c_str());
         }
 
         if (pPowerTelemetry.gpuCurrentTemperature.bSupported)
         {
-            PRINT_LOGS("\nGpu Current Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentTemperature.value.datadouble, printUnits(pPowerTelemetry.gpuCurrentTemperature.units).c_str(),
-                       printType(pPowerTelemetry.gpuCurrentTemperature.type).c_str());
+            PRINT_LOGS("\nGpu Current Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuCurrentTemperature.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuCurrentTemperature.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuCurrentTemperature.type).c_str());
         }
 
         if (pPowerTelemetry.globalActivityCounter.bSupported)
         {
-            PRINT_LOGS("\nGpu Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.globalActivityCounter.value.datadouble, printUnits(pPowerTelemetry.globalActivityCounter.units).c_str(),
-                       printType(pPowerTelemetry.globalActivityCounter.type).c_str());
+            PRINT_LOGS("\nGpu Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.globalActivityCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.globalActivityCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.globalActivityCounter.type).c_str());
         }
 
         if (pPowerTelemetry.renderComputeActivityCounter.bSupported)
         {
             PRINT_LOGS("\nRender Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.renderComputeActivityCounter.value.datadouble,
-                       printUnits(pPowerTelemetry.renderComputeActivityCounter.units).c_str(), printType(pPowerTelemetry.renderComputeActivityCounter.type).c_str());
+                       DecodeCtlUnits(pPowerTelemetry.renderComputeActivityCounter.units).c_str(), DecodeCtlDataType(pPowerTelemetry.renderComputeActivityCounter.type).c_str());
         }
 
         if (pPowerTelemetry.mediaActivityCounter.bSupported)
         {
-            PRINT_LOGS("\nMedia Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.mediaActivityCounter.value.datadouble, printUnits(pPowerTelemetry.mediaActivityCounter.units).c_str(),
-                       printType(pPowerTelemetry.mediaActivityCounter.type).c_str());
+            PRINT_LOGS("\nMedia Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.mediaActivityCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.mediaActivityCounter.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.mediaActivityCounter.type).c_str());
         }
 
         if (pPowerTelemetry.vramVoltage.bSupported)
         {
-            PRINT_LOGS("\nVRAM Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVoltage.value.datadouble, printUnits(pPowerTelemetry.vramVoltage.units).c_str(),
-                       printType(pPowerTelemetry.vramVoltage.type).c_str());
+            PRINT_LOGS("\nVRAM Voltage: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVoltage.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramVoltage.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramVoltage.type).c_str());
         }
 
         if (pPowerTelemetry.vramCurrentClockFrequency.bSupported)
         {
-            PRINT_LOGS("\nVRAM Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentClockFrequency.value.datadouble, printUnits(pPowerTelemetry.vramCurrentClockFrequency.units).c_str(),
-                       printType(pPowerTelemetry.vramCurrentClockFrequency.type).c_str());
+            PRINT_LOGS("\nVRAM Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentClockFrequency.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramCurrentClockFrequency.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramCurrentClockFrequency.type).c_str());
         }
 
         if (pPowerTelemetry.vramReadBandwidthCounter.bSupported)
         {
             PRINT_LOGS("\nVRAM Read Bandwidth Counter: %llu (%s) Datatype:(%s)", pPowerTelemetry.vramReadBandwidthCounter.value.datau64,
-                       printUnits(pPowerTelemetry.vramReadBandwidthCounter.units).c_str(), printType(pPowerTelemetry.vramReadBandwidthCounter.type).c_str());
+                       DecodeCtlUnits(pPowerTelemetry.vramReadBandwidthCounter.units).c_str(), DecodeCtlDataType(pPowerTelemetry.vramReadBandwidthCounter.type).c_str());
         }
 
         if (pPowerTelemetry.vramWriteBandwidthCounter.bSupported)
         {
             PRINT_LOGS("\nVRAM Write Bandwidth Counter: %llu (%s) Datatype:(%s)", pPowerTelemetry.vramWriteBandwidthCounter.value.datau64,
-                       printUnits(pPowerTelemetry.vramWriteBandwidthCounter.units).c_str(), printType(pPowerTelemetry.vramWriteBandwidthCounter.type).c_str());
+                       DecodeCtlUnits(pPowerTelemetry.vramWriteBandwidthCounter.units).c_str(), DecodeCtlDataType(pPowerTelemetry.vramWriteBandwidthCounter.type).c_str());
         }
 
         if (pPowerTelemetry.vramCurrentEffectiveFrequency.bSupported)
         {
             PRINT_LOGS("\nVRAM Effective Frequency: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentEffectiveFrequency.value.datadouble,
-                       printUnits(pPowerTelemetry.vramCurrentEffectiveFrequency.units).c_str(), printType(pPowerTelemetry.vramCurrentEffectiveFrequency.type).c_str());
+                       DecodeCtlUnits(pPowerTelemetry.vramCurrentEffectiveFrequency.units).c_str(), DecodeCtlDataType(pPowerTelemetry.vramCurrentEffectiveFrequency.type).c_str());
         }
 
         if (pPowerTelemetry.vramCurrentTemperature.bSupported)
         {
-            PRINT_LOGS("\nVRAM Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentTemperature.value.datadouble, printUnits(pPowerTelemetry.vramCurrentTemperature.units).c_str(),
-                       printType(pPowerTelemetry.vramCurrentTemperature.type).c_str());
+            PRINT_LOGS("\nVRAM Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramCurrentTemperature.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramCurrentTemperature.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramCurrentTemperature.type).c_str());
         }
 
         if (pPowerTelemetry.vramReadBandwidth.bSupported)
         {
-            PRINT_LOGS("\nVRAM Read Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramReadBandwidth.value.datadouble, printUnits(pPowerTelemetry.vramReadBandwidth.units).c_str(),
-                       printType(pPowerTelemetry.vramReadBandwidth.type).c_str());
+            PRINT_LOGS("\nVRAM Read Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramReadBandwidth.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramReadBandwidth.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramReadBandwidth.type).c_str());
         }
 
         if (pPowerTelemetry.vramWriteBandwidth.bSupported)
         {
-            PRINT_LOGS("\nVRAM Write Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramWriteBandwidth.value.datadouble, printUnits(pPowerTelemetry.vramWriteBandwidth.units).c_str(),
-                       printType(pPowerTelemetry.vramWriteBandwidth.type).c_str());
+            PRINT_LOGS("\nVRAM Write Bandwidth: %f (%s) Datatype:(%s)", pPowerTelemetry.vramWriteBandwidth.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramWriteBandwidth.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramWriteBandwidth.type).c_str());
         }
 
         if (pPowerTelemetry.gpuVrTemp.bSupported)
         {
-            PRINT_LOGS("\nGPU VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVrTemp.value.datadouble, printUnits(pPowerTelemetry.gpuVrTemp.units).c_str(),
-                       printType(pPowerTelemetry.gpuVrTemp.type).c_str());
+            PRINT_LOGS("\nGPU VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuVrTemp.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuVrTemp.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuVrTemp.type).c_str());
         }
 
         if (pPowerTelemetry.vramVrTemp.bSupported)
         {
-            PRINT_LOGS("\nVRAM VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVrTemp.value.datadouble, printUnits(pPowerTelemetry.vramVrTemp.units).c_str(),
-                       printType(pPowerTelemetry.vramVrTemp.type).c_str());
+            PRINT_LOGS("\nVRAM VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.vramVrTemp.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramVrTemp.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.vramVrTemp.type).c_str());
         }
 
         if (pPowerTelemetry.saVrTemp.bSupported)
         {
-            PRINT_LOGS("\nSA VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.saVrTemp.value.datadouble, printUnits(pPowerTelemetry.saVrTemp.units).c_str(),
-                       printType(pPowerTelemetry.saVrTemp.type).c_str());
+            PRINT_LOGS("\nSA VR Temperature: %f (%s) Datatype:(%s)", pPowerTelemetry.saVrTemp.value.datadouble, DecodeCtlUnits(pPowerTelemetry.saVrTemp.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.saVrTemp.type).c_str());
         }
 
         if (pPowerTelemetry.gpuEffectiveClock.bSupported)
         {
-            PRINT_LOGS("\nEffective frequency of the GPU: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEffectiveClock.value.datadouble, printUnits(pPowerTelemetry.gpuEffectiveClock.units).c_str(),
-                       printType(pPowerTelemetry.gpuEffectiveClock.type).c_str());
+            PRINT_LOGS("\nEffective frequency of the GPU: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEffectiveClock.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuEffectiveClock.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuEffectiveClock.type).c_str());
         }
 
         if (pPowerTelemetry.gpuOverVoltagePercent.bSupported)
         {
-            PRINT_LOGS("\nGPU Overvoltage Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuOverVoltagePercent.value.datadouble, printUnits(pPowerTelemetry.gpuOverVoltagePercent.units).c_str(),
-                       printType(pPowerTelemetry.gpuOverVoltagePercent.type).c_str());
+            PRINT_LOGS("\nGPU Overvoltage Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuOverVoltagePercent.value.datadouble,
+                       DecodeCtlUnits(pPowerTelemetry.gpuOverVoltagePercent.units).c_str(), DecodeCtlDataType(pPowerTelemetry.gpuOverVoltagePercent.type).c_str());
         }
 
         if (pPowerTelemetry.gpuPowerPercent.bSupported)
         {
-            PRINT_LOGS("\nGPU Power Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuPowerPercent.value.datadouble, printUnits(pPowerTelemetry.gpuPowerPercent.units).c_str(),
-                       printType(pPowerTelemetry.gpuPowerPercent.type).c_str());
+            PRINT_LOGS("\nGPU Power Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuPowerPercent.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuPowerPercent.units).c_str(),
+                       DecodeCtlDataType(pPowerTelemetry.gpuPowerPercent.type).c_str());
         }
 
         if (pPowerTelemetry.gpuTemperaturePercent.bSupported)
         {
-            PRINT_LOGS("\nGPU Temperature Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuTemperaturePercent.value.datadouble, printUnits(pPowerTelemetry.gpuTemperaturePercent.units).c_str(),
-                       printType(pPowerTelemetry.gpuTemperaturePercent.type).c_str());
+            PRINT_LOGS("\nGPU Temperature Percentage: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuTemperaturePercent.value.datadouble,
+                       DecodeCtlUnits(pPowerTelemetry.gpuTemperaturePercent.units).c_str(), DecodeCtlDataType(pPowerTelemetry.gpuTemperaturePercent.type).c_str());
         }
 
         for (int i = 0; i < CTL_FAN_COUNT; i++)
         {
             if (pPowerTelemetry.fanSpeed[i].bSupported)
             {
-                PRINT_LOGS("\nFan[%d] Speed: %f (%s) Datatype:(%s)", i, pPowerTelemetry.fanSpeed[i].value.datadouble, printUnits(pPowerTelemetry.fanSpeed[i].units).c_str(),
-                           printType(pPowerTelemetry.fanSpeed[i].type).c_str());
+                PRINT_LOGS("\nFan[%d] Speed: %f (%s) Datatype:(%s)", i, pPowerTelemetry.fanSpeed[i].value.datadouble, DecodeCtlUnits(pPowerTelemetry.fanSpeed[i].units).c_str(),
+                           DecodeCtlDataType(pPowerTelemetry.fanSpeed[i].type).c_str());
             }
         }
 
-        PRINT_LOGS("\ngpuPowerLimited: %s", ((pPowerTelemetry.gpuPowerLimited) ? "true" : "false"));
-        PRINT_LOGS("\ngpuTemperatureLimited: %s", ((pPowerTelemetry.gpuTemperatureLimited) ? "true" : "false"));
-        PRINT_LOGS("\ngpuCurrentLimited: %s", ((pPowerTelemetry.gpuCurrentLimited) ? "true" : "false"));
-        PRINT_LOGS("\ngpuVoltageLimited: %s", ((pPowerTelemetry.gpuVoltageLimited) ? "true" : "false"));
-        PRINT_LOGS("\ngpuUtilizationLimited: %s", ((pPowerTelemetry.gpuUtilizationLimited) ? "true" : "false"));
+        PRINT_LOGS("\ngpuPowerLimited: %s", DecodeBoolean(pPowerTelemetry.gpuPowerLimited).c_str());
+        PRINT_LOGS("\ngpuTemperatureLimited: %s", DecodeBoolean(pPowerTelemetry.gpuTemperatureLimited).c_str());
+        PRINT_LOGS("\ngpuCurrentLimited: %s", DecodeBoolean(pPowerTelemetry.gpuCurrentLimited).c_str());
+        PRINT_LOGS("\ngpuVoltageLimited: %s", DecodeBoolean(pPowerTelemetry.gpuVoltageLimited).c_str());
+        PRINT_LOGS("\ngpuUtilizationLimited: %s", DecodeBoolean(pPowerTelemetry.gpuUtilizationLimited).c_str());
     }
     else
     {
@@ -1214,6 +1415,14 @@ void PerComponentTest(ctl_device_adapter_handle_t hDAhandle)
     try
     {
         CtlLedTest(hDAhandle);
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
+    try
+    {
+        CtlEccTest(hDAhandle);
     }
     catch (const std::bad_array_new_length &e)
     {

@@ -890,6 +890,285 @@ ctl_result_t CtlGlobalOrPerAppTest(ctl_device_adapter_handle_t hDevices)
     return Result;
 }
 
+
+/***************************************************************
+ * @brief
+ * Method to test Frame Limit
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlTestFrameLimit(ctl_device_adapter_handle_t hDevices)
+{
+    // Frame Limit Per APP GET/SET
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    printf("======================Frame Limit test -> Per Application settings =====================\n");
+    char *pAppName                        = "GTA5.exe";
+    ctl_3d_feature_getset_t Get3DProperty = { 0 };
+    ctl_3d_feature_getset_t Set3DProperty = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    // Set Frame Limit
+    Set3DProperty.FeatureType           = CTL_3D_FEATURE_FRAME_LIMIT;
+    Set3DProperty.bSet                  = TRUE;
+    Set3DProperty.CustomValueSize       = 0;
+    Set3DProperty.pCustomValue          = NULL;
+    Set3DProperty.ApplicationName       = pAppName;
+    Set3DProperty.ApplicationNameLength = (int8_t)strlen(pAppName);
+    Set3DProperty.ValueType             = CTL_PROPERTY_VALUE_TYPE_INT32;
+    Set3DProperty.Value.IntType.Enable  = true;
+    Set3DProperty.Value.IntType.Value   = 30;
+    Set3DProperty.Version               = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        printf(" Set3DProperty.Value.IntType.Enable = %d\n", Set3DProperty.Value.IntType.Enable);
+        printf(" Set3DProperty.Value.IntType.Value = %d\n", Set3DProperty.Value.IntType.Value);
+        printf(" Set3DProperty.ApplicationName = %s\n", Set3DProperty.ApplicationName);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success\n");
+        }
+
+        // Get Frame Limit
+        Get3DProperty.FeatureType           = CTL_3D_FEATURE_FRAME_LIMIT;
+        Get3DProperty.bSet                  = FALSE;
+        Get3DProperty.CustomValueSize       = 0;
+        Get3DProperty.pCustomValue          = NULL;
+        Get3DProperty.ApplicationName       = pAppName;
+        Get3DProperty.ApplicationNameLength = (int8_t)strlen(pAppName);
+        Get3DProperty.ValueType             = CTL_PROPERTY_VALUE_TYPE_INT32;
+        Get3DProperty.Version               = 0;
+
+        if (NULL != hDevices)
+        {
+            Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+
+            if (CTL_RESULT_SUCCESS != Result)
+            {
+                printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+                return Result;
+            }
+            else
+            {
+                printf("ctlGetSet3DFeature returned success\n");
+                printf(" Get3DProperty.Value.IntType.Enable = %d\n", Get3DProperty.Value.IntType.Enable);
+                printf(" Get3DProperty.Value.IntType.Value = %d\n", Get3DProperty.Value.IntType.Value);
+                printf(" Get3DProperty.ApplicationName = %s\n", Get3DProperty.ApplicationName);
+            }
+        }
+    }
+
+    // Frame Limit Global GET/SET
+
+    printf("======================Frame Limit test -> Global settings======================\n");
+    Get3DProperty = { 0 };
+    Set3DProperty = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    // Set Frame Limit
+    Set3DProperty.FeatureType          = CTL_3D_FEATURE_FRAME_LIMIT;
+    Set3DProperty.bSet                 = TRUE;
+    Set3DProperty.CustomValueSize      = 0;
+    Set3DProperty.pCustomValue         = NULL;
+    Set3DProperty.ValueType            = CTL_PROPERTY_VALUE_TYPE_INT32;
+    Set3DProperty.Value.IntType.Enable = true;
+    Set3DProperty.Value.IntType.Value  = 60;
+    Set3DProperty.Version              = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        printf(" Set3DProperty.Value.IntType.Enable = %d\n", Set3DProperty.Value.IntType.Enable);
+        printf(" Set3DProperty.Value.IntType.Value = %d\n", Set3DProperty.Value.IntType.Value);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success\n");
+        }
+
+        // Get Frame Limit
+        Get3DProperty.FeatureType     = CTL_3D_FEATURE_FRAME_LIMIT;
+        Get3DProperty.bSet            = FALSE;
+        Get3DProperty.CustomValueSize = 0;
+        Get3DProperty.pCustomValue    = NULL;
+        Get3DProperty.ValueType       = CTL_PROPERTY_VALUE_TYPE_INT32;
+        Get3DProperty.Version         = 0;
+
+        if (NULL != hDevices)
+        {
+            Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+            if (CTL_RESULT_SUCCESS != Result)
+            {
+                printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+                return Result;
+            }
+            else
+            {
+                printf("ctlGetSet3DFeature returned success\n");
+                printf(" Get3DProperty.Value.IntType.Enable = %d\n", Get3DProperty.Value.IntType.Enable);
+                printf(" Get3DProperty.Value.IntType.Value = %d\n", Get3DProperty.Value.IntType.Value);
+            }
+        }
+    }
+
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Method to test Low Latency
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlTestLowLatency(ctl_device_adapter_handle_t hDevices)
+{
+    // Low Latency Per APP GET/SET
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    printf("======================Low Latency test -> Per Application settings =====================\n");
+    char *pAppName                        = "GTA5.exe";
+    ctl_3d_feature_getset_t Get3DProperty = { 0 };
+    ctl_3d_feature_getset_t Set3DProperty = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    // Set Low Latency mode
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_LOW_LATENCY;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.CustomValueSize           = 0;
+    Set3DProperty.pCustomValue              = NULL;
+    Set3DProperty.ApplicationName           = pAppName;
+    Set3DProperty.ApplicationNameLength     = (int8_t)strlen(pAppName);
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_LOW_LATENCY_TYPES_TURN_ON_BOOST_MODE_ON;
+    Set3DProperty.Version                   = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        printf(" Set3DProperty.Value.EnumType.EnableType = %d\n", Set3DProperty.Value.EnumType.EnableType);
+        printf(" Set3DProperty.ApplicationName = %s\n", Set3DProperty.ApplicationName);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success\n");
+        }
+
+        // Get Low Latency mode
+        Get3DProperty.FeatureType           = CTL_3D_FEATURE_LOW_LATENCY;
+        Get3DProperty.bSet                  = FALSE;
+        Get3DProperty.CustomValueSize       = 0;
+        Get3DProperty.pCustomValue          = NULL;
+        Get3DProperty.ApplicationName       = pAppName;
+        Get3DProperty.ApplicationNameLength = (int8_t)strlen(pAppName);
+        Get3DProperty.ValueType             = CTL_PROPERTY_VALUE_TYPE_ENUM;
+        Get3DProperty.Version               = 0;
+
+        if (NULL != hDevices)
+        {
+            Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+
+            if (CTL_RESULT_SUCCESS != Result)
+            {
+                printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+                return Result;
+            }
+            else
+            {
+                printf("ctlGetSet3DFeature returned success\n");
+                printf(" Get3DProperty.Value.EnumType.EnableType = %d\n", Get3DProperty.Value.EnumType.EnableType);
+                printf(" Get3DProperty.ApplicationName = %s\n", Get3DProperty.ApplicationName);
+            }
+        }
+    }
+
+    // Low Latency Global GET/SET
+
+    printf("======================Low Latency test -> Global settings======================\n");
+    Get3DProperty = { 0 };
+    Set3DProperty = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    // Set Low Latency mode
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_LOW_LATENCY;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.CustomValueSize           = 0;
+    Set3DProperty.pCustomValue              = NULL;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_LOW_LATENCY_TYPES_TURN_ON;
+    Set3DProperty.Version                   = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        printf(" Set3DProperty.Value.EnumType.EnableType = %d\n", Set3DProperty.Value.EnumType.EnableType);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success\n");
+        }
+
+        // Get Low Latency mode
+        Get3DProperty.FeatureType     = CTL_3D_FEATURE_LOW_LATENCY;
+        Get3DProperty.bSet            = FALSE;
+        Get3DProperty.CustomValueSize = 0;
+        Get3DProperty.pCustomValue    = NULL;
+        Get3DProperty.ValueType       = CTL_PROPERTY_VALUE_TYPE_ENUM;
+        Get3DProperty.Version         = 0;
+
+        if (NULL != hDevices)
+        {
+            Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+            if (CTL_RESULT_SUCCESS != Result)
+            {
+                printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+                return Result;
+            }
+            else
+            {
+                printf("ctlGetSet3DFeature returned success\n");
+                printf(" Get3DProperty.Value.EnumType.EnableType = %d\n", Get3DProperty.Value.EnumType.EnableType);
+            }
+        }
+    }
+
+    return Result;
+}
+
 int main()
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
@@ -1010,6 +1289,20 @@ int main()
                 if (CTL_RESULT_SUCCESS != Result)
                 {
                     APP_LOG_ERROR("CtlGlobalOrPerAppTest failure code: 0x%X", Result);
+                }
+                STORE_RESET_ERROR(Result);
+
+                Result = CtlTestFrameLimit(hDevices[Index]);
+                if (CTL_RESULT_SUCCESS != Result)
+                {
+                    APP_LOG_ERROR("CtlTestFrameLimit failure code: 0x%X", Result);
+                }
+                STORE_RESET_ERROR(Result);
+
+                Result = CtlTestLowLatency(hDevices[Index]);
+                if (CTL_RESULT_SUCCESS != Result)
+                {
+                    APP_LOG_ERROR("CtlTestLowLatency failure code: 0x%X", Result);
                 }
                 STORE_RESET_ERROR(Result);
 
