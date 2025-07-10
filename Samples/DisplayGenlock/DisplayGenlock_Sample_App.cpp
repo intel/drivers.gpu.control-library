@@ -23,6 +23,7 @@
 #include <cassert>
 #include <string>
 #include <fstream>
+#include <list>
 using namespace std;
 
 #define CTL_APIEXPORT // caller of control API DLL shall define this before including igcl_api.h
@@ -30,12 +31,14 @@ using namespace std;
 #include "igcl_api.h"
 #include "GenericIGCLApp.h"
 
+#define NUMBER_OF_PRIMARY_ADAPTERS 1
+
 typedef struct _genlock_sample_args
 {
     bool IsGenlockPrimary;
     ctl_genlock_operation_t Operation;
     ctl_display_output_types_t PortType;
-    uint32_t NumberOfPrimaryAdapters;
+    uint32_t PrimaryBusId;
 } genlock_sample_args;
 
 static bool IsGetVBlankTs = false;
@@ -50,25 +53,25 @@ ctl_result_t GResult = CTL_RESULT_SUCCESS;
  ***************************************************************/
 void PrintTopology(ctl_genlock_args_t *pGenlockArgs, uint32_t AdapterCount)
 {
-    printf("========= Genlock Topology =========\n");
+    PRINT_LOGS("========= Genlock Topology =========");
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
-        printf("Adapter %u:\n", AdapterIndex);
-        printf("\tIsGenlockEnabled : %s\n", pGenlockArgs[AdapterIndex].IsGenlockEnabled ? "true" : "false");
-        printf("\tIsGenlockPossible : %s\n", pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
+        APP_LOG_INFO("Adapter %u:", AdapterIndex);
+        APP_LOG_INFO("\tIsGenlockEnabled : %s", pGenlockArgs[AdapterIndex].IsGenlockEnabled ? "true" : "false");
+        APP_LOG_INFO("\tIsGenlockPossible : %s", pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
         if (true == pGenlockArgs[AdapterIndex].IsGenlockEnabled)
         {
-            printf("\tIsPrimaryGenlockSystem : %s\n", pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem ? "true" : "false");
-            printf("\tNumber of Genlock displays : %d\n", pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays);
+            APP_LOG_INFO("\tIsPrimaryGenlockSystem : %s", pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem ? "true" : "false");
+            APP_LOG_INFO("\tNumber of Genlock displays : %d", pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays);
             for (int8_t DisplayIndex = 0; DisplayIndex < pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays; DisplayIndex++)
             {
-                printf("\tDisplay %u:\n", DisplayIndex);
-                printf("\t\tDisplay output handle : %p\n", pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo[DisplayIndex].hDisplayOutput);
-                printf("\t\tPrimary pipe : %s\n", pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo[DisplayIndex].IsPrimary ? "true" : "false");
+                APP_LOG_INFO("\tDisplay %u:", DisplayIndex);
+                APP_LOG_INFO("\t\tDisplay output handle : %p", pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo[DisplayIndex].hDisplayOutput);
+                APP_LOG_INFO("\t\tPrimary pipe : %s", pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo[DisplayIndex].IsPrimary ? "true" : "false");
             }
         }
     }
-    printf("====================================\n");
+    PRINT_LOGS("====================================");
 }
 
 /***************************************************************
@@ -79,24 +82,24 @@ void PrintTopology(ctl_genlock_args_t *pGenlockArgs, uint32_t AdapterCount)
  ***************************************************************/
 void PrintUsage(char *pArgv[])
 {
-    printf("Genlock Sample Test Application.\n");
-    printf("\nUsage: %s [Operation] <-g Genlock_Mode> <-d Display_Type> <-n Number_Of_Primary_Adapters>\n", pArgv[0]);
-    printf("Operation\n");
-    printf("\t-timing : Get target mode timing details supported by each display\n");
-    printf("\t-validate : Validate Genlock configuration\n");
-    printf("\t-enable : Enable Genlock\n");
-    printf("\t-topology : Get current Genlock topology\n");
-    printf("\t-disable : Disable Genlock\n");
-    printf("\t-vblankts : Get VBlank Timestamp\n");
-    printf("\t-help : Display usage\n");
-    printf("-g [Genlock mode]\n");
-    printf("\tprimary : primary system providing ref clock and ref sync (default)\n");
-    printf("\tsecondary : secondary system referring ref clock and ref sync from primary\n");
-    printf("-d [Display type]\n");
-    printf("\tdp : Display Port (default)\n");
-    printf("\thdmi : HDMI\n");
-    printf("-n [Number of Primary Adapters]\n");
-    printf("\tSpecify how many adapters you want to enable as a primary (default : 1)\n");
+    APP_LOG_INFO("Genlock Sample Test Application.");
+    APP_LOG_INFO("Usage: %s [Operation] <-g Genlock_Mode> <-d Display_Type> <-n Number_Of_Primary_Adapters>", pArgv[0]);
+    APP_LOG_INFO("Operation");
+    APP_LOG_INFO("\t-timing : Get target mode timing details supported by each display");
+    APP_LOG_INFO("\t-validate : Validate Genlock configuration");
+    APP_LOG_INFO("\t-enable : Enable Genlock");
+    APP_LOG_INFO("\t-topology : Get current Genlock topology");
+    APP_LOG_INFO("\t-disable : Disable Genlock");
+    APP_LOG_INFO("\t-vblankts : Get VBlank Timestamp");
+    APP_LOG_INFO("\t-help : Display usage");
+    APP_LOG_INFO("-g [Genlock mode]");
+    APP_LOG_INFO("\tprimary : primary system providing ref clock and ref sync (default)");
+    APP_LOG_INFO("\tsecondary : secondary system referring ref clock and ref sync from primary");
+    APP_LOG_INFO("-d [Display type]");
+    APP_LOG_INFO("\tdp : Display Port (default)");
+    APP_LOG_INFO("\thdmi : HDMI");
+    APP_LOG_INFO("-p [PCIe BUS ID of Primary Adapter]");
+    APP_LOG_INFO("\tDesignate PCIe BUS ID of adapter you want to set as a primary (default : 0)");
 }
 
 /***************************************************************
@@ -139,9 +142,9 @@ ctl_result_t GetCmdlineArgs(int Argc, char *pArgv[], genlock_sample_args *pGenlo
     string OptionArg;
 
     // initialize Genlock Sample Args
-    pGenlockSampleArgs->PortType                = CTL_DISPLAY_OUTPUT_TYPES_DISPLAYPORT;
-    pGenlockSampleArgs->NumberOfPrimaryAdapters = 1;
-    pGenlockSampleArgs->IsGenlockPrimary        = true;
+    pGenlockSampleArgs->PortType         = CTL_DISPLAY_OUTPUT_TYPES_DISPLAYPORT;
+    pGenlockSampleArgs->IsGenlockPrimary = true;
+    pGenlockSampleArgs->PrimaryBusId     = 0;
 
     if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-timing", OptionArg))
     {
@@ -182,7 +185,7 @@ ctl_result_t GetCmdlineArgs(int Argc, char *pArgv[], genlock_sample_args *pGenlo
             pGenlockSampleArgs->IsGenlockPrimary = false;
         }
     }
-    printf("[in] Genlock Mode: %s\n", pGenlockSampleArgs->IsGenlockPrimary == true ? "primary" : "secondary");
+    APP_LOG_INFO("[in] Genlock Mode: %s", pGenlockSampleArgs->IsGenlockPrimary == true ? "primary" : "secondary");
     // Display Type option
     if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-d", OptionArg))
     {
@@ -191,9 +194,9 @@ ctl_result_t GetCmdlineArgs(int Argc, char *pArgv[], genlock_sample_args *pGenlo
             pGenlockSampleArgs->PortType = CTL_DISPLAY_OUTPUT_TYPES_HDMI;
         }
     }
-    printf("[in] Display Type: %s\n", pGenlockSampleArgs->PortType == CTL_DISPLAY_OUTPUT_TYPES_HDMI ? "hdmi" : "dp");
-    // Number of Primary Adapters option
-    if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-n", OptionArg))
+    APP_LOG_INFO("[in] Display Type: %s", pGenlockSampleArgs->PortType == CTL_DISPLAY_OUTPUT_TYPES_HDMI ? "hdmi" : "dp");
+    // Primary BUS ID option
+    if (CTL_RESULT_SUCCESS == FindOptionArg(Argc, pArgv, "-p", OptionArg))
     {
         if (("" != OptionArg))
         {
@@ -201,17 +204,113 @@ ctl_result_t GetCmdlineArgs(int Argc, char *pArgv[], genlock_sample_args *pGenlo
             {
                 if (!isdigit(OptionArg[Index]))
                 {
-                    printf("Invalid Number of primary adapters.\n");
+                    APP_LOG_ERROR("Invalid PCIe BUS ID.");
                     Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
                     EXIT_ON_ERROR(Result);
                 }
             }
-            pGenlockSampleArgs->NumberOfPrimaryAdapters = stoul(OptionArg, 0, 16);
+            pGenlockSampleArgs->PrimaryBusId = stoul(OptionArg, 0, 10);
         }
     }
-    printf("[in] Number of primary adapters: %u\n", pGenlockSampleArgs->NumberOfPrimaryAdapters);
+    APP_LOG_INFO("[in] BUS ID of primary adapter: %u", pGenlockSampleArgs->PrimaryBusId);
 
 Exit:
+    return Result;
+}
+
+/***************************************************************
+ * @brief GetVblankTimestamp
+ * get vblank time stamp
+ * @param hDevices, AdapterCount
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t GetVblankTimestamp(ctl_device_adapter_handle_t *hDevices, uint32_t AdapterCount)
+{
+    ctl_result_t Result                                = CTL_RESULT_SUCCESS;
+    ctl_device_adapter_handle_t hFailureDeviceAdapter  = NULL;
+    ctl_display_output_handle_t *hDisplayOutput        = NULL;
+    ctl_display_output_handle_t *hActiveDisplayOutputs = NULL;
+    uint32_t DisplayCount                              = 0;
+    uint8_t ActiveDisplayCount                         = 0;
+    uint8_t MaxNumDisplayOutputs                       = 0;
+    bool IsDisplayActive                               = false;
+    bool IsDisplayAttached                             = false;
+    ctl_vblank_ts_args_t VblankTsArgs;
+
+    for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
+    {
+        ActiveDisplayCount = 0;
+
+        // Enumerate all the possible target displays for the adapters
+        // First step is to get the count
+        DisplayCount = 0;
+
+        Result = ctlEnumerateDisplayOutputs(hDevices[AdapterIndex], &DisplayCount, NULL);
+
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+        }
+        else if (DisplayCount <= 0)
+        {
+            APP_LOG_WARN("Invalid Display Count. Skipping display enumeration for adapter: %d", AdapterIndex);
+            continue;
+        }
+
+        hDisplayOutput = (ctl_display_output_handle_t *)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
+        EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+        Result = ctlEnumerateDisplayOutputs(hDevices[AdapterIndex], &DisplayCount, hDisplayOutput);
+        LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+
+        APP_LOG_INFO("Adapter %u:", AdapterIndex);
+        for (uint8_t DisplayIndex = 0; DisplayIndex < DisplayCount; DisplayIndex++)
+        {
+            ctl_display_properties_t stDisplayProperties = {};
+            stDisplayProperties.Size                     = sizeof(ctl_display_properties_t);
+
+            if (NULL == hDisplayOutput[DisplayIndex])
+            {
+                APP_LOG_ERROR("\thDisplayOutput[%d] is NULL.", DisplayIndex);
+                Result = CTL_RESULT_ERROR_INVALID_NULL_HANDLE;
+                EXIT_ON_ERROR(Result);
+            }
+
+            Result = ctlGetDisplayProperties(hDisplayOutput[DisplayIndex], &stDisplayProperties);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetDisplayProperties");
+
+            ctl_adapter_display_encoder_properties_t stDisplayEncoderProperties = {};
+            stDisplayEncoderProperties.Size                                     = sizeof(ctl_adapter_display_encoder_properties_t);
+
+            Result = ctlGetAdaperDisplayEncoderProperties(hDisplayOutput[DisplayIndex], &stDisplayEncoderProperties);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetAdaperDisplayEncoderProperties");
+
+            IsDisplayActive   = stDisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ACTIVE;
+            IsDisplayAttached = stDisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ATTACHED;
+
+            memset(&VblankTsArgs, 0, sizeof(ctl_vblank_ts_args_t));
+
+            // Filter active display outputs
+            if (IsDisplayActive && IsDisplayAttached)
+            {
+                // get genlock status (vblank time stamp)
+                Result = ctlGetVblankTimestamp(hDisplayOutput[DisplayIndex], &VblankTsArgs);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlGetVblankTimestamp");
+            }
+
+            for (uint8_t i = 0; i < VblankTsArgs.NumOfTargets; i++)
+            {
+                APP_LOG_INFO("\tTarget ID: %d Child[%d] vblank timestamp: %I64d", stDisplayProperties.Os_display_encoder_handle.WindowsDisplayEncoderID, i, VblankTsArgs.VblankTS[i]);
+            }
+        }
+
+        // Free dynamically allocated memories
+        CTL_FREE_MEM(hDisplayOutput);
+    }
+
+Exit:
+    CTL_FREE_MEM(hDisplayOutput);
+
     return Result;
 }
 
@@ -386,10 +485,10 @@ ctl_result_t TestGenlockValidate(ctl_device_adapter_handle_t *hDevices, ctl_genl
     Result = ctlGetSetDisplayGenlock(hDevices, pGenlockArgs, AdapterCount, &hFailureDeviceAdapter);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplayGenlock");
 
-    printf("========= Genlock Validate =========\n");
+    PRINT_LOGS("========= Genlock Validate =========");
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
-        printf("Adapter[%u]: IsGenlockPossible : %s\n", AdapterIndex, pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
+        APP_LOG_INFO("Adapter[%u]: IsGenlockPossible : %s", AdapterIndex, pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
     }
 
 Exit:
@@ -527,7 +626,7 @@ ctl_result_t InitGenlockArgs(ctl_device_adapter_handle_t *hDevices, uint32_t Ada
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid display count for adapter: %d\n", AdapterIndex);
+            APP_LOG_ERROR("Invalid display count for adapter: %d", AdapterIndex);
             LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
         }
 
@@ -548,7 +647,7 @@ ctl_result_t InitGenlockArgs(ctl_device_adapter_handle_t *hDevices, uint32_t Ada
 
             if (NULL == hDisplayOutput[DisplayIndex])
             {
-                printf("hDisplayOutput[%d] is NULL.\n", DisplayIndex);
+                APP_LOG_ERROR("hDisplayOutput[%d] is NULL.", DisplayIndex);
                 Result = CTL_RESULT_ERROR_INVALID_NULL_HANDLE;
                 EXIT_ON_ERROR(Result);
             }
@@ -574,7 +673,7 @@ ctl_result_t InitGenlockArgs(ctl_device_adapter_handle_t *hDevices, uint32_t Ada
 
         if ((CTL_GENLOCK_OPERATION_GET_TOPOLOGY != GenlockSampleArgs.Operation) && (0 == ActiveDisplayCount))
         {
-            printf("Adatper[%d] does not have any active displays for the selected display type. ActiveDisplayCount is %d.\n", AdapterIndex, ActiveDisplayCount);
+            APP_LOG_ERROR("Adatper[%d] does not have any active displays for the selected display type. ActiveDisplayCount is %d.", AdapterIndex, ActiveDisplayCount);
             Result = CTL_RESULT_ERROR_DISPLAY_NOT_ATTACHED;
             EXIT_ON_ERROR(Result);
         }
@@ -591,11 +690,13 @@ ctl_result_t InitGenlockArgs(ctl_device_adapter_handle_t *hDevices, uint32_t Ada
         pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem = GenlockSampleArgs.IsGenlockPrimary;
 
         // Allocate dynamic memories
+        CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo);
         pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo =
         (ctl_genlock_display_info_t *)malloc(sizeof(ctl_genlock_display_info_t) * pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays);
         EXIT_ON_MEM_ALLOC_FAILURE(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo, "pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo");
         memset(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo, 0, sizeof(ctl_genlock_display_info_t) * pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays);
 
+        CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList);
         pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList =
         (ctl_genlock_target_mode_list_t *)malloc(sizeof(ctl_genlock_target_mode_list_t) * pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays);
         EXIT_ON_MEM_ALLOC_FAILURE(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList, "pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList");
@@ -621,97 +722,194 @@ Exit:
 }
 
 /***************************************************************
- * @brief GetVblankTimestamp
- * get vblank time stamp
- * @param hDevices, AdapterCount
+ * @brief GenlockEnable
+ * Enable Display Genlock
+ * @param hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs
  * @return ctl_result_t
  ***************************************************************/
-ctl_result_t GetVblankTimestamp(ctl_device_adapter_handle_t *hDevices, uint32_t AdapterCount)
+ctl_result_t GenlockEnable(ctl_device_adapter_handle_t *hDevices, uint32_t AdapterCount, genlock_sample_args GenlockSampleArgs, ctl_genlock_args_t *pGenlockArgs)
 {
-    ctl_result_t Result                                = CTL_RESULT_SUCCESS;
-    ctl_device_adapter_handle_t hFailureDeviceAdapter  = NULL;
-    ctl_display_output_handle_t *hDisplayOutput        = NULL;
-    ctl_display_output_handle_t *hActiveDisplayOutputs = NULL;
-    uint32_t DisplayCount                              = 0;
-    uint8_t ActiveDisplayCount                         = 0;
-    uint8_t MaxNumDisplayOutputs                       = 0;
-    bool IsDisplayActive                               = false;
-    bool IsDisplayAttached                             = false;
-    ctl_vblank_ts_args_t VblankTsArgs;
+    ctl_result_t Result                             = CTL_RESULT_SUCCESS;
+    ctl_device_adapter_handle_t PrimaryAdapter      = NULL;
+    ctl_device_adapter_handle_t *hSecondaryAdapters = NULL;
+    uint8_t PrimaryAdapterCount                     = 0;
+    uint8_t SecondaryAdapterCount                   = 0;
+    uint8_t SecondaryAdapterIndex                   = 0;
 
-    for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
+    // The primary adapter must be enabled before enabling other secondary adapters
+    // Number of primary adapters should be one. Other adapters are configured as a secondary
+    if (true == GenlockSampleArgs.IsGenlockPrimary)
     {
-        ActiveDisplayCount = 0;
-
-        // Enumerate all the possible target displays for the adapters
-        // First step is to get the count
-        DisplayCount = 0;
-
-        Result = ctlEnumerateDisplayOutputs(hDevices[AdapterIndex], &DisplayCount, NULL);
-
-        if (CTL_RESULT_SUCCESS != Result)
+        PrimaryAdapterCount   = NUMBER_OF_PRIMARY_ADAPTERS;
+        SecondaryAdapterCount = AdapterCount - PrimaryAdapterCount;
+        hSecondaryAdapters    = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * SecondaryAdapterCount);
+        for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
         {
-            LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
-        }
-        else if (DisplayCount <= 0)
-        {
-            printf("Invalid Display Count. Skipping display enumeration for adapter: %d\n", AdapterIndex);
-            continue;
-        }
+            LUID deviceID;
+            ctl_device_adapter_properties_t stdeviceAdapterProperties = { 0 };
 
-        hDisplayOutput = (ctl_display_output_handle_t *)malloc(sizeof(ctl_display_output_handle_t) * DisplayCount);
-        EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+            stdeviceAdapterProperties.Size           = sizeof(ctl_device_adapter_properties_t);
+            stdeviceAdapterProperties.pDeviceID      = &deviceID;
+            stdeviceAdapterProperties.device_id_size = sizeof(LUID);
+            stdeviceAdapterProperties.Version        = 2;
 
-        Result = ctlEnumerateDisplayOutputs(hDevices[AdapterIndex], &DisplayCount, hDisplayOutput);
-        LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, "ctlEnumerateDisplayOutputs");
+            // Fetch device adapter properties into stdeviceAdapterProperties
+            Result = ctlGetDeviceProperties(hDevices[AdapterIndex], &stdeviceAdapterProperties);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetDeviceProperties");
 
-        printf("Adapter %u:\n", AdapterIndex);
-        for (uint8_t DisplayIndex = 0; DisplayIndex < DisplayCount; DisplayIndex++)
-        {
-            ctl_display_properties_t stDisplayProperties = {};
-            stDisplayProperties.Size                     = sizeof(ctl_display_properties_t);
-
-            if (NULL == hDisplayOutput[DisplayIndex])
+            if (((GenlockSampleArgs.PrimaryBusId != 0) && (stdeviceAdapterProperties.adapter_bdf.bus == GenlockSampleArgs.PrimaryBusId)) ||
+                ((GenlockSampleArgs.PrimaryBusId == 0) && (AdapterIndex == 0)))
             {
-                printf("\thDisplayOutput[%d] is NULL.\n", DisplayIndex);
-                Result = CTL_RESULT_ERROR_INVALID_NULL_HANDLE;
-                EXIT_ON_ERROR(Result);
+                PrimaryAdapter = hDevices[AdapterIndex];
             }
-
-            Result = ctlGetDisplayProperties(hDisplayOutput[DisplayIndex], &stDisplayProperties);
-            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetDisplayProperties");
-
-            ctl_adapter_display_encoder_properties_t stDisplayEncoderProperties = {};
-            stDisplayEncoderProperties.Size                                     = sizeof(ctl_adapter_display_encoder_properties_t);
-
-            Result = ctlGetAdaperDisplayEncoderProperties(hDisplayOutput[DisplayIndex], &stDisplayEncoderProperties);
-            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetAdaperDisplayEncoderProperties");
-
-            IsDisplayActive   = stDisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ACTIVE;
-            IsDisplayAttached = stDisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ATTACHED;
-
-            memset(&VblankTsArgs, 0, sizeof(ctl_vblank_ts_args_t));
-
-            // Filter active display outputs
-            if (IsDisplayActive && IsDisplayAttached)
+            else
             {
-                // get genlock status (vblank time stamp)
-                Result = ctlGetVblankTimestamp(hDisplayOutput[DisplayIndex], &VblankTsArgs);
-                LOG_AND_EXIT_ON_ERROR(Result, "ctlGetVblankTimestamp");
-            }
-
-            for (uint8_t i = 0; i < VblankTsArgs.NumOfTargets; i++)
-            {
-                printf("\tTarget ID: %d Child[%d] vblank timestamp: %I64d\n", stDisplayProperties.Os_display_encoder_handle.WindowsDisplayEncoderID, i, VblankTsArgs.VblankTS[i]);
+                hSecondaryAdapters[SecondaryAdapterIndex] = hDevices[AdapterIndex];
+                SecondaryAdapterIndex++;
             }
         }
 
-        // Free dynamically allocated memories
-        CTL_FREE_MEM(hDisplayOutput);
+        // Enabling a primary adapter
+        Result = InitGenlockArgs(&PrimaryAdapter, PrimaryAdapterCount, GenlockSampleArgs, pGenlockArgs);
+        LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs for a primary adapter");
+
+        Result = TestGenlockEnable(&PrimaryAdapter, pGenlockArgs, PrimaryAdapterCount);
+        LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockEnable - Primary");
+
+        // Enabling secondary adapters
+        if (SecondaryAdapterCount > 0)
+        {
+            GenlockSampleArgs.IsGenlockPrimary = false;
+            Result                             = InitGenlockArgs(hSecondaryAdapters, SecondaryAdapterCount, GenlockSampleArgs, pGenlockArgs);
+            LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs for secondary adapters");
+
+            Result = TestGenlockEnable(hSecondaryAdapters, pGenlockArgs, SecondaryAdapterCount);
+            LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockEnable - Secondary");
+        }
+    }
+    else
+    {
+        // Configuring all adapters as a secondary
+        Result = InitGenlockArgs(hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs);
+        LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
+        Result = TestGenlockEnable(hDevices, pGenlockArgs, AdapterCount);
+        LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockEnable - Secondary Adapters");
     }
 
 Exit:
-    CTL_FREE_MEM(hDisplayOutput);
+    CTL_FREE_MEM(hSecondaryAdapters);
+
+    return Result;
+}
+
+/***************************************************************
+ * @brief GenlockDisable
+ * Disable Display Genlock
+ * @param hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t GenlockDisable(ctl_device_adapter_handle_t *hDevices, uint32_t AdapterCount, genlock_sample_args GenlockSampleArgs, ctl_genlock_args_t *pGenlockArgs)
+{
+    ctl_result_t Result                             = CTL_RESULT_SUCCESS;
+    ctl_device_adapter_handle_t *hPrimaryAdapters   = NULL;
+    ctl_device_adapter_handle_t *hSecondaryAdapters = NULL;
+    uint8_t GenlockedAdapterCount                   = 0;
+    uint8_t PrimaryAdapterCount                     = 0;
+    uint8_t SecondaryAdapterCount                   = 0;
+
+    // The primary adapter must be disabled last after secondary adapters are disabled
+    if (true == GenlockSampleArgs.IsGenlockPrimary)
+    {
+        // Secondary adapters should be disabled firstly
+        // Get topology to check which adapter is a primary
+        GenlockSampleArgs.Operation = CTL_GENLOCK_OPERATION_GET_TOPOLOGY;
+        Result                      = InitGenlockArgs(hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs);
+        LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
+        Result = TestGenlockGetTopology(hDevices, pGenlockArgs, AdapterCount);
+        LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockGetTopology");
+
+        // Count primary and secondary adapters
+        GenlockedAdapterCount = 0;
+        PrimaryAdapterCount   = 0;
+        SecondaryAdapterCount = 0;
+        for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
+        {
+            if (true == pGenlockArgs[AdapterIndex].IsGenlockEnabled)
+            {
+                GenlockedAdapterCount++;
+                if (false == pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem)
+                {
+                    SecondaryAdapterCount++;
+                }
+            }
+        }
+
+        if (0 == GenlockedAdapterCount)
+        {
+            APP_LOG_ERROR("There is no Genlocked adapter.");
+            Result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+            EXIT_ON_ERROR(Result);
+        }
+
+        PrimaryAdapterCount = GenlockedAdapterCount - SecondaryAdapterCount;
+        if (0 != PrimaryAdapterCount)
+        {
+            hPrimaryAdapters = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * PrimaryAdapterCount);
+            EXIT_ON_MEM_ALLOC_FAILURE(hPrimaryAdapters, "hPrimaryAdapters");
+        }
+        if (0 != SecondaryAdapterCount)
+        {
+            hSecondaryAdapters = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * SecondaryAdapterCount);
+            EXIT_ON_MEM_ALLOC_FAILURE(hSecondaryAdapters, "hSecondaryAdapters");
+        }
+
+        PrimaryAdapterCount   = 0;
+        SecondaryAdapterCount = 0;
+        for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
+        {
+            if ((true == pGenlockArgs[AdapterIndex].IsGenlockEnabled) && (true == pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem) && (NULL != hPrimaryAdapters))
+            {
+                hPrimaryAdapters[PrimaryAdapterCount++] = hDevices[AdapterIndex];
+            }
+            else if ((true == pGenlockArgs[AdapterIndex].IsGenlockEnabled) && (false == pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem) && (NULL != hSecondaryAdapters))
+            {
+                hSecondaryAdapters[SecondaryAdapterCount++] = hDevices[AdapterIndex];
+            }
+        }
+
+        GenlockSampleArgs.Operation = CTL_GENLOCK_OPERATION_DISABLE;
+        // Disable secondary adapters
+        GenlockSampleArgs.IsGenlockPrimary = false;
+        if (0 < SecondaryAdapterCount)
+        {
+            Result = InitGenlockArgs(hSecondaryAdapters, SecondaryAdapterCount, GenlockSampleArgs, pGenlockArgs);
+            LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
+            Result = TestGenlockDisable(hSecondaryAdapters, pGenlockArgs, SecondaryAdapterCount);
+            LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockDisable");
+        }
+        CTL_FREE_MEM(hSecondaryAdapters);
+
+        // Disable primary adapter
+        GenlockSampleArgs.IsGenlockPrimary = true;
+        if (0 < PrimaryAdapterCount)
+        {
+            Result = InitGenlockArgs(hPrimaryAdapters, PrimaryAdapterCount, GenlockSampleArgs, pGenlockArgs);
+            LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
+            Result = TestGenlockDisable(hPrimaryAdapters, pGenlockArgs, PrimaryAdapterCount);
+        }
+
+        CTL_FREE_MEM(hPrimaryAdapters);
+    }
+    else
+    {
+        Result = InitGenlockArgs(hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs);
+        LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
+        Result = TestGenlockDisable(hDevices, pGenlockArgs, AdapterCount);
+    }
+
+Exit:
+    CTL_FREE_MEM(hPrimaryAdapters);
+    CTL_FREE_MEM(hSecondaryAdapters);
 
     return Result;
 }
@@ -724,13 +922,8 @@ Exit:
  ***************************************************************/
 ctl_result_t TestDisplayGenlock(ctl_device_adapter_handle_t *hDevices, uint32_t AdapterCount, genlock_sample_args GenlockSampleArgs)
 {
-    ctl_result_t Result                             = CTL_RESULT_SUCCESS;
-    ctl_genlock_args_t *pGenlockArgs                = NULL;
-    ctl_device_adapter_handle_t *hPrimaryAdapters   = NULL;
-    ctl_device_adapter_handle_t *hSecondaryAdapters = NULL;
-    uint8_t GenlockedAdapterCount                   = 0;
-    uint8_t PrimaryAdapterCount                     = 0;
-    uint8_t SecondaryAdapterCount                   = 0;
+    ctl_result_t Result              = CTL_RESULT_SUCCESS;
+    ctl_genlock_args_t *pGenlockArgs = NULL;
 
     pGenlockArgs = (ctl_genlock_args_t *)malloc(sizeof(ctl_genlock_args_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(pGenlockArgs, "pGenlockArgs");
@@ -748,131 +941,10 @@ ctl_result_t TestDisplayGenlock(ctl_device_adapter_handle_t *hDevices, uint32_t 
             Result = TestGenlockValidate(hDevices, pGenlockArgs, AdapterCount);
             break;
         case CTL_GENLOCK_OPERATION_ENABLE:
-            // The primary adapter must be enabled first before other secondary adapters are enabled
-            if (true == GenlockSampleArgs.IsGenlockPrimary)
-            {
-                // Number of primary adapters cannot be zero or bigger than plugged-in adapters count
-                if ((0 == GenlockSampleArgs.NumberOfPrimaryAdapters) || (AdapterCount < GenlockSampleArgs.NumberOfPrimaryAdapters))
-                {
-                    printf("Number of primary adapters cannot be zero or bigger than plugged-in adapters count.\n");
-                    Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
-                    CTL_FREE_MEM(pGenlockArgs);
-                    return Result;
-                }
-                // Enable primary target on the primary adapter#0
-                Result = InitGenlockArgs(hDevices, GenlockSampleArgs.NumberOfPrimaryAdapters, GenlockSampleArgs, pGenlockArgs);
-                LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
-
-                Result = TestGenlockEnable(hDevices, pGenlockArgs, GenlockSampleArgs.NumberOfPrimaryAdapters);
-                LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockEnable - Primary");
-
-                SecondaryAdapterCount = AdapterCount - GenlockSampleArgs.NumberOfPrimaryAdapters;
-                if (SecondaryAdapterCount > 0)
-                {
-                    // Other adapters are secondary systems for Genlock
-                    GenlockSampleArgs.IsGenlockPrimary = false;
-                    Result                             = InitGenlockArgs(&hDevices[GenlockSampleArgs.NumberOfPrimaryAdapters], SecondaryAdapterCount, GenlockSampleArgs, pGenlockArgs);
-                    LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
-                    Result = TestGenlockEnable(&hDevices[GenlockSampleArgs.NumberOfPrimaryAdapters], pGenlockArgs, SecondaryAdapterCount);
-                    LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockEnable - Secondary");
-                }
-            }
-            else
-            {
-                Result = InitGenlockArgs(hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs);
-                LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
-                Result = TestGenlockEnable(hDevices, pGenlockArgs, AdapterCount);
-                LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockEnable - Primary");
-            }
+            Result = GenlockEnable(hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs);
             break;
         case CTL_GENLOCK_OPERATION_DISABLE:
-            // The primary adapter must be disabled last after secondary adapters are disabled
-            if (true == GenlockSampleArgs.IsGenlockPrimary)
-            {
-                // Secondary adapters should be disabled first
-                // Get topology to check which adapter is a primary
-                GenlockSampleArgs.Operation = CTL_GENLOCK_OPERATION_GET_TOPOLOGY;
-                Result                      = InitGenlockArgs(hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs);
-                LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
-                Result = TestGenlockGetTopology(hDevices, pGenlockArgs, AdapterCount);
-                LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockGetTopology");
-
-                // Count primary and secondary adapters
-                GenlockedAdapterCount = 0;
-                PrimaryAdapterCount   = 0;
-                SecondaryAdapterCount = 0;
-                for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
-                {
-                    if (true == pGenlockArgs[AdapterIndex].IsGenlockEnabled)
-                    {
-                        GenlockedAdapterCount++;
-                        if (false == pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem)
-                        {
-                            SecondaryAdapterCount++;
-                        }
-                    }
-                }
-
-                if (0 == GenlockedAdapterCount)
-                {
-                    printf("There is no Genlocked adapter.\n");
-                    Result = CTL_RESULT_ERROR_NOT_INITIALIZED;
-                    EXIT_ON_ERROR(Result);
-                }
-
-                PrimaryAdapterCount = GenlockedAdapterCount - SecondaryAdapterCount;
-                if (0 != PrimaryAdapterCount)
-                {
-                    hPrimaryAdapters = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * PrimaryAdapterCount);
-                    EXIT_ON_MEM_ALLOC_FAILURE(hPrimaryAdapters, "hPrimaryAdapters");
-                }
-                if (0 != SecondaryAdapterCount)
-                {
-                    hSecondaryAdapters = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * SecondaryAdapterCount);
-                    EXIT_ON_MEM_ALLOC_FAILURE(hSecondaryAdapters, "hSecondaryAdapters");
-                }
-
-                PrimaryAdapterCount   = 0;
-                SecondaryAdapterCount = 0;
-                for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
-                {
-                    if ((true == pGenlockArgs[AdapterIndex].IsGenlockEnabled) && (true == pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem) && (NULL != hPrimaryAdapters))
-                    {
-                        hPrimaryAdapters[PrimaryAdapterCount++] = hDevices[AdapterIndex];
-                    }
-                    else if ((true == pGenlockArgs[AdapterIndex].IsGenlockEnabled) && (false == pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem) && (NULL != hSecondaryAdapters))
-                    {
-                        hSecondaryAdapters[SecondaryAdapterCount++] = hDevices[AdapterIndex];
-                    }
-                }
-
-                GenlockSampleArgs.Operation = CTL_GENLOCK_OPERATION_DISABLE;
-                // Disable secondary adapters
-                GenlockSampleArgs.IsGenlockPrimary = false;
-                if (0 < SecondaryAdapterCount)
-                {
-                    Result = InitGenlockArgs(hSecondaryAdapters, SecondaryAdapterCount, GenlockSampleArgs, pGenlockArgs);
-                    LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
-                    Result = TestGenlockDisable(hSecondaryAdapters, pGenlockArgs, SecondaryAdapterCount);
-                    LOG_AND_EXIT_ON_ERROR(Result, "TestGenlockDisable");
-                }
-                CTL_FREE_MEM(hSecondaryAdapters);
-
-                // Disable primary adapter
-                GenlockSampleArgs.IsGenlockPrimary = true;
-                if (0 < PrimaryAdapterCount)
-                {
-                    Result = InitGenlockArgs(hPrimaryAdapters, PrimaryAdapterCount, GenlockSampleArgs, pGenlockArgs);
-                    LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
-                    Result = TestGenlockDisable(hPrimaryAdapters, pGenlockArgs, PrimaryAdapterCount);
-                }
-            }
-            else
-            {
-                Result = InitGenlockArgs(hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs);
-                LOG_AND_EXIT_ON_ERROR(Result, "InitGenlockArgs");
-                Result = TestGenlockDisable(hDevices, pGenlockArgs, AdapterCount);
-            }
+            Result = GenlockDisable(hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs);
             break;
         case CTL_GENLOCK_OPERATION_GET_TOPOLOGY:
             Result = InitGenlockArgs(hDevices, AdapterCount, GenlockSampleArgs, pGenlockArgs);
@@ -899,8 +971,12 @@ Exit:
                     CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList[ModeListIndex].pTargetModes);
                 }
             }
-            CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo);
-            CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList);
+
+            for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
+            {
+                CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockDisplayInfo);
+                CTL_FREE_MEM(pGenlockArgs[AdapterIndex].GenlockTopology.pGenlockModeList);
+            }
         }
     }
 
@@ -934,19 +1010,40 @@ int main(int Argc, char *pArgv[])
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     // Initialization successful
     // Get the list of Intel Adapters
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, NULL);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, NULL);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "hDevices");
 
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     if (true == IsGetVBlankTs)
     {
@@ -963,6 +1060,6 @@ Exit:
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDevices);
 
-    printf("Overall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overall test result is 0x%X", GResult);
     return GResult;
 }

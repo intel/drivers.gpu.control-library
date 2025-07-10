@@ -62,12 +62,12 @@ ctl_result_t TestPSRPowerFeature(ctl_display_output_handle_t hDisplayOutput)
 
     if (CTL_POWER_OPTIMIZATION_FLAG_PSR != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_PSR))
     {
-        printf("PSR is not supported\n");
+        APP_LOG_WARN("PSR is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("PSR is supported\n");
+    APP_LOG_INFO("PSR is supported");
 
     // Set Current PowerFeature
     Result = ctlSetPowerOptimizationSetting(hDisplayOutput, &NewPowerSettings);
@@ -76,7 +76,7 @@ ctl_result_t TestPSRPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     // Get Applied PowerFeature
     Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (PSR)");
-    printf("PSR Enable = %d\n", AppliedPowerSettings.Enable);
+    APP_LOG_INFO("PSR Enable = %d", AppliedPowerSettings.Enable);
 
 Exit:
     return Result;
@@ -106,7 +106,7 @@ ctl_result_t TestDPSTPowerFeature(ctl_display_output_handle_t hDisplayOutput)
 
     if (CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST))
     {
-        printf("DPST is not supported\n");
+        APP_LOG_WARN("DPST is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
@@ -116,19 +116,19 @@ ctl_result_t TestDPSTPowerFeature(ctl_display_output_handle_t hDisplayOutput)
 
     if (CTL_POWER_OPTIMIZATION_DPST_FLAG_BKLT != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_BKLT))
     {
-        printf("BKLT is not supported\n");
+        APP_LOG_WARN("BKLT is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("DPST is supported\n");
-    printf("DPST Enable = %d\n", AppliedPowerSettings.Enable);
-    printf("DPST MinLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
-    printf("DPST MaxLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
+    APP_LOG_INFO("DPST is supported");
+    APP_LOG_INFO("DPST Enable = %d", AppliedPowerSettings.Enable);
+    APP_LOG_INFO("DPST MinLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
+    APP_LOG_INFO("DPST MaxLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
 
     if (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_EPSM)
     {
-        printf("DPST EPSM enabled\n");
+        APP_LOG_INFO("DPST EPSM enabled");
     }
 
     uint8_t Levels[2]                                             = { AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel, AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel };
@@ -153,7 +153,7 @@ ctl_result_t TestDPSTPowerFeature(ctl_display_output_handle_t hDisplayOutput)
 
         if (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level != NewPowerSettings.FeatureSpecificData.DPSTInfo.Level)
         {
-            printf("Current and Applied levels mismatched: %d, %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
+            APP_LOG_ERROR("Current and Applied levels mismatched: %d, %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
         }
     }
 
@@ -189,15 +189,15 @@ ctl_result_t TestOPSTPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     if ((CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST)) ||
         (CTL_POWER_OPTIMIZATION_DPST_FLAG_OPST != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_OPST)))
     {
-        printf("OPST is not supported\n");
+        APP_LOG_WARN("OPST is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("OPST is supported\n");
-    printf("GetPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_OPST\n");
-    printf("OPST MinLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
-    printf("OPST MaxLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
+    APP_LOG_INFO("OPST is supported");
+    APP_LOG_INFO("GetPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_OPST");
+    APP_LOG_INFO("OPST MinLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
+    APP_LOG_INFO("OPST MaxLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
 
     NewPowerSettings.Size                                         = sizeof(ctl_power_optimization_settings_t);
     NewPowerSettings.PowerOptimizationFeature                     = CTL_POWER_OPTIMIZATION_FLAG_DPST;
@@ -222,7 +222,7 @@ ctl_result_t TestOPSTPowerFeature(ctl_display_output_handle_t hDisplayOutput)
 
         if (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level != NewPowerSettings.FeatureSpecificData.DPSTInfo.Level)
         {
-            printf("Current and Applied levels  mismatched: %d, %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
+            APP_LOG_ERROR("Current and Applied levels  mismatched: %d, %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
         }
     }
 
@@ -258,14 +258,14 @@ ctl_result_t TestELPPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     if ((CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST)) ||
         (CTL_POWER_OPTIMIZATION_DPST_FLAG_ELP != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_ELP)))
     {
-        printf("ELP is not supported\n");
+        APP_LOG_WARN("ELP is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("GetPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_ELP\n");
-    printf("ELP MinLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
-    printf("ELP MaxLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
+    APP_LOG_INFO("GetPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_ELP");
+    APP_LOG_INFO("ELP MinLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
+    APP_LOG_INFO("ELP MaxLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
 
     uint8_t Levels[2]                                             = { AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel, AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel };
     NewPowerSettings.Size                                         = sizeof(ctl_power_optimization_settings_t);
@@ -288,7 +288,7 @@ ctl_result_t TestELPPowerFeature(ctl_display_output_handle_t hDisplayOutput)
 
         if (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level != NewPowerSettings.FeatureSpecificData.DPSTInfo.Level)
         {
-            printf("Current and Applied levels mismatched: %d, %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
+            APP_LOG_ERROR("Current and Applied levels mismatched: %d, %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
         }
     }
 
@@ -349,11 +349,11 @@ ctl_result_t TestBrightnessControl(ctl_display_output_handle_t hDisplayOutput)
 
         if (AppliedBrightnessSettings.TargetBrightness != NewBrightnessSettings.TargetBrightness)
         {
-            printf("Current and Applied TargetBrightness mismatched: %d, %d\n", AppliedBrightnessSettings.TargetBrightness, NewBrightnessSettings.TargetBrightness);
+            APP_LOG_ERROR("Current and Applied TargetBrightness mismatched: %d, %d", AppliedBrightnessSettings.TargetBrightness, NewBrightnessSettings.TargetBrightness);
         }
 
-        printf("Current brightness = %d\n", AppliedBrightnessSettings.CurrentBrightness);
-        printf("Target brightness = %d\n", AppliedBrightnessSettings.TargetBrightness);
+        APP_LOG_INFO("Current brightness = %d", AppliedBrightnessSettings.CurrentBrightness);
+        APP_LOG_INFO("Target brightness = %d", AppliedBrightnessSettings.TargetBrightness);
     }
     else
     {
@@ -391,13 +391,13 @@ ctl_result_t TestApdPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     if ((CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST)) ||
         (CTL_POWER_OPTIMIZATION_DPST_FLAG_APD != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_APD)))
     {
-        printf("APD is not supported\n");
+        APP_LOG_WARN("APD is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
 
-    printf("APD MinLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
-    printf("APD MaxLevel = %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
+    APP_LOG_INFO("APD MinLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
+    APP_LOG_INFO("APD MaxLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
 
     uint8_t Levels[2] = { AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel, AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel };
 
@@ -420,7 +420,7 @@ ctl_result_t TestApdPowerFeature(ctl_display_output_handle_t hDisplayOutput)
 
         if (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level != NewPowerSettings.FeatureSpecificData.DPSTInfo.Level)
         {
-            printf("Current and Applied levels mismatched: %d, %d\n", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
+            APP_LOG_ERROR("Current and Applied levels mismatched: %d, %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
         }
     }
 
@@ -455,7 +455,7 @@ ctl_result_t TestPixOptixPowerFeature(ctl_display_output_handle_t hDisplayOutput
     if ((CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST)) ||
         (CTL_POWER_OPTIMIZATION_DPST_FLAG_PIXOPTIX != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_PIXOPTIX)))
     {
-        printf("PIXOPTIX is not supported\n");
+        APP_LOG_WARN("PIXOPTIX is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
@@ -474,11 +474,11 @@ ctl_result_t TestPixOptixPowerFeature(ctl_display_output_handle_t hDisplayOutput
 
     if (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_PIXOPTIX)
     {
-        printf("PIXOPTIX is enabled");
+        APP_LOG_INFO("PIXOPTIX is enabled");
     }
     else
     {
-        printf("PIXOPTIX is not enabled");
+        APP_LOG_ERROR("PIXOPTIX is not enabled");
     }
 
 Exit:
@@ -512,11 +512,11 @@ ctl_result_t TestAlrrFeature(ctl_display_output_handle_t hDisplayOutput)
 
         if (PowerOptimizationSetting.FeatureSpecificData.LRRInfo.CurrentLRRTypes & CTL_POWER_OPTIMIZATION_LRR_FLAG_ALRR)
         {
-            printf("ALRR is enabled");
+            APP_LOG_INFO("ALRR is enabled");
         }
         else
         {
-            printf("ALRR is not enabled");
+            APP_LOG_WARN("ALRR is not enabled");
         }
     }
 
@@ -542,13 +542,13 @@ ctl_result_t TestFbcPowerFeature(ctl_display_output_handle_t hDisplayOutput)
 
     if (CTL_POWER_OPTIMIZATION_FLAG_FBC != (PowerOptimizationCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_FBC))
     {
-        printf("FBC is not supported\n");
+        APP_LOG_WARN("FBC is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
         goto Exit;
     }
     else
     {
-        printf("FBC is supported\n");
+        APP_LOG_INFO("FBC is supported");
     }
 
     if (PowerOptimizationCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_FBC)
@@ -558,7 +558,73 @@ ctl_result_t TestFbcPowerFeature(ctl_display_output_handle_t hDisplayOutput)
         Result                                            = ctlGetPowerOptimizationSetting(hDisplayOutput, &PowerOptimizationSetting);
         LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting");
 
-        printf("FBC Enable Status= %d\n", PowerOptimizationSetting.Enable);
+        APP_LOG_INFO("FBC Enable Status= %d", PowerOptimizationSetting.Enable);
+    }
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Power feature Test for CABC
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestCABCPowerFeature(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                                    = CTL_RESULT_SUCCESS;
+    ctl_power_optimization_settings_t NewPowerSettings     = { 0 };
+    ctl_power_optimization_settings_t AppliedPowerSettings = { 0 };
+    ctl_power_optimization_caps_t PowerCaps                = { 0 };
+
+    PowerCaps.Size                                = sizeof(ctl_power_optimization_caps_t);
+    AppliedPowerSettings.Size                     = sizeof(ctl_power_optimization_settings_t);
+    AppliedPowerSettings.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_DPST;
+    AppliedPowerSettings.PowerSource              = CTL_POWER_SOURCE_DC;
+    AppliedPowerSettings.PowerOptimizationPlan    = CTL_POWER_OPTIMIZATION_PLAN_BALANCED;
+
+    Result = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerCaps);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (CABC)");
+
+    Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (CABC)");
+
+    if ((CTL_POWER_OPTIMIZATION_FLAG_DPST != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_DPST)) ||
+        (CTL_POWER_OPTIMIZATION_DPST_FLAG_PANEL_CABC != (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.SupportedFeatures & CTL_POWER_OPTIMIZATION_DPST_FLAG_PANEL_CABC)))
+    {
+        APP_LOG_WARN("CABC is not supported");
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
+
+    APP_LOG_INFO("GetPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_PANEL_CABC");
+    APP_LOG_INFO("CABC MinLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel);
+    APP_LOG_INFO("CABC MaxLevel = %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel);
+
+    uint8_t Levels[2]                                             = { AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MinLevel, AppliedPowerSettings.FeatureSpecificData.DPSTInfo.MaxLevel };
+    NewPowerSettings.Size                                         = sizeof(ctl_power_optimization_settings_t);
+    NewPowerSettings.PowerOptimizationFeature                     = CTL_POWER_OPTIMIZATION_FLAG_DPST;
+    NewPowerSettings.Enable                                       = TRUE;
+    NewPowerSettings.FeatureSpecificData.DPSTInfo.EnabledFeatures = CTL_POWER_OPTIMIZATION_DPST_FLAG_PANEL_CABC;
+    NewPowerSettings.PowerSource                                  = CTL_POWER_SOURCE_DC;
+    NewPowerSettings.PowerOptimizationPlan                        = CTL_POWER_OPTIMIZATION_PLAN_BALANCED;
+
+    for (uint8_t Count = 0; Count < 2; Count++)
+    {
+        // Set PowerFeature
+        NewPowerSettings.FeatureSpecificData.DPSTInfo.Level = Levels[Count];
+
+        Result = ctlSetPowerOptimizationSetting(hDisplayOutput, &NewPowerSettings);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlSetPowerOptimizationSetting (CABC)");
+
+        Result = ctlGetPowerOptimizationSetting(hDisplayOutput, &AppliedPowerSettings);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting (CABC)");
+
+        if (AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level != NewPowerSettings.FeatureSpecificData.DPSTInfo.Level)
+        {
+            APP_LOG_ERROR("Current and Applied levels mismatched: %d, %d", AppliedPowerSettings.FeatureSpecificData.DPSTInfo.Level, NewPowerSettings.FeatureSpecificData.DPSTInfo.Level);
+        }
     }
 
 Exit:
@@ -591,12 +657,12 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
 
         if (FALSE == IsDisplayAttached)
         {
-            printf("Display %d is not attached, skipping the call for this display\n", DisplayIndex);
+            APP_LOG_WARN("Display %d is not attached, skipping the call for this display", DisplayIndex);
             continue;
         }
         else
         {
-            printf("Attached Display Count: %d\n", DisplayIndex);
+            APP_LOG_INFO("Attached Display Count: %d", DisplayIndex);
         }
 
         // NOTE: Currently DPST/ELP/OPST combination is not supported
@@ -635,6 +701,10 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
         Result = TestFbcPowerFeature(hDisplayOutput[DisplayIndex]);
 
         STORE_AND_RESET_ERROR(Result);
+
+        Result = TestCABCPowerFeature(hDisplayOutput[DisplayIndex]);
+
+        STORE_AND_RESET_ERROR(Result);
     }
 
 Exit:
@@ -662,13 +732,13 @@ ctl_result_t EnumerateTargetDisplays(ctl_display_output_handle_t *hDisplayOutput
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid Display Count. skipping display enumration for adapter:%d\n", AdapterIndex);
+            APP_LOG_WARN("Invalid Display Count. skipping display enumration for adapter:%d", AdapterIndex);
             continue;
         }
 
@@ -680,7 +750,7 @@ ctl_result_t EnumerateTargetDisplays(ctl_display_output_handle_t *hDisplayOutput
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
         }
 
@@ -690,7 +760,7 @@ ctl_result_t EnumerateTargetDisplays(ctl_display_output_handle_t *hDisplayOutput
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("EnumerateDisplayHandles returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("EnumerateDisplayHandles returned failure code: 0x%X", Result);
         }
 
         CTL_FREE_MEM(hDisplayOutput);
@@ -726,25 +796,46 @@ int main()
     CtlInitArgs.Version    = 0;
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     // Initialization successful
     // Get the list of Intel Adapters
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "hDevices");
 
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     Result = EnumerateTargetDisplays(hDisplayOutput, AdapterCount, hDevices);
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("EnumerateTargetDisplays returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("EnumerateTargetDisplays returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
 
@@ -753,6 +844,6 @@ Exit:
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDisplayOutput);
     CTL_FREE_MEM(hDevices);
-    printf("Overrall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overrall test result is 0x%X", GResult);
     return GResult;
 }

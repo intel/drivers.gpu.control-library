@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
-set(TARGET_NAME ScdcRead)
+set(TARGET_NAME FirmwareApi)
 get_filename_component(ROOT_DIR ../../ ABSOLUTE)
-project(ScdcRead VERSION 1.0)
+project(FirmwareApi VERSION 1.0)
 add_executable(${TARGET_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/ScdcReadApp.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FirmwareApiApp.cpp
     ${ROOT_DIR}/Source/cApiWrapper.cpp
 )
 

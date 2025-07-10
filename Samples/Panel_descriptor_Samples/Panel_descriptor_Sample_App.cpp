@@ -43,7 +43,7 @@ ctl_result_t GetPanelDescriptor(ctl_display_output_handle_t hDisplayOutput, ctl_
 
     //  Print the descriptor data size
     DescriptorDataSize = pPanelDescArgs->DescriptorDataSize;
-    printf("DescriptorDataSize = : %d\n", DescriptorDataSize);
+    APP_LOG_INFO("DescriptorDataSize = : %d", DescriptorDataSize);
 
     // Once we have the size of the descriptor data, do another call to ctlPanelDescriptorAccess with DescriptorDataSize as the value derived from 1st ctlPanelDescriptorAccess
     // call.
@@ -58,10 +58,13 @@ ctl_result_t GetPanelDescriptor(ctl_display_output_handle_t hDisplayOutput, ctl_
     Result = ctlPanelDescriptorAccess(hDisplayOutput, pPanelDescArgs);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlPanelDescriptorAccess");
 
-    printf("Panel Descriptor Data: \n");
-    for (uint32_t j = 0; j < pPanelDescArgs->DescriptorDataSize; j++)
+    APP_LOG_INFO("Panel Descriptor Data on block %d: ", pPanelDescArgs->BlockNumber);
+    for (uint32_t i = 0; i < pPanelDescArgs->DescriptorDataSize; i += 16)
     {
-        printf("[%d] = : 0x%X\n", j, pPanelDescArgs->pDescriptorData[j]);
+        for (uint32_t j = i; j < (i + 16); j++)
+        {
+            APP_LOG_INFO("0x%02X ", pPanelDescArgs->pDescriptorData[j]);
+        }
     }
 
     // EXTENSION BLOCKS READ : For EDID, Need to get the number of extensions blocks from 127th byte of base block
@@ -69,7 +72,7 @@ ctl_result_t GetPanelDescriptor(ctl_display_output_handle_t hDisplayOutput, ctl_
 
     if (0 == NumberOfExtnBlocks)
     {
-        printf("No Extn Block found \n");
+        APP_LOG_ERROR("No Extn Block found ");
         goto Exit;
     }
 
@@ -90,14 +93,14 @@ ctl_result_t GetPanelDescriptor(ctl_display_output_handle_t hDisplayOutput, ctl_
 
         //  Print the descriptor data size
         ExtBlockDescriptorDataSize = ExtBlockPanelDescArgs.DescriptorDataSize;
-        printf("DescriptorDataSize for extension block = : %d\n", ExtBlockDescriptorDataSize);
+        APP_LOG_INFO("DescriptorDataSize for extension block = : %d", ExtBlockDescriptorDataSize);
 
         // Once we have the size of the descriptor data, do another call to ctlPanelDescriptorAccess with DescriptorDataSize as the value derived from 1st
         // ctlPanelDescriptorAcces call.
         ExtBlockPanelDescArgs                    = { 0 };
         ExtBlockPanelDescArgs.Size               = sizeof(ctl_panel_descriptor_access_args_t);
         ExtBlockPanelDescArgs.OpType             = CTL_OPERATION_TYPE_READ; // Currently only Read operation is supported. Write operationnot supported.
-        ExtBlockPanelDescArgs.BlockNumber        = BlockIndex;              // Block number
+        ExtBlockPanelDescArgs.BlockNumber        = BlockIndex + 1;          // Block number
         ExtBlockPanelDescArgs.DescriptorDataSize = ExtBlockDescriptorDataSize;
         ExtBlockPanelDescArgs.pDescriptorData    = (uint8_t *)malloc(ExtBlockDescriptorDataSize * sizeof(uint8_t)); // Allocate memory for the descriptor data
 
@@ -107,15 +110,18 @@ ctl_result_t GetPanelDescriptor(ctl_display_output_handle_t hDisplayOutput, ctl_
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlPanelDescriptorAccess for extension block %d returned failure code: 0x%X\n", BlockIndex, Result);
+            APP_LOG_ERROR("ctlPanelDescriptorAccess for extension block %d returned failure code: 0x%X", BlockIndex, Result);
             CTL_FREE_MEM(ExtBlockPanelDescArgs.pDescriptorData);
             goto Exit;
         }
 
-        printf("Panel Descriptor Data: \n");
-        for (uint32_t j = 0; j < pPanelDescArgs->DescriptorDataSize; j++)
+        APP_LOG_INFO("Panel Descriptor Data on block %d: ", ExtBlockPanelDescArgs.BlockNumber);
+        for (uint32_t i = 0; i < pPanelDescArgs->DescriptorDataSize; i += 16)
         {
-            printf("[%d] = : 0x%X\n", j, ExtBlockPanelDescArgs.pDescriptorData[j]);
+            for (uint32_t j = i; j < (i + 16); j++)
+            {
+                APP_LOG_INFO("0x%02X ", ExtBlockPanelDescArgs.pDescriptorData[j]);
+            }
         }
 
         CTL_FREE_MEM(ExtBlockPanelDescArgs.pDescriptorData);
@@ -139,7 +145,7 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
 
     if (0 == DisplayCount)
     {
-        printf("Invalid Display Count \n");
+        APP_LOG_ERROR("Invalid Display Count ");
         goto Exit;
     }
 
@@ -156,7 +162,7 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
 
         if (FALSE == IsDisplayAttached)
         {
-            printf("Display %d is not attached, skipping the call for this display\n", DisplayIndex);
+            APP_LOG_WARN("Display %d is not attached, skipping the call for this display", DisplayIndex);
             continue;
         }
 
@@ -203,13 +209,13 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_ERROR("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid Display Count. skipping display enumration for adapter:%d\n", AdapterIndex);
+            APP_LOG_WARN("Invalid Display Count. skipping display enumration for adapter:%d", AdapterIndex);
             continue;
         }
 
@@ -220,7 +226,7 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_ERROR("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
         }
 
@@ -230,7 +236,7 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("EnumerateDisplayHandles returned failure code: 0x%X\n", Result);
+            APP_LOG_ERROR("EnumerateDisplayHandles returned failure code: 0x%X", Result);
         }
 
         CTL_FREE_MEM(hDisplayOutput);
@@ -265,31 +271,52 @@ int main()
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     // Initialization successful
     // Get the list of Intel Adapters
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "hDevices");
 
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     Result = EnumerateTargetDisplays(AdapterCount, hDevices);
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("EnumerateTargetDisplays returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("EnumerateTargetDisplays returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
 
 Exit:
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDevices);
-    printf("Overrall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overrall test result is 0x%X", GResult);
     return GResult;
 }

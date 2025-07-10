@@ -39,7 +39,7 @@ ctl_result_t TestI2CAUXAccess(ctl_display_output_handle_t hDisplayOutput)
     ctl_aux_access_args_t AUXArgs = { 0 }; // AUX Access WRITE
     ctl_i2c_access_args_t I2CArgs = { 0 }; // I2C Access
 
-    printf("Aux Read Test.\n");
+    APP_LOG_INFO("Aux Read Test.");
 
     AUXArgs.Size     = sizeof(ctl_aux_access_args_t);
     AUXArgs.OpType   = CTL_OPERATION_TYPE_WRITE;
@@ -52,7 +52,7 @@ ctl_result_t TestI2CAUXAccess(ctl_display_output_handle_t hDisplayOutput)
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("ctlAUXAccess for Native Aux DPCD WRITE returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("ctlAUXAccess for Native Aux DPCD WRITE returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
 
@@ -69,7 +69,7 @@ ctl_result_t TestI2CAUXAccess(ctl_display_output_handle_t hDisplayOutput)
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("ctlAUXAccess for Native Aux DPCD Read returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("ctlAUXAccess for Native Aux DPCD Read returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
     else
@@ -77,11 +77,11 @@ ctl_result_t TestI2CAUXAccess(ctl_display_output_handle_t hDisplayOutput)
         // Print the data
         for (uint32_t j = 0; j < AUXArgs.DataSize; j++)
         {
-            printf("Read data[%d] = : 0x%X\n", j, AUXArgs.Data[j]);
+            APP_LOG_INFO("Read data[%d] = : 0x%X", j, AUXArgs.Data[j]);
         }
     }
 
-    printf("I2C Write Test.\n");
+    APP_LOG_INFO("I2C Write Test.");
 
     // I2C WRITE : 82 01 10 AC at adddress 6E and subaddress 51
     // If we write these BYTEs ( 82 01 10  AC) to adddress 6E and
@@ -112,10 +112,10 @@ ctl_result_t TestI2CAUXAccess(ctl_display_output_handle_t hDisplayOutput)
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("ctlI2CAccess for I2C write returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("ctlI2CAccess for I2C write returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
-    printf("I2C Read Test.\n");
+    APP_LOG_INFO("I2C Read Test.");
     // I2C READ : 82 01 10 AC at adddress 6E and subaddress 51
     I2CArgs.Size     = sizeof(ctl_i2c_access_args_t);
     I2CArgs.OpType   = CTL_OPERATION_TYPE_READ;
@@ -130,7 +130,7 @@ ctl_result_t TestI2CAUXAccess(ctl_display_output_handle_t hDisplayOutput)
     //  Print the data
     for (uint32_t j = 0; j < I2CArgs.DataSize; j++)
     {
-        printf("Read data[%d] = : 0x%X\n", j, I2CArgs.Data[j]);
+        APP_LOG_INFO("Read data[%d] = : 0x%X", j, I2CArgs.Data[j]);
     }
 
 Exit:
@@ -172,16 +172,16 @@ ctl_result_t TestI2CAUXAccessOnPinPair(ctl_i2c_pin_pair_handle_t hI2cPinPair)
     I2CArgs.Data[2]  = 0x10;
     I2CArgs.Data[3]  = 0xAC;
 
-    printf("I2C Write Test: Address %#x, Offset %#x, size %d.\n", I2CArgs.Address, I2CArgs.Offset, I2CArgs.DataSize);
+    APP_LOG_INFO("I2C Write Test: Address %#x, Offset %#x, size %d.", I2CArgs.Address, I2CArgs.Offset, I2CArgs.DataSize);
     Result = ctlI2CAccessOnPinPair(hI2cPinPair, &I2CArgs);
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("I2C write returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("I2C write returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
     else
     {
-        printf("I2C Write Test Success.\n");
+        APP_LOG_INFO("I2C Write Test Success.");
     }
 
     ZeroMemory(&I2CArgs, sizeof(I2CArgs));
@@ -196,18 +196,18 @@ ctl_result_t TestI2CAUXAccessOnPinPair(ctl_i2c_pin_pair_handle_t hI2cPinPair)
     // I2CArgs.Flags |= CTL_I2C_FLAG_SPEED_BIT_BASH;
     // I2CArgs.Flags = CTL_I2C_FLAG_ATOMICI2C;  // Need to set this to do Atomic I2C call
 
-    printf("I2C Read Test: Address %#X, Offset %#X, size %d, Flags %#X.\n", I2CArgs.Address, I2CArgs.Offset, I2CArgs.DataSize, I2CArgs.Flags);
+    APP_LOG_INFO("I2C Read Test: Address %#X, Offset %#X, size %d, Flags %#X.", I2CArgs.Address, I2CArgs.Offset, I2CArgs.DataSize, I2CArgs.Flags);
     Result = ctlI2CAccessOnPinPair(hI2cPinPair, &I2CArgs);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlI2CAccessOnPinPair for I2C read");
 
     //  Print the data
     for (uint32_t j = 0; j < I2CArgs.DataSize; j++)
     {
-        printf("Read data[%d] = : 0x%X\n", j, I2CArgs.Data[j]);
+        APP_LOG_INFO("Read data[%d] = : 0x%X", j, I2CArgs.Data[j]);
     }
 
 Exit:
-    printf("\n-------------------------\n");
+    PRINT_LOGS("-------------------------");
     return Result;
 }
 
@@ -226,7 +226,8 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
     {
         ctl_display_properties_t DisplayProperties = { 0 };
         DisplayProperties.Size                     = sizeof(ctl_display_properties_t);
-        printf("Display Handle: %p\n-------------------------\n", hDisplayOutput[DisplayIndex]);
+        APP_LOG_INFO("Display Handle: %p", hDisplayOutput[DisplayIndex]);
+        PRINT_LOGS("-------------------------");
         Result = ctlGetDisplayProperties(hDisplayOutput[DisplayIndex], &DisplayProperties);
         LOG_AND_EXIT_ON_ERROR(Result, "ctlGetDisplayProperties");
 
@@ -234,7 +235,7 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
 
         if (FALSE == IsDisplayAttached)
         {
-            printf("Display %d is not attached, skipping the call for this display\n", DisplayIndex);
+            APP_LOG_WARN("Display %d is not attached, skipping the call for this display", DisplayIndex);
             continue;
         }
 
@@ -257,7 +258,8 @@ ctl_result_t TestI2cAccessOnEmumeratedPinPairs(ctl_i2c_pin_pair_handle_t *hI2cPi
     ctl_result_t Result = CTL_RESULT_SUCCESS;
     for (uint32_t Index = 0; Index < PinPairCount; Index++)
     {
-        printf("I2CAccessOnPinPair Test for Pin Pair[%d] handle: %p\n-------------------------\n", Index, hI2cPinPair[Index]);
+        APP_LOG_INFO("I2CAccessOnPinPair Test for Pin Pair[%d] handle: %p", Index, hI2cPinPair[Index]);
+        PRINT_LOGS("-------------------------");
         Result = TestI2CAUXAccessOnPinPair(hI2cPinPair[Index]);
         STORE_AND_RESET_ERROR(Result);
     }
@@ -279,7 +281,8 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
 
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
-        printf("Adapter Handle: %p\n===============================\n", hDevices[AdapterIndex]);
+        APP_LOG_INFO("Adapter Handle: %p", hDevices[AdapterIndex]);
+        PRINT_LOGS("===============================");
 
         // enumerate all the possible target display's for the adapters
         // first step is to get the count
@@ -289,13 +292,13 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_ERROR("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid Display Count. skipping display enumration for adapter:%d\n", AdapterIndex);
+            APP_LOG_WARN("Invalid Display Count. skipping display enumration for adapter:%d", AdapterIndex);
             continue;
         }
 
@@ -306,7 +309,7 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_ERROR("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
         }
 
@@ -316,7 +319,7 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("EnumerateDisplayHandles returned failure code: 0x%X\n", Result);
+            APP_LOG_ERROR("EnumerateDisplayHandles returned failure code: 0x%X", Result);
         }
 
         CTL_FREE_MEM(hDisplayOutput);
@@ -342,7 +345,8 @@ ctl_result_t EnumerateI2CDevices(uint32_t AdapterCount, ctl_device_adapter_handl
 
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
-        printf("\nI2C Access Test For Adapter[%d] handle: %p\n===========================\n", AdapterIndex, hDevices[AdapterIndex]);
+        APP_LOG_INFO("I2C Access Test For Adapter[%d] handle: %p", AdapterIndex, hDevices[AdapterIndex]);
+        PRINT_LOGS("===========================");
         // enumerate all the possible target display's for the adapters
         // first step is to get the count
         PinCount = 0;
@@ -351,13 +355,13 @@ ctl_result_t EnumerateI2CDevices(uint32_t AdapterCount, ctl_device_adapter_handl
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateI2CPinPairs returned failure code: 0x%X\n", Result);
+            APP_LOG_ERROR("ctlEnumerateI2CPinPairs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
         else if (PinCount <= 0)
         {
-            printf("Invalid Display Count. skipping pin pair enumration for adapter:%d\n", AdapterIndex);
+            APP_LOG_ERROR("Invalid Display Count. skipping pin pair enumration for adapter:%d", AdapterIndex);
             continue;
         }
 
@@ -368,7 +372,7 @@ ctl_result_t EnumerateI2CDevices(uint32_t AdapterCount, ctl_device_adapter_handl
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateI2CPinPairs returned failure code: 0x%X\n", Result);
+            APP_LOG_ERROR("ctlEnumerateI2CPinPairs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
         }
 
@@ -378,7 +382,7 @@ ctl_result_t EnumerateI2CDevices(uint32_t AdapterCount, ctl_device_adapter_handl
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("TestI2cAccessOnEmumeratedPinPairs returned failure code: 0x%X\n", Result);
+            APP_LOG_ERROR("TestI2cAccessOnEmumeratedPinPairs returned failure code: 0x%X", Result);
         }
 
         CTL_FREE_MEM(hI2cPinPair);
@@ -413,32 +417,53 @@ int main()
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     // Initialization successful
     // Get the list of Intel Adapters
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "hDevices");
 
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     Result = EnumerateTargetDisplays(AdapterCount, hDevices);
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("EnumerateTargetDisplays returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("EnumerateTargetDisplays returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
 #if 0 // Keeping the call disabled as not needed for regular Display use cases. Mainly intended for non-display devices.
     Result = EnumerateI2CDevices(AdapterCount, hDevices);
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("EnumerateI2CDevices returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("EnumerateI2CDevices returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
 #endif
@@ -446,7 +471,7 @@ Exit:
 
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDevices);
-    printf("Overrall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overrall test result is 0x%X", GResult);
     return GResult;
 }
 
