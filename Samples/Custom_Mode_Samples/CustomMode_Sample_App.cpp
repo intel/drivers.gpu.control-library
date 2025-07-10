@@ -66,12 +66,12 @@ ctl_result_t GetCustomModes(ctl_display_output_handle_t hDisplayOutput)
 
     if (0 == NumOfCustomModes)
     {
-        printf("\n No Custom modes added.\n");
+        APP_LOG_WARN("No Custom modes added.");
         goto Exit;
     }
     else
     {
-        printf("\n Number of custom modes:%d", NumOfCustomModes);
+        APP_LOG_INFO("Number of custom modes:%d", NumOfCustomModes);
     }
 
     pCustomModeSourceSize = NumOfCustomModes * sizeof(ctl_custom_src_mode_t);
@@ -80,7 +80,7 @@ ctl_result_t GetCustomModes(ctl_display_output_handle_t hDisplayOutput)
 
     EXIT_ON_MEM_ALLOC_FAILURE(pCustomSourceModes, "pCustomSourceModes");
 
-    memset(pCustomSourceModes, 0, sizeof(pCustomSourceModes));
+    memset(pCustomSourceModes, 0, pCustomModeSourceSize);
 
     GetCustomModes.NumOfModes         = NumOfCustomModes;
     GetCustomModes.CustomModeOpType   = CTL_CUSTOM_MODE_OPERATION_TYPES_GET_CUSTOM_SOURCE_MODES;
@@ -94,14 +94,12 @@ ctl_result_t GetCustomModes(ctl_display_output_handle_t hDisplayOutput)
 
     pCustomSourceModesList = pCustomSourceModes;
 
-    printf("\n No.\tSourceX\tSourceY\n");
+    APP_LOG_INFO("No.\tSourceX\tSourceY");
     for (uint8_t i = 0; i < NumOfCustomModes; i++)
     {
-        printf(" %d\t%d\t%d\n", i, pCustomSourceModesList->SourceX, pCustomSourceModesList->SourceY);
+        APP_LOG_INFO(" %d\t%d\t%d", i, pCustomSourceModesList->SourceX, pCustomSourceModesList->SourceY);
         pCustomSourceModesList++;
     }
-
-    printf("\n");
 
 Exit:
     CTL_FREE_MEM(pCustomSourceModes);
@@ -124,7 +122,7 @@ ctl_result_t AddCustomModes(ctl_display_output_handle_t hDisplayOutput, uint32_t
 
     EXIT_ON_MEM_ALLOC_FAILURE(pCustomSourceMode, "pCustomSourceMode");
 
-    memset(pCustomSourceMode, 0, sizeof(pCustomSourceMode));
+    memset(pCustomSourceMode, 0, sizeof(ctl_custom_src_mode_t));
 
     AddCustomMode.NumOfModes         = 1;
     AddCustomMode.CustomModeOpType   = CTL_CUSTOM_MODE_OPERATION_TYPES_ADD_CUSTOM_SOURCE_MODE;
@@ -135,7 +133,7 @@ ctl_result_t AddCustomModes(ctl_display_output_handle_t hDisplayOutput, uint32_t
     pCustomSourceMode->SourceX = SourceX;
     pCustomSourceMode->SourceY = SourceY;
 
-    printf("\nAdding Custom mode X:%d Y:%d\n", SourceX, SourceY);
+    APP_LOG_INFO("Adding Custom mode X:%d Y:%d", SourceX, SourceY);
 
     // Add Custom mode.
     Result = ctlGetSetCustomMode(hDisplayOutput, &AddCustomMode);
@@ -172,7 +170,7 @@ ctl_result_t RemoveCustomModes(ctl_display_output_handle_t hDisplayOutput)
 
     EXIT_ON_MEM_ALLOC_FAILURE(pCustomSourceModes, "pCustomSourceModes");
 
-    memset(pCustomSourceModes, 0, sizeof(pCustomSourceModes));
+    memset(pCustomSourceModes, 0, pCustomModeSourceSize);
 
     RemoveCustomModes.NumOfModes         = NumOfModesToRemove;
     RemoveCustomModes.CustomModeOpType   = CTL_CUSTOM_MODE_OPERATION_TYPES_REMOVE_CUSTOM_SOURCE_MODES;
@@ -187,7 +185,7 @@ ctl_result_t RemoveCustomModes(ctl_display_output_handle_t hDisplayOutput)
         pCustomSourceModesList->SourceX = Modes[i].X;
         pCustomSourceModesList->SourceY = Modes[i].Y;
         pCustomSourceModesList++;
-        printf("Removing Custom mode X:%d Y:%d\n", Modes[i].X, Modes[i].Y);
+        APP_LOG_INFO("Removing Custom mode X:%d Y:%d", Modes[i].X, Modes[i].Y);
     }
 
     // Add Custom mode.
@@ -225,12 +223,12 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
 
         if (FALSE == IsDisplayAttached)
         {
-            printf("Display %d is not attached, skipping the call for this display\n", DisplayIndex);
+            APP_LOG_WARN("Display %d is not attached, skipping the call for this display", DisplayIndex);
             continue;
         }
         else
         {
-            printf("Attached Display Count: %d\n", DisplayIndex);
+            APP_LOG_INFO("Attached Display Count: %d", DisplayIndex);
         }
 
         // At a time only one custom mode add operation is supported
@@ -287,13 +285,13 @@ ctl_result_t EnumerateTargetDisplays(ctl_display_output_handle_t *hDisplayOutput
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid Display Count. skipping display enumration for adapter:%d\n", AdapterIndex);
+            APP_LOG_WARN("Invalid Display Count. skipping display enumration for adapter:%d", AdapterIndex);
             continue;
         }
 
@@ -305,7 +303,7 @@ ctl_result_t EnumerateTargetDisplays(ctl_display_output_handle_t *hDisplayOutput
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("ctlEnumerateDisplayOutputs returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("ctlEnumerateDisplayOutputs returned failure code: 0x%X", Result);
             STORE_AND_RESET_ERROR(Result);
         }
 
@@ -315,7 +313,7 @@ ctl_result_t EnumerateTargetDisplays(ctl_display_output_handle_t *hDisplayOutput
 
         if (CTL_RESULT_SUCCESS != Result)
         {
-            printf("EnumerateDisplayHandles returned failure code: 0x%X\n", Result);
+            APP_LOG_WARN("EnumerateDisplayHandles returned failure code: 0x%X", Result);
         }
 
         CTL_FREE_MEM(hDisplayOutput);
@@ -351,25 +349,46 @@ int main()
     CtlInitArgs.Version    = 0;
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     // Initialization successful
     // Get the list of Intel Adapters
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "hDevices");
 
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     Result = EnumerateTargetDisplays(hDisplayOutput, AdapterCount, hDevices);
 
     if (CTL_RESULT_SUCCESS != Result)
     {
-        printf("EnumerateTargetDisplays returned failure code: 0x%X\n", Result);
+        APP_LOG_ERROR("EnumerateTargetDisplays returned failure code: 0x%X", Result);
         STORE_AND_RESET_ERROR(Result);
     }
 
@@ -378,6 +397,6 @@ Exit:
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDisplayOutput);
     CTL_FREE_MEM(hDevices);
-    printf("Overrall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overrall test result is 0x%X", GResult);
     return GResult;
 }

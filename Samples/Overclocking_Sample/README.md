@@ -1,1 +1,1 @@
-Sample Application for the Overclocking interface
+Sample Application for the Overclocking interface with Overclocking V2 APIs

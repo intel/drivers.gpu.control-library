@@ -56,14 +56,14 @@ enum ChildInfoIndex
  ***************************************************************/
 void PrintUsage(char *pArgv[])
 {
-    printf("Combined Display Sample Test Application.\n");
-    printf("\nUsage: %s [Combined Display Port] <Config File>\n", pArgv[0]);
-    printf("\nCombined Display Port - 0 | 1\n");
-    printf("\tCombined Display port number you want to disable or query. Default is 0.\n");
-    printf("Config File - sample config file\n");
-    printf("\tEnable.cfg - Enabling 1x2 mode of Combined Display with 1080p displays\n");
-    printf("\tDisable.cfg - Disabling Combined Display\n");
-    printf("\tQuery.cfg - Querying current Combined Display topology\n");
+    APP_LOG_INFO("Combined Display Sample Test Application.");
+    APP_LOG_INFO("Usage: %s [Combined Display Port] <Config File>", pArgv[0]);
+    APP_LOG_INFO("Combined Display Port - 0 | 1");
+    APP_LOG_INFO("Combined Display port number you want to disable or query. Default is 0.");
+    APP_LOG_INFO("Config File - sample config file");
+    APP_LOG_INFO("Enable.cfg - Enabling 1x2 mode of Combined Display with 1080p displays");
+    APP_LOG_INFO("Disable.cfg - Disabling Combined Display");
+    APP_LOG_INFO("Query.cfg - Querying current Combined Display topology");
 }
 
 /***************************************************************
@@ -82,7 +82,7 @@ ctl_result_t ParseArguments(const char *pCDArgFile, ctl_combined_display_args_t 
 
     if (false == ConfigFile.is_open())
     {
-        printf("Cannot open a config file.\n");
+        APP_LOG_ERROR("Cannot open a config file.");
         Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
         EXIT_ON_ERROR(Result);
     }
@@ -107,7 +107,7 @@ ctl_result_t ParseArguments(const char *pCDArgFile, ctl_combined_display_args_t 
         }
 
         // Print lines
-        printf("%s = %s\n", Name.c_str(), Value.c_str());
+        APP_LOG_INFO("%s = %s", Name.c_str(), Value.c_str());
 
         // Fill out combined display config arguments
         pCombinedDisplayArgs->Size    = sizeof(ctl_combined_display_args_t);
@@ -163,7 +163,7 @@ ctl_result_t ParseChildInfoArguments(const char *pCDArgFile, ctl_combined_displa
 
     if (false == ConfigFile.is_open())
     {
-        printf("Cannot open a config file.\n");
+        APP_LOG_ERROR("Cannot open a config file.");
         Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
         EXIT_ON_ERROR(Result);
     }
@@ -296,7 +296,7 @@ ctl_result_t ParseDisplayOrderArguments(uint8_t NumOutputs, const char *pCDArgFi
 
     if (false == ConfigFile.is_open())
     {
-        printf("Cannot open a config file.\n");
+        APP_LOG_ERROR("Cannot open a config file.");
         Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
         EXIT_ON_ERROR(Result);
     }
@@ -338,7 +338,7 @@ ctl_result_t ParseDisplayOrderArguments(uint8_t NumOutputs, const char *pCDArgFi
                     break;
                 }
             }
-            Order                   = Value;
+            Order                   = move(Value);
             SelectedDisplays[Index] = stoi(Order);
             break;
         }
@@ -362,23 +362,23 @@ void PrintCombinedConfig(const ctl_combined_display_args_t CombinedDisplayArgs)
     ctl_rect_t FbSrc, FbPos;
     ctl_child_display_target_mode_t TargetMode;
 
-    printf("========= Combined Display Configuration =========\n");
-    printf("Number of Display Outputs: %u\n", CombinedDisplayArgs.NumOutputs);
-    printf("Combined Display Width: %u\n", CombinedDisplayArgs.CombinedDesktopWidth);
-    printf("Combined Display Height: %u\n", CombinedDisplayArgs.CombinedDesktopHeight);
+    PRINT_LOGS("========= Combined Display Configuration =========");
+    APP_LOG_INFO("Number of Display Outputs: %u", CombinedDisplayArgs.NumOutputs);
+    APP_LOG_INFO("Combined Display Width: %u", CombinedDisplayArgs.CombinedDesktopWidth);
+    APP_LOG_INFO("Combined Display Height: %u", CombinedDisplayArgs.CombinedDesktopHeight);
     for (uint8_t i = 0; i < CombinedDisplayArgs.NumOutputs; i++)
     {
         FbSrc      = CombinedDisplayArgs.pChildInfo[i].FbSrc;
         FbPos      = CombinedDisplayArgs.pChildInfo[i].FbPos;
         TargetMode = CombinedDisplayArgs.pChildInfo[i].TargetMode;
 
-        printf("Display[%u]: ", i);
-        printf("{%u,%u,%u,%u},", FbSrc.Left, FbSrc.Top, FbSrc.Right, FbSrc.Bottom);
-        printf("{%u,%u,%u,%u},", FbPos.Left, FbPos.Top, FbPos.Right, FbPos.Bottom);
-        printf("%u,", CombinedDisplayArgs.pChildInfo[i].DisplayOrientation);
-        printf("{%u,%u,%.1f}\n", TargetMode.Width, TargetMode.Height, TargetMode.RefreshRate);
+        APP_LOG_INFO("Display[%u]: ", i);
+        APP_LOG_INFO("{%u,%u,%u,%u},", FbSrc.Left, FbSrc.Top, FbSrc.Right, FbSrc.Bottom);
+        APP_LOG_INFO("{%u,%u,%u,%u},", FbPos.Left, FbPos.Top, FbPos.Right, FbPos.Bottom);
+        APP_LOG_INFO("%u,", CombinedDisplayArgs.pChildInfo[i].DisplayOrientation);
+        APP_LOG_INFO("{%u,%u,%.1f}", TargetMode.Width, TargetMode.Height, TargetMode.RefreshRate);
     }
-    printf("==========================================================\n");
+    PRINT_LOGS("==========================================================");
 }
 
 /***************************************************************
@@ -491,7 +491,7 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
         }
         else if (DisplayCount <= 0)
         {
-            printf("Invalid Display Count. Skipping display enumeration for adapter: %d\n", Index);
+            APP_LOG_WARN("Invalid Display Count. Skipping display enumeration for adapter: %d", Index);
             CTL_FREE_MEM(pSelectedDisplays);
             continue;
         }
@@ -519,7 +519,7 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
 
             if (NULL == pHDisplayOutput[i])
             {
-                printf("pHDisplayOutput[%d] is NULL.\n", i);
+                APP_LOG_ERROR("pHDisplayOutput[%d] is NULL.", i);
                 Result = CTL_RESULT_ERROR_INVALID_NULL_HANDLE;
                 EXIT_ON_ERROR(Result);
             }
@@ -539,8 +539,9 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
                 pHCombinedDisplayOutputs[CombinedDisplayCount++] = pHDisplayOutput[i];
             }
 
-            uint32_t CombinedAllowedEncoderTypes = CTL_ENCODER_CONFIG_FLAG_TYPEC_CAPABLE | CTL_ENCODER_CONFIG_FLAG_TBT_CAPABLE | CTL_ENCODER_CONFIG_FLAG_DITHERING_SUPPORTED;
-            bool IsCombinedAvailable             = false;
+            uint32_t CombinedAllowedEncoderTypes =
+            CTL_ENCODER_CONFIG_FLAG_TYPEC_CAPABLE | CTL_ENCODER_CONFIG_FLAG_TBT_CAPABLE | CTL_ENCODER_CONFIG_FLAG_DITHERING_SUPPORTED | CTL_ENCODER_CONFIG_FLAG_INTERNAL_DISPLAY;
+            bool IsCombinedAvailable = false;
 
             IsCombinedAvailable = (0 == stDisplayEncoderProperties.EncoderConfigFlags) || (stDisplayEncoderProperties.EncoderConfigFlags & CombinedAllowedEncoderTypes);
             IsDisplayActive     = stDisplayProperties.DisplayConfigFlags & CTL_DISPLAY_CONFIG_FLAG_DISPLAY_ACTIVE;
@@ -558,7 +559,7 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
         {
             if (CombinedDisplayArgs.NumOutputs > NumActiveOutputs)
             {
-                printf("The input NumOutputs of %u is greater than the system's NumActiveOutputs of %u.\n", CombinedDisplayArgs.NumOutputs, NumActiveOutputs);
+                APP_LOG_ERROR("The input NumOutputs of %u is greater than the system's NumActiveOutputs of %u.", CombinedDisplayArgs.NumOutputs, NumActiveOutputs);
                 Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
                 EXIT_ON_ERROR(Result);
             }
@@ -568,7 +569,7 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
             {
                 if ((CTL_DISPLAY_ORIENTATION_0 != CombinedDisplayArgs.pChildInfo[i].DisplayOrientation) && (CTL_DISPLAY_ORIENTATION_180 != CombinedDisplayArgs.pChildInfo[i].DisplayOrientation))
                 {
-                    printf("Only 0/180 degree rotation is supported.\n");
+                    APP_LOG_ERROR("Only 0/180 degree rotation is supported.");
                     Result = CTL_RESULT_ERROR_INVALID_ARGUMENT;
                     EXIT_ON_ERROR(Result);
                 }
@@ -583,7 +584,7 @@ ctl_result_t TestCombinedDisplay(uint32_t AdapterCount, ctl_device_adapter_handl
             Result = ctlGetSetCombinedDisplay(hDevices[Index], &CombinedDisplayArgs);
             if (CTL_RESULT_SUCCESS == Result && CombinedDisplayArgs.IsSupported == false)
             {
-                printf("The following Combined Display configuration is not supported\n");
+                APP_LOG_WARN("The following Combined Display configuration is not supported");
                 PrintCombinedConfig(CombinedDisplayArgs);
             }
         }
@@ -680,28 +681,64 @@ int main(int argc, char *pArgv[])
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
 
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     // Initialization successful
     // Get the list of Intel Adapters
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, NULL);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, NULL);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
     hDevices = (ctl_device_adapter_handle_t *)malloc(sizeof(ctl_device_adapter_handle_t) * AdapterCount);
     EXIT_ON_MEM_ALLOC_FAILURE(hDevices, "hDevices");
 
-    Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
-    LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    try
+    {
+        Result = ctlEnumerateDevices(hAPIHandle, &AdapterCount, hDevices);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
-    Result = TestCombinedDisplay(AdapterCount, hDevices, pCDArgFile, CombinedPort);
-    LOG_AND_EXIT_ON_ERROR(Result, "TestCombinedDisplay");
+    try
+    {
+        Result = TestCombinedDisplay(AdapterCount, hDevices, pCDArgFile, CombinedPort);
+        LOG_AND_EXIT_ON_ERROR(Result, "TestCombinedDisplay");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
+    catch (const std::ios_base::failure &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
+    catch (const std::bad_cast &e)
+    {
+        APP_LOG_ERROR("%s ", e.what());
+    }
 
 Exit:
 
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDevices);
 
-    printf("Overall test result is 0x%X\n", GResult);
+    APP_LOG_INFO("Overall test result is 0x%X", GResult);
     return GResult;
 }

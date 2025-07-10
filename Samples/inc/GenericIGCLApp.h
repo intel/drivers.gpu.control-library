@@ -38,29 +38,36 @@
     if (CTL_RESULT_SUCCESS != Result) \
         goto Exit;
 
-#define LOG_AND_EXIT_ON_ERROR(Result, ErrRtrndByFunc)                       \
-    if (CTL_RESULT_SUCCESS != Result)                                       \
-    {                                                                       \
-        printf("%s returned failure code: 0x%X\n", ErrRtrndByFunc, Result); \
-        goto Exit;                                                          \
+#define LOG_AND_EXIT_ON_ERROR(Result, ErrRtrndByFunc)                               \
+    if (CTL_RESULT_SUCCESS != Result)                                               \
+    {                                                                               \
+        printf("[ERROR] %s returned failure code: 0x%X\n", ErrRtrndByFunc, Result); \
+        goto Exit;                                                                  \
     }
 
-#define EXIT_ON_MEM_ALLOC_FAILURE(Ptr, AllocatedVarName)             \
-    if (NULL == Ptr)                                                 \
-    {                                                                \
-        Result = CTL_RESULT_ERROR_INVALID_NULL_POINTER;              \
-        printf("Memory Allocation Failed: %s \n", AllocatedVarName); \
-        goto Exit;                                                   \
+#define EXIT_ON_MEM_ALLOC_FAILURE(Ptr, AllocatedVarName)                     \
+    if (NULL == Ptr)                                                         \
+    {                                                                        \
+        Result = CTL_RESULT_ERROR_INVALID_NULL_POINTER;                      \
+        printf("[ERROR] Memory Allocation Failed: %s \n", AllocatedVarName); \
+        goto Exit;                                                           \
     }
 
-#define LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, ErrRtrndByFunc)         \
-    if (CTL_RESULT_SUCCESS != Result)                                       \
-    {                                                                       \
-        printf("%s returned failure code: 0x%X\n", ErrRtrndByFunc, Result); \
-        STORE_AND_RESET_ERROR(Result);                                      \
+#define LOG_AND_STORE_RESET_RESULT_ON_ERROR(Result, ErrRtrndByFunc)                 \
+    if (CTL_RESULT_SUCCESS != Result)                                               \
+    {                                                                               \
+        printf("[ERROR] %s returned failure code: 0x%X\n", ErrRtrndByFunc, Result); \
+        STORE_AND_RESET_ERROR(Result);                                              \
     }
 
-#define PRINT_LOGS(...) printf(__VA_ARGS__)
+// Application logging macro
+#define APP_LOG_INFO(fmt, ...) printf("[INFO] " fmt "\n", ##__VA_ARGS__)
+#define APP_LOG_WARN(fmt, ...) printf("[WARN] " fmt "\n", ##__VA_ARGS__)
+#define APP_LOG_ERROR(fmt, ...) printf("[ERROR] " fmt "\n", ##__VA_ARGS__)
+
+#define PRINT_LOGS(...)  \
+    printf(__VA_ARGS__); \
+    printf("\n")
 
 #define CONTROL_BIT(_i) (1 << _i)
 
@@ -109,6 +116,10 @@ inline char *Get3DFeatureName(ctl_3d_feature_t FeatureType)
             return "VRR windowed blt";
         case CTL_3D_FEATURE_GLOBAL_OR_PER_APP:
             return "global or per app settings";
+        case CTL_3D_FEATURE_LOW_LATENCY:
+            return "Low Latency";
+        case CTL_3D_FEATURE_FRAME_GENERATION:
+            return "XeSS Frame Generation";
         default:
             return "No Name";
     }
@@ -172,19 +183,19 @@ inline void Print3DFeatureSupport(ctl_3d_feature_details_t *pFeatureDetails)
     FeatureSupport = pFeatureDetails->FeatureMiscSupport;
     if (CTL_3D_FEATURE_MISC_FLAG_DX11 & FeatureSupport)
     {
-        printf("  pFeatureDetails->FeatureMiscSupport = CTL_3D_FEATURE_MISC_FLAG_DX11\n");
+        printf("[INFO]  pFeatureDetails->FeatureMiscSupport = CTL_3D_FEATURE_MISC_FLAG_DX11\n");
     }
     if (CTL_3D_FEATURE_MISC_FLAG_DX12 & FeatureSupport)
     {
-        printf("  pFeatureDetails->FeatureMiscSupport = CTL_3D_FEATURE_MISC_FLAG_DX12\n");
+        printf("[INFO]  pFeatureDetails->FeatureMiscSupport = CTL_3D_FEATURE_MISC_FLAG_DX12\n");
     }
     if (CTL_3D_FEATURE_MISC_FLAG_VULKAN & FeatureSupport)
     {
-        printf("  pFeatureDetails->FeatureMiscSupport = CTL_3D_FEATURE_MISC_FLAG_VULKAN\n");
+        printf("[INFO]  pFeatureDetails->FeatureMiscSupport = CTL_3D_FEATURE_MISC_FLAG_VULKAN\n");
     }
     if (CTL_3D_FEATURE_MISC_FLAG_LIVE_CHANGE & FeatureSupport)
     {
-        printf("  pFeatureDetails->FeatureMiscSupport = CTL_3D_FEATURE_MISC_FLAG_LIVE_CHANGE\n");
+        printf("[INFO]  pFeatureDetails->FeatureMiscSupport = CTL_3D_FEATURE_MISC_FLAG_LIVE_CHANGE\n");
     }
     return;
 }
@@ -200,17 +211,17 @@ inline void PrintEnduranceGamingControl(uint32_t Control)
     switch (Control)
     {
         case CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_OFF:
-            printf("  pEGCaps->EGControlCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_OFF\n");
+            printf("[INFO]  pEGCaps->EGControlCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_OFF\n");
 
             break;
 
         case CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_ON:
-            printf("  pEGCaps->EGControlCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_ON\n");
+            printf("[INFO]  pEGCaps->EGControlCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_ON\n");
 
             break;
 
         case CTL_3D_ENDURANCE_GAMING_CONTROL_AUTO:
-            printf("  pEGCaps->EGControlCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_CONTROL_AUTO\n");
+            printf("[INFO]  pEGCaps->EGControlCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_CONTROL_AUTO\n");
 
             break;
 
@@ -230,17 +241,17 @@ inline void PrintEnduranceGamingMode(uint32_t Mode)
     switch (Mode)
     {
         case CTL_3D_ENDURANCE_GAMING_MODE_BETTER_PERFORMANCE:
-            printf("  pEGCaps->EGModeCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_MODE_BETTER_PERFORMANCE\n");
+            printf("[INFO]  pEGCaps->EGModeCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_MODE_BETTER_PERFORMANCE\n");
 
             break;
 
         case CTL_3D_ENDURANCE_GAMING_MODE_BALANCED:
-            printf("  pEGCaps->EGModeCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_MODE_BALANCED\n");
+            printf("[INFO]  pEGCaps->EGModeCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_MODE_BALANCED\n");
 
             break;
 
         case CTL_3D_ENDURANCE_GAMING_MODE_MAXIMUM_BATTERY:
-            printf("  pEGCaps->EGModeCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_MODE_MAXIMUM_BATTERY\n");
+            printf("[INFO]  pEGCaps->EGModeCaps.SupportedTypes = CTL_3D_ENDURANCE_GAMING_MODE_MAXIMUM_BATTERY\n");
 
             break;
 
@@ -309,44 +320,44 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
 {
     if (pFeatureDetails)
     {
-        printf("3D Feature supported: %s (%d)\n", Get3DFeatureName(pFeatureDetails->FeatureType), pFeatureDetails->FeatureType);
-        printf("  Feature conflict mask flag: 0x%llX\n", pFeatureDetails->ConflictingFeatures);
-        printf("  Supported per application: %d\n", pFeatureDetails->PerAppSupport);
-        printf("  Supports live change: %s\n", (pFeatureDetails->FeatureMiscSupport & CTL_3D_FEATURE_MISC_FLAG_LIVE_CHANGE) ? "Yes" : "No");
+        printf("[INFO] 3D Feature supported: %s (%d)\n", Get3DFeatureName(pFeatureDetails->FeatureType), pFeatureDetails->FeatureType);
+        printf("[INFO] Feature conflict mask flag: 0x%llX\n", pFeatureDetails->ConflictingFeatures);
+        printf("[INFO] Supported per application: %d\n", pFeatureDetails->PerAppSupport);
+        printf("[INFO] Supports live change: %s\n", (pFeatureDetails->FeatureMiscSupport & CTL_3D_FEATURE_MISC_FLAG_LIVE_CHANGE) ? "Yes" : "No");
         Print3DFeatureSupport(pFeatureDetails);
 
         switch (pFeatureDetails->ValueType)
         {
             case CTL_PROPERTY_VALUE_TYPE_ENUM:
             {
-                printf("  Default value: %d\n", pFeatureDetails->Value.EnumType.DefaultType);
+                printf("[INFO] Default value: %d\n", pFeatureDetails->Value.EnumType.DefaultType);
                 if (CTL_3D_FEATURE_GAMING_FLIP_MODES == pFeatureDetails->FeatureType)
                 {
                     ctl_gaming_flip_mode_flags_t GamingflipCaps = (ctl_gaming_flip_mode_flags_t)pFeatureDetails->Value.EnumType.SupportedTypes;
 
                     if (CTL_GAMING_FLIP_MODE_FLAG_APPLICATION_DEFAULT & GamingflipCaps)
                     {
-                        printf("  pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_APPLICATION_DEFAULT\n");
+                        printf("[INFO] pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_APPLICATION_DEFAULT\n");
                     }
                     if (CTL_GAMING_FLIP_MODE_FLAG_VSYNC_OFF & GamingflipCaps)
                     {
-                        printf("  pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_VSYNC_OFF\n");
+                        printf("[INFO] pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_VSYNC_OFF\n");
                     }
                     if (CTL_GAMING_FLIP_MODE_FLAG_VSYNC_ON & GamingflipCaps)
                     {
-                        printf("  pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_VSYNC_ON\n");
+                        printf("[INFO] pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_VSYNC_ON\n");
                     }
                     if (CTL_GAMING_FLIP_MODE_FLAG_SMOOTH_SYNC & GamingflipCaps)
                     {
-                        printf("  pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_SMOOTH_SYNC\n");
+                        printf("[INFO] pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_SMOOTH_SYNC\n");
                     }
                     if (CTL_GAMING_FLIP_MODE_FLAG_SPEED_FRAME & GamingflipCaps)
                     {
-                        printf("  pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_SPEED_FRAME\n");
+                        printf("[INFO] pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_SPEED_FRAME\n");
                     }
                     if (CTL_GAMING_FLIP_MODE_FLAG_CAPPED_FPS & GamingflipCaps)
                     {
-                        printf("  pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_CAPPED_FPS\n");
+                        printf("[INFO] pFeatureDetails->Value.EnumType.SupportedTypes = CTL_GAMING_FLIP_MODE_FLAG_CAPPED_FPS\n");
                     }
                 }
                 // printf("  Enabled value: %d\n", pFeatureDetails->Value.EnumType.EnableType);
@@ -354,25 +365,25 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
             break;
             case CTL_PROPERTY_VALUE_TYPE_BOOL:
             {
-                printf("  Default value: %d\n", pFeatureDetails->Value.BoolType.DefaultState);
+                printf("[INFO] Default value: %d\n", pFeatureDetails->Value.BoolType.DefaultState);
                 // printf("  Enabled value: %d\n", pFeatureDetails->Value.BoolType.Enable);
             }
             break;
             case CTL_PROPERTY_VALUE_TYPE_FLOAT:
             {
-                printf("  Min possible value: %f\n", pFeatureDetails->Value.FloatType.RangeInfo.min_possible_value);
-                printf("  Max possible value: %f\n", pFeatureDetails->Value.FloatType.RangeInfo.max_possible_value);
-                printf("  Step size: %f\n", pFeatureDetails->Value.FloatType.RangeInfo.step_size);
-                printf("  Default value: %f\n", pFeatureDetails->Value.FloatType.RangeInfo.default_value);
+                printf("[INFO] Min possible value: %f\n", pFeatureDetails->Value.FloatType.RangeInfo.min_possible_value);
+                printf("[INFO] Max possible value: %f\n", pFeatureDetails->Value.FloatType.RangeInfo.max_possible_value);
+                printf("[INFO] Step size: %f\n", pFeatureDetails->Value.FloatType.RangeInfo.step_size);
+                printf("[INFO] Default value: %f\n", pFeatureDetails->Value.FloatType.RangeInfo.default_value);
                 // printf("  Current value: %f\n", pFeatureDetails->Value.FloatType.Value);
             }
             break;
             case CTL_PROPERTY_VALUE_TYPE_INT32:
             {
-                printf("  Min possible value: %d\n", pFeatureDetails->Value.IntType.RangeInfo.min_possible_value);
-                printf("  Max possible value: %d\n", pFeatureDetails->Value.IntType.RangeInfo.max_possible_value);
-                printf("  Step size: %d\n", pFeatureDetails->Value.IntType.RangeInfo.step_size);
-                printf("  Default value: %d\n", pFeatureDetails->Value.IntType.RangeInfo.default_value);
+                printf("[INFO] Min possible value: %d\n", pFeatureDetails->Value.IntType.RangeInfo.min_possible_value);
+                printf("[INFO] Max possible value: %d\n", pFeatureDetails->Value.IntType.RangeInfo.max_possible_value);
+                printf("[INFO] Step size: %d\n", pFeatureDetails->Value.IntType.RangeInfo.step_size);
+                printf("[INFO] Default value: %d\n", pFeatureDetails->Value.IntType.RangeInfo.default_value);
                 // printf("  Current value: %d\n", pFeatureDetails->Value.IntType.Value);
             }
             break;
@@ -380,7 +391,7 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
             {
                 if (pFeatureDetails->pCustomValue == NULL)
                 {
-                    printf("  Empty custom data\n");
+                    printf("[WARN] Empty custom data\n");
                     break;
                 }
 
@@ -389,12 +400,12 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
                     case CTL_3D_FEATURE_ADAPTIVE_SYNC_PLUS:
                     {
                         ctl_adaptivesync_caps_t *pASCaps = (ctl_adaptivesync_caps_t *)pFeatureDetails->pCustomValue;
-                        printf("  AdaptiveBalanceSupported = %d\n", pASCaps->AdaptiveBalanceSupported);
-                        printf("  AdaptiveBalanceStrengthCaps.DefaultEnable = %d\n", pASCaps->AdaptiveBalanceStrengthCaps.DefaultEnable);
-                        printf("  AdaptiveBalanceStrengthCaps.RangeInfo.default_value = %f\n", pASCaps->AdaptiveBalanceStrengthCaps.RangeInfo.default_value);
-                        printf("  AdaptiveBalanceStrengthCaps.RangeInfo.min_possible_value = %f\n", pASCaps->AdaptiveBalanceStrengthCaps.RangeInfo.min_possible_value);
-                        printf("  AdaptiveBalanceStrengthCaps.RangeInfo.max_possible_value = %f\n", pASCaps->AdaptiveBalanceStrengthCaps.RangeInfo.max_possible_value);
-                        printf("  AdaptiveBalanceStrengthCaps.RangeInfo.step_size = %f\n", pASCaps->AdaptiveBalanceStrengthCaps.RangeInfo.step_size);
+                        printf("[INFO] AdaptiveBalanceSupported = %d\n", pASCaps->AdaptiveBalanceSupported);
+                        printf("[INFO] AdaptiveBalanceStrengthCaps.DefaultEnable = %d\n", pASCaps->AdaptiveBalanceStrengthCaps.DefaultEnable);
+                        printf("[INFO] AdaptiveBalanceStrengthCaps.RangeInfo.default_value = %f\n", pASCaps->AdaptiveBalanceStrengthCaps.RangeInfo.default_value);
+                        printf("[INFO] AdaptiveBalanceStrengthCaps.RangeInfo.min_possible_value = %f\n", pASCaps->AdaptiveBalanceStrengthCaps.RangeInfo.min_possible_value);
+                        printf("[INFO] AdaptiveBalanceStrengthCaps.RangeInfo.max_possible_value = %f\n", pASCaps->AdaptiveBalanceStrengthCaps.RangeInfo.max_possible_value);
+                        printf("[INFO] AdaptiveBalanceStrengthCaps.RangeInfo.step_size = %f\n", pASCaps->AdaptiveBalanceStrengthCaps.RangeInfo.step_size);
                     }
                     break;
 
@@ -403,24 +414,24 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
                         ctl_endurance_gaming_caps_t *pEGCaps = (ctl_endurance_gaming_caps_t *)pFeatureDetails->pCustomValue;
                         std::vector<uint32_t> EGControls     = { CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_OFF, CTL_3D_ENDURANCE_GAMING_CONTROL_TURN_ON, CTL_3D_ENDURANCE_GAMING_CONTROL_AUTO };
                         std::vector<uint32_t> EGModes        = { CTL_3D_ENDURANCE_GAMING_MODE_BETTER_PERFORMANCE, CTL_3D_ENDURANCE_GAMING_MODE_BALANCED, CTL_3D_ENDURANCE_GAMING_MODE_MAXIMUM_BATTERY };
-                        printf("  pEGCaps->EGControlCaps.DefaultType = %d\n", pEGCaps->EGControlCaps.DefaultType);
-                        printf("  pEGCaps->EGModeCaps.DefaultType = %d\n", pEGCaps->EGModeCaps.DefaultType);
+                        printf("[INFO] pEGCaps->EGControlCaps.DefaultType = %d\n", pEGCaps->EGControlCaps.DefaultType);
+                        printf("[INFO] pEGCaps->EGModeCaps.DefaultType = %d\n", pEGCaps->EGModeCaps.DefaultType);
 
-                        Print3DFeatureSupportedSettings(pEGCaps->EGControlCaps.SupportedTypes, EGControls, ENDURANCE_GAMING_CONTROLS);
-                        Print3DFeatureSupportedSettings(pEGCaps->EGModeCaps.SupportedTypes, EGModes, ENDURANCE_GAMING_MODES);
+                        Print3DFeatureSupportedSettings(pEGCaps->EGControlCaps.SupportedTypes, move(EGControls), ENDURANCE_GAMING_CONTROLS);
+                        Print3DFeatureSupportedSettings(pEGCaps->EGModeCaps.SupportedTypes, move(EGModes), ENDURANCE_GAMING_MODES);
                     }
                     break;
 
                     case CTL_3D_FEATURE_APP_PROFILES:
                     {
                         ctl_3d_app_profiles_caps_t *pCaps = (ctl_3d_app_profiles_caps_t *)pFeatureDetails->pCustomValue;
-                        printf("  pCaps->SupportedTierTypes = %s\n", GetProfileTypeName(pCaps->SupportedTierTypes));
+                        printf("[INFO] pCaps->SupportedTierTypes = %s\n", GetProfileTypeName(pCaps->SupportedTierTypes));
                     }
                     break;
 
                     default:
                     {
-                        printf("  Unknown feature type with custom capabilities! ERROR!!\n");
+                        printf("[ERROR]  Unknown feature type with custom capabilities! ERROR!!\n");
                     }
                     break;
                 }

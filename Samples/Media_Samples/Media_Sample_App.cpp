@@ -23,6 +23,7 @@
 #define CTL_APIEXPORT // caller of control API DLL shall define this before
                       // including igcl_api.h
 #include "igcl_api.h"
+#include "GenericIGCLApp.h"
 
 ctl_result_t GResult = CTL_RESULT_SUCCESS;
 #define STORE_RESET_ERROR(Result)     \
@@ -966,14 +967,30 @@ int main()
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));
-    Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+    try
+    {
+        Result = ctlInit(&CtlInitArgs, &hAPIHandle);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlInit");
+    }
+    catch (const std::bad_array_new_length &e)
+    {
+        printf("%s \n", e.what());
+    }
 
     if (CTL_RESULT_SUCCESS == Result)
     {
         // Initialization successful
         // Get the list of Intel Adapters
 
-        Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+        try
+        {
+            Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+        }
+        catch (const std::bad_array_new_length &e)
+        {
+            printf("%s \n", e.what());
+        }
 
         if (CTL_RESULT_SUCCESS == Result)
         {
@@ -981,14 +998,22 @@ int main()
             if (hDevices == NULL)
             {
                 GResult = CTL_RESULT_ERROR_INVALID_NULL_POINTER;
-                goto free_exit;
+                goto Exit;
             }
-            Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+            try
+            {
+                Result = ctlEnumerateDevices(hAPIHandle, &Adapter_count, hDevices);
+                LOG_AND_EXIT_ON_ERROR(Result, "ctlEnumerateDevices");
+            }
+            catch (const std::bad_array_new_length &e)
+            {
+                printf("%s \n", e.what());
+            }
         }
         if (CTL_RESULT_SUCCESS != Result)
         {
             printf("ctlEnumerateDevices returned failure code: 0x%X\n", Result);
-            goto free_exit;
+            goto Exit;
         }
 
         for (Index = 0; Index < Adapter_count; Index++)
@@ -1028,17 +1053,17 @@ int main()
                 if (NULL != StDeviceAdapterProperties.pDeviceID)
                 {
                     AdapterID = *(reinterpret_cast<LUID *>(StDeviceAdapterProperties.pDeviceID));
-                    std::cout << "Adapter ID " << AdapterID.LowPart << "\n";
+                    printf(" Adapter ID %lu\n", AdapterID.LowPart);
                 }
 
                 if (0x8086 == StDeviceAdapterProperties.pci_vendor_id)
                 {
-                    std::cout << "Intel Adapter Name " << StDeviceAdapterProperties.name << "\n";
-                    std::cout << "Vendor id  " << StDeviceAdapterProperties.pci_vendor_id << "\n";
-                    std::cout << "Device id " << StDeviceAdapterProperties.pci_device_id << "\n";
-                    std::cout << "SubSys id " << StDeviceAdapterProperties.pci_subsys_id << "\n";
-                    std::cout << "SubSys Vendor id " << StDeviceAdapterProperties.pci_subsys_vendor_id << "\n";
-                    std::cout << "Rev id " << StDeviceAdapterProperties.rev_id << "\n";
+                    printf(" Intel Adapter Name  %s\n", StDeviceAdapterProperties.name);
+                    printf("Vendor id  0x%X\n", StDeviceAdapterProperties.pci_vendor_id);
+                    printf("Device id: 0x%X\n", StDeviceAdapterProperties.pci_device_id);
+                    printf("SubSys id 0x%X\n", StDeviceAdapterProperties.pci_subsys_id);
+                    printf("SubSys Vendor id 0x%X\n", StDeviceAdapterProperties.pci_subsys_vendor_id);
+                    printf("Rev id: 0x%X\n", StDeviceAdapterProperties.rev_id);
                 }
 
                 // get media properties
@@ -1059,7 +1084,6 @@ int main()
                 if (NULL != StDeviceAdapterProperties.pDeviceID)
                 {
                     free(StDeviceAdapterProperties.pDeviceID);
-                    StDeviceAdapterProperties.pDeviceID = NULL;
                 }
             }
         }
@@ -1069,7 +1093,7 @@ int main()
         STORE_RESET_ERROR(Result);
     }
 
-free_exit:
+Exit:
 
     ctlClose(hAPIHandle);
 
