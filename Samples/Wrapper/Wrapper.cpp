@@ -1,4 +1,4 @@
-//===========================================================================
+﻿//===========================================================================
 // Copyright (C) 2022 Intel Corporation
 //
 //
@@ -403,6 +403,94 @@ extern "C" {
 
     Exit:
         CTL_FREE_MEM(hDisplayOutput);
+        return Result;
+    }
+
+    ctl_result_t GetEnduranceGamingCaps(ctl_device_adapter_handle_t hDevice, ctl_endurance_gaming_caps_t* pCaps)
+    {
+        ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+        // ask IGCL what it supports
+        ctl_3d_feature_details_t details[CTL_3D_FEATURE_MAX] = {};
+        ctl_3d_feature_caps_t caps = {};
+        caps.Size = sizeof(caps);
+        caps.Version = 1;
+        caps.NumSupportedFeatures = CTL_3D_FEATURE_MAX;
+        caps.pFeatureDetails = details;
+
+        Result = ctlGetSupported3DCapabilities(hDevice, &caps);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSupported3DCapabilities");
+
+        // find the Endurance‐Gaming entry
+        bool found = false;
+        for (uint32_t i = 0; i < caps.NumSupportedFeatures; ++i) {
+            if (details[i].FeatureType == CTL_3D_FEATURE_ENDURANCE_GAMING) {
+                // the API tells us how each enum parameter is supported
+                // the feature's PropertyInfo.EnumType holds SupportedTypes + DefaultType
+                // but ctl_endurance_gaming_caps_t has two enum‐caps: EGControlCaps & EGModeCaps
+                // IGCL packs both into pCustomValue as ctl_endurance_gaming_caps_t
+                auto igclCaps = reinterpret_cast<ctl_endurance_gaming_caps_t*>(details[i].pCustomValue);
+
+                *pCaps = *igclCaps;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+
+    Exit:
+        return Result;
+    }
+
+    ctl_result_t GetEnduranceGamingSettings(ctl_device_adapter_handle_t hDevice, ctl_endurance_gaming2_t* pSettings)
+    {
+        ctl_result_t Result = CTL_RESULT_SUCCESS;
+        ctl_3d_feature_getset_t fs = {};
+
+        fs.Size = sizeof(fs);
+        fs.Version = 1;
+        fs.FeatureType = CTL_3D_FEATURE_ENDURANCE_GAMING;
+        fs.ApplicationName = nullptr;        // global
+        fs.ApplicationNameLength = 0;
+        fs.bSet = false;          // GET
+        fs.ValueType = CTL_PROPERTY_VALUE_TYPE_CUSTOM;
+        fs.CustomValueSize = sizeof(*pSettings);
+        fs.pCustomValue = pSettings;
+
+        Result = ctlGetSet3DFeature(hDevice, &fs);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSet3DFeature (GetEnduranceGamingSettings)");
+
+    Exit:
+        return Result;
+    }
+
+    ctl_result_t SetEnduranceGamingSettings(ctl_device_adapter_handle_t hDevice, ctl_endurance_gaming_t settings)
+    {
+        ctl_result_t Result = CTL_RESULT_SUCCESS;
+        ctl_3d_feature_getset_t fs = {};
+        ctl_endurance_gaming2_t eg2 = {};
+
+        // copy only the control + mode into the v2 type
+        eg2.EGControl = settings.EGControl;
+        eg2.EGMode = settings.EGMode;
+        // eg2.IsFPRequired, eg2.TargetFPS etc are out‐params
+
+        fs.Size = sizeof(fs);
+        fs.Version = 1;
+        fs.FeatureType = CTL_3D_FEATURE_ENDURANCE_GAMING;
+        fs.ApplicationName = nullptr;
+        fs.ApplicationNameLength = 0;
+        fs.bSet = true;           // SET
+        fs.ValueType = CTL_PROPERTY_VALUE_TYPE_CUSTOM;
+        fs.CustomValueSize = sizeof(eg2);
+        fs.pCustomValue = &eg2;
+
+        Result = ctlGetSet3DFeature(hDevice, &fs);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSet3DFeature (SetEnduranceGamingSettings)");
+
+    Exit:
         return Result;
     }
 
