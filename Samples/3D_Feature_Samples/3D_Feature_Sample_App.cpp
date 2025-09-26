@@ -890,7 +890,6 @@ ctl_result_t CtlGlobalOrPerAppTest(ctl_device_adapter_handle_t hDevices)
     return Result;
 }
 
-
 /***************************************************************
  * @brief
  * Method to test Frame Limit

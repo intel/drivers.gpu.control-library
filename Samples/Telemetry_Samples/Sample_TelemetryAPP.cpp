@@ -1179,6 +1179,9 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
 
     ctl_result_t Status = ctlPowerTelemetryGet(hDAhandle, &pPowerTelemetry);
 
+    static bool firstSample = true;
+    double timeDiff         = 0.0;
+
     if (Status == ctl_result_t::CTL_RESULT_SUCCESS)
     {
         PRINT_LOGS("\nTelemetry Success\n \n");
@@ -1187,24 +1190,71 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
         {
             PRINT_LOGS("\nTimeStamp: %f (%s) Datatype:(%s)", pPowerTelemetry.timeStamp.value.datadouble, DecodeCtlUnits(pPowerTelemetry.timeStamp.units).c_str(),
                        DecodeCtlDataType(pPowerTelemetry.timeStamp.type).c_str());
+
+            // Calculate time difference between current and previous timestamp
+            static double prevTimeStamp = 0.0;
+            if (!firstSample)
+            {
+                timeDiff = pPowerTelemetry.timeStamp.value.datadouble - prevTimeStamp;
+            }
+            prevTimeStamp = pPowerTelemetry.timeStamp.value.datadouble;
         }
 
         if (pPowerTelemetry.gpuEnergyCounter.bSupported)
         {
             PRINT_LOGS("\nGpu Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.gpuEnergyCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.gpuEnergyCounter.units).c_str(),
                        DecodeCtlDataType(pPowerTelemetry.gpuEnergyCounter.type).c_str());
+
+            // Calculate and display power based on energy counter if we have previous values
+            static double prevGpuEnergyCounter = 0.0;
+            if (!firstSample && pPowerTelemetry.timeStamp.bSupported)
+            {
+                double energyDiff = pPowerTelemetry.gpuEnergyCounter.value.datadouble - prevGpuEnergyCounter;
+                if (timeDiff > 0.0)
+                {
+                    double powerWatts = energyDiff / timeDiff;
+                    PRINT_LOGS("GPU Power (calculated): %f Watts", powerWatts);
+                }
+            }
+            prevGpuEnergyCounter = pPowerTelemetry.gpuEnergyCounter.value.datadouble;
         }
 
         if (pPowerTelemetry.vramEnergyCounter.bSupported)
         {
             PRINT_LOGS("\nVRAM Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.vramEnergyCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.vramEnergyCounter.units).c_str(),
                        DecodeCtlDataType(pPowerTelemetry.vramEnergyCounter.type).c_str());
+
+            // Calculate and display VRAM power based on energy counter if we have previous values
+            static double prevVramEnergyCounter = 0.0;
+            if (!firstSample && pPowerTelemetry.timeStamp.bSupported)
+            {
+                double energyDiff = pPowerTelemetry.vramEnergyCounter.value.datadouble - prevVramEnergyCounter;
+                if (timeDiff > 0.0)
+                {
+                    double powerWatts = energyDiff / timeDiff;
+                    PRINT_LOGS("VRAM Power (calculated): %f Watts", powerWatts);
+                }
+            }
+            prevVramEnergyCounter = pPowerTelemetry.vramEnergyCounter.value.datadouble;
         }
 
         if (pPowerTelemetry.totalCardEnergyCounter.bSupported)
         {
             PRINT_LOGS("\nCard Energy Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.totalCardEnergyCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.totalCardEnergyCounter.units).c_str(),
                        DecodeCtlDataType(pPowerTelemetry.totalCardEnergyCounter.type).c_str());
+
+            // Calculate and display total card power based on energy counter if we have previous values
+            static double prevTotalCardEnergyCounter = 0.0;
+            if (!firstSample && pPowerTelemetry.timeStamp.bSupported)
+            {
+                double energyDiff = pPowerTelemetry.totalCardEnergyCounter.value.datadouble - prevTotalCardEnergyCounter;
+                if (timeDiff > 0.0)
+                {
+                    double powerWatts = energyDiff / timeDiff;
+                    PRINT_LOGS("Total Card Power (calculated): %f Watts", powerWatts);
+                }
+            }
+            prevTotalCardEnergyCounter = pPowerTelemetry.totalCardEnergyCounter.value.datadouble;
         }
 
         if (pPowerTelemetry.gpuVoltage.bSupported)
@@ -1229,18 +1279,57 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
         {
             PRINT_LOGS("\nGpu Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.globalActivityCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.globalActivityCounter.units).c_str(),
                        DecodeCtlDataType(pPowerTelemetry.globalActivityCounter.type).c_str());
+
+            // Calculate and display GPU utilization based on global activity counter
+            static double prevGlobalActivityCounter = 0.0;
+            if (!firstSample && pPowerTelemetry.timeStamp.bSupported)
+            {
+                double activityDiff = pPowerTelemetry.globalActivityCounter.value.datadouble - prevGlobalActivityCounter;
+                if (timeDiff > 0.0)
+                {
+                    double utilization = (activityDiff / timeDiff) * 100.0; // Convert to percentage
+                    PRINT_LOGS("GPU Utilization (calculated): %f%%", utilization);
+                }
+            }
+            prevGlobalActivityCounter = pPowerTelemetry.globalActivityCounter.value.datadouble;
         }
 
         if (pPowerTelemetry.renderComputeActivityCounter.bSupported)
         {
             PRINT_LOGS("\nRender Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.renderComputeActivityCounter.value.datadouble,
                        DecodeCtlUnits(pPowerTelemetry.renderComputeActivityCounter.units).c_str(), DecodeCtlDataType(pPowerTelemetry.renderComputeActivityCounter.type).c_str());
+
+            // Calculate and display renderCompute utilization based on renderCompute activity counter
+            static double prevRenderComputeActivityCounter = 0.0;
+            if (!firstSample && pPowerTelemetry.timeStamp.bSupported)
+            {
+                double activityDiff = pPowerTelemetry.renderComputeActivityCounter.value.datadouble - prevRenderComputeActivityCounter;
+                if (timeDiff > 0.0)
+                {
+                    double utilization = (activityDiff / timeDiff) * 100.0; // Convert to percentage
+                    PRINT_LOGS("RenderCompute Utilization (calculated): %f%%", utilization);
+                }
+            }
+            prevRenderComputeActivityCounter = pPowerTelemetry.renderComputeActivityCounter.value.datadouble;
         }
 
         if (pPowerTelemetry.mediaActivityCounter.bSupported)
         {
             PRINT_LOGS("\nMedia Activity Counter: %f (%s) Datatype:(%s)", pPowerTelemetry.mediaActivityCounter.value.datadouble, DecodeCtlUnits(pPowerTelemetry.mediaActivityCounter.units).c_str(),
                        DecodeCtlDataType(pPowerTelemetry.mediaActivityCounter.type).c_str());
+
+            // Calculate and display media utilization based on media activity counter
+            static double prevMediaActivityCounter = 0.0;
+            if (!firstSample && pPowerTelemetry.timeStamp.bSupported)
+            {
+                double activityDiff = pPowerTelemetry.mediaActivityCounter.value.datadouble - prevMediaActivityCounter;
+                if (timeDiff > 0.0)
+                {
+                    double utilization = (activityDiff / timeDiff) * 100.0; // Convert to percentage
+                    PRINT_LOGS("Media Utilization (calculated): %f%%", utilization);
+                }
+            }
+            prevMediaActivityCounter = pPowerTelemetry.mediaActivityCounter.value.datadouble;
         }
 
         if (pPowerTelemetry.vramVoltage.bSupported)
@@ -1347,6 +1436,8 @@ void CtlPowerTelemetryTest(ctl_device_adapter_handle_t hDAhandle)
         PRINT_LOGS("\ngpuCurrentLimited: %s", DecodeBoolean(pPowerTelemetry.gpuCurrentLimited).c_str());
         PRINT_LOGS("\ngpuVoltageLimited: %s", DecodeBoolean(pPowerTelemetry.gpuVoltageLimited).c_str());
         PRINT_LOGS("\ngpuUtilizationLimited: %s", DecodeBoolean(pPowerTelemetry.gpuUtilizationLimited).c_str());
+
+        firstSample = false;
     }
     else
     {
