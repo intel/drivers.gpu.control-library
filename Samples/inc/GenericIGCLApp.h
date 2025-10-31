@@ -120,6 +120,8 @@ inline char *Get3DFeatureName(ctl_3d_feature_t FeatureType)
             return "Low Latency";
         case CTL_3D_FEATURE_FRAME_GENERATION:
             return "XeSS Frame Generation";
+        case CTL_3D_FEATURE_PREBUILT_SHADER_DOWNLOAD:
+            return "Prebuilt Shader Download";
         default:
             return "No Name";
     }
