@@ -1513,6 +1513,7 @@ typedef enum _ctl_3d_feature_t
     CTL_3D_FEATURE_GLOBAL_OR_PER_APP = 15,          ///< Set global settings or per application settings
     CTL_3D_FEATURE_LOW_LATENCY = 16,                ///< Low latency mode. Contains generic enum type fields
     CTL_3D_FEATURE_FRAME_GENERATION = 17,           ///< Frame Generation
+    CTL_3D_FEATURE_PREBUILT_SHADER_DOWNLOAD = 18,   ///< Download prebuilt shaders. Contains generic bool type fields
     CTL_3D_FEATURE_MAX
 
 } ctl_3d_feature_t;

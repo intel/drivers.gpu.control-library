@@ -924,6 +924,12 @@ ctl_result_t CtlAdapterTesting(ctl_device_adapter_handle_t *hDevices, uint32_t A
         }
     }
 
+    if (StDeviceAdapterProperties.pDeviceID != nullptr)
+    {
+            free(StDeviceAdapterProperties.pDeviceID);
+            StDeviceAdapterProperties.pDeviceID = nullptr;
+    }
+
     return Result;
 }
 
