@@ -1544,7 +1544,7 @@ int main()
     ctl_init_args_t CtlInitArgs;
     ctl_api_handle_t hAPIHandle;
     CtlInitArgs.AppVersion = CTL_MAKE_VERSION(CTL_IMPL_MAJOR_VERSION, CTL_IMPL_MINOR_VERSION);
-    CtlInitArgs.flags      = CTL_INIT_FLAG_USE_LEVEL_ZERO;
+    CtlInitArgs.flags      = CTL_INIT_FLAG_USE_LEVEL_ZERO | CTL_INIT_FLAG_IGSC_FUL;
     CtlInitArgs.Size       = sizeof(CtlInitArgs);
     CtlInitArgs.Version    = 0;
     ZeroMemory(&CtlInitArgs.ApplicationUID, sizeof(ctl_application_id_t));

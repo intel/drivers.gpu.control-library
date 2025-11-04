@@ -326,6 +326,103 @@ Exit:
 }
 
 /***************************************************************
+ * @brief
+ * Sample test for Get/Set Audio settings
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestToGetSetAudioEndpoint(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                           = CTL_RESULT_SUCCESS;
+    ctl_display_settings_t AppliedDisplaySettings = { 0 };
+    ctl_display_settings_t NewDisplaySettings     = { 0 };
+    bool IsControllable, IsSupported = FALSE;
+
+    // GET CALL
+    AppliedDisplaySettings.Version = API_VERSION;
+    AppliedDisplaySettings.Size    = sizeof(ctl_display_settings_t);
+    AppliedDisplaySettings.Set     = FALSE;
+
+    Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (Audio settings GET CALL)");
+
+    IsControllable = (CTL_DISPLAY_SETTING_FLAG_AUDIO & AppliedDisplaySettings.ControllableFlags) ? TRUE : FALSE;
+    IsSupported    = (CTL_DISPLAY_SETTING_FLAG_AUDIO & AppliedDisplaySettings.SupportedFlags) ? TRUE : FALSE;
+
+    if (FALSE == IsControllable)
+    {
+        printf("Get/Set Audio settings are not controllable \n");
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
+
+    if (FALSE == IsSupported)
+    {
+        printf("Get/Set Audio is not supported \n");
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
+
+    printf("\n Current Audio settings are %d \n", AppliedDisplaySettings.AudioSettings);
+
+    // SET CALL To disable audio endpoint
+    NewDisplaySettings.Version = API_VERSION;
+    NewDisplaySettings.Size    = sizeof(ctl_display_settings_t);
+    NewDisplaySettings.Set     = TRUE;
+
+    NewDisplaySettings.ValidFlags    = CTL_DISPLAY_SETTING_FLAG_AUDIO;
+    NewDisplaySettings.AudioSettings = CTL_DISPLAY_SETTING_AUDIO_DISABLED;
+
+    Result = ctlGetSetDisplaySettings(hDisplayOutput, &NewDisplaySettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (Audio settings SET CALL)");
+
+    // GET CALL
+    AppliedDisplaySettings         = { 0 };
+    AppliedDisplaySettings.Version = API_VERSION;
+    AppliedDisplaySettings.Size    = sizeof(ctl_display_settings_t);
+    AppliedDisplaySettings.Set     = FALSE;
+
+    Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (Audio settings GET CALL)");
+    printf("\n Current Audio settings post SET call %d \n", AppliedDisplaySettings.AudioSettings);
+
+    if (AppliedDisplaySettings.AudioSettings != NewDisplaySettings.AudioSettings)
+    {
+        APP_LOG_ERROR("Current and Applied AudioSettings mismatched: %d, %d", AppliedDisplaySettings.AudioSettings, NewDisplaySettings.AudioSettings);
+    }
+
+    // SET CALL To enable back audio endpoint
+    NewDisplaySettings         = { 0 };
+    NewDisplaySettings.Version = API_VERSION;
+    NewDisplaySettings.Size    = sizeof(ctl_display_settings_t);
+    NewDisplaySettings.Set     = TRUE;
+
+    NewDisplaySettings.ValidFlags    = CTL_DISPLAY_SETTING_FLAG_AUDIO;
+    NewDisplaySettings.AudioSettings = CTL_DISPLAY_SETTING_AUDIO_DEFAULT;
+
+    Result = ctlGetSetDisplaySettings(hDisplayOutput, &NewDisplaySettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (Audio settings SET CALL)");
+
+    // GET CALL
+    AppliedDisplaySettings         = { 0 };
+    AppliedDisplaySettings.Version = API_VERSION;
+    AppliedDisplaySettings.Size    = sizeof(ctl_display_settings_t);
+    AppliedDisplaySettings.Set     = FALSE;
+
+    Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (Audio settings GET CALL)");
+    printf("\n Current Audio settings post SET call %d \n", AppliedDisplaySettings.AudioSettings);
+
+    if (AppliedDisplaySettings.AudioSettings != NewDisplaySettings.AudioSettings)
+    {
+        APP_LOG_ERROR("Current and Applied AudioSettings mismatched: %d, %d", AppliedDisplaySettings.AudioSettings, NewDisplaySettings.AudioSettings);
+    }
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
  * @brief EnumerateDisplayHandles
  * Only for demonstration purpose, API is called for each of the display output handle in below snippet.
  * User has to filter through the available display output handle and has to call the API with particular display output handle.
@@ -374,6 +471,10 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
 
         // Get/Set HDR10+ Source Tonemapping Flag
         Result = TestToGetSetSourceTonemapping(hDisplayOutput[DisplayIndex]);
+        STORE_AND_RESET_ERROR(Result);
+
+        // Get/Set Audio Endpoint
+        Result = TestToGetSetAudioEndpoint(hDisplayOutput[DisplayIndex]);
         STORE_AND_RESET_ERROR(Result);
     }
 
