@@ -120,6 +120,9 @@ typedef enum _ctl_init_flag_t
 {
     CTL_INIT_FLAG_USE_LEVEL_ZERO = CTL_BIT(0),      ///< Use Level0 or not. This is usually required for telemetry,
                                                     ///< performance, frequency related APIs
+    CTL_INIT_FLAG_IGSC_FUL = CTL_BIT(1),            ///< Enable IGSC(Intel Graphics System Firmware Update Library) full
+                                                    ///< functionality mode, which may include advanced graphics and compute
+                                                    ///< capabilities
     CTL_INIT_FLAG_MAX = 0x80000000
 
 } ctl_init_flag_t;
@@ -392,6 +395,7 @@ typedef enum _ctl_result_t
     CTL_RESULT_ERROR_UNKNOWN = 0x4000FFFF,          ///< Unknown or internal error
     CTL_RESULT_ERROR_RETRY_OPERATION = 0x40010000,  ///< Operation failed, retry previous operation again
     CTL_RESULT_ERROR_IGSC_LOADER = 0x40010001,      ///< IGSC library loader not found
+    CTL_RESULT_ERROR_RESTRICTED_APPLICATION = 0x40010002,   ///< Unsupported application
     CTL_RESULT_ERROR_GENERIC_END = 0x4000FFFF,      ///< "Generic error code end value, not to be used
                                                     ///< "
     CTL_RESULT_ERROR_CORE_START = 0x44000000,       ///< Core error code starting value, not to be used
