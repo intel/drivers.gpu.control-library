@@ -93,7 +93,7 @@ Each of the enumerated adapters will have a unique handle and the applications c
 <pre class="literal-block">function main( ... )
  <a class="reference internal" href="api.html#ctl-init-args-t"><span class="std std-ref">ctl_init_args_t</span></a> CtlInitArgs;
  ctl_api_handle_t hAPIHandle;
-    if (<a class="reference internal" href="api.html#ctlinit"><span class="std std-ref">ctlInit</span></a>(CtlInitArgs, &amp;hAPIHandle) != <a class="reference internal" href="api.html#ctl-result-t"><span class="std std-ref">CTL_RESULT_SUCCESS</span></a>)
+    if (<a class="reference internal" href="api.html#ctlinit"><span class="std std-ref">ctlInit</span></a>(&amp;CtlInitArgs, &amp;hAPIHandle) != <a class="reference internal" href="api.html#ctl-result-t"><span class="std std-ref">CTL_RESULT_SUCCESS</span></a>)
         output(&quot;Can't initialize the API&quot;)
     else
         # Enumerate all adapters
