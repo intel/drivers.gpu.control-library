@@ -17,7 +17,7 @@ The pseudo code below shows how to initialize the IGCL library and enumerate the
    function main( ... )
     :ref:`ctl-init-args-t` CtlInitArgs;
     ctl_api_handle_t hAPIHandle;
-       if (:ref:`ctlInit`\(CtlInitArgs, &hAPIHandle) != :ref:`CTL_RESULT_SUCCESS <ctl-result-t>`\)
+       if (:ref:`ctlInit`\(&CtlInitArgs, &hAPIHandle) != :ref:`CTL_RESULT_SUCCESS <ctl-result-t>`\)
            output("Can't initialize the API")
        else
            # Enumerate all adapters

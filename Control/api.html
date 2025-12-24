@@ -4618,7 +4618,7 @@
 <span id="_CPPv312ctlI2CAccess27ctl_display_output_handle_tP21ctl_i2c_access_args_t"></span><span id="_CPPv212ctlI2CAccess27ctl_display_output_handle_tP21ctl_i2c_access_args_t"></span><span id="ctlI2CAccess__ctl_display_output_handle_t.ctl_i2c_access_args_tP"></span><span class="target" id="igcl__api_8h_1ae4c111668b07bb7987e2747e9bce19e4"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlI2CAccess</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_display_output_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDisplayOutput</span></span>, <a class="reference internal" href="#_CPPv421ctl_i2c_access_args_t" title="ctl_i2c_access_args_t"><span class="n"><span class="pre">ctl_i2c_access_args_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pI2cAccessArgs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412ctlI2CAccess27ctl_display_output_handle_tP21ctl_i2c_access_args_t" title="Link to this definition"></a><br /></dt>
 <dd><p>I2C Access. </p>
 <p><ul class="simple">
-<li><p>Interface to access I2C using display handle as identifier.</p></li>
+<li><p>Interface to access I2C using display handle as identifier. I2C driver override flags are supported only for HDMI displays.</p></li>
 </ul>
 </p>
 <dl class="field-list simple">
@@ -6629,6 +6629,30 @@
 <dt class="sig sig-object cpp" id="_CPPv4N14ctl_i2c_flag_t27CTL_I2C_FLAG_SPEED_BIT_BASHE">
 <span id="_CPPv3N14ctl_i2c_flag_t27CTL_I2C_FLAG_SPEED_BIT_BASHE"></span><span id="_CPPv2N14ctl_i2c_flag_t27CTL_I2C_FLAG_SPEED_BIT_BASHE"></span><span class="target" id="igcl__api_8h_1ac17565ccd5893214c6e102cf7b42f40aacb342a51d3f03696e44a1035dd8b8b3e"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_I2C_FLAG_SPEED_BIT_BASH</span></span></span><a class="headerlink" href="#_CPPv4N14ctl_i2c_flag_t27CTL_I2C_FLAG_SPEED_BIT_BASHE" title="Link to this definition"></a><br /></dt>
 <dd><p>Uses Slower access using SW bit bashing method. If no Speed Flag is set, defaults to Best Option possible. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N14ctl_i2c_flag_t28CTL_I2C_FLAG_DRIVER_OVERRIDEE">
+<span id="_CPPv3N14ctl_i2c_flag_t28CTL_I2C_FLAG_DRIVER_OVERRIDEE"></span><span id="_CPPv2N14ctl_i2c_flag_t28CTL_I2C_FLAG_DRIVER_OVERRIDEE"></span><span class="target" id="igcl__api_8h_1ac17565ccd5893214c6e102cf7b42f40aa5493ba83e4a52db29ec4ce6bdb039fd3"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_I2C_FLAG_DRIVER_OVERRIDE</span></span></span><a class="headerlink" href="#_CPPv4N14ctl_i2c_flag_t28CTL_I2C_FLAG_DRIVER_OVERRIDEE" title="Link to this definition"></a><br /></dt>
+<dd><p>If set, overrides the driver I2C flags with those provided by IGCL. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N14ctl_i2c_flag_t18CTL_I2C_FLAG_STARTE">
+<span id="_CPPv3N14ctl_i2c_flag_t18CTL_I2C_FLAG_STARTE"></span><span id="_CPPv2N14ctl_i2c_flag_t18CTL_I2C_FLAG_STARTE"></span><span class="target" id="igcl__api_8h_1ac17565ccd5893214c6e102cf7b42f40aa5ddb7a1cfd48fad09850d7ffefe50d60"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_I2C_FLAG_START</span></span></span><a class="headerlink" href="#_CPPv4N14ctl_i2c_flag_t18CTL_I2C_FLAG_STARTE" title="Link to this definition"></a><br /></dt>
+<dd><p>I2C Start driver override flag. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N14ctl_i2c_flag_t17CTL_I2C_FLAG_STOPE">
+<span id="_CPPv3N14ctl_i2c_flag_t17CTL_I2C_FLAG_STOPE"></span><span id="_CPPv2N14ctl_i2c_flag_t17CTL_I2C_FLAG_STOPE"></span><span class="target" id="igcl__api_8h_1ac17565ccd5893214c6e102cf7b42f40aa2d87c2ca38d60009c05a2f6c71f600d3"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_I2C_FLAG_STOP</span></span></span><a class="headerlink" href="#_CPPv4N14ctl_i2c_flag_t17CTL_I2C_FLAG_STOPE" title="Link to this definition"></a><br /></dt>
+<dd><p>I2C Stop driver override flags. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N14ctl_i2c_flag_t20CTL_I2C_FLAG_RESTARTE">
+<span id="_CPPv3N14ctl_i2c_flag_t20CTL_I2C_FLAG_RESTARTE"></span><span id="_CPPv2N14ctl_i2c_flag_t20CTL_I2C_FLAG_RESTARTE"></span><span class="target" id="igcl__api_8h_1ac17565ccd5893214c6e102cf7b42f40aaee9100942a81239df3adcd770d4ead16"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_I2C_FLAG_RESTART</span></span></span><a class="headerlink" href="#_CPPv4N14ctl_i2c_flag_t20CTL_I2C_FLAG_RESTARTE" title="Link to this definition"></a><br /></dt>
+<dd><p>I2C Restart driver override flag. </p>
 </dd></dl>
 
 <dl class="cpp enumerator">
