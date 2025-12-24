@@ -327,6 +327,79 @@ Exit:
 
 /***************************************************************
  * @brief
+ * Sample test for HDR10+
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestHDR10Plus(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result                           = CTL_RESULT_SUCCESS;
+    ctl_display_settings_t AppliedDisplaySettings = { 0 };
+    ctl_display_settings_t NewDisplaySettings     = { 0 };
+    bool IsControllable, IsSupported = FALSE;
+
+    // GET CALL
+    AppliedDisplaySettings.Version    = API_VERSION;
+    AppliedDisplaySettings.Size       = sizeof(ctl_display_settings_t);
+    AppliedDisplaySettings.Set        = FALSE;
+    AppliedDisplaySettings.ValidFlags = CTL_DISPLAY_SETTING_FLAG_LOW_LATENCY | CTL_DISPLAY_SETTING_FLAG_SOURCE_TM;
+
+    Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (LowLatency GET CALL)");
+
+    // LowLatency
+    IsControllable = (CTL_DISPLAY_SETTING_FLAG_LOW_LATENCY & AppliedDisplaySettings.ControllableFlags) ? TRUE : FALSE;
+    IsSupported    = (CTL_DISPLAY_SETTING_FLAG_LOW_LATENCY & AppliedDisplaySettings.SupportedFlags) ? TRUE : FALSE;
+
+    if ((FALSE == IsControllable) || (FALSE == IsSupported))
+    {
+        APP_LOG_WARN("Get/Set LowLatency is not supported/controllable = %d/%d", IsSupported, IsControllable);
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
+    APP_LOG_INFO(" Current Applied LowLatency is %d ", AppliedDisplaySettings.LowLatency);
+
+    // SourceTM
+    IsControllable = (CTL_DISPLAY_SETTING_FLAG_SOURCE_TM & AppliedDisplaySettings.ControllableFlags) ? TRUE : FALSE;
+    IsSupported    = (CTL_DISPLAY_SETTING_FLAG_SOURCE_TM & AppliedDisplaySettings.SupportedFlags) ? TRUE : FALSE;
+
+    if ((FALSE == IsControllable) || (FALSE == IsSupported))
+    {
+        APP_LOG_WARN("Get/Set SourceTM is not supported/controllable = %d/%d. Ensure HDR mode is enabled in OS settings.", IsSupported, IsControllable);
+        Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;
+        goto Exit;
+    }
+    APP_LOG_INFO(" Current Applied SourceTM is %d ", AppliedDisplaySettings.SourceTM);
+
+    // CALL TO ENABLE HDR10+ LOW_LATENCY
+    NewDisplaySettings.Version    = API_VERSION;
+    NewDisplaySettings.Size       = sizeof(ctl_display_settings_t);
+    NewDisplaySettings.Set        = TRUE;
+    NewDisplaySettings.ValidFlags = CTL_DISPLAY_SETTING_FLAG_LOW_LATENCY | CTL_DISPLAY_SETTING_FLAG_SOURCE_TM;
+    NewDisplaySettings.LowLatency = CTL_DISPLAY_SETTING_LOW_LATENCY_ENABLED;
+    NewDisplaySettings.SourceTM   = CTL_DISPLAY_SETTING_SOURCETM_ENABLED;
+
+    Result = ctlGetSetDisplaySettings(hDisplayOutput, &NewDisplaySettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (LowLatency_SourceTM SET CALL)");
+
+    // GET CALL
+    AppliedDisplaySettings            = { 0 };
+    AppliedDisplaySettings.Version    = API_VERSION;
+    AppliedDisplaySettings.Size       = sizeof(ctl_display_settings_t);
+    AppliedDisplaySettings.Set        = FALSE;
+    AppliedDisplaySettings.ValidFlags = CTL_DISPLAY_SETTING_FLAG_LOW_LATENCY | CTL_DISPLAY_SETTING_FLAG_SOURCE_TM;
+
+    Result = ctlGetSetDisplaySettings(hDisplayOutput, &AppliedDisplaySettings);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlGetSetDisplaySettings (LowLatency_SourceTM GET CALL)");
+    APP_LOG_INFO(" Current LowLatency is %d ", AppliedDisplaySettings.LowLatency);
+    APP_LOG_INFO(" Current SourceTM is %d ", AppliedDisplaySettings.SourceTM);
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
+ * @brief
  * Sample test for Get/Set Audio settings
  * @param hDisplayOutput
  * @return ctl_result_t
@@ -465,13 +538,26 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
         Result = TestToGetSetContentType(hDisplayOutput[DisplayIndex]);
         STORE_AND_RESET_ERROR(Result);
 
-        // Get/Set HDR10+ Low Latency Flag
-        Result = TestToGetSetLowLatency(hDisplayOutput[DisplayIndex]);
-        STORE_AND_RESET_ERROR(Result);
+        if (DisplayProperties.FeatureSupportedFlags & CTL_STD_DISPLAY_FEATURE_FLAG_HDR10_PLUS_CERTIFIED)
+        {
+            APP_LOG_INFO("HDR10+ Certified Display is detected");
 
-        // Get/Set HDR10+ Source Tonemapping Flag
-        Result = TestToGetSetSourceTonemapping(hDisplayOutput[DisplayIndex]);
-        STORE_AND_RESET_ERROR(Result);
+            // Get/Set HDR10+ Low Latency & SourceTM Flag
+            Result = TestHDR10Plus(hDisplayOutput[DisplayIndex]);
+            STORE_AND_RESET_ERROR(Result);
+        }
+        else
+        {
+            APP_LOG_INFO("HDR10+ Certified Display not detected");
+
+            // Get/Set HDR10+ Low Latency Flag
+            Result = TestToGetSetLowLatency(hDisplayOutput[DisplayIndex]);
+            STORE_AND_RESET_ERROR(Result);
+
+            // Get/Set HDR10+ Source Tonemapping Flag
+            Result = TestToGetSetSourceTonemapping(hDisplayOutput[DisplayIndex]);
+            STORE_AND_RESET_ERROR(Result);
+        }
 
         // Get/Set Audio Endpoint
         Result = TestToGetSetAudioEndpoint(hDisplayOutput[DisplayIndex]);

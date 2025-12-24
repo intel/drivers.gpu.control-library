@@ -2540,6 +2540,10 @@ typedef enum _ctl_i2c_flag_t
     CTL_I2C_FLAG_SPEED_FAST = CTL_BIT(5),           ///< If no Speed Flag is set, defaults to Best Option possible.
     CTL_I2C_FLAG_SPEED_BIT_BASH = CTL_BIT(6),       ///< Uses Slower access using SW bit bashing method. If no Speed Flag is
                                                     ///< set, defaults to Best Option possible.
+    CTL_I2C_FLAG_DRIVER_OVERRIDE = CTL_BIT(7),      ///< If set, overrides the driver I2C flags with those provided by IGCL
+    CTL_I2C_FLAG_START = CTL_BIT(8),                ///< I2C Start driver override flag
+    CTL_I2C_FLAG_STOP = CTL_BIT(9),                 ///< I2C Stop driver override flags
+    CTL_I2C_FLAG_RESTART = CTL_BIT(10),             ///< I2C Restart driver override flag
     CTL_I2C_FLAG_MAX = 0x80000000
 
 } ctl_i2c_flag_t;
@@ -2566,7 +2570,8 @@ typedef struct _ctl_i2c_access_args_t
 /// @brief I2C Access
 /// 
 /// @details
-///     - Interface to access I2C using display handle as identifier.
+///     - Interface to access I2C using display handle as identifier.  I2C
+///       driver override flags are supported only for HDMI displays.
 /// 
 /// @returns
 ///     - CTL_RESULT_SUCCESS

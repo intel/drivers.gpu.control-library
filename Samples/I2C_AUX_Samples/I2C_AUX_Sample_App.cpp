@@ -139,6 +139,211 @@ Exit:
 }
 
 /***************************************************************
+ * @brief TestI2CAccessWithDriverOverrideFlagsForMultipleReadTransactions
+ * Reference code to show how to use the I2C driver flags for multiple read transactions for HDMI displays
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestI2CAccessWithDriverOverrideFlagsForMultipleReadTransactions(ctl_display_output_handle_t hDisplayOutput)
+{
+#define READ_DATA_SIZE 11 // the total read data size to
+#define READ_SIZE_LIMIT 2 // the read data size limit for each I2C read transaction
+
+    ctl_result_t Result           = CTL_RESULT_SUCCESS;
+    ctl_i2c_access_args_t I2CArgs = { 0 }; // I2C Access
+    uint32_t ReadDataLeft         = 0;
+    uint32_t ReadDataSent         = 0;
+    uint32_t ReadDataSizeLimit    = 0;
+    bool IsFirstReadTransaction   = TRUE;
+
+    // I2C WRITE : 82 01 10 AC at address 6E and subaddress 51
+    // If we write these BYTEs ( 82 01 10 AC) to address 6E and
+    // subaddress 51, it should update the current brightness to the 10th
+    // byte at address 6E and subaddress 51. One can verify by changing
+    // panel brightness from panel buttons, writing to address 6E
+    // and subaddress 51 ( 82 01 10 AC), and then reading 10th byte at
+    // address 6E and subaddress 51. Here is an example of an 11 byte output:
+    // 6E 88 02 00 10 00 00 64 00 19 D9.  The 10th byte value is the current brightness value of the
+    // panel. To confirm whether this value is correct or not, convert the Hex
+    // value to Decimal.  In this example, the 10th byte is 0x19, which represents 25% panel brightness.
+    I2CArgs.Size     = sizeof(ctl_i2c_access_args_t);
+    I2CArgs.OpType   = CTL_OPERATION_TYPE_WRITE;
+    I2CArgs.Address  = 0x6E; // Address used for demonstration purpose
+    I2CArgs.Offset   = 0x51; // Offset used for demonstration purpose
+    I2CArgs.DataSize = 4;
+    I2CArgs.Data[0]  = 0x82;
+    I2CArgs.Data[1]  = 0x01;
+    I2CArgs.Data[2]  = 0x10;
+    I2CArgs.Data[3]  = 0xAC;
+
+    EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+    APP_LOG_INFO("I2C Write Test using I2C driver override flags for multiple read transactions");
+
+    Result = ctlI2CAccess(hDisplayOutput, &I2CArgs);
+
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        APP_LOG_ERROR("ctlI2CAccess for I2C write returned failure code: 0x%X", Result);
+        STORE_AND_RESET_ERROR(Result);
+    }
+
+    // I2C READ : 82 01 10 AC at address 6E and subaddress 51
+    APP_LOG_INFO("I2C Read Transaction Test using I2C driver override flags for multiple read transactions");
+
+    ZeroMemory(&I2CArgs, sizeof(I2CArgs));
+    I2CArgs.Size     = sizeof(ctl_i2c_access_args_t);
+    I2CArgs.OpType   = CTL_OPERATION_TYPE_READ;
+    I2CArgs.Address  = 0x6E; // Address used for demonstration purpose
+    I2CArgs.Offset   = 0x51; // Offset used for demonstration purpose
+    I2CArgs.DataSize = READ_SIZE_LIMIT;
+
+    I2CArgs.Flags |= CTL_I2C_FLAG_DRIVER_OVERRIDE; // must be enabled to use the driver override I2C flags
+    I2CArgs.Flags |= CTL_I2C_FLAG_SPEED_BIT_BASH;  // bit bash flag is required for driver override feature
+
+    ReadDataLeft           = READ_DATA_SIZE;
+    ReadDataSizeLimit      = READ_SIZE_LIMIT;
+    ReadDataSent           = 0;
+    IsFirstReadTransaction = TRUE;
+
+    for (uint32_t i = 0; ReadDataLeft > 0; i++)
+    {
+        I2CArgs.Offset = ReadDataSent;
+
+        if (TRUE == IsFirstReadTransaction)
+        {
+            if (ReadDataLeft <= ReadDataSizeLimit) // single read transaction: enable start and stop
+            {
+                APP_LOG_INFO("Single Transaction");
+                I2CArgs.DataSize = ReadDataLeft;
+                I2CArgs.Flags |= CTL_I2C_FLAG_START;
+                I2CArgs.Flags |= CTL_I2C_FLAG_STOP;
+            }
+            else // first read transaction: enable start, disable stop
+            {
+                APP_LOG_INFO("First Transaction: %i", i + 1);
+                I2CArgs.DataSize = ReadDataSizeLimit;
+                I2CArgs.Flags |= CTL_I2C_FLAG_START;
+                I2CArgs.Flags &= ~CTL_I2C_FLAG_STOP;
+            }
+
+            IsFirstReadTransaction = FALSE;
+        }
+        else
+        {
+            if (ReadDataLeft <= ReadDataSizeLimit) // last read transaction: disable start, enable stop
+            {
+                APP_LOG_INFO("Last Transaction: %i", i + 1);
+                I2CArgs.DataSize = ReadDataLeft;
+                I2CArgs.Flags &= ~CTL_I2C_FLAG_START;
+                I2CArgs.Flags |= CTL_I2C_FLAG_STOP;
+            }
+            else // middle range read transaction: disable start and stop
+            {
+                APP_LOG_INFO("Middle Range Transaction: %i", i + 1);
+                I2CArgs.Flags &= ~CTL_I2C_FLAG_START;
+                I2CArgs.Flags &= ~CTL_I2C_FLAG_STOP;
+            }
+        }
+
+        memset(I2CArgs.Data, 0xFF, I2CArgs.DataSize); // Clear the data buffer before reading
+
+        Result = ctlI2CAccess(hDisplayOutput, &I2CArgs);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlI2CAccess for I2C Read Transaction Test using I2C driver override flags");
+
+        //  Print the data
+        for (uint32_t j = 0; j < I2CArgs.DataSize; j++)
+        {
+            APP_LOG_INFO("Read data[%d] = : 0x%X", j, I2CArgs.Data[j]);
+        }
+
+        ReadDataSent += I2CArgs.DataSize;
+        ReadDataLeft -= I2CArgs.DataSize;
+    }
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
+ * @brief TestI2CAccessWithRestartDriverOverrideFlag
+ * Reference code to show how to use the I2C Restart driver override flag for HDMI displays
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestI2CAccessWithRestartDriverOverrideFlag(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result           = CTL_RESULT_SUCCESS;
+    ctl_i2c_access_args_t I2CArgs = { 0 }; // I2C Access
+
+    // I2C WRITE : 82 01 10 AC at address 6E and subaddress 51
+    // If we write these BYTEs ( 82 01 10 AC) to address 6E and
+    // subaddress 51, it should update the current brightness to the 10th
+    // byte at address 6E and subaddress 51. One can verify by changing
+    // panel brightness from panel buttons, writing to address 6E
+    // and subaddress 51 ( 82 01 10 AC), and then reading 10th byte at
+    // address 6E and subaddress 51. Here is an example of an 11 byte output:
+    // 6E 88 02 00 10 00 00 64 00 19 D9.  The 10th byte value is the current brightness value of the
+    // panel. To confirm whether this value is correct or not, convert the Hex
+    // value to Decimal.  In this example, the 10th byte is 0x19, which represents 25% panel brightness.
+    I2CArgs.Size     = sizeof(ctl_i2c_access_args_t);
+    I2CArgs.OpType   = CTL_OPERATION_TYPE_WRITE;
+    I2CArgs.Address  = 0x6E; // Address used for demonstration purpose
+    I2CArgs.Offset   = 0x51; // Offset used for demonstration purpose
+    I2CArgs.DataSize = 4;
+    I2CArgs.Data[0]  = 0x82;
+    I2CArgs.Data[1]  = 0x01;
+    I2CArgs.Data[2]  = 0x10;
+    I2CArgs.Data[3]  = 0xAC;
+
+    EXIT_ON_MEM_ALLOC_FAILURE(hDisplayOutput, "hDisplayOutput");
+
+    APP_LOG_INFO("I2C Write Test using I2C Restart driver override flag for read");
+
+    I2CArgs.Flags |= CTL_I2C_FLAG_DRIVER_OVERRIDE; // must be enabled to use the driver override I2C flags
+    I2CArgs.Flags |= CTL_I2C_FLAG_SPEED_BIT_BASH;  // bit bash flag is required for driver override feature
+    I2CArgs.Flags |= CTL_I2C_FLAG_START;           // enable start flag for the write operation
+
+    Result = ctlI2CAccess(hDisplayOutput, &I2CArgs);
+
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        APP_LOG_ERROR("ctlI2CAccess for I2C write returned failure code: 0x%X", Result);
+        STORE_AND_RESET_ERROR(Result);
+    }
+
+    // I2C READ : 82 01 10 AC at address 6E and subaddress 51
+    APP_LOG_INFO("I2C Read Transaction Test using I2C Restart driver override flag for read");
+
+    ZeroMemory(&I2CArgs, sizeof(I2CArgs));
+    I2CArgs.Size     = sizeof(ctl_i2c_access_args_t);
+    I2CArgs.OpType   = CTL_OPERATION_TYPE_READ;
+    I2CArgs.Address  = 0x6E; // Address used for demonstration purpose
+    I2CArgs.Offset   = 0x51; // Offset used for demonstration purpose
+    I2CArgs.DataSize = 11;
+
+    // Perform I2C repeated start transaction for read by enabling Restart flag
+    I2CArgs.Flags |= CTL_I2C_FLAG_DRIVER_OVERRIDE; // must be enabled to use the driver override I2C flags
+    I2CArgs.Flags |= CTL_I2C_FLAG_SPEED_BIT_BASH;  // bit bash flag is required for driver override feature
+    I2CArgs.Flags |= CTL_I2C_FLAG_RESTART;         // enable restart flag for the read operation
+    I2CArgs.Flags |= CTL_I2C_FLAG_STOP;            // issue a stop after the read operation is completed
+
+    memset(I2CArgs.Data, 0xFF, I2CArgs.DataSize); // Clear the data buffer before reading
+
+    Result = ctlI2CAccess(hDisplayOutput, &I2CArgs);
+    LOG_AND_EXIT_ON_ERROR(Result, "ctlI2CAccess for I2C read with Restart flag");
+
+    //  Print the data
+    for (uint32_t j = 0; j < I2CArgs.DataSize; j++)
+    {
+        APP_LOG_INFO("Read data[%d] = : 0x%X", j, I2CArgs.Data[j]);
+    }
+
+Exit:
+    return Result;
+}
+
+/***************************************************************
  * @brief Tests I2C Access on enumerated Pin Pairs.
  * Reference code to use ctlI2CAccessOnPinPair API
  * @param hI2cPinPair
@@ -241,6 +446,22 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
 
         Result = TestI2CAUXAccess(hDisplayOutput[DisplayIndex]);
         STORE_AND_RESET_ERROR(Result);
+
+        ctl_adapter_display_encoder_properties_t stDisplayEncoderProperties = {};
+        stDisplayEncoderProperties.Size                                     = sizeof(ctl_adapter_display_encoder_properties_t);
+
+        Result = ctlGetAdaperDisplayEncoderProperties(hDisplayOutput[DisplayIndex], &stDisplayEncoderProperties);
+        LOG_AND_EXIT_ON_ERROR(Result, "ctlGetAdaperDisplayEncoderProperties");
+
+        // Currently the driver override flags are limited to HDMI only
+        if (CTL_DISPLAY_OUTPUT_TYPES_HDMI == stDisplayEncoderProperties.Type)
+        {
+            Result = TestI2CAccessWithDriverOverrideFlagsForMultipleReadTransactions(hDisplayOutput[DisplayIndex]);
+            STORE_AND_RESET_ERROR(Result);
+
+            Result = TestI2CAccessWithRestartDriverOverrideFlag(hDisplayOutput[DisplayIndex]);
+            STORE_AND_RESET_ERROR(Result);
+        }
     }
 
 Exit:

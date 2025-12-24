@@ -582,7 +582,7 @@ void OverclockTemperatureLimit(ctl_device_adapter_handle_t hDAhandle)
 
     // Step 3: Writing New Temperature Limit by increasing it by (Step * 5.0) from min value
     // Input Temperature Limit units are given in ctl_oc_properties_t::temperatureLimit::units returned from ctlOverclockGetProperties()
-    // Currently ctl_oc_properties_t::temperatureLimit::units for Alchemist are CTL_UNITS_TEMPERATURE_CELSIUS units, for Battlemage are CTL_UNITS_PERCENT units
+    // Currently ctl_oc_properties_t::temperatureLimit::units for Alchemist and BMG G31 are CTL_UNITS_TEMPERATURE_CELSIUS units, for Battlemage (excluding G31) are CTL_UNITS_PERCENT units
     CurrentTemperatureLimit = OcProperties.temperatureLimit.min + (OcProperties.temperatureLimit.step * 5.0);
     Status                  = ctlOverclockTemperatureLimitSetV2(hDAhandle, CurrentTemperatureLimit);
     if (Status != ctl_result_t::CTL_RESULT_SUCCESS)
