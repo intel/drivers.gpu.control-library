@@ -445,3 +445,62 @@ inline void Print3DFeatureDetail(ctl_3d_feature_details_t *pFeatureDetails)
         }
     }
 }
+
+// Helper function to print ctl_std_display_feature_flags_t flags
+void PrintStdDisplayFeatureFlags(ctl_std_display_feature_flags_t flags)
+{
+    printf("ctl_std_display_feature_flags_t: 0x%X\n", flags);
+
+    // Example flag values, replace/add with actual flag definitions as needed
+    struct FlagInfo
+    {
+        ctl_std_display_feature_flags_t value;
+        const char *name;
+    };
+
+    static const FlagInfo flagInfos[] = {
+        { 0x00000001, "CTL_STD_DISPLAY_FEATURE_FLAG_HDCP" },
+        { 0x00000002, "CTL_STD_DISPLAY_FEATURE_FLAG_HD_AUDIO" },
+        { 0x00000004, "CTL_STD_DISPLAY_FEATURE_FLAG_PSR" },
+        { 0x00000008, "CTL_STD_DISPLAY_FEATURE_FLAG_ADAPTIVESYNC_VRR" },
+        { 0x00000010, "CTL_STD_DISPLAY_FEATURE_FLAG_VESA_COMPRESSION" },
+        { 0x00000020, "CTL_STD_DISPLAY_FEATURE_FLAG_HDR" },
+        { 0x00000040, "CTL_STD_DISPLAY_FEATURE_FLAG_HDMI_QMS" },
+        { 0x00000080, "CTL_STD_DISPLAY_FEATURE_FLAG_HDR10_PLUS_CERTIFIED" },
+        { 0x00000100, "CTL_STD_DISPLAY_FEATURE_FLAG_VESA_HDR_CERTIFIED" },
+        // Add more flag definitions here as needed
+    };
+
+    for (const auto &info : flagInfos)
+    {
+        if (flags & info.value)
+        {
+            printf("  %s\n", info.name);
+        }
+    }
+}
+
+void PrintIntelDisplayFeatureFlags(ctl_intel_display_feature_flags_t flags)
+{
+    printf("ctl_intel_display_feature_flags_t: 0x%X\n", flags);
+    // Example flag values, replace/add with actual flag definitions as needed
+    struct FlagInfo
+    {
+        ctl_intel_display_feature_flags_t value;
+        const char *name;
+    };
+    static const FlagInfo flagInfos[] = {
+        { 0x00000001, "CTL_INTEL_DISPLAY_FEATURE_FLAG_DPST" },
+        { 0x00000002, "CTL_INTEL_DISPLAY_FEATURE_FLAG_LACE" },
+        { 0x00000004, "CTL_INTEL_DISPLAY_FEATURE_FLAG_DRRS" },
+        { 0x00000008, "CTL_INTEL_DISPLAY_FEATURE_FLAG_ARC_ADAPTIVE_SYNC_CERTIFIED" },
+        // Add more flag definitions here as needed
+    };
+    for (const auto &info : flagInfos)
+    {
+        if (flags & info.value)
+        {
+            printf("  %s\n", info.name);
+        }
+    }
+}

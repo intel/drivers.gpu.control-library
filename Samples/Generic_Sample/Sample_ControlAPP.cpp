@@ -423,6 +423,13 @@ ctl_result_t CtlGetDisplayPropertiesTest(ctl_device_adapter_handle_t hAdapter, c
             std::cout << "DisplayConfigFlags is " << pStdisplayproperties->DisplayConfigFlags << "\n";
             std::cout << "Is Display Active : " << Isdisplay_active << "\n";
             std::cout << "Is Display Attached : " << Isdisplay_attached << "\n";
+
+            std::cout << "Supported features\n";
+            PrintStdDisplayFeatureFlags(pStdisplayproperties->FeatureSupportedFlags);
+            PrintIntelDisplayFeatureFlags(pStdisplayproperties->AdvancedFeatureSupportedFlags);
+            std::cout << "Enabled features\n ";
+            PrintStdDisplayFeatureFlags(pStdisplayproperties->FeatureEnabledFlags);
+            PrintIntelDisplayFeatureFlags(pStdisplayproperties->AdvancedFeatureEnabledFlags);
         }
         pStdisplayproperties->DisplayConfigFlags                                = 0;
         pStdisplayproperties->Os_display_encoder_handle.WindowsDisplayEncoderID = 0;
@@ -926,8 +933,8 @@ ctl_result_t CtlAdapterTesting(ctl_device_adapter_handle_t *hDevices, uint32_t A
 
     if (StDeviceAdapterProperties.pDeviceID != nullptr)
     {
-            free(StDeviceAdapterProperties.pDeviceID);
-            StDeviceAdapterProperties.pDeviceID = nullptr;
+        free(StDeviceAdapterProperties.pDeviceID);
+        StDeviceAdapterProperties.pDeviceID = nullptr;
     }
 
     return Result;

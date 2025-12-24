@@ -890,7 +890,8 @@ ctlSetCurrentSharpness(
 * @brief I2C Access
 * 
 * @details
-*     - Interface to access I2C using display handle as identifier.
+*     - Interface to access I2C using display handle as identifier.  I2C
+*       driver override flags are supported only for HDMI displays.
 * 
 * @returns
 *     - CTL_RESULT_SUCCESS
