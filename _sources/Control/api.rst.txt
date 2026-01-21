@@ -934,9 +934,6 @@ Display
     * :ref:`ctlSetLACEConfig`
     * :ref:`ctlSoftwarePSR`
     * :ref:`ctlGetIntelArcSyncInfoForMonitor`
-    * :ref:`ctlEnumerateMuxDevices`
-    * :ref:`ctlGetMuxProperties`
-    * :ref:`ctlSwitchMux`
     * :ref:`ctlGetIntelArcSyncProfile`
     * :ref:`ctlSetIntelArcSyncProfile`
     * :ref:`ctlEdidManagement`
@@ -1046,7 +1043,6 @@ Display
     * :ref:`ctl-lace-config-t`
     * :ref:`ctl-sw-psr-settings-t`
     * :ref:`ctl-intel-arc-sync-monitor-params-t`
-    * :ref:`ctl-mux-properties-t`
     * :ref:`ctl-intel-arc-sync-profile-params-t`
     * :ref:`ctl-edid-management-args-t`
     * :ref:`ctl-get-set-custom-mode-args-t`
@@ -1346,33 +1342,6 @@ ctlGetIntelArcSyncInfoForMonitor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenfunction:: ctlGetIntelArcSyncInfoForMonitor
-    :project: ControlApi
-
-
-.. _ctlEnumerateMuxDevices:
-
-ctlEnumerateMuxDevices
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. doxygenfunction:: ctlEnumerateMuxDevices
-    :project: ControlApi
-
-
-.. _ctlGetMuxProperties:
-
-ctlGetMuxProperties
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. doxygenfunction:: ctlGetMuxProperties
-    :project: ControlApi
-
-
-.. _ctlSwitchMux:
-
-ctlSwitchMux
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. doxygenfunction:: ctlSwitchMux
     :project: ControlApi
 
 
@@ -2302,16 +2271,6 @@ ctl_intel_arc_sync_monitor_params_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_intel_arc_sync_monitor_params_t
-    :project: ControlApi
-    :members:
-    :undoc-members:
-
-.. _ctl-mux-properties-t:
-
-ctl_mux_properties_t
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. doxygenstruct:: ctl_mux_properties_t
     :project: ControlApi
     :members:
     :undoc-members:
