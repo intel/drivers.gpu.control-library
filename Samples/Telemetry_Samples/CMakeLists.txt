@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13.4 FATAL_ERROR)
 set(TARGET_NAME Telemetry_Samples)
 get_filename_component(ROOT_DIR ../../ ABSOLUTE)
 project(Telemetry_Samples VERSION 1.0)
