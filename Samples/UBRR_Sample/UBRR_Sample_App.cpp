@@ -56,7 +56,7 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
             continue;
         }
 
-        PowerOptimizationCaps.Size    = sizeof(ctl_pfnGetPowerOptimizationCaps_t);
+        PowerOptimizationCaps.Size    = sizeof(ctl_power_optimization_caps_t);
         PowerOptimizationCaps.Version = 1;
         Result                        = ctlGetPowerOptimizationCaps(hDisplayOutput[DisplayIndex], &PowerOptimizationCaps);
 
@@ -66,27 +66,77 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
         {
             PowerOptimizationSetting.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_LRR;
             PowerOptimizationSetting.Size                     = sizeof(ctl_power_optimization_settings_t);
+            PowerOptimizationSetting.Version                  = 1;
             Result                                            = ctlGetPowerOptimizationSetting(hDisplayOutput[DisplayIndex], &PowerOptimizationSetting);
 
             LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting");
         }
 
+        // Setting UBLRR feature if supported and checking if the set value is read back correctly using GET calls.
+        // For UBZRR, the flow will be similar to UBLRR, just replace the flag to UBZRR. Note setting UBZRR can cause display blankout.
         if (PowerOptimizationSetting.FeatureSpecificData.LRRInfo.SupportedLRRTypes & CTL_POWER_OPTIMIZATION_LRR_FLAG_UBLRR)
         {
-            if (PowerOptimizationSetting.FeatureSpecificData.LRRInfo.bRequirePSRDisable)
-            {
-                // Disable PSR.
-            }
+            APP_LOG_INFO("Setting UBLRR feature");
 
-            PowerOptimizationSetting                          = { 0 };
-            PowerOptimizationSetting.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_LRR;
-
+            PowerOptimizationSetting                                             = { 0 };
+            PowerOptimizationSetting.PowerOptimizationFeature                    = CTL_POWER_OPTIMIZATION_FLAG_LRR;
+            PowerOptimizationSetting.Size                                        = sizeof(ctl_power_optimization_settings_t);
+            PowerOptimizationSetting.Version                                     = 1;
             PowerOptimizationSetting.FeatureSpecificData.LRRInfo.CurrentLRRTypes = CTL_POWER_OPTIMIZATION_LRR_FLAG_UBLRR;
             PowerOptimizationSetting.Enable                                      = TRUE;
-            PowerOptimizationSetting.Size                                        = sizeof(ctl_power_optimization_settings_t);
             Result                                                               = ctlSetPowerOptimizationSetting(hDisplayOutput[DisplayIndex], &PowerOptimizationSetting);
 
             LOG_AND_EXIT_ON_ERROR(Result, "ctlSetPowerOptimizationSetting");
+
+            APP_LOG_INFO("Getting UBLRR feature");
+
+            PowerOptimizationSetting                          = { 0 };
+            PowerOptimizationSetting.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_LRR;
+            PowerOptimizationSetting.Size                     = sizeof(ctl_power_optimization_settings_t);
+            PowerOptimizationSetting.Version                  = 1;
+            Result                                            = ctlGetPowerOptimizationSetting(hDisplayOutput[DisplayIndex], &PowerOptimizationSetting);
+
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting");
+
+            if (CTL_POWER_OPTIMIZATION_LRR_FLAG_UBLRR == PowerOptimizationSetting.FeatureSpecificData.LRRInfo.CurrentLRRTypes)
+            {
+                APP_LOG_INFO("UBLRR feature is set successfully, the enable bit reads: %d", PowerOptimizationSetting.Enable);
+            }
+            else
+            {
+                APP_LOG_ERROR("UBLRR feature failed to set, the enable bit reads: %d", PowerOptimizationSetting.Enable);
+            }
+
+            APP_LOG_INFO("Disabling UBLRR feature");
+
+            PowerOptimizationSetting                                             = { 0 };
+            PowerOptimizationSetting.PowerOptimizationFeature                    = CTL_POWER_OPTIMIZATION_FLAG_LRR;
+            PowerOptimizationSetting.Size                                        = sizeof(ctl_power_optimization_settings_t);
+            PowerOptimizationSetting.Version                                     = 1;
+            PowerOptimizationSetting.FeatureSpecificData.LRRInfo.CurrentLRRTypes = CTL_POWER_OPTIMIZATION_LRR_FLAG_UBLRR;
+            PowerOptimizationSetting.Enable                                      = FALSE;
+            Result                                                               = ctlSetPowerOptimizationSetting(hDisplayOutput[DisplayIndex], &PowerOptimizationSetting);
+
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlSetPowerOptimizationSetting");
+
+            APP_LOG_INFO("Getting UBLRR feature");
+
+            PowerOptimizationSetting                          = { 0 };
+            PowerOptimizationSetting.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_LRR;
+            PowerOptimizationSetting.Size                     = sizeof(ctl_power_optimization_settings_t);
+            PowerOptimizationSetting.Version                  = 1;
+            Result                                            = ctlGetPowerOptimizationSetting(hDisplayOutput[DisplayIndex], &PowerOptimizationSetting);
+
+            LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationSetting");
+
+            if (CTL_POWER_OPTIMIZATION_LRR_FLAG_UBLRR == PowerOptimizationSetting.FeatureSpecificData.LRRInfo.CurrentLRRTypes)
+            {
+                APP_LOG_ERROR("UBLRR feature failed to disable, the enable bit says: %d", PowerOptimizationSetting.Enable);
+            }
+            else
+            {
+                APP_LOG_INFO("UBLRR feature disabled successfully, the enable bit says: %d", PowerOptimizationSetting.Enable);
+            }
         }
     }
 
@@ -120,7 +170,7 @@ ctl_result_t EnumerateTargetDisplays(uint32_t AdapterCount, ctl_device_adapter_h
             STORE_AND_RESET_ERROR(Result);
             continue;
         }
-        else if (DisplayCount <= 0)
+        else if (DisplayCount == 0)
         {
             APP_LOG_WARN("Invalid Display Count. skipping display enumeration for adapter:%d", AdapterIndex);
             continue;
@@ -149,7 +199,7 @@ Exit:
 
 /***************************************************************
  * @brief
- * Main Function which calls the Sample UBBR API
+ * Main Function which calls the Sample UBRR API
  * @param
  * @return int
  ***************************************************************/
@@ -162,7 +212,7 @@ int main()
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     ctl_init_args_t CtlInitArgs;
-    ctl_api_handle_t hAPIHandle;
+    ctl_api_handle_t hAPIHandle = nullptr;
 
     ZeroMemory(&CtlInitArgs, sizeof(ctl_init_args_t));
 
@@ -218,6 +268,6 @@ Exit:
 
     ctlClose(hAPIHandle);
     CTL_FREE_MEM(hDevices);
-    APP_LOG_INFO("Overrall test result is 0x%X", GResult);
+    APP_LOG_INFO("Overall test result is 0x%X", GResult);
     return GResult;
 }
