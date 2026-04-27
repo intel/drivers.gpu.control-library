@@ -1056,6 +1056,10 @@ typedef struct _ctl_3d_feature_getset_t ctl_3d_feature_getset_t;
 typedef struct _ctl_kmd_load_features_t ctl_kmd_load_features_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_3d_live_state_t
+typedef struct _ctl_3d_live_state_t ctl_3d_live_state_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_display_timing_t
 typedef struct _ctl_display_timing_t ctl_display_timing_t;
 
@@ -1514,6 +1518,7 @@ typedef enum _ctl_3d_feature_t
     CTL_3D_FEATURE_LOW_LATENCY = 16,                ///< Low latency mode. Contains generic enum type fields
     CTL_3D_FEATURE_FRAME_GENERATION = 17,           ///< Frame Generation
     CTL_3D_FEATURE_PREBUILT_SHADER_DOWNLOAD = 18,   ///< Download prebuilt shaders. Contains generic bool type fields
+    CTL_3D_FEATURE_LIVE_STATE = 19,                 ///< Application Live State feature.
     CTL_3D_FEATURE_MAX
 
 } ctl_3d_feature_t;
@@ -1939,6 +1944,28 @@ ctlGetSet3DFeature(
     ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
     ctl_3d_feature_getset_t* pFeature               ///< [in][release] 3D feature get/set parameter
     );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Live state frame pacing status flags
+typedef enum _ctl_3d_live_state_frame_pacing_types_t
+{
+    CTL_3D_LIVE_STATE_FRAME_PACING_TYPES_DISABLED = 0,  ///< Frame pacing is disabled
+    CTL_3D_LIVE_STATE_FRAME_PACING_TYPES_ENABLED_AND_ACTIVE = 1,///< Frame pacing is enabled and active
+    CTL_3D_LIVE_STATE_FRAME_PACING_TYPES_ENABLED_BUT_INACTIVE = 2,  ///< Frame Pacing is enabled, but not active
+    CTL_3D_LIVE_STATE_FRAME_PACING_TYPES_MAX
+
+} ctl_3d_live_state_frame_pacing_types_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Live State data
+typedef struct _ctl_3d_live_state_t
+{
+    ctl_3d_feature_misc_flags_t GfxApi;             ///< [in,out] Graphics API  indicating which APIs are active
+    uint32_t TargetFPS;                             ///< [in,out] Target FPS for frame pacing
+    ctl_3d_live_state_frame_pacing_types_t FramePacingStatus;   ///< [in,out] Frame pacing status
+    uint32_t Reserved[4];                           ///< [out] Reserved fields
+
+} ctl_3d_live_state_t;
 
 
 #if !defined(__GNUC__)
@@ -2611,6 +2638,10 @@ typedef enum _ctl_i2c_pinpair_flag_t
     CTL_I2C_PINPAIR_FLAG_SPEED_FAST = CTL_BIT(5),   ///< If no Speed Flag is set, defaults to Best Option possible.
     CTL_I2C_PINPAIR_FLAG_SPEED_BIT_BASH = CTL_BIT(6),   ///< Uses Slower access using SW bit bashing method. If no Speed Flag is
                                                     ///< set, defaults to Best Option possible.
+    CTL_I2C_PINPAIR_FLAG_DRIVER_OVERRIDE = CTL_BIT(7),  ///< If set, overrides the driver I2C flags with those provided by IGCL
+    CTL_I2C_PINPAIR_FLAG_START = CTL_BIT(8),        ///< I2C Start driver override flag
+    CTL_I2C_PINPAIR_FLAG_STOP = CTL_BIT(9),         ///< I2C Stop driver override flags
+    CTL_I2C_PINPAIR_FLAG_RESTART = CTL_BIT(10),     ///< I2C Restart driver override flag
     CTL_I2C_PINPAIR_FLAG_MAX = 0x80000000
 
 } ctl_i2c_pinpair_flag_t;
