@@ -564,6 +564,7 @@ _3d
     * :ref:`ctl-emulated-typed-64bit-atomics-types-t`
     * :ref:`ctl-3d-vrr-windowed-blt-reserved-t`
     * :ref:`ctl-3d-global-or-per-app-types-t`
+    * :ref:`ctl-3d-live-state-frame-pacing-types-t`
 
  
 * Structures
@@ -581,6 +582,7 @@ _3d
     * :ref:`ctl-3d-feature-caps-t`
     * :ref:`ctl-3d-feature-getset-t`
     * :ref:`ctl-kmd-load-features-t`
+    * :ref:`ctl-3d-live-state-t`
 
 
 _3d Functions
@@ -771,6 +773,15 @@ ctl_3d_global_or_per_app_types_t
 .. doxygenenum:: ctl_3d_global_or_per_app_types_t
     :project: ControlApi
 
+
+.. _ctl-3d-live-state-frame-pacing-types-t:
+
+ctl_3d_live_state_frame_pacing_types_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_live_state_frame_pacing_types_t
+    :project: ControlApi
+
  
 _3d Structures
 ------------------------------------------------------------------------------
@@ -891,6 +902,16 @@ ctl_kmd_load_features_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_kmd_load_features_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-3d-live-state-t:
+
+ctl_3d_live_state_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_3d_live_state_t
     :project: ControlApi
     :members:
     :undoc-members:
