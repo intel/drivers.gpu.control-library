@@ -554,6 +554,7 @@ _3d
     * :ref:`ctl-3d-endurance-gaming-control-t`
     * :ref:`ctl-3d-endurance-gaming-mode-t`
     * :ref:`ctl-3d-low-latency-types-t`
+    * :ref:`ctl-3d-frame-generation-override-t`
     * :ref:`ctl-3d-cmaa-types-t`
     * :ref:`ctl-3d-adaptive-tessellation-types-t`
     * :ref:`ctl-3d-sharpening-filter-types-t`
@@ -681,6 +682,15 @@ ctl_3d_low_latency_types_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_3d_low_latency_types_t
+    :project: ControlApi
+
+
+.. _ctl-3d-frame-generation-override-t:
+
+ctl_3d_frame_generation_override_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_3d_frame_generation_override_t
     :project: ControlApi
 
 
@@ -912,6 +922,53 @@ ctl_3d_live_state_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_3d_live_state_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+
+ 
+
+Dev_prop
+============================================================
+* Functions
+
+
+    * :ref:`ctlDevPropGetProperties`
+
+ 
+
+ 
+* Structures
+
+
+    * :ref:`ctl-dev-prop-properties-t`
+
+
+Dev_prop Functions
+------------------------------------------------------------------------------
+
+
+.. _ctlDevPropGetProperties:
+
+ctlDevPropGetProperties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlDevPropGetProperties
+    :project: ControlApi
+
+
+
+ 
+Dev_prop Structures
+------------------------------------------------------------------------------
+
+.. _ctl-dev-prop-properties-t:
+
+ctl_dev_prop_properties_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_dev_prop_properties_t
     :project: ControlApi
     :members:
     :undoc-members:
