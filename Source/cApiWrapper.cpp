@@ -420,6 +420,46 @@ ctlGetSet3DFeature(
 
 
 /**
+* @brief Get device properties.
+* 
+* @details
+*     - The application may call this function from simultaneous threads.
+*     - The implementation of this function should be lock-free.
+* 
+* @returns
+*     - CTL_RESULT_SUCCESS
+*     - CTL_RESULT_ERROR_UNINITIALIZED
+*     - CTL_RESULT_ERROR_DEVICE_LOST
+*     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+*         + `nullptr == hDAhandle`
+*     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+*         + `nullptr == pProperties`
+*/
+ctl_result_t CTL_APICALL
+ctlDevPropGetProperties(
+    ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
+    ctl_dev_prop_properties_t* pProperties          ///< [in,out] Output with the device properties.
+    )
+{
+    ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
+    
+
+    HINSTANCE hinstLibPtr = GetLoaderHandle();
+
+    if (NULL != hinstLibPtr)
+    {
+        ctl_pfnDevPropGetProperties_t pfnDevPropGetProperties = (ctl_pfnDevPropGetProperties_t)GetProcAddress(hinstLibPtr, "ctlDevPropGetProperties");
+        if (pfnDevPropGetProperties)
+        {
+            result = pfnDevPropGetProperties(hDAhandle, pProperties);
+        }
+    }
+
+    return result;
+}
+
+
+/**
 * @brief Check Driver version
 * 
 * @details
@@ -1055,7 +1095,8 @@ ctlAUXAccess(
 ctl_result_t CTL_APICALL
 ctlGetPowerOptimizationCaps(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
-    ctl_power_optimization_caps_t* pPowerOptimizationCaps   ///< [in,out][release] Query result for power optimization features
+    ctl_power_optimization_caps_t* pPowerOptimizationCaps   ///< [in,out][release] Query result for power optimization features.
+                                                    ///< Version 1 returns caps per display output, else its adapter caps
     )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
@@ -1097,7 +1138,8 @@ ctlGetPowerOptimizationCaps(
 ctl_result_t CTL_APICALL
 ctlGetPowerOptimizationSetting(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
-    ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in,out][release] Power optimization data to be fetched
+    ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in,out][release] Power optimization settings. Version 1 returns caps
+                                                    ///< per display output, else its adapter settings
     )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
@@ -1140,7 +1182,9 @@ ctlGetPowerOptimizationSetting(
 ctl_result_t CTL_APICALL
 ctlSetPowerOptimizationSetting(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
-    ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in][release] Power optimization data to be applied
+    ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in][release] Power optimization settings to be applied. Version 1
+                                                    ///< applies settings per display, else settings are applied on all
+                                                    ///< displays on this adapter
     )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
@@ -1625,7 +1669,8 @@ ctlSetCurrentScaling(
 ctl_result_t CTL_APICALL
 ctlGetLACEConfig(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
-    ctl_lace_config_t* pLaceConfig                  ///< [out]Lace configuration
+    ctl_lace_config_t* pLaceConfig                  ///< [out] Lace configuration. Version 1 returns lace configuration per
+                                                    ///< display output, else its adapter's lace configuration
     )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
@@ -1666,7 +1711,8 @@ ctlGetLACEConfig(
 ctl_result_t CTL_APICALL
 ctlSetLACEConfig(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in]Handle to display output
-    ctl_lace_config_t* pLaceConfig                  ///< [in]Lace configuration
+    ctl_lace_config_t* pLaceConfig                  ///< [in] Update Lace configuration. Version 1 updates lace configuration
+                                                    ///< per display output, else its adapter's lace configuration update
     )
 {
     ctl_result_t result = CTL_RESULT_ERROR_NOT_INITIALIZED;
