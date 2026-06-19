@@ -883,7 +883,7 @@ ctl_result_t CtlGlobalOrPerAppTest(ctl_device_adapter_handle_t hDevices)
         {
             APP_LOG_INFO("ctlGetSet3DFeature returned success(Set Global Over Per App Setting (Get call))");
             APP_LOG_INFO(" Get3DProperty.ApplicationName = %s", Get3DProperty.ApplicationName);
-            APP_LOG_INFO(" Get3DProperty.Value.EnumType.EnableTypee = %d", Get3DProperty.Value.EnumType.EnableType);
+            APP_LOG_INFO(" Get3DProperty.Value.EnumType.EnableType = %d", Get3DProperty.Value.EnumType.EnableType);
         }
     }
 
@@ -1168,6 +1168,150 @@ ctl_result_t CtlTestLowLatency(ctl_device_adapter_handle_t hDevices)
     return Result;
 }
 
+/***************************************************************
+ * @brief
+ * Method to test XeSS Frame Generation overrides
+ *
+ * @note
+ * Application-specific override applies only if the per-application settings are enabled.
+ * You can enable the per-application settings by setting the CTL_3D_FEATURE_GLOBAL_OR_PER_APP feature
+ * for the target application to CTL_3D_GLOBAL_OR_PER_APP_TYPES_PER_APP.
+ *
+ * @sa CtlGlobalOrPerAppTest
+ *
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlTestFrameGeneration(ctl_device_adapter_handle_t hDevices)
+{
+    // Frame Generation Per APP GET/SET.
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    printf("======================Frame Generation test -> Per Application settings =====================\n");
+    const char *pAppName                  = "GTA5.exe";
+    ctl_3d_feature_getset_t Get3DProperty = { 0 };
+    ctl_3d_feature_getset_t Set3DProperty = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    // Set frame generation override
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.CustomValueSize           = 0;
+    Set3DProperty.pCustomValue              = NULL;
+    Set3DProperty.ApplicationName           = (char *)pAppName;
+    Set3DProperty.ApplicationNameLength     = (int8_t)strlen(pAppName);
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_FRAME_GENERATION_OVERRIDE_4X;
+    Set3DProperty.Version                   = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        printf(" Set3DProperty.Value.EnumType.EnableType = %d\n", Set3DProperty.Value.EnumType.EnableType);
+        printf(" Set3DProperty.ApplicationName = %s\n", Set3DProperty.ApplicationName);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success\n");
+        }
+
+        // Get frame generation override
+        Get3DProperty.FeatureType           = CTL_3D_FEATURE_FRAME_GENERATION;
+        Get3DProperty.bSet                  = FALSE;
+        Get3DProperty.CustomValueSize       = 0;
+        Get3DProperty.pCustomValue          = NULL;
+        Get3DProperty.ApplicationName       = (char *)pAppName;
+        Get3DProperty.ApplicationNameLength = (int8_t)strlen(pAppName);
+        Get3DProperty.ValueType             = CTL_PROPERTY_VALUE_TYPE_ENUM;
+        Get3DProperty.Version               = 0;
+
+        if (NULL != hDevices)
+        {
+            Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+
+            if (CTL_RESULT_SUCCESS != Result)
+            {
+                printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+                return Result;
+            }
+            else
+            {
+                printf("ctlGetSet3DFeature returned success\n");
+                printf(" Get3DProperty.Value.EnumType.EnableType = %d\n", Get3DProperty.Value.EnumType.EnableType);
+                printf(" Get3DProperty.ApplicationName = %s\n", Get3DProperty.ApplicationName);
+            }
+        }
+    }
+
+    // Frame Generation Global GET/SET
+
+    printf("======================Frame Generation test -> Global settings======================\n");
+    Get3DProperty = { 0 };
+    Set3DProperty = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    // Set frame generation override
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.CustomValueSize           = 0;
+    Set3DProperty.pCustomValue              = NULL;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_FRAME_GENERATION_OVERRIDE_3X;
+    Set3DProperty.Version                   = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        printf(" Set3DProperty.Value.EnumType.EnableType = %d\n", Set3DProperty.Value.EnumType.EnableType);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success\n");
+        }
+
+        // Get frame generation override
+        Get3DProperty.FeatureType     = CTL_3D_FEATURE_FRAME_GENERATION;
+        Get3DProperty.bSet            = FALSE;
+        Get3DProperty.CustomValueSize = 0;
+        Get3DProperty.pCustomValue    = NULL;
+        Get3DProperty.ValueType       = CTL_PROPERTY_VALUE_TYPE_ENUM;
+        Get3DProperty.Version         = 0;
+
+        if (NULL != hDevices)
+        {
+            Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+            if (CTL_RESULT_SUCCESS != Result)
+            {
+                printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+                return Result;
+            }
+            else
+            {
+                printf("ctlGetSet3DFeature returned success\n");
+                printf(" Get3DProperty.Value.EnumType.EnableType = %d\n", Get3DProperty.Value.EnumType.EnableType);
+            }
+        }
+    }
+
+    return Result;
+}
+
 int main()
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
@@ -1305,6 +1449,13 @@ int main()
                 }
                 STORE_RESET_ERROR(Result);
 
+                Result = CtlTestFrameGeneration(hDevices[Index]);
+                if (CTL_RESULT_SUCCESS != Result)
+                {
+                    APP_LOG_ERROR("CtlTestFrameGeneration failure code: 0x%X", Result);
+                }
+                STORE_RESET_ERROR(Result);
+
                 // Test eventing
                 CtlTestEvents(hDevices[0]); // for now just first adapter!
             }
@@ -1324,7 +1475,7 @@ Exit:
         hDevices = nullptr;
     }
 
-    APP_LOG_INFO("Overrall test result is 0x%X", GResult);
+    APP_LOG_INFO("Overall test result is 0x%X", GResult);
 
     return GResult;
 }

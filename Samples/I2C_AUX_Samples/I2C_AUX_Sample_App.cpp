@@ -27,6 +27,13 @@
 
 ctl_result_t GResult = CTL_RESULT_SUCCESS;
 
+#define I2C_AUX_READ_DATA_SIZE 64     // the total read data size for I2C AUX reads
+#define I2C_AUX_READ_SIZE_LIMIT 16    // the read data size limit for each I2C AUX read transaction
+#define I2C_READ_DATA_SIZE 11         // the total read data size for I2C reads
+#define I2C_READ_SIZE_LIMIT 2         // the read data size limit for each I2C read transaction
+#define I2C_PINPAIR_READ_DATA_SIZE 11 // the total read data size for I2C Pin Pair reads
+#define I2C_PINPAIR_READ_SIZE_LIMIT 2 // the read data size limit for each I2C Pin Pair read transaction
+
 /***************************************************************
  * @brief TestI2CAUXAccess
  * Reference code to use I2CAuxAccess API
@@ -139,6 +146,93 @@ Exit:
 }
 
 /***************************************************************
+ * @brief TestI2CAUXAccessForMultipleReadTransactions
+ * Reference code to use I2CAuxAccess API with Middle of Transaction flag for multiple read transactions
+ * @param hDisplayOutput
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t TestI2CAUXAccessForMultipleReadTransactions(ctl_display_output_handle_t hDisplayOutput)
+{
+    ctl_result_t Result           = CTL_RESULT_SUCCESS;
+    ctl_aux_access_args_t AUXArgs = { 0 }; // AUX Access
+    uint32_t ReadDataLeft         = 0;
+    uint32_t ReadDataSent         = 0;
+    uint32_t ReadDataSizeLimit    = 0;
+
+    // I2C Over Aux READ at address 0xA0 (EDID) starting from offset 0x00
+    APP_LOG_INFO("I2C Over Aux Read Test using MOT flag for multiple read transactions");
+
+    // Step 1: Write offset byte (0x00) to I2C device 0xA0 to set EDID internal read pointer
+    ZeroMemory(&AUXArgs, sizeof(AUXArgs));
+    AUXArgs.Size     = sizeof(ctl_aux_access_args_t);
+    AUXArgs.OpType   = CTL_OPERATION_TYPE_WRITE;
+    AUXArgs.Address  = 0xA0; // EDID I2C device address
+    AUXArgs.DataSize = 1;
+    AUXArgs.Data[0]  = 0x00;                     // Set read pointer to offset 0
+    AUXArgs.Flags    = CTL_AUX_FLAG_I2C_AUX_MOT; // Keep transaction open for reads
+
+    APP_LOG_INFO("Setting EDID read offset to 0x00 with MOT");
+    Result = ctlAUXAccess(hDisplayOutput, &AUXArgs);
+    if (CTL_RESULT_SUCCESS != Result)
+    {
+        APP_LOG_ERROR("Failed to set EDID offset. Error: 0x%X", Result);
+        return Result;
+    }
+
+    // Step 2: Perform multiple read transactions
+    ReadDataLeft      = I2C_AUX_READ_DATA_SIZE;
+    ReadDataSizeLimit = I2C_AUX_READ_SIZE_LIMIT;
+    ReadDataSent      = 0;
+
+    for (uint32_t i = 0; ReadDataLeft > 0; i++)
+    {
+        ZeroMemory(&AUXArgs, sizeof(AUXArgs));
+        AUXArgs.Size    = sizeof(ctl_aux_access_args_t);
+        AUXArgs.OpType  = CTL_OPERATION_TYPE_READ;
+        AUXArgs.Address = 0xA0; // EDID I2C device address (same as write address)
+
+        // Determine the data size and flags for this transaction
+        if (ReadDataLeft <= ReadDataSizeLimit)
+        {
+            // Last transaction: read remaining bytes and send STOP
+            APP_LOG_INFO("Last Read Transaction: %i", i + 1);
+            AUXArgs.DataSize = ReadDataLeft;
+            AUXArgs.Flags    = CTL_AUX_FLAG_I2C_AUX; // Send STOP to close transaction
+        }
+        else
+        {
+            // First or middle transaction: read chunk and keep transaction open
+            APP_LOG_INFO("Read Transaction: %i", i + 1);
+            AUXArgs.DataSize = ReadDataSizeLimit;
+            AUXArgs.Flags    = CTL_AUX_FLAG_I2C_AUX_MOT; // Keep transaction open (no STOP)
+        }
+
+        memset(AUXArgs.Data, 0xFF, AUXArgs.DataSize); // Clear the data buffer before reading
+
+        Result = ctlAUXAccess(hDisplayOutput, &AUXArgs);
+        if (CTL_RESULT_SUCCESS == Result)
+        {
+            //  Print the data
+            for (uint32_t j = 0; j < AUXArgs.DataSize; j++)
+            {
+                APP_LOG_INFO("Read data[%d] = : 0x%X", ReadDataSent + j, AUXArgs.Data[j]);
+            }
+        }
+        else
+        {
+            APP_LOG_ERROR("TestI2CAUXAccessForMultipleReadTransactions returned failure code: 0x%X", Result);
+            STORE_AND_RESET_ERROR(Result);
+            break;
+        }
+
+        ReadDataSent += AUXArgs.DataSize;
+        ReadDataLeft -= AUXArgs.DataSize;
+    }
+
+    return Result;
+}
+
+/***************************************************************
  * @brief TestI2CAccessWithDriverOverrideFlagsForMultipleReadTransactions
  * Reference code to show how to use the I2C driver flags for multiple read transactions for HDMI displays
  * @param hDisplayOutput
@@ -146,9 +240,6 @@ Exit:
  ***************************************************************/
 ctl_result_t TestI2CAccessWithDriverOverrideFlagsForMultipleReadTransactions(ctl_display_output_handle_t hDisplayOutput)
 {
-#define I2C_READ_DATA_SIZE 11 // the total read data size
-#define I2C_READ_SIZE_LIMIT 2 // the read data size limit for each I2C read transaction
-
     ctl_result_t Result           = CTL_RESULT_SUCCESS;
     ctl_i2c_access_args_t I2CArgs = { 0 }; // I2C Access
     uint32_t ReadDataLeft         = 0;
@@ -462,6 +553,11 @@ ctl_result_t EnumerateDisplayHandles(ctl_display_output_handle_t *hDisplayOutput
             Result = TestI2CAccessWithRestartDriverOverrideFlag(hDisplayOutput[DisplayIndex]);
             STORE_AND_RESET_ERROR(Result);
         }
+        else if (CTL_DISPLAY_OUTPUT_TYPES_DISPLAYPORT == stDisplayEncoderProperties.Type)
+        {
+            Result = TestI2CAUXAccessForMultipleReadTransactions(hDisplayOutput[DisplayIndex]);
+            STORE_AND_RESET_ERROR(Result);
+        }
     }
 
 Exit:
@@ -560,9 +656,6 @@ Exit:
  ***************************************************************/
 ctl_result_t TestI2CPinPairsForMultipleReadTransactions(ctl_i2c_pin_pair_handle_t *hI2cPinPair, uint32_t PinPairCount)
 {
-#define I2C_PINPAIR_READ_DATA_SIZE 11 // the total read data size
-#define I2C_PINPAIR_READ_SIZE_LIMIT 2 // the read data size limit for each I2C Pin Pair read transaction
-
     ctl_result_t Result                               = CTL_RESULT_SUCCESS;
     ctl_i2c_access_pinpair_args_t I2AccessPinPairArgs = { 0 }; // I2C Access on Pin Pair
     uint32_t ReadDataLeft                             = 0;

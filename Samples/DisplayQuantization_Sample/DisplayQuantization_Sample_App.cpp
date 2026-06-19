@@ -323,6 +323,10 @@ ctl_result_t TestDisplayQuantization(uint32_t AdapterCount, ctl_device_adapter_h
         {
             Result = SetDisplayQuantizationConfig(pHActiveDisplayOutputs, NumActiveOutputs, pSelectedDisplayID, pSelectedMode);
         }
+
+        // Free allocations at the end of each iteration to avoid leaks
+        CTL_FREE_MEM(pHDisplayOutput);
+        CTL_FREE_MEM(pHActiveDisplayOutputs);
     }
 
 Exit:

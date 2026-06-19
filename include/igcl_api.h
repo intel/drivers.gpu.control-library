@@ -1062,6 +1062,10 @@ typedef struct _ctl_kmd_load_features_t ctl_kmd_load_features_t;
 typedef struct _ctl_3d_live_state_t ctl_3d_live_state_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_dev_prop_properties_t
+typedef struct _ctl_dev_prop_properties_t ctl_dev_prop_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_display_timing_t
 typedef struct _ctl_display_timing_t ctl_display_timing_t;
 
@@ -1609,6 +1613,18 @@ typedef enum _ctl_3d_low_latency_types_t
 } ctl_3d_low_latency_types_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief XeSS Frame Generation overrides
+typedef enum _ctl_3d_frame_generation_override_t
+{
+    CTL_3D_FRAME_GENERATION_OVERRIDE_APP_CHOICE = 0,///< Application Default
+    CTL_3D_FRAME_GENERATION_OVERRIDE_2X = 1,        ///< 2x frame generation - 1 interpolated frame
+    CTL_3D_FRAME_GENERATION_OVERRIDE_3X = 2,        ///< 3x frame generation - 2 interpolated frames
+    CTL_3D_FRAME_GENERATION_OVERRIDE_4X = 3,        ///< 4x frame generation - 3 interpolated frames
+    CTL_3D_FRAME_GENERATION_OVERRIDE_MAX
+
+} ctl_3d_frame_generation_override_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Cmaa values possible
 typedef enum _ctl_3d_cmaa_types_t
 {
@@ -1972,6 +1988,45 @@ typedef struct _ctl_3d_live_state_t
 
 #if !defined(__GNUC__)
 #pragma endregion // _3D
+#endif
+// Intel 'ctlApi' for Device Adapter - Device Properties
+#if !defined(__GNUC__)
+#pragma region dev_prop
+#endif
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Device properties.
+typedef struct _ctl_dev_prop_properties_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    bool isWorkstation;                             ///< [out] Indicates if the graphics device is a workstation SKU (Arc PRO).
+
+} ctl_dev_prop_properties_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get device properties.
+/// 
+/// @details
+///     - The application may call this function from simultaneous threads.
+///     - The implementation of this function should be lock-free.
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDAhandle`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pProperties`
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlDevPropGetProperties(
+    ctl_device_adapter_handle_t hDAhandle,          ///< [in][release] Handle to display adapter
+    ctl_dev_prop_properties_t* pProperties          ///< [in,out] Output with the device properties.
+    );
+
+
+#if !defined(__GNUC__)
+#pragma endregion // dev_prop
 #endif
 // Intel 'ctlApi' for Device Adapter
 #if !defined(__GNUC__)
@@ -2863,7 +2918,8 @@ typedef struct _ctl_power_optimization_caps_t
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlGetPowerOptimizationCaps(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
-    ctl_power_optimization_caps_t* pPowerOptimizationCaps   ///< [in,out][release] Query result for power optimization features
+    ctl_power_optimization_caps_t* pPowerOptimizationCaps   ///< [in,out][release] Query result for power optimization features.
+                                                    ///< Version 1 returns caps per display output, else its adapter caps
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2983,7 +3039,8 @@ typedef struct _ctl_get_brightness_t
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlGetPowerOptimizationSetting(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
-    ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in,out][release] Power optimization data to be fetched
+    ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in,out][release] Power optimization settings. Version 1 returns caps
+                                                    ///< per display output, else its adapter settings
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3007,7 +3064,9 @@ ctlGetPowerOptimizationSetting(
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlSetPowerOptimizationSetting(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
-    ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in][release] Power optimization data to be applied
+    ctl_power_optimization_settings_t* pPowerOptimizationSettings   ///< [in][release] Power optimization settings to be applied. Version 1
+                                                    ///< applies settings per display, else settings are applied on all
+                                                    ///< displays on this adapter
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3710,7 +3769,8 @@ typedef struct _ctl_lace_config_t
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlGetLACEConfig(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
-    ctl_lace_config_t* pLaceConfig                  ///< [out]Lace configuration
+    ctl_lace_config_t* pLaceConfig                  ///< [out] Lace configuration. Version 1 returns lace configuration per
+                                                    ///< display output, else its adapter's lace configuration
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3732,7 +3792,8 @@ ctlGetLACEConfig(
 CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlSetLACEConfig(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in]Handle to display output
-    ctl_lace_config_t* pLaceConfig                  ///< [in]Lace configuration
+    ctl_lace_config_t* pLaceConfig                  ///< [in] Update Lace configuration. Version 1 updates lace configuration
+                                                    ///< per display output, else its adapter's lace configuration update
     );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -8178,6 +8239,14 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSupported3DCapabilities_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSet3DFeature_t)(
     ctl_device_adapter_handle_t,
     ctl_3d_feature_getset_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlDevPropGetProperties 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnDevPropGetProperties_t)(
+    ctl_device_adapter_handle_t,
+    ctl_dev_prop_properties_t*
     );
 
 
