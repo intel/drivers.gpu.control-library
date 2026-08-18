@@ -1025,6 +1025,7 @@ Display
     * :ref:`ctlGetSetDynamicContrastEnhancement`
     * :ref:`ctlGetSetWireFormat`
     * :ref:`ctlGetSetDisplaySettings`
+    * :ref:`ctlDisplayFeatureReset`
 
  
 * Enumerations
@@ -1039,6 +1040,7 @@ Display
     * :ref:`ctl-protocol-converter-location-flags-t`
     * :ref:`ctl-display-config-flags-t`
     * :ref:`ctl-encoder-config-flags-t`
+    * :ref:`ctl-display-feature-reset-flags-t`
     * :ref:`ctl-sharpness-filter-type-flags-t`
     * :ref:`ctl-i2c-flags-t`
     * :ref:`ctl-i2c-pinpair-flags-t`
@@ -1100,6 +1102,7 @@ Display
     * :ref:`ctl-power-optimization-settings-t`
     * :ref:`ctl-set-brightness-t`
     * :ref:`ctl-get-brightness-t`
+    * :ref:`ctl-display-feature-reset-t`
     * :ref:`ctl-pixtx-color-primaries-t`
     * :ref:`ctl-pixtx-pixel-format-t`
     * :ref:`ctl-pixtx-1dlut-config-t`
@@ -1540,6 +1543,15 @@ ctlGetSetDisplaySettings
     :project: ControlApi
 
 
+.. _ctlDisplayFeatureReset:
+
+ctlDisplayFeatureReset
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlDisplayFeatureReset
+    :project: ControlApi
+
+
 
 Display Enums
 ------------------------------------------------------------------------------
@@ -1623,6 +1635,15 @@ ctl_encoder_config_flags_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenenum:: ctl_encoder_config_flag_t
+    :project: ControlApi
+
+
+.. _ctl-display-feature-reset-flags-t:
+
+ctl_display_feature_reset_flags_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenenum:: ctl_display_feature_reset_flag_t
     :project: ControlApi
 
 
@@ -2143,6 +2164,16 @@ ctl_get_brightness_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_get_brightness_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-display-feature-reset-t:
+
+ctl_display_feature_reset_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_display_feature_reset_t
     :project: ControlApi
     :members:
     :undoc-members:
@@ -3622,6 +3653,7 @@ Overclock
     * :ref:`ctlOverclockTemperatureLimitGet`
     * :ref:`ctlOverclockTemperatureLimitSet`
     * :ref:`ctlPowerTelemetryGet`
+    * :ref:`ctlPowerTelemetryGetV2`
     * :ref:`ctlOverclockResetToDefault`
     * :ref:`ctlOverclockGpuFrequencyOffsetGetV2`
     * :ref:`ctlOverclockGpuFrequencyOffsetSetV2`
@@ -3654,6 +3686,7 @@ Overclock
     * :ref:`ctl-oc-vf-pair-t`
     * :ref:`ctl-psu-info-t`
     * :ref:`ctl-power-telemetry-t`
+    * :ref:`ctl-power-telemetry-v2-t`
     * :ref:`ctl-voltage-frequency-point-t`
 
 
@@ -3811,6 +3844,15 @@ ctlPowerTelemetryGet
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenfunction:: ctlPowerTelemetryGet
+    :project: ControlApi
+
+
+.. _ctlPowerTelemetryGetV2:
+
+ctlPowerTelemetryGetV2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: ctlPowerTelemetryGetV2
     :project: ControlApi
 
 
@@ -4022,6 +4064,16 @@ ctl_power_telemetry_t
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. doxygenstruct:: ctl_power_telemetry_t
+    :project: ControlApi
+    :members:
+    :undoc-members:
+
+.. _ctl-power-telemetry-v2-t:
+
+ctl_power_telemetry_v2_t
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. doxygenstruct:: ctl_power_telemetry_v2_t
     :project: ControlApi
     :members:
     :undoc-members:
