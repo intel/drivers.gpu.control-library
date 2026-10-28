@@ -764,6 +764,12 @@
 </dd></dl>
 
 <dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N12ctl_result_t41CTL_RESULT_ERROR_SWITCH_TO_ZESINIT_IN_APPE">
+<span id="_CPPv3N12ctl_result_t41CTL_RESULT_ERROR_SWITCH_TO_ZESINIT_IN_APPE"></span><span id="_CPPv2N12ctl_result_t41CTL_RESULT_ERROR_SWITCH_TO_ZESINIT_IN_APPE"></span><span class="target" id="igcl__api_8h_1a07cb11ab61a2ceeb0410dbb21228b59faf50e851f57a26dfb86188594801fd7e8"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_RESULT_ERROR_SWITCH_TO_ZESINIT_IN_APP</span></span></span><a class="headerlink" href="#_CPPv4N12ctl_result_t41CTL_RESULT_ERROR_SWITCH_TO_ZESINIT_IN_APPE" title="Link to this definition"></a><br /></dt>
+<dd><p>Incompatible sysman initialization, application should initialize zeInit without sysman or switch to zesInit (if application needs sysman API). For more details, refer to: <a class="reference external" href="https://spec.oneapi.io/level-zero/latest/sysman/PROG.html#sysman-programming-guide">https://spec.oneapi.io/level-zero/latest/sysman/PROG.html#sysman-programming-guide</a>. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
 <dt class="sig sig-object cpp" id="_CPPv4N12ctl_result_t24CTL_RESULT_ERROR_UNKNOWNE">
 <span id="_CPPv3N12ctl_result_t24CTL_RESULT_ERROR_UNKNOWNE"></span><span id="_CPPv2N12ctl_result_t24CTL_RESULT_ERROR_UNKNOWNE"></span><span class="target" id="igcl__api_8h_1a07cb11ab61a2ceeb0410dbb21228b59fa3ac9598206ff70feaf743b008dcf6e24"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_RESULT_ERROR_UNKNOWN</span></span></span><a class="headerlink" href="#_CPPv4N12ctl_result_t24CTL_RESULT_ERROR_UNKNOWNE" title="Link to this definition"></a><br /></dt>
 <dd><p>Unknown or internal error. </p>
@@ -4693,7 +4699,7 @@
 <span id="id92"></span><h4>ctlGetZeDevice<a class="headerlink" href="#ctlgetzedevice" title="Link to this heading"></a></h4>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv414ctlGetZeDevice27ctl_device_adapter_handle_tPvPPv">
-<span id="_CPPv314ctlGetZeDevice27ctl_device_adapter_handle_tPvPPv"></span><span id="_CPPv214ctlGetZeDevice27ctl_device_adapter_handle_tPvPPv"></span><span id="ctlGetZeDevice__ctl_device_adapter_handle_t.voidP.voidPP"></span><span class="target" id="igcl__api_8h_1a70a5a133a451a11a6c4714f6c6f420b7"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlGetZeDevice</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pZeDevice</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">hInstance</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414ctlGetZeDevice27ctl_device_adapter_handle_tPvPPv" title="Link to this definition"></a><br /></dt>
+<span id="_CPPv314ctlGetZeDevice27ctl_device_adapter_handle_tPvPPv"></span><span id="_CPPv214ctlGetZeDevice27ctl_device_adapter_handle_tPvPPv"></span><span id="ctlGetZeDevice__ctl_device_adapter_handle_t.voidP.voidPP"></span><span class="target" id="igcl__api_8h_1a522e1ebee55f49e2f0d57f20cbd8617b"></span><span class="pre">CTL_APIEXPORT</span><span class="w"> </span><a class="reference internal" href="#_CPPv412ctl_result_t" title="ctl_result_t"><span class="n"><span class="pre">ctl_result_t</span></span></a><span class="w"> </span><span class="pre">CTL_APICALL</span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctlGetZeDevice</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ctl_device_adapter_handle_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">hDAhandle</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pZesDevice</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">hInstance</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414ctlGetZeDevice27ctl_device_adapter_handle_tPvPPv" title="Link to this definition"></a><br /></dt>
 <dd><p>Get Level0 Device handle. </p>
 <p><ul class="simple">
 <li><p>The application gets OneAPI Level0 Device handles</p></li>
@@ -4703,7 +4709,7 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>hDAhandle</strong> – [in][release] Handle to display adapter </p></li>
-<li><p><strong>pZeDevice</strong> – [out][release] ze_device handle </p></li>
+<li><p><strong>pZesDevice</strong> – [out][release] zes_device handle </p></li>
 <li><p><strong>hInstance</strong> – [out][release] Module instance which caller can use to get export functions directly </p></li>
 </ul>
 </dd>
@@ -4717,7 +4723,7 @@
 </ul>
 </p></li>
 <li><p>CTL_RESULT_ERROR_INVALID_NULL_POINTER<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">pZeDevice</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">pZesDevice</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">nullptr</span> <span class="pre">==</span> <span class="pre">hInstance</span></code></p></li>
 </ul>
 </p></li>
@@ -7051,9 +7057,9 @@
 </dd></dl>
 
 <dl class="cpp enumerator">
-<dt class="sig sig-object cpp" id="_CPPv4N29ctl_power_optimization_flag_t31CTL_POWER_OPTIMIZATION_FLAG_SPHE">
-<span id="_CPPv3N29ctl_power_optimization_flag_t31CTL_POWER_OPTIMIZATION_FLAG_SPHE"></span><span id="_CPPv2N29ctl_power_optimization_flag_t31CTL_POWER_OPTIMIZATION_FLAG_SPHE"></span><span class="target" id="igcl__api_8h_1abbc7537c2992535a6f3c50257127d86babdb07f2232b99774b209de8346c61ce1"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_POWER_OPTIMIZATION_FLAG_SPH</span></span></span><a class="headerlink" href="#_CPPv4N29ctl_power_optimization_flag_t31CTL_POWER_OPTIMIZATION_FLAG_SPHE" title="Link to this definition"></a><br /></dt>
-<dd><p>Smart Power HDR, This flag is Applicable for only API version &gt; 0. </p>
+<dt class="sig sig-object cpp" id="_CPPv4N29ctl_power_optimization_flag_t41CTL_POWER_OPTIMIZATION_FLAG_INTELSMARTHDRE">
+<span id="_CPPv3N29ctl_power_optimization_flag_t41CTL_POWER_OPTIMIZATION_FLAG_INTELSMARTHDRE"></span><span id="_CPPv2N29ctl_power_optimization_flag_t41CTL_POWER_OPTIMIZATION_FLAG_INTELSMARTHDRE"></span><span class="target" id="igcl__api_8h_1abbc7537c2992535a6f3c50257127d86ba0cfcd9ecbccf90e80c58d8d12bf92c7a"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CTL_POWER_OPTIMIZATION_FLAG_INTELSMARTHDR</span></span></span><a class="headerlink" href="#_CPPv4N29ctl_power_optimization_flag_t41CTL_POWER_OPTIMIZATION_FLAG_INTELSMARTHDRE" title="Link to this definition"></a><br /></dt>
+<dd><p>Intel Smart HDR, This flag is Applicable for only API version &gt; 0. </p>
 </dd></dl>
 
 <dl class="cpp enumerator">
@@ -8615,14 +8621,7 @@
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N40ctl_adapter_display_encoder_properties_t18EncoderConfigFlagsE">
 <span id="_CPPv3N40ctl_adapter_display_encoder_properties_t18EncoderConfigFlagsE"></span><span id="_CPPv2N40ctl_adapter_display_encoder_properties_t18EncoderConfigFlagsE"></span><span id="ctl_adapter_display_encoder_properties_t::EncoderConfigFlags__ctl_encoder_config_flags_t"></span><span class="target" id="structctl__adapter__display__encoder__properties__t_1acd27054da901bbe60faef1e83f7065e4"></span><span class="n"><span class="pre">ctl_encoder_config_flags_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EncoderConfigFlags</span></span></span><a class="headerlink" href="#_CPPv4N40ctl_adapter_display_encoder_properties_t18EncoderConfigFlagsE" title="Link to this definition"></a><br /></dt>
-<dd><p>[out] Output configuration related flags which indicate how the output pixel stream drive the panel. Refer <a class="reference internal" href="#igcl__api_8h_1a6f65fdc9a8c3001bbbb4d522f9db1d25"><span class="std std-ref">ctl_encoder_config_flag_t</span></a><p>Note:</p>
-<p>Virtual = 1: This indicates that its a software display. Hardware based features will not be applicable to this display. Collage=1,Virtual=1: Indicates the fake display output created by driver which has the combined resolution of multiple physical displays involved in collage configuration</p>
-<p>Collage=1,Virtual=0: Indicates the child physical displays involved in a collage configuration. These are real physical outputs</p>
-<p>Split=1,Virtual=1 : Indicates the fake display output created by driver which occupies a portion of a real physical display</p>
-<p>Split=1,Virtual=0 : Indicates the physical display which got split to form multiple split displays</p>
-<p>Split=1,Collage=1 : Invalid combination</p>
-
- MgpuCollage=1,Collage=1,Virtual=1: Indicates the fake display output created by driver which has the combined resolution of multiple physical displays spread across multiple GPUs involved in Multi-GPU collage configuration MgpuCollage=1,Collage=1,Virtual=0: Indicates the child physical displays involved in a Multi-GPU collage configuration. These are real physical outputs </p>
+<dd><p>[out] Output configuration related flags which indicate how the output pixel stream drive the panel. Refer <a class="reference internal" href="#igcl__api_8h_1a6f65fdc9a8c3001bbbb4d522f9db1d25"><span class="std std-ref">ctl_encoder_config_flag_t</span></a> Note: Virtual = 1: This indicates that its a software display. Hardware based features will not be applicable to this display. Collage=1,Virtual=1: Indicates the fake display output created by driver which has the combined resolution of multiple physical displays involved in collage configuration Collage=1,Virtual=0: Indicates the child physical displays involved in a collage configuration. These are real physical outputs Split=1,Virtual=1 : Indicates the fake display output created by driver which occupies a portion of a real physical display Split=1,Virtual=0 : Indicates the physical display which got split to form multiple split displays Split=1,Collage=1 : Invalid combination MgpuCollage=1,Collage=1,Virtual=1: Indicates the fake display output created by driver which has the combined resolution of multiple physical displays spread across multiple GPUs involved in Multi-GPU collage configuration MgpuCollage=1,Collage=1,Virtual=0: Indicates the child physical displays involved in a Multi-GPU collage configuration. These are real physical outputs </p>
 </dd></dl>
 
 <dl class="cpp var">
@@ -10705,6 +10704,18 @@
 <dt class="sig sig-object cpp" id="_CPPv4N18ctl_genlock_args_t17IsGenlockPossibleE">
 <span id="_CPPv3N18ctl_genlock_args_t17IsGenlockPossibleE"></span><span id="_CPPv2N18ctl_genlock_args_t17IsGenlockPossibleE"></span><span id="ctl_genlock_args_t::IsGenlockPossible__b"></span><span class="target" id="structctl__genlock__args__t_1a9682a30e8ddcf6f0c73332cb9343e2b6"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">IsGenlockPossible</span></span></span><a class="headerlink" href="#_CPPv4N18ctl_genlock_args_t17IsGenlockPossibleE" title="Link to this definition"></a><br /></dt>
 <dd><p>[out] Indicates if Genlock can be enabled/disabled with the given topology </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N18ctl_genlock_args_t18IsGenlockSupportedE">
+<span id="_CPPv3N18ctl_genlock_args_t18IsGenlockSupportedE"></span><span id="_CPPv2N18ctl_genlock_args_t18IsGenlockSupportedE"></span><span id="ctl_genlock_args_t::IsGenlockSupported__b"></span><span class="target" id="structctl__genlock__args__t_1a932a614c9cc1425968737243c3d730df"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">IsGenlockSupported</span></span></span><a class="headerlink" href="#_CPPv4N18ctl_genlock_args_t18IsGenlockSupportedE" title="Link to this definition"></a><br /></dt>
+<dd><p>[out] Whether Genlock is supported as a feature on this platform. If false, no driver invocation shall be made for Genlock action operations </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N18ctl_genlock_args_t27IsMultiChipGenlockSupportedE">
+<span id="_CPPv3N18ctl_genlock_args_t27IsMultiChipGenlockSupportedE"></span><span id="_CPPv2N18ctl_genlock_args_t27IsMultiChipGenlockSupportedE"></span><span id="ctl_genlock_args_t::IsMultiChipGenlockSupported__b"></span><span class="target" id="structctl__genlock__args__t_1ae8156c76e086278a232feb6338ddc478"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">IsMultiChipGenlockSupported</span></span></span><a class="headerlink" href="#_CPPv4N18ctl_genlock_args_t27IsMultiChipGenlockSupportedE" title="Link to this definition"></a><br /></dt>
+<dd><p>[out] Whether multi-chip Genlock is supported on this platform. If false but IsGenlockSupported is true, single-chip Genlock can still be performed </p>
 </dd></dl>
 
 </div>

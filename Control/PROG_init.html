@@ -127,30 +127,30 @@ Following C++ code shows how to do the same.</p>
 ctl_result_t Level0HandleTest(ctl_device_adapter_handle_t hDevices)
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
-    ze_device_handle_t Ze_device;
+    zes_device_handle_t Zes_device;
     ze_device_module_properties_t ZemoduleProperties;
     HINSTANCE hLevel0Loader = NULL;
 
-    Result = ctlGetZeDevice(hDevices, &amp;Ze_device, &amp;(void *)hLevel0Loader);
-    if (CTL_RESULT_SUCCESS == Result &amp;&amp; Ze_device != NULL)
+    Result = ctlGetZeDevice(hDevices, &amp;Zes_device, &amp;(void *)hLevel0Loader);
+    if (CTL_RESULT_SUCCESS == Result &amp;&amp; Zes_device != NULL)
     {
-        std::cout &lt;&lt; &quot;Success: ctlDevice = &quot; &lt;&lt; hDevices &lt;&lt; &quot; ze_device = &quot; &lt;&lt; Ze_device &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;Success: ctlDevice = &quot; &lt;&lt; hDevices &lt;&lt; &quot; zes_device = &quot; &lt;&lt; Zes_device &lt;&lt; std::endl;
     }
     else
     {
-        std::cout &lt;&lt; &quot;Error: Not able to get ze_device!n&quot;;
+        std::cout &lt;&lt; &quot;Error: Not able to get zes_device!n&quot;;
     }
 
     // Try to get a level0 function using getprocaddress()
-    if (hLevel0Loader &amp;&amp; Ze_device)
+    if (hLevel0Loader &amp;&amp; Zes_device)
     {
-        ze_pfnDeviceGetModuleProperties_t pfnDeviceGetModuleProperties = (ze_pfnDeviceGetModuleProperties_t)GetProcAddress(hLevel0Loader, &quot;zeDeviceGetModuleProperties&quot;);
+        ze_pfnDeviceGetModuleProperties_t pfnDeviceGetModuleProperties = (zes_pfnDeviceGetModuleProperties_t)GetProcAddress(hLevel0Loader, &quot;zeDeviceGetModuleProperties&quot;);
         if (pfnDeviceGetModuleProperties)
         {
-            std::cout &lt;&lt; &quot;Success: Obtained level0 zeDeviceGetModuleProperties &quot;
+            std::cout &lt;&lt; &quot;Success: Obtained level0 zesDeviceGetModuleProperties &quot;
                          &quot;functionn&quot;;
 
-            if (pfnDeviceGetModuleProperties(Ze_device, &amp;ZemoduleProperties) == ZE_RESULT_SUCCESS)
+            if (pfnDeviceGetModuleProperties(Zes_device, &amp;ZemoduleProperties) == ZE_RESULT_SUCCESS)
             {
                 std::cout &lt;&lt; &quot;zemoduleProperties::spirvVersionSupported = &quot; &lt;&lt; ZemoduleProperties.spirvVersionSupported &lt;&lt; std::endl;
             }
