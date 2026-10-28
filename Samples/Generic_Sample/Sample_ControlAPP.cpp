@@ -49,18 +49,18 @@ ctl_result_t GResult = CTL_RESULT_SUCCESS;
 ctl_result_t CtlLevel0HandleTest(ctl_device_adapter_handle_t hDevices)
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
-    ze_device_handle_t Ze_device;
-    ze_device_module_properties_t ZemoduleProperties = { 0 };
-    HINSTANCE hLevel0Loader                          = NULL;
+    zes_device_handle_t Zes_device;
+    zes_device_module_properties_t ZesmoduleProperties = { 0 };
+    HINSTANCE hLevel0Loader                            = NULL;
 
-    Result = ctlGetZeDevice(hDevices, &Ze_device, &(void *)hLevel0Loader);
-    if (CTL_RESULT_SUCCESS == Result && Ze_device != NULL)
+    Result = ctlGetZeDevice(hDevices, &Zes_device, &(void *)hLevel0Loader);
+    if (CTL_RESULT_SUCCESS == Result && Zes_device != NULL)
     {
-        std::cout << "Success: ctlDevice = " << hDevices << " ze_device = " << Ze_device << std::endl;
+        std::cout << "Success: ctlDevice = " << hDevices << " zes_device = " << Zes_device << std::endl;
     }
     else
     {
-        std::cout << "Error: Not able to get ze_device!\n";
+        std::cout << "Error: Not able to get zes_device!\n";
         STORE_RESET_ERROR(Result);
     }
 
@@ -73,11 +73,11 @@ ctl_result_t CtlLevel0HandleTest(ctl_device_adapter_handle_t hDevices)
             std::cout << "Success: Obtained level0 zeDeviceGetModuleProperties "
                          "function\n";
 
-            if (Ze_device != NULL)
+            if (Zes_device != NULL)
             {
-                if (pfnDeviceGetModuleProperties(Ze_device, &ZemoduleProperties) == ZE_RESULT_SUCCESS)
+                if (pfnDeviceGetModuleProperties(Zes_device, &ZesmoduleProperties) == ZE_RESULT_SUCCESS)
                 {
-                    std::cout << "zemoduleProperties::spirvVersionSupported = " << ZemoduleProperties.spirvVersionSupported << std::endl;
+                    std::cout << "zemoduleProperties::spirvVersionSupported = " << ZesmoduleProperties.spirvVersionSupported << std::endl;
                 }
                 else
                 {

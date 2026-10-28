@@ -101,13 +101,13 @@ ctl_result_t TestSPHPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     PowerCaps.Size                                = sizeof(ctl_power_optimization_caps_t);
     PowerCaps.Version                             = 1;
     AppliedPowerSettings.Size                     = sizeof(ctl_power_optimization_settings_t);
-    AppliedPowerSettings.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_SPH;
+    AppliedPowerSettings.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_INTELSMARTHDR;
     AppliedPowerSettings.PowerSource              = CTL_POWER_SOURCE_AC;
     AppliedPowerSettings.PowerOptimizationPlan    = CTL_POWER_OPTIMIZATION_PLAN_BALANCED;
     AppliedPowerSettings.Version                  = 1;
 
     NewPowerSettings.Size                     = sizeof(ctl_power_optimization_settings_t);
-    NewPowerSettings.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_SPH;
+    NewPowerSettings.PowerOptimizationFeature = CTL_POWER_OPTIMIZATION_FLAG_INTELSMARTHDR;
     NewPowerSettings.Enable                   = TRUE;
     NewPowerSettings.PowerSource              = CTL_POWER_SOURCE_AC;
     NewPowerSettings.PowerOptimizationPlan    = CTL_POWER_OPTIMIZATION_PLAN_BALANCED;
@@ -117,7 +117,7 @@ ctl_result_t TestSPHPowerFeature(ctl_display_output_handle_t hDisplayOutput)
     Result = ctlGetPowerOptimizationCaps(hDisplayOutput, &PowerCaps);
     LOG_AND_EXIT_ON_ERROR(Result, "ctlGetPowerOptimizationCaps (SPH)");
 
-    if (CTL_POWER_OPTIMIZATION_FLAG_SPH != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_SPH))
+    if (CTL_POWER_OPTIMIZATION_FLAG_INTELSMARTHDR != (PowerCaps.SupportedFeatures & CTL_POWER_OPTIMIZATION_FLAG_INTELSMARTHDR))
     {
         APP_LOG_WARN("SPH is not supported");
         Result = CTL_RESULT_ERROR_UNSUPPORTED_FEATURE;

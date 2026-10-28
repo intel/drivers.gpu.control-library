@@ -57,11 +57,13 @@ void PrintTopology(ctl_genlock_args_t *pGenlockArgs, uint32_t AdapterCount)
     for (uint32_t AdapterIndex = 0; AdapterIndex < AdapterCount; AdapterIndex++)
     {
         APP_LOG_INFO("Adapter %u:", AdapterIndex);
-        APP_LOG_INFO("\tIsGenlockEnabled : %s", pGenlockArgs[AdapterIndex].IsGenlockEnabled ? "true" : "false");
-        APP_LOG_INFO("\tIsGenlockPossible : %s", pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
+        APP_LOG_INFO("\tIs Genlock Supported : %s", pGenlockArgs[AdapterIndex].IsGenlockSupported ? "true" : "false");
+        APP_LOG_INFO("\tIs Genlock Possible : %s", pGenlockArgs[AdapterIndex].IsGenlockPossible ? "true" : "false");
+        APP_LOG_INFO("\tIs Genlock Enabled : %s", pGenlockArgs[AdapterIndex].IsGenlockEnabled ? "true" : "false");
+        APP_LOG_INFO("\tIs Multi-Chip Genlock Supported : %s", pGenlockArgs[AdapterIndex].IsMultiChipGenlockSupported ? "true" : "false");
         if (true == pGenlockArgs[AdapterIndex].IsGenlockEnabled)
         {
-            APP_LOG_INFO("\tIsPrimaryGenlockSystem : %s", pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem ? "true" : "false");
+            APP_LOG_INFO("\tIs Primary Genlock System : %s", pGenlockArgs[AdapterIndex].GenlockTopology.IsPrimaryGenlockSystem ? "true" : "false");
             APP_LOG_INFO("\tNumber of Genlock displays : %d", pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays);
             for (int8_t DisplayIndex = 0; DisplayIndex < pGenlockArgs[AdapterIndex].GenlockTopology.NumGenlockDisplays; DisplayIndex++)
             {
