@@ -26,21 +26,21 @@ The pseudo code below shows how to initialize the IGCL library and enumerate the
            :ref:`ctlEnumerateDevices`\(hAPIHandle,&Adapter_count, hDevices);
            hDevices = (ctl_device_adapter_handle_t \*)malloc(sizeof(ctl_device_adapter_handle_t) \* Adapter_count);
            :ref:`ctlEnumerateDevices`\(hAPIHandle,&Adapter_count, hDevices);
-           
+
            #Use the handle to call the api's
-           
+
            for(index = 0 .. Adapter_count-1)
                # Get Adapter Properties
                :ref:`ctl-device-adapter-properties-t` StDeviceAdapterProperties = { 0 };
-			   
+
                #OS specific initialization.This is an Windows example
-			   
+
                StDeviceAdapterProperties.Size           = sizeof(:ref:`ctl-device-adapter-properties-t`\);
                StDeviceAdapterProperties.pDeviceID      = malloc(sizeof(LUID));
                StDeviceAdapterProperties.device_id_size = sizeof(LUID);
                :ref:`ctlGetDeviceProperties`\(hDevices[Index], &StDeviceAdapterProperties);
-			   
-              
+
+
     free_memory(...)
 
 Using Level Zero
@@ -54,30 +54,30 @@ Following C++ code shows how to do the same.
     ctl_result_t Level0HandleTest(ctl_device_adapter_handle_t hDevices)
     {
         ctl_result_t Result = CTL_RESULT_SUCCESS;
-        ze_device_handle_t Ze_device;
+        zes_device_handle_t Zes_device;
         ze_device_module_properties_t ZemoduleProperties;
         HINSTANCE hLevel0Loader = NULL;
 
-        Result = ctlGetZeDevice(hDevices, &Ze_device, &(void \*)hLevel0Loader);
-        if (CTL_RESULT_SUCCESS == Result && Ze_device != NULL)
+        Result = ctlGetZeDevice(hDevices, &Zes_device, &(void \*)hLevel0Loader);
+        if (CTL_RESULT_SUCCESS == Result && Zes_device != NULL)
         {
-            std::cout << "Success: ctlDevice = " << hDevices << " ze_device = " << Ze_device << std::endl;
+            std::cout << "Success: ctlDevice = " << hDevices << " zes_device = " << Zes_device << std::endl;
         }
         else
         {
-            std::cout << "Error: Not able to get ze_device!\n";
+            std::cout << "Error: Not able to get zes_device!\n";
         }
 
         // Try to get a level0 function using getprocaddress()
-        if (hLevel0Loader && Ze_device)
+        if (hLevel0Loader && Zes_device)
         {
-            ze_pfnDeviceGetModuleProperties_t pfnDeviceGetModuleProperties = (ze_pfnDeviceGetModuleProperties_t)GetProcAddress(hLevel0Loader, "zeDeviceGetModuleProperties");
+            ze_pfnDeviceGetModuleProperties_t pfnDeviceGetModuleProperties = (zes_pfnDeviceGetModuleProperties_t)GetProcAddress(hLevel0Loader, "zeDeviceGetModuleProperties");
             if (pfnDeviceGetModuleProperties)
             {
-                std::cout << "Success: Obtained level0 zeDeviceGetModuleProperties "
+                std::cout << "Success: Obtained level0 zesDeviceGetModuleProperties "
                              "function\n";
 
-                if (pfnDeviceGetModuleProperties(Ze_device, &ZemoduleProperties) == ZE_RESULT_SUCCESS)
+                if (pfnDeviceGetModuleProperties(Zes_device, &ZemoduleProperties) == ZE_RESULT_SUCCESS)
                 {
                     std::cout << "zemoduleProperties::spirvVersionSupported = " << ZemoduleProperties.spirvVersionSupported << std::endl;
                 }
@@ -95,12 +95,12 @@ Following C++ code shows how to do the same.
         {
             std::cout << "Error: Not able to get level0 instance\n";
         }
-        
+
         free_memory(...)
-        
+
         return Result;
-    }                 
-    
-	
+    }
+
+
 Refer samples for example code snippets of various API's
 
