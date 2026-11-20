@@ -1312,6 +1312,455 @@ ctl_result_t CtlTestFrameGeneration(ctl_device_adapter_handle_t hDevices)
     return Result;
 }
 
+/***************************************************************
+ * @brief
+ * Method to test Driver Frame Generation feature.
+ *
+ * Global scope  : INTEL_OPTIMIZED, TURN_OFF
+ *                 FORCE_ON is per-app only - tested to confirm rejection.
+ * Per-app scope : FORCE_ON, INTEL_OPTIMIZED, TURN_OFF
+ *                 Tested with one whitelisted app (dota2.exe)
+ *                 and one non-whitelisted app (MyGame.exe).
+ *
+ * @note  Whitelist comparison lowercases the input and strips .exe,
+ *        then does a case-sensitive find against the whitelist entries.
+ *
+ * @note  Per-app overrides apply only when CTL_3D_FEATURE_GLOBAL_OR_PER_APP
+ *        is set to CTL_3D_GLOBAL_OR_PER_APP_TYPES_PER_APP for the target app.
+ *
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlTestDriverFrameGeneration(ctl_device_adapter_handle_t hDevices)
+{
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    // "dota2" is present (lowercase) in DriverFGWhitelistedApps -> Get will succeed
+    // "MyGame" is not in the whitelist                          -> Get returns CTL_RESULT_ERROR_RESTRICTED_APPLICATION
+    const char *pWhitelistedApp    = "dota2.exe";
+    const char *pNonWhitelistedApp = "MyGame.exe";
+
+    ctl_3d_feature_getset_t Get3DProperty = { 0 };
+    ctl_3d_feature_getset_t Set3DProperty = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    if (NULL == hDevices)
+        return Result;
+
+    // ----------------------------------------------------------------
+    // Global tests
+    //   1. INTEL_OPTIMIZED -> Set (success), then Get later
+    //   2. FORCE_ON        -> CTL_RESULT_ERROR_UNSUPPORTED_FEATURE
+    //   3. TURN_OFF        -> success
+    // ----------------------------------------------------------------
+    PRINT_LOGS("======================Driver Frame Generation test -> Global settings======================");
+
+    // 1. Set Global: INTEL_OPTIMIZED (expected success)
+    Set3DProperty                           = { 0 };
+    Set3DProperty.Size                      = sizeof(Set3DProperty);
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_INTEL_OPTIMIZED;
+    Set3DProperty.ApplicationName           = NULL;
+    Set3DProperty.ApplicationNameLength     = 0;
+    Set3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    APP_LOG_INFO("Set Global INTEL_OPTIMIZED: EnableType = %d", Set3DProperty.Value.EnumType.EnableType);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Global INTEL_OPTIMIZED) returned failure: 0x%X", Result);
+    else
+        APP_LOG_INFO("ctlGetSet3DFeature (Set Global INTEL_OPTIMIZED) returned success");
+    STORE_RESET_ERROR(Result);
+
+    // Get Global (expect INTEL_OPTIMIZED value back)
+    Get3DProperty             = { 0 };
+    Get3DProperty.Size        = sizeof(Get3DProperty);
+    Get3DProperty.FeatureType = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Get3DProperty.bSet        = FALSE;
+    Get3DProperty.ValueType   = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.Version     = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Get Global) returned failure: 0x%X", Result);
+    else
+        APP_LOG_INFO("ctlGetSet3DFeature (Get Global) returned success. Value = %d", Get3DProperty.Value.EnumType.EnableType);
+    STORE_RESET_ERROR(Result);
+
+    // 2. Set Global: FORCE_ON (per-app only - expected CTL_RESULT_ERROR_UNSUPPORTED_FEATURE)
+    Set3DProperty                           = { 0 };
+    Set3DProperty.Size                      = sizeof(Set3DProperty);
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_FORCE_ON;
+    Set3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    if (CTL_RESULT_ERROR_UNSUPPORTED_FEATURE == Result)
+    {
+        APP_LOG_INFO("Correctly rejected FORCE_ON for global scope (CTL_RESULT_ERROR_UNSUPPORTED_FEATURE)");
+        Result = CTL_RESULT_SUCCESS;
+    }
+    else if (CTL_RESULT_SUCCESS != Result)
+    {
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Global FORCE_ON) returned unexpected failure: 0x%X", Result);
+    }
+    else
+    {
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Global FORCE_ON) unexpectedly succeeded (expected CTL_RESULT_ERROR_UNSUPPORTED_FEATURE)");
+    }
+    STORE_RESET_ERROR(Result);
+
+    // 3. Set Global: TURN_OFF (expected success)
+    Set3DProperty                           = { 0 };
+    Set3DProperty.Size                      = sizeof(Set3DProperty);
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_TURN_OFF;
+    Set3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    APP_LOG_INFO("Set Global TURN_OFF: EnableType = %d", Set3DProperty.Value.EnumType.EnableType);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Global TURN_OFF) returned failure: 0x%X", Result);
+    else
+        APP_LOG_INFO("ctlGetSet3DFeature (Set Global TURN_OFF) returned success");
+    STORE_RESET_ERROR(Result);
+
+    // ----------------------------------------------------------------
+    // Per-app tests: whitelisted app (dota2.exe)
+    //   1. Get     -> success (app is whitelisted)
+    //   2. FORCE_ON -> success
+    //   3. TURN_OFF -> success
+    // ----------------------------------------------------------------
+    PRINT_LOGS("======================Driver Frame Generation test -> Per App (Whitelisted: dota2.exe)======================");
+
+    // 1. Get to verify the app is whitelisted (expected success)
+    Get3DProperty                           = { 0 };
+    Get3DProperty.Size                      = sizeof(Get3DProperty);
+    Get3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Get3DProperty.bSet                      = FALSE;
+    Get3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_INTEL_OPTIMIZED;
+    Get3DProperty.ApplicationName           = (char *)pWhitelistedApp;
+    Get3DProperty.ApplicationNameLength     = (int8_t)strlen(pWhitelistedApp);
+    Get3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Get Per-App, %s) returned failure: 0x%X", pWhitelistedApp, Result);
+    else
+        APP_LOG_INFO("Get Per-App confirmed whitelisted app %s. Value = %d", pWhitelistedApp, Get3DProperty.Value.EnumType.EnableType);
+    STORE_RESET_ERROR(Result);
+
+    // 2. Set to verify the app is whitelisted (expected success)
+    Get3DProperty                           = { 0 };
+    Get3DProperty.Size                      = sizeof(Get3DProperty);
+    Get3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Get3DProperty.bSet                      = TRUE;
+    Get3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_INTEL_OPTIMIZED;
+    Get3DProperty.ApplicationName           = (char *)pWhitelistedApp;
+    Get3DProperty.ApplicationNameLength     = (int8_t)strlen(pWhitelistedApp);
+    Get3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Per-App, %s) returned failure: 0x%X; is not a whitelisted app", pWhitelistedApp, Result);
+    else
+        APP_LOG_INFO("Set Per-App succeeded; confirmed whitelisted app %s. Value = %d", pWhitelistedApp, Get3DProperty.Value.EnumType.EnableType);
+    STORE_RESET_ERROR(Result);
+
+    Get3DProperty                       = { 0 };
+    Get3DProperty.Size                  = sizeof(Get3DProperty);
+    Get3DProperty.FeatureType           = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Get3DProperty.bSet                  = FALSE;
+    Get3DProperty.ValueType             = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.ApplicationName       = (char *)pWhitelistedApp;
+    Get3DProperty.ApplicationNameLength = (int8_t)strlen(pWhitelistedApp);
+    Get3DProperty.Version               = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Get Per-App, %s) returned failure: 0x%X", pWhitelistedApp, Result);
+    else
+        APP_LOG_INFO("Get Per-App for %s returned success and registry set to = %d", pWhitelistedApp, Get3DProperty.Value.EnumType.EnableType);
+    STORE_RESET_ERROR(Result);
+
+    // 3. Set FORCE_ON (expected success)
+    Set3DProperty                           = { 0 };
+    Set3DProperty.Size                      = sizeof(Set3DProperty);
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_FORCE_ON;
+    Set3DProperty.ApplicationName           = (char *)pWhitelistedApp;
+    Set3DProperty.ApplicationNameLength     = (int8_t)strlen(pWhitelistedApp);
+    Set3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Per-App FORCE_ON, %s) returned failure: 0x%X", pWhitelistedApp, Result);
+    else
+        APP_LOG_INFO("ctlGetSet3DFeature (Set Per-App FORCE_ON, %s) returned success", pWhitelistedApp);
+    STORE_RESET_ERROR(Result);
+
+    // 4. Set TURN_OFF (expected success)
+    Set3DProperty                           = { 0 };
+    Set3DProperty.Size                      = sizeof(Set3DProperty);
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_TURN_OFF;
+    Set3DProperty.ApplicationName           = (char *)pWhitelistedApp;
+    Set3DProperty.ApplicationNameLength     = (int8_t)strlen(pWhitelistedApp);
+    Set3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Per-App TURN_OFF, %s) returned failure: 0x%X", pWhitelistedApp, Result);
+    else
+        APP_LOG_INFO("ctlGetSet3DFeature (Set Per-App TURN_OFF, %s) returned success", pWhitelistedApp);
+    STORE_RESET_ERROR(Result);
+
+    // ----------------------------------------------------------------
+    // Per-app tests: non-whitelisted app (MyGame.exe)
+    //   1. Get     -> CTL_RESULT_ERROR_RESTRICTED_APPLICATION (not whitelisted)
+    //   2. FORCE_ON -> success (write succeeds)
+    //   3. TURN_OFF -> success
+    // ----------------------------------------------------------------
+    PRINT_LOGS("======================Driver Frame Generation test -> Per App (Non-Whitelisted: MyGame.exe)======================");
+
+    // 1. Get to verify the app is NOT whitelisted (expected CTL_RESULT_ERROR_RESTRICTED_APPLICATION)
+    Get3DProperty                           = { 0 };
+    Get3DProperty.Size                      = sizeof(Get3DProperty);
+    Get3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Get3DProperty.bSet                      = FALSE;
+    Get3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_INTEL_OPTIMIZED;
+    Get3DProperty.ApplicationName           = (char *)pNonWhitelistedApp;
+    Get3DProperty.ApplicationNameLength     = (int8_t)strlen(pNonWhitelistedApp);
+    Get3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+    if (CTL_RESULT_ERROR_RESTRICTED_APPLICATION == Result)
+    {
+        APP_LOG_INFO("Get Per-App correctly returned CTL_RESULT_ERROR_RESTRICTED_APPLICATION for non-whitelisted app %s", pNonWhitelistedApp);
+        Result = CTL_RESULT_SUCCESS;
+    }
+    else if (CTL_RESULT_SUCCESS != Result)
+    {
+        APP_LOG_ERROR("ctlGetSet3DFeature (Get Per-App, %s) returned unexpected failure: 0x%X", pNonWhitelistedApp, Result);
+    }
+    else
+    {
+        APP_LOG_ERROR("ctlGetSet3DFeature (Get Per-App, %s) unexpectedly succeeded (expected CTL_RESULT_ERROR_RESTRICTED_APPLICATION). Value = %d", pNonWhitelistedApp,
+                      Get3DProperty.Value.EnumType.EnableType);
+    }
+    STORE_RESET_ERROR(Result);
+
+    // 2. Set to verify the app is NOT whitelisted (expected CTL_RESULT_ERROR_RESTRICTED_APPLICATION)
+    Get3DProperty                           = { 0 };
+    Get3DProperty.Size                      = sizeof(Get3DProperty);
+    Get3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Get3DProperty.bSet                      = TRUE;
+    Get3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_INTEL_OPTIMIZED;
+    Get3DProperty.ApplicationName           = (char *)pNonWhitelistedApp;
+    Get3DProperty.ApplicationNameLength     = (int8_t)strlen(pNonWhitelistedApp);
+    Get3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+    if (CTL_RESULT_ERROR_RESTRICTED_APPLICATION == Result)
+    {
+        APP_LOG_INFO("Set Per-App correctly returned CTL_RESULT_ERROR_RESTRICTED_APPLICATION for non-whitelisted app %s", pNonWhitelistedApp);
+        Result = CTL_RESULT_SUCCESS;
+    }
+    else if (CTL_RESULT_SUCCESS != Result)
+    {
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Per-App, %s) returned unexpected failure: 0x%X", pNonWhitelistedApp, Result);
+    }
+    else
+    {
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Per-App, %s) unexpectedly succeeded (expected CTL_RESULT_ERROR_RESTRICTED_APPLICATION). Value = %d", pNonWhitelistedApp,
+                      Get3DProperty.Value.EnumType.EnableType);
+    }
+    STORE_RESET_ERROR(Result);
+
+    Get3DProperty                       = { 0 };
+    Get3DProperty.Size                  = sizeof(Get3DProperty);
+    Get3DProperty.FeatureType           = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Get3DProperty.bSet                  = FALSE;
+    Get3DProperty.ValueType             = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Get3DProperty.ApplicationName       = (char *)pNonWhitelistedApp;
+    Get3DProperty.ApplicationNameLength = (int8_t)strlen(pNonWhitelistedApp);
+    Get3DProperty.Version               = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Get Per-App, %s) returned failure: 0x%X", pNonWhitelistedApp, Result);
+    else
+        APP_LOG_INFO("Get Per-App for  %s returned success and registry set to = %d", pNonWhitelistedApp, Get3DProperty.Value.EnumType.EnableType);
+    STORE_RESET_ERROR(Result);
+
+    // 3. Set FORCE_ON (expected success - write succeeds even for non-whitelisted app)
+    Set3DProperty                           = { 0 };
+    Set3DProperty.Size                      = sizeof(Set3DProperty);
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_FORCE_ON;
+    Set3DProperty.ApplicationName           = (char *)pNonWhitelistedApp;
+    Set3DProperty.ApplicationNameLength     = (int8_t)strlen(pNonWhitelistedApp);
+    Set3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Per-App FORCE_ON, %s) returned failure: 0x%X", pNonWhitelistedApp, Result);
+    else
+        APP_LOG_INFO("ctlGetSet3DFeature (Set Per-App FORCE_ON, %s) returned success", pNonWhitelistedApp);
+    STORE_RESET_ERROR(Result);
+
+    // 4. Set TURN_OFF (expected success)
+    Set3DProperty                           = { 0 };
+    Set3DProperty.Size                      = sizeof(Set3DProperty);
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_TURN_OFF;
+    Set3DProperty.ApplicationName           = (char *)pNonWhitelistedApp;
+    Set3DProperty.ApplicationNameLength     = (int8_t)strlen(pNonWhitelistedApp);
+    Set3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("ctlGetSet3DFeature (Set Per-App TURN_OFF, %s) returned failure: 0x%X", pNonWhitelistedApp, Result);
+    else
+        APP_LOG_INFO("ctlGetSet3DFeature (Set Per-App TURN_OFF, %s) returned success", pNonWhitelistedApp);
+    STORE_RESET_ERROR(Result);
+
+    // ----------------------------------------------------------------
+    // Cleanup: reset everything (both apps + global) back to TURN_OFF
+    // ----------------------------------------------------------------
+    PRINT_LOGS("======================Driver Frame Generation test -> Cleanup (reset to TURN_OFF)======================");
+
+    const char *pCleanupApps[] = { pWhitelistedApp, pNonWhitelistedApp };
+
+    for (int i = 0; i < 2; i++)
+    {
+        Set3DProperty                           = { 0 };
+        Set3DProperty.Size                      = sizeof(Set3DProperty);
+        Set3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+        Set3DProperty.bSet                      = TRUE;
+        Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+        Set3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_TURN_OFF;
+        Set3DProperty.ApplicationName           = (char *)pCleanupApps[i];
+        Set3DProperty.ApplicationNameLength     = (int8_t)strlen(pCleanupApps[i]);
+        Set3DProperty.Version                   = 0;
+
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        if (CTL_RESULT_SUCCESS != Result)
+            APP_LOG_ERROR("Cleanup: ctlGetSet3DFeature (Set TURN_OFF, %s) returned failure: 0x%X", pCleanupApps[i], Result);
+        else
+            APP_LOG_INFO("Cleanup: Reset %s -> TURN_OFF", pCleanupApps[i]);
+        STORE_RESET_ERROR(Result);
+    }
+
+    // Reset global back to TURN_OFF
+    Set3DProperty                           = { 0 };
+    Set3DProperty.Size                      = sizeof(Set3DProperty);
+    Set3DProperty.FeatureType               = CTL_3D_FEATURE_DRIVER_FRAME_GENERATION;
+    Set3DProperty.bSet                      = TRUE;
+    Set3DProperty.ValueType                 = CTL_PROPERTY_VALUE_TYPE_ENUM;
+    Set3DProperty.Value.EnumType.EnableType = CTL_3D_DRIVER_FRAME_GENERATION_TURN_OFF;
+    Set3DProperty.ApplicationName           = NULL;
+    Set3DProperty.ApplicationNameLength     = 0;
+    Set3DProperty.Version                   = 0;
+
+    Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+    if (CTL_RESULT_SUCCESS != Result)
+        APP_LOG_ERROR("Cleanup: ctlGetSet3DFeature (Set Global TURN_OFF) returned failure: 0x%X", Result);
+    else
+        APP_LOG_INFO("Cleanup: Reset Global -> TURN_OFF");
+    STORE_RESET_ERROR(Result);
+
+    return Result;
+}
+
+/***************************************************************
+ * @brief
+ * Method to test Prebuilt shader download settings
+ * @param hDevices
+ * @return ctl_result_t
+ ***************************************************************/
+ctl_result_t CtlTestPrebuiltShaderDownload(ctl_device_adapter_handle_t hDevices)
+{
+    // Prebuilt Shader Download Global GET/SET
+    ctl_result_t Result = CTL_RESULT_SUCCESS;
+
+    ctl_3d_feature_getset_t Get3DProperty = { 0 };
+    ctl_3d_feature_getset_t Set3DProperty = { 0 };
+
+    Set3DProperty.Size = sizeof(Set3DProperty);
+    Get3DProperty.Size = sizeof(Get3DProperty);
+
+    printf("======================Prebuilt Shader Download test -> Global settings======================\n");
+
+    // Set the feature enabled
+    Set3DProperty.FeatureType           = CTL_3D_FEATURE_PREBUILT_SHADER_DOWNLOAD;
+    Set3DProperty.bSet                  = TRUE;
+    Set3DProperty.CustomValueSize       = 0;
+    Set3DProperty.pCustomValue          = NULL;
+    Set3DProperty.ValueType             = CTL_PROPERTY_VALUE_TYPE_BOOL;
+    Set3DProperty.Value.BoolType.Enable = 1; // Enabled
+    Set3DProperty.Version               = 0;
+
+    if (NULL != hDevices)
+    {
+        Result = ctlGetSet3DFeature(hDevices, &Set3DProperty);
+        printf(" Set3DProperty.Value.BoolType.Enable = %d\n", Set3DProperty.Value.BoolType.Enable);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success\n");
+        }
+
+        // Check the value of the setting to verify it's set
+        Get3DProperty.FeatureType     = CTL_3D_FEATURE_PREBUILT_SHADER_DOWNLOAD;
+        Get3DProperty.bSet            = FALSE;
+        Get3DProperty.CustomValueSize = 0;
+        Get3DProperty.pCustomValue    = NULL;
+        Get3DProperty.ValueType       = CTL_PROPERTY_VALUE_TYPE_BOOL;
+        Get3DProperty.Version         = 0;
+
+        Result = ctlGetSet3DFeature(hDevices, &Get3DProperty);
+        if (CTL_RESULT_SUCCESS != Result)
+        {
+            printf("ctlGetSet3DFeature returned failure code: 0x%X\n", Result);
+
+            return Result;
+        }
+        else
+        {
+            printf("ctlGetSet3DFeature returned success\n");
+            printf(" Get3DProperty.Value.BoolType.Enable = %d\n", Get3DProperty.Value.BoolType.Enable);
+        }
+    }
+
+    return Result;
+}
+
 int main()
 {
     ctl_result_t Result = CTL_RESULT_SUCCESS;
@@ -1453,6 +1902,20 @@ int main()
                 if (CTL_RESULT_SUCCESS != Result)
                 {
                     APP_LOG_ERROR("CtlTestFrameGeneration failure code: 0x%X", Result);
+                }
+                STORE_RESET_ERROR(Result);
+
+                Result = CtlTestDriverFrameGeneration(hDevices[Index]); // no user input needed
+                if (CTL_RESULT_SUCCESS != Result)
+                {
+                    APP_LOG_ERROR("CtlTestDriverFrameGeneration failure code: 0x%X", Result);
+                }
+                STORE_RESET_ERROR(Result);
+
+                Result = CtlTestPrebuiltShaderDownload(hDevices[Index]);
+                if (CTL_RESULT_SUCCESS != Result)
+                {
+                    APP_LOG_ERROR("CtlTestPrebuiltShaderDownload failure code: 0x%X", Result);
                 }
                 STORE_RESET_ERROR(Result);
 
