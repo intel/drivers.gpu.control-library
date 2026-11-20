@@ -654,7 +654,7 @@ ctl_result_t ApplyPartialSaturation(ctl_display_output_handle_t hDisplayOutput, 
 
     ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
     SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.OperationType               = CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM;
     SetPixTxArgs.NumBlocks                   = 1;          // We are enabling only one block
     SetPixTxArgs.pBlockConfigs               = &LutConfig; // for 3DLUT block
 
@@ -753,7 +753,7 @@ ctl_result_t ApplyBrightnessContrastGamma(ctl_display_output_handle_t hDisplayOu
 
     ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
     SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.OperationType               = CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM;
     SetPixTxArgs.NumBlocks                   = 1;          // We are enabling only one block
     SetPixTxArgs.pBlockConfigs               = &LutConfig; // for 1DLUT block
 
@@ -877,7 +877,7 @@ ctl_result_t ApplyLinearCSC(ctl_display_output_handle_t hDisplayOutput, ctl_pixt
 
     ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
     SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.OperationType               = CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM;
     SetPixTxArgs.NumBlocks                   = 3; // We are trying to set only one block
     SetPixTxArgs.pBlockConfigs               = (ctl_pixtx_block_config_t *)malloc(SetPixTxArgs.NumBlocks * sizeof(ctl_pixtx_block_config_t));
     EXIT_ON_MEM_ALLOC_FAILURE(SetPixTxArgs.pBlockConfigs, " SetPixTxArgs.pBlockConfigs");
@@ -1062,7 +1062,7 @@ ctl_result_t RotateAndScalePanelColorSpaceToContentColorSpace(ctl_display_output
 
     ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
     SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.OperationType               = CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM;
     SetPixTxArgs.NumBlocks                   = 3; // We are trying to set only one block
     SetPixTxArgs.pBlockConfigs               = (ctl_pixtx_block_config_t *)malloc(SetPixTxArgs.NumBlocks * sizeof(ctl_pixtx_block_config_t));
     EXIT_ON_MEM_ALLOC_FAILURE(SetPixTxArgs.pBlockConfigs, " SetPixTxArgs.pBlockConfigs");
@@ -1189,7 +1189,7 @@ ctl_result_t SetDeGammaLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx
     memset(LutConfig.Config.OneDLutConfig.pSampleValues, 0, LutSize * sizeof(double));
 
     SetPixTxArgs.Size          = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.OperationType = CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM;
     SetPixTxArgs.NumBlocks     = 1;          // We are enabling only one block
     SetPixTxArgs.pBlockConfigs = &LutConfig; // for 1DLUT block
 
@@ -1282,7 +1282,7 @@ ctl_result_t SetGammaLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_p
 
     ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
     SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.OperationType               = CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM;
     SetPixTxArgs.NumBlocks                   = 1;          // We are enabling only one block
     SetPixTxArgs.pBlockConfigs               = &LutConfig; // for 1DLUT block
 
@@ -1405,7 +1405,7 @@ ctl_result_t SetCsc(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe_g
 
     ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
     SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.OperationType               = CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM;
     SetPixTxArgs.NumBlocks                   = 1;          // We are trying to set only one block
     SetPixTxArgs.pBlockConfigs               = &CSCConfig; // for CSC block
     SetPixTxArgs.pBlockConfigs->BlockId      = pPixTxCaps->pBlockConfigs[CscBlockIndex].BlockId;
@@ -1427,7 +1427,7 @@ ctl_result_t PixTxRestoreDefault(ctl_display_output_handle_t hDisplayOutput, ctl
     ctl_result_t Result                      = CTL_RESULT_SUCCESS;
     ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
     SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_RESTORE_DEFAULT;
+    SetPixTxArgs.OperationType               = CTL_PIXTX_CONFIG_OPERATION_TYPE_RESTORE_DEFAULT;
     SetPixTxArgs.NumBlocks                   = pPixTxCaps->NumBlocks;
     SetPixTxArgs.pBlockConfigs               = pPixTxCaps->pBlockConfigs;
 
@@ -1470,7 +1470,7 @@ ctl_result_t ApplyHueSaturation(ctl_display_output_handle_t hDisplayOutput, ctl_
 
     ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
     SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.OperationType               = CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM;
     SetPixTxArgs.NumBlocks                   = 1;          // We are trying to set only one block
     SetPixTxArgs.pBlockConfigs               = &CSCConfig; // for CSC block
     SetPixTxArgs.pBlockConfigs->BlockId      = pPixTxCaps->pBlockConfigs[CscBlockIndex].BlockId;
@@ -1496,7 +1496,7 @@ ctl_result_t Set3DLut(ctl_display_output_handle_t hDisplayOutput, ctl_pixtx_pipe
 
     ctl_pixtx_pipe_set_config_t SetPixTxArgs = { 0 };
     SetPixTxArgs.Size                        = sizeof(ctl_pixtx_pipe_set_config_t);
-    SetPixTxArgs.OpertaionType               = CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM;
+    SetPixTxArgs.OperationType               = CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM;
     SetPixTxArgs.NumBlocks                   = 1;                                                          // We are enabling only one block
     SetPixTxArgs.pBlockConfigs               = &LutConfig;                                                 // for 3DLUT block
     SetPixTxArgs.Flags                       = CTL_PIXTX_PIPE_SET_CONFIG_FLAG_PERSIST_ACROSS_POWER_EVENTS; // This flag is required to maintain the persistance across power events.

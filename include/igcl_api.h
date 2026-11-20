@@ -1538,6 +1538,7 @@ typedef enum _ctl_3d_feature_t
     CTL_3D_FEATURE_PREBUILT_SHADER_DOWNLOAD = 18,   ///< Download prebuilt shaders. Contains generic bool type fields
     CTL_3D_FEATURE_LIVE_STATE = 19,                 ///< Application Live State feature.
     CTL_3D_FEATURE_FRAME_GENERATION_CONTROL = 20,   ///< Frame Generation Control
+    CTL_3D_FEATURE_DRIVER_FRAME_GENERATION = 21,    ///< Driver Frame Generation
     CTL_3D_FEATURE_MAX
 
 } ctl_3d_feature_t;
@@ -1997,6 +1998,19 @@ typedef struct _ctl_3d_live_state_t
     uint32_t Reserved[4];                           ///< [out] Reserved fields
 
 } ctl_3d_live_state_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Driver Frame Generation
+typedef enum _ctl_3d_driver_frame_generation_t
+{
+    CTL_3D_DRIVER_FRAME_GENERATION_TURN_OFF = 0,    ///< Default
+    CTL_3D_DRIVER_FRAME_GENERATION_INTEL_OPTIMIZED = 1, ///< Enable only on Intel optimized applications, query with a Get call
+                                                    ///< using this option before a Set call to ensure the application is
+                                                    ///< optimized
+    CTL_3D_DRIVER_FRAME_GENERATION_FORCE_ON = 2,    ///< Force feature on selected application
+    CTL_3D_DRIVER_FRAME_GENERATION_MAX
+
+} ctl_3d_driver_frame_generation_t;
 
 
 #if !defined(__GNUC__)
@@ -2798,6 +2812,10 @@ typedef enum _ctl_aux_flag_t
     CTL_AUX_FLAG_NATIVE_AUX = CTL_BIT(0),           ///< For Native AUX operation
     CTL_AUX_FLAG_I2C_AUX = CTL_BIT(1),              ///< For I2C AUX operation
     CTL_AUX_FLAG_I2C_AUX_MOT = CTL_BIT(2),          ///< For I2C AUX MOT operation
+    CTL_AUX_FLAG_DRIVER_OVERRIDE = CTL_BIT(3),      ///< If set, overrides the driver I2C flags with those provided by IGCL
+    CTL_AUX_FLAG_START = CTL_BIT(4),                ///< I2C Start driver override flag
+    CTL_AUX_FLAG_STOP = CTL_BIT(5),                 ///< I2C Stop driver override flags
+    CTL_AUX_FLAG_RESTART = CTL_BIT(6),              ///< I2C Restart driver override flag
     CTL_AUX_FLAG_MAX = 0x80000000
 
 } ctl_aux_flag_t;
@@ -2977,7 +2995,8 @@ typedef struct _ctl_power_optimization_psr_t
 {
     uint32_t Size;                                  ///< [in] size of this structure
     uint8_t Version;                                ///< [in] version of this structure
-    uint8_t PSRVersion;                             ///< [in,out] A value of 1 means PSR1, 2 means PSR2
+    uint8_t PSRVersion;                             ///< [in,out] A value of 1 means PSR1, 2 means PSR2, 3 means Panel Replay.
+                                                    ///< 0 (default) leaves version selection to the driver
     bool FullFetchUpdate;                           ///< [in,out] Full fetch and update
 
 } ctl_power_optimization_psr_t;
@@ -3211,14 +3230,14 @@ typedef enum _ctl_pixtx_config_query_type_t
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Configuration operation types
-typedef enum _ctl_pixtx_config_opertaion_type_t
+typedef enum _ctl_pixtx_config_operation_type_t
 {
-    CTL_PIXTX_CONFIG_OPERTAION_TYPE_RESTORE_DEFAULT = 1,///< Restore block by block or entire pipe line. Use NumBlocks = 0 to
+    CTL_PIXTX_CONFIG_OPERATION_TYPE_RESTORE_DEFAULT = 1,///< Restore block by block or entire pipe line. Use NumBlocks = 0 to
                                                     ///< restore all.
-    CTL_PIXTX_CONFIG_OPERTAION_TYPE_SET_CUSTOM = 2, ///< Custom LUT or matrix can be set thorugh this option.
-    CTL_PIXTX_CONFIG_OPERTAION_TYPE_MAX
+    CTL_PIXTX_CONFIG_OPERATION_TYPE_SET_CUSTOM = 2, ///< Custom LUT or matrix can be set thorugh this option.
+    CTL_PIXTX_CONFIG_OPERATION_TYPE_MAX
 
-} ctl_pixtx_config_opertaion_type_t;
+} ctl_pixtx_config_operation_type_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Pixel transformation gamma encoding types
@@ -3402,7 +3421,7 @@ typedef struct _ctl_pixtx_pipe_set_config_t
 {
     uint32_t Size;                                  ///< [in] size of this structure
     uint8_t Version;                                ///< [in] version of this structure
-    ctl_pixtx_config_opertaion_type_t OpertaionType;///< [in] Set operation type
+    ctl_pixtx_config_operation_type_t OperationType;///< [in] Set operation type
     ctl_pixtx_pipe_set_config_flags_t Flags;        ///< [in] Config flags. Refer ::ctl_pixtx_pipe_set_config_flag_t
     uint32_t NumBlocks;                             ///< [in] Number of blocks
     ctl_pixtx_block_config_t* pBlockConfigs;        ///< [in,out] Array of block specific configs
